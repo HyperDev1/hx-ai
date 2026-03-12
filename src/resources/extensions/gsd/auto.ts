@@ -676,7 +676,7 @@ function peekNext(unitType: string, state: GSDState): string {
   const sid = state.activeSlice?.id ?? "";
   switch (unitType) {
     case "research-milestone": return "plan milestone roadmap";
-    case "plan-milestone": return "research first slice";
+    case "plan-milestone": return "plan or execute first slice";
     case "research-slice": return `plan ${sid}`;
     case "plan-slice": return "execute first task";
     case "execute-task": return `continue ${sid}`;
@@ -1158,9 +1158,19 @@ async function dispatchNextUnit(
       const hasResearch = !!(researchFile && await loadFile(researchFile));
 
       if (!hasResearch) {
-        unitType = "research-slice";
-        unitId = `${mid}/${sid}`;
-        prompt = await buildResearchSlicePrompt(mid, midTitle!, sid, sTitle, basePath);
+        // Skip slice research for S01 when milestone research already exists —
+        // the milestone research already covers the same ground for the first slice.
+        const milestoneResearchFile = resolveMilestoneFile(basePath, mid, "RESEARCH");
+        const hasMilestoneResearch = !!(milestoneResearchFile && await loadFile(milestoneResearchFile));
+        if (hasMilestoneResearch && sid === "S01") {
+          unitType = "plan-slice";
+          unitId = `${mid}/${sid}`;
+          prompt = await buildPlanSlicePrompt(mid, midTitle!, sid, sTitle, basePath);
+        } else {
+          unitType = "research-slice";
+          unitId = `${mid}/${sid}`;
+          prompt = await buildResearchSlicePrompt(mid, midTitle!, sid, sTitle, basePath);
+        }
       } else {
         unitType = "plan-slice";
         unitId = `${mid}/${sid}`;
