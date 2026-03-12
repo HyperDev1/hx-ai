@@ -30,9 +30,31 @@ function run(cmd, options = {}) {
 process.stdout.write = process.stderr.write.bind(process.stderr)
 
 // ---------------------------------------------------------------------------
+// ASCII banner — printed before clack UI for brand recognition
+// ---------------------------------------------------------------------------
+const cyan    = '\x1b[36m'
+const dim     = '\x1b[2m'
+const reset   = '\x1b[0m'
+
+const banner =
+  '\n' +
+  cyan +
+  '   ██████╗ ███████╗██████╗ \n' +
+  '  ██╔════╝ ██╔════╝██╔══██╗\n' +
+  '  ██║  ███╗███████╗██║  ██║\n' +
+  '  ██║   ██║╚════██║██║  ██║\n' +
+  '  ╚██████╔╝███████║██████╔╝\n' +
+  '   ╚═════╝ ╚══════╝╚═════╝ ' +
+  reset + '\n' +
+  '\n' +
+  `  Get Shit Done ${dim}v${pkg.version}${reset}\n`
+
+// ---------------------------------------------------------------------------
 // Main — wrapped in async IIFE, with graceful fallback if clack fails
 // ---------------------------------------------------------------------------
 ;(async () => {
+  process.stderr.write(banner)
+
   let p, pc
 
   try {
@@ -40,15 +62,14 @@ process.stdout.write = process.stderr.write.bind(process.stderr)
     pc = (await import('picocolors')).default
   } catch {
     // Clack or picocolors unavailable — fall back to minimal output
-    process.stderr.write(`\n  GSD v${pkg.version} installed.\n  Run gsd to get started.\n\n`)
+    process.stderr.write(`  Run gsd to get started.\n\n`)
     await run('npx patch-package')
-    const args = os.platform() === 'linux' ? '--with-deps' : ''
-    await run(`npx playwright install chromium ${args}`)
+    await run('npx playwright install chromium')
     return
   }
 
   // --- Branded intro -------------------------------------------------------
-  p.intro(pc.bgCyan(pc.black(' gsd ')) + '  ' + pc.dim(`v${pkg.version}`))
+  p.intro('Setup')
 
   const results = []
   const s = p.spinner()
@@ -68,18 +89,28 @@ process.stdout.write = process.stderr.write.bind(process.stderr)
   }
 
   // --- Step 2: Playwright browser ------------------------------------------
+  // Avoid --with-deps: install scripts should not block on interactive sudo
+  // prompts. If Linux libs are missing, suggest the explicit follow-up.
   s.start('Setting up browser tools…')
-  const pwArgs = os.platform() === 'linux' ? ' --with-deps' : ''
-  const pwResult = await run(`npx playwright install chromium${pwArgs}`)
+  const pwResult = await run('npx playwright install chromium')
   if (pwResult.ok) {
     s.stop('Browser tools ready')
     results.push({ label: 'Browser tools ready', ok: true })
   } else {
-    s.stop(pc.yellow('Browser tools — skipped (non-fatal)'))
-    results.push({
-      label: 'Browser tools unavailable — run ' + pc.cyan('npx playwright install chromium'),
-      ok: false,
-    })
+    const output = `${pwResult.stdout ?? ''}${pwResult.stderr ?? ''}`
+    if (os.platform() === 'linux' && output.includes('Host system is missing dependencies to run browsers.')) {
+      s.stop(pc.yellow('Browser downloaded, missing Linux deps'))
+      results.push({
+        label: 'Run ' + pc.cyan('sudo npx playwright install-deps chromium') + ' to finish setup',
+        ok: false,
+      })
+    } else {
+      s.stop(pc.yellow('Browser tools — skipped (non-fatal)'))
+      results.push({
+        label: 'Browser tools unavailable — run ' + pc.cyan('npx playwright install chromium'),
+        ok: false,
+      })
+    }
   }
 
   // --- Summary note --------------------------------------------------------

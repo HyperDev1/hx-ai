@@ -446,8 +446,22 @@ export class GitServiceImpl {
       commitType, milestoneId, sliceId, sliceTitle, mainBranch, branch,
     );
 
-    // Squash merge
-    this.git(["merge", "--squash", branch]);
+    // Squash merge — abort cleanly on conflict so the working tree is never
+    // left in a half-merged state (see: merge-bug-fix).
+    try {
+      this.git(["merge", "--squash", branch]);
+    } catch (mergeError) {
+      // git merge --squash exits non-zero on conflict. The working tree now
+      // has conflict markers and a dirty index. Reset to restore a clean state.
+      this.git(["reset", "--hard", "HEAD"], { allowFailure: true });
+      const msg = mergeError instanceof Error ? mergeError.message : String(mergeError);
+      throw new Error(
+        `Squash-merge of "${branch}" into "${mainBranch}" failed with conflicts. ` +
+        `Working tree has been reset to a clean state. ` +
+        `Resolve manually: git checkout ${mainBranch} && git merge --squash ${branch}\n` +
+        `Original error: ${msg}`,
+      );
+    }
 
     // Commit with rich message via stdin pipe
     this.git(["commit", "-F", "-"], { input: message });

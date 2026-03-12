@@ -1023,14 +1023,35 @@ async function dispatchNextUnit(
             midTitle = state.activeMilestone?.title;
           } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
+
+            // Safety net: if mergeSliceToMain failed to clean up (or the error
+            // came from switchToMain), ensure the working tree isn't left in a
+            // conflicted/dirty merge state. Without this, state derivation reads
+            // conflict-marker-filled files, produces a corrupt phase, and
+            // dispatch loops forever (see: merge-bug-fix).
+            try {
+              const { runGit } = await import("./git-service.ts");
+              const status = runGit(basePath, ["status", "--porcelain"], { allowFailure: true });
+              if (status && (status.includes("UU ") || status.includes("AA ") || status.includes("UD "))) {
+                runGit(basePath, ["reset", "--hard", "HEAD"], { allowFailure: true });
+                ctx.ui.notify(
+                  `Cleaned up conflicted merge state after failed squash-merge.`,
+                  "warning",
+                );
+              }
+            } catch { /* best-effort cleanup */ }
+
             ctx.ui.notify(
-              `Slice merge failed: ${message}`,
+              `Slice merge failed — stopping auto-mode. Fix conflicts manually and restart.\n${message}`,
               "error",
             );
-            // Re-derive state so dispatch can figure out what to do
-            state = await deriveState(basePath);
-            mid = state.activeMilestone?.id;
-            midTitle = state.activeMilestone?.title;
+            if (currentUnit) {
+              const modelId = ctx.model?.id ?? "unknown";
+              snapshotUnitMetrics(ctx, currentUnit.type, currentUnit.id, currentUnit.startedAt, modelId);
+              saveActivityLog(ctx, basePath, currentUnit.type, currentUnit.id);
+            }
+            await stopAuto(ctx, pi);
+            return;
           }
         }
       }
