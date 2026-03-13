@@ -2,7 +2,7 @@ import * as fs from "node:fs";
 import { createRequire } from "node:module";
 import * as os from "node:os";
 import * as path from "node:path";
-import { execSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import YAML from "yaml";
 import { globSync } from "glob";
 import { CONFIG_DIR_NAME } from "../../config.js";
@@ -177,11 +177,9 @@ const LOCAL_BIN_PATHS: Array<{ markers: string[]; binDir: string }> = [
 ];
 
 function which(command: string): string | null {
-	try {
-		return execSync(`which ${command}`, { encoding: "utf-8" }).trim() || null;
-	} catch {
-		return null;
-	}
+	const result = spawnSync("which", [command], { encoding: "utf-8" });
+	if (result.status !== 0) return null;
+	return result.stdout.trim() || null;
 }
 
 export function resolveCommand(command: string, cwd: string): string | null {

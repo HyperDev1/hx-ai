@@ -164,7 +164,7 @@ const CLIENT_CAPABILITIES = {
 
 function parseMessage(
 	buffer: Buffer,
-): { message: LspJsonRpcResponse | LspJsonRpcNotification; remaining: Buffer } | null {
+): { message: LspJsonRpcResponse | LspJsonRpcNotification | null; remaining: Buffer } | null {
 	const headerEndIndex = findHeaderEnd(buffer);
 	if (headerEndIndex === -1) return null;
 
@@ -182,10 +182,15 @@ function parseMessage(
 	const messageText = new TextDecoder().decode(messageBytes);
 	const remaining = Buffer.from(buffer.subarray(messageEnd));
 
-	return {
-		message: JSON.parse(messageText),
-		remaining,
-	};
+	let message: LspJsonRpcResponse | LspJsonRpcNotification;
+	try {
+		message = JSON.parse(messageText);
+	} catch {
+		// Malformed JSON from LSP server — skip this message and advance past it
+		return { message: null, remaining };
+	}
+
+	return { message, remaining };
 }
 
 function findHeaderEnd(buffer: Uint8Array): number {
@@ -238,6 +243,11 @@ async function startMessageReader(client: LspClient): Promise<void> {
 			while (parsed) {
 				const { message, remaining } = parsed;
 				workingBuffer = remaining;
+
+				if (!message) {
+					parsed = parseMessage(workingBuffer);
+					continue;
+				}
 
 				if ("id" in message && message.id !== undefined) {
 					const pending = client.pendingRequests.get(message.id);
