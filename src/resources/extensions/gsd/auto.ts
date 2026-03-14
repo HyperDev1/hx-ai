@@ -22,7 +22,7 @@ import { loadFile, parseContinue, parsePlan, parseRoadmap, parseSummary, extract
 export { inlinePriorMilestoneSummary };
 import type { UatType } from "./files.js";
 import { collectSecretsFromManifest } from "../get-secrets-from-user.js";
-import { loadPrompt } from "./prompt-loader.js";
+import { loadPrompt, inlineTemplate } from "./prompt-loader.js";
 import {
   gsdRoot, resolveMilestoneFile, resolveSliceFile, resolveSlicePath,
   resolveMilestonePath, resolveDir, resolveTasksDir, resolveTaskFiles, resolveTaskFile,
@@ -2294,6 +2294,7 @@ async function buildResearchMilestonePrompt(mid: string, midTitle: string, base:
   if (requirementsInline) inlined.push(requirementsInline);
   const decisionsInline = await inlineGsdRootFile(base, "decisions.md", "Decisions");
   if (decisionsInline) inlined.push(decisionsInline);
+  inlined.push(inlineTemplate("research", "Research"));
 
   const inlinedContext = `## Inlined Context (preloaded — do not re-read these files)\n\n${inlined.join("\n\n---\n\n")}`;
 
@@ -2326,6 +2327,11 @@ async function buildPlanMilestonePrompt(mid: string, midTitle: string, base: str
   if (requirementsInline) inlined.push(requirementsInline);
   const decisionsInline = await inlineGsdRootFile(base, "decisions.md", "Decisions");
   if (decisionsInline) inlined.push(decisionsInline);
+  inlined.push(inlineTemplate("roadmap", "Roadmap"));
+  inlined.push(inlineTemplate("decisions", "Decisions"));
+  inlined.push(inlineTemplate("plan", "Slice Plan"));
+  inlined.push(inlineTemplate("task-plan", "Task Plan"));
+  inlined.push(inlineTemplate("secrets-manifest", "Secrets Manifest"));
 
   const inlinedContext = `## Inlined Context (preloaded — do not re-read these files)\n\n${inlined.join("\n\n---\n\n")}`;
 
@@ -2362,6 +2368,7 @@ async function buildResearchSlicePrompt(
   if (decisionsInline) inlined.push(decisionsInline);
   const requirementsInline = await inlineGsdRootFile(base, "requirements.md", "Requirements");
   if (requirementsInline) inlined.push(requirementsInline);
+  inlined.push(inlineTemplate("research", "Research"));
 
   const depContent = await inlineDependencySummaries(mid, sid, base);
 
@@ -2397,6 +2404,8 @@ async function buildPlanSlicePrompt(
   if (decisionsInline) inlined.push(decisionsInline);
   const requirementsInline = await inlineGsdRootFile(base, "requirements.md", "Requirements");
   if (requirementsInline) inlined.push(requirementsInline);
+  inlined.push(inlineTemplate("plan", "Slice Plan"));
+  inlined.push(inlineTemplate("task-plan", "Task Plan"));
 
   const depContent = await inlineDependencySummaries(mid, sid, base);
 
@@ -2458,6 +2467,10 @@ async function buildExecuteTaskPrompt(
   );
 
   const carryForwardSection = await buildCarryForwardSection(priorSummaries, base);
+  const inlinedTemplates = [
+    inlineTemplate("task-summary", "Task Summary"),
+    inlineTemplate("decisions", "Decisions"),
+  ].join("\n\n---\n\n");
 
   const taskSummaryPath = `${relSlicePath(base, mid, sid)}/tasks/${tid}-SUMMARY.md`;
 
@@ -2472,6 +2485,7 @@ async function buildExecuteTaskPrompt(
     resumeSection,
     priorTaskLines: priorLines,
     taskSummaryPath,
+    inlinedTemplates,
   });
 }
 
@@ -2504,6 +2518,8 @@ async function buildCompleteSlicePrompt(
       }
     }
   }
+  inlined.push(inlineTemplate("slice-summary", "Slice Summary"));
+  inlined.push(inlineTemplate("uat", "UAT"));
 
   const inlinedContext = `## Inlined Context (preloaded — do not re-read these files)\n\n${inlined.join("\n\n---\n\n")}`;
 
@@ -2556,6 +2572,7 @@ async function buildCompleteMilestonePrompt(
   const contextRel = relMilestoneFile(base, mid, "CONTEXT");
   const contextInline = await inlineFileOptional(contextPath, contextRel, "Milestone Context");
   if (contextInline) inlined.push(contextInline);
+  inlined.push(inlineTemplate("milestone-summary", "Milestone Summary"));
 
   const inlinedContext = `## Inlined Context (preloaded — do not re-read these files)\n\n${inlined.join("\n\n---\n\n")}`;
 
