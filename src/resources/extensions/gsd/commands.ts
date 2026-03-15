@@ -215,20 +215,16 @@ export async function fireStatusViaCommand(
 async function handlePrefs(args: string, ctx: ExtensionCommandContext): Promise<void> {
   const trimmed = args.trim();
 
-  if (trimmed === "" || trimmed === "global") {
+  if (trimmed === "" || trimmed === "global" || trimmed === "wizard" || trimmed === "setup"
+    || trimmed === "wizard global" || trimmed === "setup global") {
     await ensurePreferencesFile(getGlobalGSDPreferencesPath(), ctx, "global");
+    await handlePrefsWizard(ctx, "global");
     return;
   }
 
-  if (trimmed === "project") {
+  if (trimmed === "project" || trimmed === "wizard project" || trimmed === "setup project") {
     await ensurePreferencesFile(getProjectGSDPreferencesPath(), ctx, "project");
-    return;
-  }
-
-  if (trimmed === "wizard" || trimmed === "setup" || trimmed === "wizard global" || trimmed === "setup global"
-    || trimmed === "wizard project" || trimmed === "setup project") {
-    const scope = trimmed.includes("project") ? "project" : "global";
-    await handlePrefsWizard(ctx, scope);
+    await handlePrefsWizard(ctx, "project");
     return;
   }
 
@@ -319,22 +315,41 @@ async function handlePrefsWizard(
   const modelPhases = ["research", "planning", "execution", "completion"] as const;
   const models: Record<string, string> = (prefs.models as Record<string, string>) ?? {};
 
-  for (const phase of modelPhases) {
-    const current = models[phase] ?? "";
-    const input = await ctx.ui.input(
-      `Model for ${phase} phase${current ? ` (current: ${current})` : ""}:`,
-      current || "e.g. claude-sonnet-4-20250514",
-    );
-    if (input !== null && input !== undefined) {
-      const val = input.trim();
-      if (val) {
-        models[phase] = val;
-      } else if (current) {
-        // User cleared it — remove
-        delete models[phase];
+  const availableModels = ctx.modelRegistry.getAvailable();
+  if (availableModels.length > 0) {
+    const modelOptions = availableModels.map(m => `${m.id} · ${m.provider}`);
+    modelOptions.push("(keep current)", "(clear)");
+
+    for (const phase of modelPhases) {
+      const current = models[phase] ?? "";
+      const title = `Model for ${phase} phase${current ? ` (current: ${current})` : ""}:`;
+      const choice = await ctx.ui.select(title, modelOptions);
+
+      if (choice && choice !== "(keep current)") {
+        if (choice === "(clear)") {
+          delete models[phase];
+        } else {
+          models[phase] = choice.split(" · ")[0];
+        }
       }
     }
-    // null/undefined = Escape/skip — keep existing value
+  } else {
+    // No authenticated models available — fall back to text input
+    for (const phase of modelPhases) {
+      const current = models[phase] ?? "";
+      const input = await ctx.ui.input(
+        `Model for ${phase} phase${current ? ` (current: ${current})` : ""}:`,
+        current || "e.g. claude-sonnet-4-20250514",
+      );
+      if (input !== null && input !== undefined) {
+        const val = input.trim();
+        if (val) {
+          models[phase] = val;
+        } else if (current) {
+          delete models[phase];
+        }
+      }
+    }
   }
   if (Object.keys(models).length > 0) {
     prefs.models = models;
@@ -452,8 +467,7 @@ function serializePreferencesToFrontmatter(prefs: Record<string, unknown>): stri
 
     if (Array.isArray(value)) {
       if (value.length === 0) {
-        lines.push(`${prefix}${key}: []`);
-        return;
+        return; // Omit empty arrays — avoids parse/serialize cycle bug with "[]" strings
       }
       lines.push(`${prefix}${key}:`);
       for (const item of value) {
@@ -484,8 +498,7 @@ function serializePreferencesToFrontmatter(prefs: Record<string, unknown>): stri
     if (typeof value === "object") {
       const entries = Object.entries(value as Record<string, unknown>);
       if (entries.length === 0) {
-        lines.push(`${prefix}${key}: {}`);
-        return;
+        return; // Omit empty objects — avoids parse/serialize cycle bug with "{}" strings
       }
       lines.push(`${prefix}${key}:`);
       for (const [k, v] of entries) {
@@ -538,7 +551,4 @@ async function ensurePreferencesFile(
     ctx.ui.notify(`Using existing ${scope} GSD skill preferences at ${path}`, "info");
   }
 
-  await ctx.waitForIdle();
-  await ctx.reload();
-  ctx.ui.notify(`Edit ${path} to update ${scope} GSD skill preferences.`, "info");
 }
