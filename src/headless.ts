@@ -26,7 +26,6 @@ import { RpcClient } from '../packages/pi-coding-agent/dist/modes/rpc/rpc-client
 export interface HeadlessOptions {
   timeout: number
   json: boolean
-  verbose: boolean
   model?: string
   command: string
   commandArgs: string[]
@@ -58,7 +57,6 @@ export function parseHeadlessArgs(argv: string[]): HeadlessOptions {
   const options: HeadlessOptions = {
     timeout: 300_000,
     json: false,
-    verbose: false,
     command: 'auto',
     commandArgs: [],
   }
@@ -79,9 +77,8 @@ export function parseHeadlessArgs(argv: string[]): HeadlessOptions {
         }
       } else if (arg === '--json') {
         options.json = true
-      } else if (arg === '--verbose') {
-        options.verbose = true
       } else if (arg === '--model' && i + 1 < args.length) {
+        // --model can also be passed from the main CLI; headless-specific takes precedence
         options.model = args[++i]
       }
     } else if (!positionalStarted) {
@@ -147,22 +144,12 @@ function handleExtensionUIRequest(
 // Progress Formatter
 // ---------------------------------------------------------------------------
 
-function formatProgress(
-  event: Record<string, unknown>,
-  verbose: boolean,
-): string | null {
+function formatProgress(event: Record<string, unknown>): string | null {
   const type = String(event.type ?? '')
 
   switch (type) {
     case 'tool_execution_start':
       return `[tool] ${event.toolName ?? 'unknown'}`
-
-    case 'tool_execution_end':
-      if (verbose) {
-        const result = String(event.result ?? '').slice(0, 200)
-        return `[tool:result] ${event.toolName ?? 'unknown'}: ${result}`
-      }
-      return null
 
     case 'agent_start':
       return '[agent] Session started'
@@ -173,14 +160,6 @@ function formatProgress(
     case 'extension_ui_request':
       if (event.method === 'notify') {
         return `[gsd] ${event.message ?? ''}`
-      }
-      return null
-
-    case 'message_update':
-      if (verbose) {
-        const msgEvent = event.assistantMessageEvent as Record<string, unknown> | undefined
-        const text = String(msgEvent?.text ?? '').slice(0, 200)
-        if (text) return `[assistant] ${text}`
       }
       return null
 
@@ -258,7 +237,6 @@ export async function runHeadless(options: HeadlessOptions): Promise<void> {
   // Event tracking
   let totalEvents = 0
   let toolCallCount = 0
-  let sawToolExecution = false
   let blocked = false
   let completed = false
   let exitCode = 0
@@ -270,7 +248,6 @@ export async function runHeadless(options: HeadlessOptions): Promise<void> {
 
     if (type === 'tool_execution_start') {
       toolCallCount++
-      sawToolExecution = true
     }
 
     // Keep last 20 events for diagnostics
@@ -290,10 +267,8 @@ export async function runHeadless(options: HeadlessOptions): Promise<void> {
 
   // Completion promise
   let resolveCompletion: () => void
-  let rejectCompletion: (err: Error) => void
-  const completionPromise = new Promise<void>((resolve, reject) => {
+  const completionPromise = new Promise<void>((resolve) => {
     resolveCompletion = resolve
-    rejectCompletion = reject
   })
 
   // Idle timeout — fallback completion detection
@@ -301,7 +276,7 @@ export async function runHeadless(options: HeadlessOptions): Promise<void> {
 
   function resetIdleTimer(): void {
     if (idleTimer) clearTimeout(idleTimer)
-    if (sawToolExecution) {
+    if (toolCallCount > 0) {
       idleTimer = setTimeout(() => {
         completed = true
         resolveCompletion()
@@ -327,7 +302,7 @@ export async function runHeadless(options: HeadlessOptions): Promise<void> {
       process.stdout.write(JSON.stringify(eventObj) + '\n')
     } else {
       // Progress output to stderr
-      const line = formatProgress(eventObj, options.verbose)
+      const line = formatProgress(eventObj)
       if (line) process.stderr.write(line + '\n')
     }
 

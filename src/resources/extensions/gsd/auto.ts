@@ -126,6 +126,18 @@ import {
 } from "./auto-recovery.js";
 import { resolveDispatch, resetRewriteCircuitBreaker } from "./auto-dispatch.js";
 import {
+  buildResearchSlicePrompt,
+  buildResearchMilestonePrompt,
+  buildPlanSlicePrompt,
+  buildPlanMilestonePrompt,
+  buildExecuteTaskPrompt,
+  buildCompleteSlicePrompt,
+  buildCompleteMilestonePrompt,
+  buildReassessRoadmapPrompt,
+  buildRunUatPrompt,
+  buildReplanSlicePrompt,
+} from "./auto-prompts.js";
+import {
   type AutoDashboardData,
   updateProgressWidget as _updateProgressWidget,
   updateSliceProgressCache,
