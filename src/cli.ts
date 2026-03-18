@@ -94,6 +94,10 @@ function parseCliArgs(argv: string[]): CliFlags {
 const cliFlags = parseCliArgs(process.argv)
 const isPrintMode = cliFlags.print || cliFlags.mode !== undefined
 
+// Early resource-skew check — must run before TTY gate so version mismatch
+// errors surface even in non-TTY environments.
+exitIfManagedResourcesAreNewer(agentDir)
+
 // Early TTY check — must come before heavy initialization to avoid dangling
 // handles that prevent process.exit() from completing promptly.
 const hasSubcommand = cliFlags.messages.length > 0
