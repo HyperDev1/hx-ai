@@ -104,11 +104,18 @@ export const PROJECT_FILES = [
   "supabase/config.toml",
   "drizzle.config.ts",
   "drizzle.config.js",
+  "redis.conf",
   // React Native markers
   "metro.config.js",
   "metro.config.ts",
   "react-native.config.js",
 ] as const;
+
+/** File extensions that indicate SQLite databases in the project. */
+const SQLITE_EXTENSIONS = [".sqlite", ".sqlite3", ".db"] as const;
+
+/** File extensions that indicate SQL usage (migrations, schemas, seeds). */
+const SQL_EXTENSIONS = [".sql"] as const;
 
 const LANGUAGE_MAP: Record<string, string> = {
   "package.json": "javascript/typescript",
@@ -280,6 +287,21 @@ export function detectProjectSignals(basePath: string): ProjectSignals {
         primaryLanguage = LANGUAGE_MAP[file];
       }
     }
+  }
+
+  // SQLite / SQL file detection — scan root entries for database file extensions.
+  // Adds synthetic markers (e.g. "*.sqlite", "*.sql") to detectedFiles so
+  // skill catalog matchFiles can reference them.
+  try {
+    const rootEntries = readdirSync(basePath);
+    if (rootEntries.some((e) => SQLITE_EXTENSIONS.some((ext) => e.endsWith(ext)))) {
+      detectedFiles.push("*.sqlite");
+    }
+    if (rootEntries.some((e) => SQL_EXTENSIONS.some((ext) => e.endsWith(ext)))) {
+      detectedFiles.push("*.sql");
+    }
+  } catch {
+    // unreadable root — skip extension scan
   }
 
   // Git repo detection

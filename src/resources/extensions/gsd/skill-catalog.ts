@@ -248,6 +248,27 @@ export const SKILL_CATALOG: SkillPack[] = [
     skills: ["supabase-postgres-best-practices"],
     matchFiles: ["supabase/config.toml"],
   },
+  {
+    label: "SQL Optimization & Review",
+    description: "Universal SQL performance optimization, security (injection prevention), and code review",
+    repo: "github/awesome-copilot",
+    skills: ["sql-optimization", "sql-code-review"],
+    matchFiles: [
+      "*.sql",
+      "*.sqlite",
+      "prisma/schema.prisma",
+      "supabase/config.toml",
+      "drizzle.config.ts",
+      "drizzle.config.js",
+    ],
+  },
+  {
+    label: "Redis",
+    description: "Redis development patterns and best practices",
+    repo: "redis/agent-skills",
+    skills: ["redis-development"],
+    matchFiles: ["redis.conf"],
+  },
   // ── Cloud Platforms ────────────────────────────────────────────────────────
   {
     label: "Firebase",

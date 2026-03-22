@@ -396,3 +396,48 @@ test("detectProjectSignals: Makefile with test target", () => {
     cleanup(dir);
   }
 });
+
+test("detectProjectSignals: SQLite file detection via extensions", () => {
+  const dir = makeTempDir("signals-sqlite");
+  try {
+    writeFileSync(join(dir, "app.sqlite3"), "", "utf-8");
+    const signals = detectProjectSignals(dir);
+    assert.ok(signals.detectedFiles.includes("*.sqlite"), "should add synthetic *.sqlite marker");
+  } finally {
+    cleanup(dir);
+  }
+});
+
+test("detectProjectSignals: SQL file detection", () => {
+  const dir = makeTempDir("signals-sql");
+  try {
+    writeFileSync(join(dir, "migrations.sql"), "", "utf-8");
+    const signals = detectProjectSignals(dir);
+    assert.ok(signals.detectedFiles.includes("*.sql"), "should add synthetic *.sql marker");
+  } finally {
+    cleanup(dir);
+  }
+});
+
+test("detectProjectSignals: .db file triggers SQLite detection", () => {
+  const dir = makeTempDir("signals-db");
+  try {
+    writeFileSync(join(dir, "data.db"), "", "utf-8");
+    const signals = detectProjectSignals(dir);
+    assert.ok(signals.detectedFiles.includes("*.sqlite"), "should add synthetic *.sqlite marker for .db files");
+  } finally {
+    cleanup(dir);
+  }
+});
+
+test("detectProjectSignals: no SQLite markers without matching files", () => {
+  const dir = makeTempDir("signals-no-sqlite");
+  try {
+    writeFileSync(join(dir, "package.json"), "{}", "utf-8");
+    const signals = detectProjectSignals(dir);
+    assert.ok(!signals.detectedFiles.includes("*.sqlite"), "should not have *.sqlite marker");
+    assert.ok(!signals.detectedFiles.includes("*.sql"), "should not have *.sql marker");
+  } finally {
+    cleanup(dir);
+  }
+});
