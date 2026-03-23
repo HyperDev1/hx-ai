@@ -12,6 +12,11 @@ duration: ""
 verification_result: passed
 completed_at: 2026-03-23T15:43:33.011Z
 blocker_discovered: false
+observability_surfaces:
+  - src/resources/extensions/gsd/tests/plan-milestone.test.ts
+  - src/resources/extensions/gsd/tests/markdown-renderer.test.ts
+  - stderr warning|stale renderer diagnostic test path
+  - parse-visible roadmap state before/after handler execution in integration assertions
 ---
 
 # T04: Finalize S01 regression coverage and prove the DB-backed planning slice end to end
@@ -42,6 +47,12 @@ Used the repository’s actual resolver-based TypeScript test harness instead of
 ## Known Issues
 
 None.
+
+## Diagnostics
+
+- Run the integrated slice proof with `node --import ./src/resources/extensions/gsd/tests/resolve-ts.mjs --experimental-strip-types --test src/resources/extensions/gsd/tests/plan-milestone.test.ts src/resources/extensions/gsd/tests/markdown-renderer.test.ts src/resources/extensions/gsd/tests/prompt-contracts.test.ts src/resources/extensions/gsd/tests/rogue-file-detection.test.ts src/resources/extensions/gsd/tests/migrate-hierarchy.test.ts`.
+- Run `node --import ./src/resources/extensions/gsd/tests/resolve-ts.mjs --experimental-strip-types --test src/resources/extensions/gsd/tests/markdown-renderer.test.ts --test-name-pattern="stderr warning|stale"` to inspect the dedicated failure-path and stale-render diagnostics.
+- Use `src/resources/extensions/gsd/tests/plan-milestone.test.ts` as the durable seam for cache-invalidation behavior; it now proves observable state changes instead of relying on illegal ESM export reassignment.
 
 ## Files Created/Modified
 

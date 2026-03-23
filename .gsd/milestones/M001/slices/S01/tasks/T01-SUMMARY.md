@@ -13,6 +13,11 @@ duration: ""
 verification_result: mixed
 completed_at: 2026-03-23T15:25:30.294Z
 blocker_discovered: false
+observability_surfaces:
+  - src/resources/extensions/gsd/tests/markdown-renderer.test.ts
+  - src/resources/extensions/gsd/tests/migrate-hierarchy.test.ts
+  - src/resources/extensions/gsd/gsd-db.ts schema v8 migration paths and milestone/slice rows
+  - ERR_MODULE_NOT_FOUND output when direct node --test bypasses the repo TS resolver
 ---
 
 # T01: Partially advanced schema v8 groundwork and documented the broken intermediate state for T01 resume
@@ -42,6 +47,12 @@ Stopped early due to context budget warning before completing the planned render
 ## Known Issues
 
 `src/resources/extensions/gsd/gsd-db.ts` is currently in a broken intermediate state. Running the targeted tests fails immediately with `ERR_MODULE_NOT_FOUND` for `src/resources/extensions/gsd/errors.js` imported from `gsd-db.ts`. `src/resources/extensions/gsd/markdown-renderer.ts`, `src/resources/extensions/gsd/md-importer.ts`, `src/resources/extensions/gsd/tests/markdown-renderer.test.ts`, and `src/resources/extensions/gsd/tests/migrate-hierarchy.test.ts` still need the actual T01 implementation work. Resume should start by restoring/fixing `gsd-db.ts` imports/runtime compatibility, then continue the v8 schema + roadmap renderer work.
+
+## Diagnostics
+
+- Run `node --import ./src/resources/extensions/gsd/tests/resolve-ts.mjs --experimental-strip-types --test src/resources/extensions/gsd/tests/markdown-renderer.test.ts src/resources/extensions/gsd/tests/migrate-hierarchy.test.ts` to verify the schema-v8 migration and roadmap-renderer path under the repository's actual TypeScript harness.
+- Inspect `src/resources/extensions/gsd/gsd-db.ts` for schema version `8`, milestone planning upserts, and milestone/slice planning read helpers when checking whether the DB-backed write path exists.
+- If a bare `node --test ...` invocation fails before reaching task logic, compare the error against the recorded `ERR_MODULE_NOT_FOUND` symptom first; that indicates harness mismatch rather than a regression in the planning implementation.
 
 ## Files Created/Modified
 

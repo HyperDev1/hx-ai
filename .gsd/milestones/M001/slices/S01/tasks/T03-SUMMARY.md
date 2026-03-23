@@ -19,6 +19,11 @@ duration: ""
 verification_result: mixed
 completed_at: 2026-03-23T15:39:21.178Z
 blocker_discovered: false
+observability_surfaces:
+  - src/resources/extensions/gsd/tests/prompt-contracts.test.ts
+  - src/resources/extensions/gsd/tests/rogue-file-detection.test.ts
+  - src/resources/extensions/gsd/auto-post-unit.ts detectRogueFileWrites() results
+  - direct node --test module-resolution failure showing resolver mismatch on rogue detection
 ---
 
 # T03: Migrate planning prompts to DB-backed tool guidance and extend rogue detection to roadmap/plan artifacts
@@ -49,6 +54,12 @@ Used the repository’s existing TypeScript resolver harness for the authoritati
 ## Known Issues
 
 Direct `node --test src/resources/extensions/gsd/tests/rogue-file-detection.test.ts` still fails with `ERR_MODULE_NOT_FOUND` on `.js` sibling imports from TypeScript sources (`auto-post-unit.ts` → `state.js`) unless the repo resolver import is used. This harness mismatch predates this task and remains for T04 to account for when running the integrated slice suite. No T03-specific functional failures remain under the repo’s actual TS harness.
+
+## Diagnostics
+
+- Run `node --import ./src/resources/extensions/gsd/tests/resolve-ts.mjs --experimental-strip-types --test src/resources/extensions/gsd/tests/prompt-contracts.test.ts src/resources/extensions/gsd/tests/rogue-file-detection.test.ts` to verify prompt migration and rogue-detection behavior together.
+- Inspect `src/resources/extensions/gsd/auto-post-unit.ts` for `detectRogueFileWrites()` cases covering `plan-milestone`, `plan-slice`, and `replan-slice` when checking enforcement behavior.
+- If only `rogue-file-detection.test.ts` fails under bare `node --test`, treat that first as the known resolver mismatch documented here before assuming the T03 logic regressed.
 
 ## Files Created/Modified
 

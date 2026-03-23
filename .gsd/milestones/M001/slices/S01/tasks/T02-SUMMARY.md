@@ -15,6 +15,11 @@ duration: ""
 verification_result: mixed
 completed_at: 2026-03-23T15:31:33.286Z
 blocker_discovered: false
+observability_surfaces:
+  - src/resources/extensions/gsd/tests/plan-milestone.test.ts
+  - src/resources/extensions/gsd/tools/plan-milestone.ts handler return/errors
+  - src/resources/extensions/gsd/markdown-renderer.ts rendered ROADMAP artifact output
+  - cache visibility through parseRoadmap()/clearParseCache() behavior in tests
 ---
 
 # T02: Added the DB-backed gsd_plan_milestone handler, tool registration, roadmap rendering path, and focused tests, then stopped at the first concrete repo-local test harness failure.
@@ -44,6 +49,12 @@ Used the repository’s actual TypeScript test harness (`node --import ./src/res
 ## Known Issues
 
 `src/resources/extensions/gsd/tests/plan-milestone.test.ts` still contains two failing tests that try to assign to read-only ESM exports (`invalidateStateCache` and `clearParseCache`). The correct next step is to verify cache invalidation via observable behavior or another non-mutation seam, then rerun `node --import ./src/resources/extensions/gsd/tests/resolve-ts.mjs --experimental-strip-types --test src/resources/extensions/gsd/tests/plan-milestone.test.ts`. Also note that the task-plan verification command is stale for this repo: direct `node --test` still fails at `ERR_MODULE_NOT_FOUND` on `.js` sibling specifiers unless the resolver import is used.
+
+## Diagnostics
+
+- Run `node --import ./src/resources/extensions/gsd/tests/resolve-ts.mjs --experimental-strip-types --test src/resources/extensions/gsd/tests/plan-milestone.test.ts` to exercise the authoritative handler proof path.
+- Inspect `src/resources/extensions/gsd/tools/plan-milestone.ts` and `src/resources/extensions/gsd/bootstrap/db-tools.ts` to confirm the validate → transaction → render → invalidate pattern and canonical/alias registration remain wired.
+- If cache-related regressions are suspected, verify them through parse-visible roadmap behavior in `src/resources/extensions/gsd/tests/plan-milestone.test.ts` rather than trying to monkey-patch ESM exports.
 
 ## Files Created/Modified
 
