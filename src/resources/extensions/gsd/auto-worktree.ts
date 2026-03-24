@@ -22,6 +22,7 @@ import { GSDError, GSD_IO_ERROR, GSD_GIT_ERROR } from "./errors.js";
 import {
   reconcileWorktreeDb,
   isDbAvailable,
+  getMilestone,
   getMilestoneSlices,
 } from "./gsd-db.js";
 import { atomicWriteSync } from "./atomic-write.js";
@@ -1035,8 +1036,9 @@ export function mergeMilestoneToMain(
   }
 
   // 6. Build rich commit message
+  const dbMilestone = getMilestone(milestoneId);
   const milestoneTitle =
-    roadmap.title.replace(/^M\d+:\s*/, "").trim() || milestoneId;
+    (dbMilestone?.title ?? "").replace(/^M\d+:\s*/, "").trim() || milestoneId;
   const subject = `feat(${milestoneId}): ${milestoneTitle}`;
   let body = "";
   if (completedSlices.length > 0) {

@@ -803,7 +803,7 @@ export function detectStaleRenders(basePath: string): StaleEntry[] {
 
         for (const slice of slices) {
           const isCompleteInDb = slice.status === "complete";
-          const roadmapSlice = parsed.slices.find(s => s.id === slice.id);
+          const roadmapSlice = parsed.slices.find((s: { id: string }) => s.id === slice.id);
           if (!roadmapSlice) continue;
 
           if (isCompleteInDb && !roadmapSlice.done) {
@@ -836,7 +836,7 @@ export function detectStaleRenders(basePath: string): StaleEntry[] {
 
           for (const task of tasks) {
             const isDoneInDb = task.status === "done" || task.status === "complete";
-            const planTask = parsed.tasks.find(t => t.id === task.id);
+            const planTask = parsed.tasks.find((t: { id: string }) => t.id === task.id);
             if (!planTask) continue;
 
             if (isDoneInDb && !planTask.done) {
