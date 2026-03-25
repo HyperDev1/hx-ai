@@ -16,6 +16,7 @@ import type {
 	SimpleStreamOptions,
 } from "@gsd/pi-ai";
 import { EventStream } from "@gsd/pi-ai";
+import { execSync } from "node:child_process";
 import { PartialMessageBuilder, ZERO_USAGE, mapUsage } from "./partial-builder.js";
 import type {
 	SDKAssistantMessage,
@@ -44,6 +45,29 @@ function createAssistantStream(): AssistantMessageEventStream {
 			throw new Error("Unexpected event type for final result");
 		},
 	) as AssistantMessageEventStream;
+}
+
+// ---------------------------------------------------------------------------
+// Claude binary resolution
+// ---------------------------------------------------------------------------
+
+let cachedClaudePath: string | null = null;
+
+/**
+ * Resolve the path to the system-installed `claude` binary.
+ * The SDK defaults to a bundled cli.js which doesn't exist when
+ * installed as a library — we need to point it at the real CLI.
+ */
+function getClaudePath(): string {
+	if (cachedClaudePath) return cachedClaudePath;
+	try {
+		cachedClaudePath = execSync("which claude", { timeout: 5_000, stdio: "pipe" })
+			.toString()
+			.trim();
+	} catch {
+		cachedClaudePath = "claude"; // fall back to PATH resolution
+	}
+	return cachedClaudePath;
 }
 
 // ---------------------------------------------------------------------------
@@ -145,6 +169,7 @@ async function pumpSdkMessages(
 		const queryResult = sdk.query({
 			prompt,
 			options: {
+				pathToClaudeCodeExecutable: getClaudePath(),
 				model: modelId,
 				includePartialMessages: true,
 				persistSession: false,
@@ -154,7 +179,6 @@ async function pumpSdkMessages(
 				allowDangerouslySkipPermissions: true,
 				settingSources: ["project"],
 				systemPrompt: { type: "preset", preset: "claude_code" },
-				env: { CLAUDE_AGENT_SDK_CLIENT_APP: "gsd" },
 				betas: modelId.includes("sonnet") ? ["context-1m-2025-08-07"] : [],
 			},
 		});
