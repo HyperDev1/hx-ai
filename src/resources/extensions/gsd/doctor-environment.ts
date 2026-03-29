@@ -441,8 +441,9 @@ function checkProjectTools(basePath: string): EnvironmentCheckResult[] {
 
 /**
  * Check git remote reachability.
+ * Exported for testing.
  */
-function checkGitRemote(basePath: string): EnvironmentCheckResult | null {
+export function checkGitRemote(basePath: string): EnvironmentCheckResult | null {
   // Only check if it's a git repo with a remote
   const remote = tryExec("git remote get-url origin", basePath);
   if (!remote) return null;
