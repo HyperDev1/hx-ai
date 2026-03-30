@@ -125,37 +125,7 @@ export interface BridgeRuntimeSnapshot {
   lastError: BridgeLastError | null
 }
 
-export interface WorkspaceTaskTarget {
-  id: string
-  title: string
-  done: boolean
-  planPath?: string
-  summaryPath?: string
-}
-
-export type RiskLevel = "low" | "medium" | "high"
-
-export interface WorkspaceSliceTarget {
-  id: string
-  title: string
-  done: boolean
-  planPath?: string
-  summaryPath?: string
-  uatPath?: string
-  tasksDir?: string
-  branch?: string
-  risk?: RiskLevel
-  depends?: string[]
-  demo?: string
-  tasks: WorkspaceTaskTarget[]
-}
-
-export interface WorkspaceMilestoneTarget {
-  id: string
-  title: string
-  roadmapPath?: string
-  slices: WorkspaceSliceTarget[]
-}
+export type { WorkspaceTaskTarget, RiskLevel, WorkspaceSliceTarget, WorkspaceMilestoneTarget } from "./workspace-types.js"
 
 export interface WorkspaceScopeTarget {
   scope: string
