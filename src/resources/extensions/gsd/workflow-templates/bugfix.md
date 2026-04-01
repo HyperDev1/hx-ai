@@ -65,11 +65,14 @@ before jumping to fixes.
 
 **Goal:** Ensure the fix doesn't break anything else.
 
-1. Run the project's full test suite
-2. Run the build (if applicable)
-3. Run the linter (if applicable)
-4. Check for regressions in related functionality
-5. If any failures, fix them before proceeding
+1. **Run all verification checks** — fix any failures before proceeding:
+   - `tsc --noEmit` (or project-appropriate type check)
+   - Linter (`eslint`, `biome`, or project-configured lint command)
+   - Full test suite
+   - Build (`npm run build` or equivalent)
+   Report result as: `Doğrulama: TypeScript ✅|❌ | Lint ✅|❌ | Build ✅|❌`
+2. Check for regressions in related functionality
+3. If any failures, fix them before proceeding
 
 ## Phase 4: Ship
 

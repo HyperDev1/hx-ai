@@ -34,12 +34,16 @@ speed matters.
 
 **Goal:** Get the fix deployed.
 
-1. Run tests — fix any failures
-2. Run the build
-3. Push and create PR with:
+1. **Verify** — run all three, fix any failures before proceeding:
+   - `tsc --noEmit` (or project-appropriate type check)
+   - Linter (`eslint`, `biome`, or project-configured lint command)
+   - Full test suite
+   - Build (`npm run build` or equivalent)
+   Report result as: `Doğrulama: TypeScript ✅|❌ | Lint ✅|❌ | Build ✅|❌`
+2. Push and create PR with:
    - What broke
    - What the fix does
    - How to verify
-4. Present PR to user for approval
+3. Present PR to user for approval
 
 </process>
