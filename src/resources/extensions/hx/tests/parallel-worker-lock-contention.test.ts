@@ -28,7 +28,7 @@ import {
   effectiveLockFile,
   effectiveLockTarget,
 } from "../session-lock.ts";
-import { gsdRoot } from "../paths.ts";
+import { hxRoot } from "../paths.ts";
 import {
   syncProjectRootToWorktree,
   syncStateToProjectRoot,
@@ -102,7 +102,7 @@ describe("parallel-worker-lock-contention (#2184)", () => {
       assert.ok(r1.acquired, "M001 worker acquires lock");
 
       // Verify the lock file is per-milestone
-      const gsdDir = gsdRoot(base);
+      const gsdDir = hxRoot(base);
       const m001LockFile = join(gsdDir, "auto-M001.lock");
       assert.ok(existsSync(m001LockFile), "auto-M001.lock exists");
 
@@ -136,7 +136,7 @@ describe("parallel-worker-lock-contention (#2184)", () => {
 
       writeLock(base, "execute-task", "M002/S01/T01");
 
-      const gsdDir = gsdRoot(base);
+      const gsdDir = hxRoot(base);
       const lockFile = join(gsdDir, "auto-M002.lock");
       assert.ok(existsSync(lockFile), "crash-recovery writes auto-M002.lock");
 

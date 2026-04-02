@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { filterInitialGsdHeader } = await import("../../web/lib/initial-gsd-header-filter.ts");
+const { filterInitialGsdHeader } = await import("../../web/lib/initial-hx-header-filter.ts");
 
 const HX_LOGO_LINES = [
   '██╗  ██╗██╗  ██╗',

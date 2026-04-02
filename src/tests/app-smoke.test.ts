@@ -73,7 +73,7 @@ test("loader sets all 4 HX_ env vars and PI_PACKAGE_DIR", async (t) => {
     process.exit(0);
   `;
 
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-loader-test-"));
+  const tmp = mkdtempSync(join(tmpdir(), "hx-loader-test-"));
   const scriptPath = join(tmp, "check-env.ts");
   writeFileSync(scriptPath, script);
 
@@ -127,7 +127,7 @@ test("loader sets all 4 HX_ env vars and PI_PACKAGE_DIR", async (t) => {
   const rel = p.slice(bundledExtensionsDir.length + 1);
   return rel.split(/[\\/]/)[0].replace(/\.(?:ts|js)$/, "");
   });
-  for (const core of ["gsd", "bg-shell", "browser-tools", "subagent", "search-the-web"]) {
+  for (const core of ["hx", "bg-shell", "browser-tools", "subagent", "search-the-web"]) {
   assert.ok(discoveredNames.includes(core), `core extension '${core}' is discoverable`);
   }
 
@@ -187,7 +187,7 @@ test("loader MIN_NODE_MAJOR matches package.json engines field", () => {
     `loader MIN_NODE_MAJOR (${loaderMin}) must match package.json engines.node (>=${engineMin}.0.0)`);
 });
 
-test("cli.ts lets gsd update bypass the managed-resource mismatch gate", () => {
+test("cli.ts lets hx update bypass the managed-resource mismatch gate", () => {
   const cliSrc = readFileSync(join(projectRoot, "src", "cli.ts"), "utf-8");
   const updateBranchIndex = cliSrc.indexOf("if (cliFlags.messages[0] === 'update')")
   const mismatchGateIndex = cliSrc.indexOf("exitIfManagedResourcesAreNewer(agentDir)")
@@ -196,7 +196,7 @@ test("cli.ts lets gsd update bypass the managed-resource mismatch gate", () => {
   assert.ok(mismatchGateIndex !== -1, "cli.ts contains the managed-resource mismatch gate")
   assert.ok(
     updateBranchIndex < mismatchGateIndex,
-    "gsd update must run before the managed-resource mismatch gate",
+    "hx update must run before the managed-resource mismatch gate",
   )
 });
 
@@ -206,13 +206,13 @@ test("cli.ts lets gsd update bypass the managed-resource mismatch gate", () => {
 
 test("initResources syncs extensions, agents, and skills to target dir", async (t) => {
   const { initResources, readManagedResourceVersion } = await import("../resource-loader.ts");
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-resources-test-"));
+  const tmp = mkdtempSync(join(tmpdir(), "hx-resources-test-"));
   const fakeAgentDir = join(tmp, "agent");
 
   initResources(fakeAgentDir);
 
   // Extensions synced
-  assertExtensionIndexExists(fakeAgentDir, "gsd");
+  assertExtensionIndexExists(fakeAgentDir, "hx");
   assertExtensionIndexExists(fakeAgentDir, "browser-tools");
   assertExtensionIndexExists(fakeAgentDir, "search-the-web");
   assertExtensionIndexExists(fakeAgentDir, "context7");
@@ -229,12 +229,12 @@ test("initResources syncs extensions, agents, and skills to target dir", async (
 
   // Idempotent: run again, no crash
   initResources(fakeAgentDir);
-  assertExtensionIndexExists(fakeAgentDir, "gsd");
+  assertExtensionIndexExists(fakeAgentDir, "hx");
 });
 
 test("initResources skips copy when managed version matches current version", async (t) => {
   const { initResources, readManagedResourceVersion } = await import("../resource-loader.ts");
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-resources-skip-"));
+  const tmp = mkdtempSync(join(tmpdir(), "hx-resources-skip-"));
   const fakeAgentDir = join(tmp, "agent");
 
   t.after(() => rmSync(tmp, { recursive: true, force: true }));
@@ -244,7 +244,7 @@ test("initResources skips copy when managed version matches current version", as
   assert.ok(version, "manifest written after first sync");
 
   // Add a marker file to detect whether sync runs again
-  const markerPath = join(fakeAgentDir, "extensions", "gsd", "_marker.txt");
+  const markerPath = join(fakeAgentDir, "extensions", "hx", "_marker.txt");
   writeFileSync(markerPath, "test-marker");
 
   // Second run: version matches — should skip, marker survives
@@ -253,7 +253,7 @@ test("initResources skips copy when managed version matches current version", as
 
   // Simulate version mismatch by writing older version to manifest
   const manifestPath = join(fakeAgentDir, "managed-resources.json");
-  writeFileSync(manifestPath, JSON.stringify({ gsdVersion: "0.0.1", syncedAt: Date.now() }));
+  writeFileSync(manifestPath, JSON.stringify({ hxVersion: "0.0.1", syncedAt: Date.now() }));
 
   // Third run: version mismatch — full sync, marker removed
   initResources(fakeAgentDir);
@@ -272,7 +272,7 @@ test("loadStoredEnvKeys hydrates process.env from auth.json", async (t) => {
   const { loadStoredEnvKeys } = await import("../wizard.ts");
   const { AuthStorage } = await import("@hyperlab/hx-coding-agent");
 
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-wizard-test-"));
+  const tmp = mkdtempSync(join(tmpdir(), "hx-wizard-test-"));
   const authPath = join(tmp, "auth.json");
   writeFileSync(authPath, JSON.stringify({
     brave: { type: "api_key", key: "test-brave-key" },
@@ -321,7 +321,7 @@ test("loadStoredEnvKeys does not overwrite existing env vars", async (t) => {
   const { loadStoredEnvKeys } = await import("../wizard.ts");
   const { AuthStorage } = await import("@hyperlab/hx-coding-agent");
 
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-wizard-nooverwrite-"));
+  const tmp = mkdtempSync(join(tmpdir(), "hx-wizard-nooverwrite-"));
   const authPath = join(tmp, "auth.json");
   writeFileSync(authPath, JSON.stringify({
     brave: { type: "api_key", key: "stored-key" },
@@ -346,7 +346,7 @@ test("loadStoredEnvKeys does not overwrite existing env vars", async (t) => {
 
 test("deriveState returns pre-planning phase for empty .hx/ directory", async (t) => {
   const { deriveState } = await import("../resources/extensions/hx/state.ts");
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-state-smoke-"));
+  const tmp = mkdtempSync(join(tmpdir(), "hx-state-smoke-"));
 
   // Create minimal .hx/ structure with no milestones
   mkdirSync(join(tmp, ".hx"), { recursive: true });
@@ -369,7 +369,7 @@ test("deriveState returns pre-planning phase for empty .hx/ directory", async (t
 test("deriveState returns pre-planning phase when no .hx/ directory exists", async (t) => {
   const { deriveState } = await import("../resources/extensions/hx/state.ts");
   // Use a temp dir with no .hx/ subdirectory at all
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-state-nogsd-"));
+  const tmp = mkdtempSync(join(tmpdir(), "hx-state-nohx-"));
 
   t.after(() => rmSync(tmp, { recursive: true, force: true }));
   // Should not throw — missing .hx/ is a valid "no project" state
@@ -382,7 +382,7 @@ test("deriveState returns pre-planning phase when no .hx/ directory exists", asy
 
 test("deriveState shape is structurally complete", async (t) => {
   const { deriveState } = await import("../resources/extensions/hx/state.ts");
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-state-shape-"));
+  const tmp = mkdtempSync(join(tmpdir(), "hx-state-shape-"));
   mkdirSync(join(tmp, ".hx"), { recursive: true });
 
   t.after(() => rmSync(tmp, { recursive: true, force: true }));
@@ -413,7 +413,7 @@ test("deriveState shape is structurally complete", async (t) => {
 
 test("runGSDDoctor completes without throwing on empty .hx/ directory", async (t) => {
   const { runGSDDoctor } = await import("../resources/extensions/hx/doctor.ts");
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-doctor-smoke-"));
+  const tmp = mkdtempSync(join(tmpdir(), "hx-doctor-smoke-"));
   mkdirSync(join(tmp, ".hx"), { recursive: true });
 
   t.after(() => rmSync(tmp, { recursive: true, force: true }));
@@ -434,7 +434,7 @@ test("runGSDDoctor completes without throwing on empty .hx/ directory", async (t
 
 test("runGSDDoctor issue objects have required fields", async (t) => {
   const { runGSDDoctor } = await import("../resources/extensions/hx/doctor.ts");
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-doctor-fields-"));
+  const tmp = mkdtempSync(join(tmpdir(), "hx-doctor-fields-"));
   mkdirSync(join(tmp, ".hx"), { recursive: true });
 
   // Create a milestone dir with no ROADMAP.md to force a missing_roadmap issue
@@ -462,12 +462,12 @@ test("runGSDDoctor issue objects have required fields", async (t) => {
 
 test("runGSDDoctor with fix:false never modifies the filesystem", async (t) => {
   const { runGSDDoctor } = await import("../resources/extensions/hx/doctor.ts");
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-doctor-readonly-"));
-  const gsdDir = join(tmp, ".hx");
-  mkdirSync(gsdDir, { recursive: true });
+  const tmp = mkdtempSync(join(tmpdir(), "hx-doctor-readonly-"));
+  const hxDir = join(tmp, ".hx");
+  mkdirSync(hxDir, { recursive: true });
 
   // Write a sentinel file — doctor must not delete or modify it
-  const sentinelPath = join(gsdDir, "SENTINEL.md");
+  const sentinelPath = join(hxDir, "SENTINEL.md");
   writeFileSync(sentinelPath, "# sentinel\n");
 
   t.after(() => rmSync(tmp, { recursive: true, force: true }));

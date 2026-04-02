@@ -1,5 +1,5 @@
 /**
- * @gsd-build/mcp-server — MCP server for GSD orchestration.
+ * @hyperlab/hx-mcp-server — MCP server for HX orchestration.
  */
 
 export { SessionManager } from './session-manager.js';

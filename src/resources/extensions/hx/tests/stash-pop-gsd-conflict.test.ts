@@ -68,7 +68,7 @@ test("#2766: stash pop conflict on .hx/ files is auto-resolved", () => {
     // mergeMilestoneToMain should succeed — .hx/ conflict auto-resolved
     const result = mergeMilestoneToMain(repo, "M300", roadmap);
     assert.ok(
-      result.commitMessage.includes("GSD-Milestone: M300"),
+      result.commitMessage.includes("HX-Milestone: M300"),
       "merge succeeds despite stash pop conflict on .hx/ file",
     );
     assert.ok(existsSync(join(repo, "feature.ts")), "milestone code merged to main");
@@ -89,7 +89,7 @@ test("#2766: stash pop conflict on .hx/ files is auto-resolved", () => {
   }
 });
 
-test("#2766: stash pop conflict on non-.gsd files preserves stash for manual resolution", () => {
+test("#2766: stash pop conflict on non-.hx files preserves stash for manual resolution", () => {
   const repo = createTempRepo();
   try {
     const wtPath = createAutoWorktree(repo, "M301");
@@ -109,15 +109,15 @@ test("#2766: stash pop conflict on non-.gsd files preserves stash for manual res
     // and is NOT a .hx/ file, so it should be left for manual resolution
     writeFileSync(join(repo, "README.md"), "# locally modified\n");
 
-    const roadmap = makeRoadmap("M301", "Non-gsd stash conflict", [
+    const roadmap = makeRoadmap("M301", "Non-hx stash conflict", [
       { id: "S01", title: "Readme update" },
     ]);
 
     // The merge itself should still succeed (stash pop conflict is non-fatal)
     const result = mergeMilestoneToMain(repo, "M301", roadmap);
     assert.ok(
-      result.commitMessage.includes("GSD-Milestone: M301"),
-      "merge succeeds even with non-.gsd stash pop conflict",
+      result.commitMessage.includes("HX-Milestone: M301"),
+      "merge succeeds even with non-.hx stash pop conflict",
     );
   } finally {
     try { rmSync(repo, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 }); } catch { /* cleanup best-effort */ }

@@ -155,7 +155,7 @@ async function writeForensicsDedupPref(ctx: ExtensionCommandContext, enabled: bo
 
   const frontmatter = serializePreferencesToFrontmatter(prefs);
   const raw = existsSync(prefsPath) ? readFileSync(prefsPath, "utf-8") : "";
-  let body = "\n# GSD Skill Preferences\n\nSee `~/.gsd/agent/extensions/hx/docs/preferences-reference.md` for full field documentation and examples.\n";
+  let body = "\n# HX Skill Preferences\n\nSee `~/.gsd/agent/extensions/hx/docs/preferences-reference.md` for full field documentation and examples.\n";
   const start = raw.startsWith("---\n") ? 4 : raw.startsWith("---\r\n") ? 5 : -1;
   if (start !== -1) {
     const closingIdx = raw.indexOf("\n---", start);

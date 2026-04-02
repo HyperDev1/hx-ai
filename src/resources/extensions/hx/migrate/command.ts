@@ -68,7 +68,7 @@ function dispatchReview(
 
   pi.sendMessage(
     {
-      customType: "gsd-migrate-review",
+      customType: "hx-migrate-review",
       content: prompt,
       display: false,
     },
@@ -98,7 +98,7 @@ export async function handleMigrate(
   if (!existsSync(sourcePath)) {
     ctx.ui.notify(
       `Directory not found: ${sourcePath}\n\n` +
-      'Migration converts a .planning/ directory (from older GSD versions) into .gsd/ format.\n' +
+      'Migration converts a .planning/ directory (from older HX versions) into .hx/ format.\n' +
       'If you are starting a new project, use /hx:new-project instead.\n' +
       'If migrating, ensure the path contains a .planning/ directory.',
       "error",
@@ -148,7 +148,7 @@ export async function handleMigrate(
   const targetGsdExists = existsSync(hxRoot(process.cwd()));
   if (targetGsdExists) {
     lines.push("");
-    lines.push("⚠ A .gsd directory already exists in the current working directory — it will be overwritten.");
+    lines.push("⚠ A .hx directory already exists in the current working directory — it will be overwritten.");
   }
 
   // ── Confirmation via showNextAction ────────────────────────────────────────
@@ -158,8 +158,8 @@ export async function handleMigrate(
     actions: [
       {
         id: "confirm",
-        label: "Write .gsd directory",
-        description: `Migrate ${preview.milestoneCount} milestone(s) to ${process.cwd()}/.gsd`,
+        label: "Write .hx directory",
+        description: `Migrate ${preview.milestoneCount} milestone(s) to ${process.cwd()}/.hx`,
         recommended: true,
       },
       {
@@ -177,13 +177,13 @@ export async function handleMigrate(
   }
 
   // ── Write ──────────────────────────────────────────────────────────────────
-  ctx.ui.notify("Writing .gsd directory…", "info");
+  ctx.ui.notify("Writing .hx directory…", "info");
 
   const result = await writeGSDDirectory(project, process.cwd());
   const gsdPath = hxRoot(process.cwd());
 
   ctx.ui.notify(
-    `✓ Migration complete — ${result.paths.length} file(s) written to .gsd/`,
+    `✓ Migration complete — ${result.paths.length} file(s) written to .hx/`,
     "info",
   );
 
@@ -191,9 +191,9 @@ export async function handleMigrate(
   const reviewChoice = await showNextAction(ctx, {
     title: "Migration written",
     summary: [
-      `${result.paths.length} files written to .gsd/`,
+      `${result.paths.length} files written to .hx/`,
       "",
-      "The agent can now review the migrated output against GSD-2 standards —",
+      "The agent can now review the migrated output against HX standards —",
       "checking structure, content quality, deriveState() round-trip, and",
       "requirement statuses. It will fix minor issues in-place.",
     ],
@@ -201,7 +201,7 @@ export async function handleMigrate(
       {
         id: "review",
         label: "Review migration",
-        description: "Agent audits the .gsd output and reports PASS/FAIL per category",
+        description: "Agent audits the .hx output and reports PASS/FAIL per category",
         recommended: true,
       },
       {
@@ -210,7 +210,7 @@ export async function handleMigrate(
         description: "Trust the migration output as-is",
       },
     ],
-    notYetMessage: "Run /hx migrate again to re-migrate, or review .gsd manually.",
+    notYetMessage: "Run /hx migrate again to re-migrate, or review .hx manually.",
   });
 
   if (reviewChoice === "review") {

@@ -27,7 +27,7 @@ import { deriveStateFromDb, invalidateStateCache } from '../state.ts';
 // ─── Fixture Helpers ───────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-recover-'));
+  const base = mkdtempSync(join(tmpdir(), 'hx-recover-'));
   mkdirSync(join(base, '.hx', 'milestones'), { recursive: true });
   return base;
 }
@@ -146,7 +146,7 @@ function clearHierarchyTables(): void {
 
 // ─── Tests ────────────────────────────────────────────────────────────────
 
-describe('gsd-recover', async () => {
+describe('hx-recover', async () => {
   test('full round-trip (populate, clear, recover, verify)', async () => {
     const base = createFixtureBase();
     try {

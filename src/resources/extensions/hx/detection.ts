@@ -19,10 +19,10 @@ export interface ProjectDetection {
   /** What kind of HX state exists in this directory */
   state: "none" | "v1-planning" | "v2-hx" | "v2-hx-empty";
 
-  /** Is this the first time GSD has been used on this machine? */
+  /** Is this the first time HX has been used on this machine? */
   isFirstEverLaunch: boolean;
 
-  /** Does ~/.gsd/ exist with preferences? */
+  /** Does ~/.hx/ exist with preferences? */
   hasGlobalSetup: boolean;
 
   /** v1 details (only when state === 'v1-planning') */
@@ -354,18 +354,18 @@ export function detectV1Planning(basePath: string): V1Detection | null {
 // ─── V2 GSD Detection ──────────────────────────────────────────────────────────
 
 function detectV2Gsd(basePath: string): V2Detection | null {
-  const gsdPath = hxRoot(basePath);
+  const hxPath = hxRoot(basePath);
 
-  if (!existsSync(gsdPath)) return null;
+  if (!existsSync(hxPath)) return null;
 
   const hasPreferences =
-    existsSync(join(gsdPath, "PREFERENCES.md")) ||
-    existsSync(join(gsdPath, "preferences.md"));
+    existsSync(join(hxPath, "PREFERENCES.md")) ||
+    existsSync(join(hxPath, "preferences.md"));
 
-  const hasContext = existsSync(join(gsdPath, "CONTEXT.md"));
+  const hasContext = existsSync(join(hxPath, "CONTEXT.md"));
 
   let milestoneCount = 0;
-  const milestonesPath = join(gsdPath, "milestones");
+  const milestonesPath = join(hxPath, "milestones");
   if (existsSync(milestonesPath)) {
     try {
       const entries = readdirSync(milestonesPath, { withFileTypes: true });
@@ -720,7 +720,7 @@ export function hasGlobalSetup(): boolean {
 }
 
 /**
- * Check if this is the very first time GSD has been used on this machine.
+ * Check if this is the very first time HX has been used on this machine.
  * Returns true if ~/.gsd/ doesn't exist or has no preferences or auth.
  */
 export function isFirstEverLaunch(): boolean {

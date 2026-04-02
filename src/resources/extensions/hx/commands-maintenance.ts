@@ -11,23 +11,23 @@ import { nativeBranchList, nativeDetectMainBranch, nativeBranchListMerged, nativ
 export async function handleCleanupBranches(ctx: ExtensionCommandContext, basePath: string): Promise<void> {
   let branches: string[];
   try {
-    branches = nativeBranchList(basePath, "gsd/*");
+    branches = nativeBranchList(basePath, "hx/*");
   } catch {
-    ctx.ui.notify("No GSD branches to clean up.", "info");
+    ctx.ui.notify("No HX branches to clean up.", "info");
     return;
   }
 
-  const quickBranches = branches.filter((b) => b.startsWith("gsd/quick/"));
+  const quickBranches = branches.filter((b) => b.startsWith("hx/quick/"));
 
   const mainBranch = nativeDetectMainBranch(basePath);
   let merged: string[];
   try {
-    merged = nativeBranchListMerged(basePath, mainBranch, "gsd/*");
+    merged = nativeBranchListMerged(basePath, mainBranch, "hx/*");
   } catch {
     merged = [];
   }
 
-  const mergedNonQuick = merged.filter((b) => !b.startsWith("gsd/quick/"));
+  const mergedNonQuick = merged.filter((b) => !b.startsWith("hx/quick/"));
   let deletedMerged = 0;
   for (const branch of mergedNonQuick) {
     try {
@@ -101,15 +101,15 @@ export async function handleCleanupBranches(ctx: ExtensionCommandContext, basePa
     summary.push(`Deleted ${deletedStaleMilestones} stale milestone branch${deletedStaleMilestones === 1 ? "" : "es"}.`);
   }
   if (quickBranches.length > 0) {
-    summary.push(`Skipped ${quickBranches.length} quick branch${quickBranches.length === 1 ? "" : "es"} (gsd/quick/*).`);
+    summary.push(`Skipped ${quickBranches.length} quick branch${quickBranches.length === 1 ? "" : "es"} (hx/quick/*).`);
   }
 
   if (summary.length === 0) {
-    const nonQuickCount = branches.filter((b) => !b.startsWith("gsd/quick/")).length;
+    const nonQuickCount = branches.filter((b) => !b.startsWith("hx/quick/")).length;
     ctx.ui.notify(
       nonQuickCount > 0
-        ? `${nonQuickCount} GSD branch${nonQuickCount === 1 ? "" : "es"} found, none merged into ${mainBranch} yet.`
-        : "No non-quick GSD branches to clean up.",
+        ? `${nonQuickCount} HX branch${nonQuickCount === 1 ? "" : "es"} found, none merged into ${mainBranch} yet.`
+        : "No non-quick HX branches to clean up.",
       "info",
     );
     return;
@@ -170,7 +170,7 @@ export async function handleCleanupWorktrees(ctx: ExtensionCommandContext, baseP
   }
 
   if (statuses.length === 0) {
-    ctx.ui.notify("No GSD worktrees found.", "info");
+    ctx.ui.notify("No HX worktrees found.", "info");
     return;
   }
 
@@ -428,7 +428,7 @@ export async function handleCleanupProjects(args: string, ctx: ExtensionCommandC
   if (unknown.length > 0) {
     lines.push(`Unknown (${unknown.length}) — no metadata yet:`);
     for (const h of unknown) {
-      lines.push(`  ? ${h}  (open that project in GSD once to register metadata)`);
+      lines.push(`  ? ${h}  (open that project in HX once to register metadata)`);
     }
     lines.push("");
   }
@@ -470,7 +470,7 @@ export async function handleCleanupProjects(args: string, ctx: ExtensionCommandC
 }
 
 /**
- * `gsd recover` — Reconstruct DB hierarchy state from rendered markdown on disk.
+ * `hx recover` — Reconstruct DB hierarchy state from rendered markdown on disk.
  *
  * Deletes milestones, slices, and tasks table rows (preserves decisions,
  * requirements, artifacts, memories), re-runs `migrateHierarchyToDb()` to
@@ -484,7 +484,7 @@ export async function handleRecover(ctx: ExtensionCommandContext, basePath: stri
   const { invalidateStateCache } = await import("./state.js");
 
   if (!dbAvailable()) {
-    ctx.ui.notify("gsd recover: No database open. Run a GSD command first to initialize the DB.", "error");
+    ctx.ui.notify("hx recover: No database open. Run a HX command first to initialize the DB.", "error");
     return;
   }
 
@@ -506,7 +506,7 @@ export async function handleRecover(ctx: ExtensionCommandContext, basePath: stri
 
     // 5. Report
     const lines = [
-      `gsd recover: reconstructed hierarchy from markdown`,
+      `hx recover: reconstructed hierarchy from markdown`,
       `  Milestones: ${counts.milestones}`,
       `  Slices:     ${counts.slices}`,
       `  Tasks:      ${counts.tasks}`,
@@ -524,12 +524,12 @@ export async function handleRecover(ctx: ExtensionCommandContext, basePath: stri
     }
 
     process.stderr.write(
-      `gsd-recover: recovered ${counts.milestones}M/${counts.slices}S/${counts.tasks}T hierarchy\n`,
+      `hx-recover: recovered ${counts.milestones}M/${counts.slices}S/${counts.tasks}T hierarchy\n`,
     );
     ctx.ui.notify(lines.join("\n"), "success");
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    process.stderr.write(`gsd-recover: failed: ${msg}\n`);
-    ctx.ui.notify(`gsd recover failed: ${msg}`, "error");
+    process.stderr.write(`hx-recover: failed: ${msg}\n`);
+    ctx.ui.notify(`hx recover failed: ${msg}`, "error");
   }
 }

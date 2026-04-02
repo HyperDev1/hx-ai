@@ -987,7 +987,7 @@ async function loadCachedWorkspaceIndex(
 async function loadWorkspaceIndexViaChildProcess(basePath: string, packageRoot: string): Promise<GSDWorkspaceIndex> {
   const deps = getBridgeDeps();
   const checkExists = deps.existsSync ?? existsSync;
-  const resolveTsLoader = join(packageRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs");
+  const resolveTsLoader = join(packageRoot, "src", "resources", "extensions", "hx", "tests", "resolve-ts.mjs");
   const moduleResolution = resolveSubprocessModule(
     packageRoot,
     "resources/extensions/hx/workspace-index.ts",

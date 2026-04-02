@@ -165,12 +165,12 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     assert.ok(result.commitMessage.includes("- S01: Core API"), "body lists S01");
     assert.ok(result.commitMessage.includes("- S02: Error handling"), "body lists S02");
     assert.ok(result.commitMessage.includes("- S03: Logging infra"), "body lists S03");
-    assert.ok(result.commitMessage.includes("GSD-Milestone: M020"), "body has GSD-Milestone trailer");
+    assert.ok(result.commitMessage.includes("HX-Milestone: M020"), "body has HX-Milestone trailer");
     assert.ok(result.commitMessage.includes("Branch: milestone/M020"), "body has branch metadata");
 
     const gitMsg = run("git log -1 --format=%B main", repo).trim();
     assert.match(gitMsg, /^feat:/, "git commit message starts with feat:");
-    assert.ok(gitMsg.includes("GSD-Milestone: M020"), "git commit has GSD-Milestone trailer");
+    assert.ok(gitMsg.includes("HX-Milestone: M020"), "git commit has HX-Milestone trailer");
     assert.ok(gitMsg.includes("- S01: Core API"), "git commit body has S01");
   });
 
@@ -250,7 +250,7 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     let threw = false;
     try {
       const result = mergeMilestoneToMain(repo, "M050", roadmap);
-      assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("GSD-Milestone: M050"), "merge commit created despite .gsd conflict");
+      assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("HX-Milestone: M050"), "merge commit created despite .gsd conflict");
     } catch (err) {
       threw = true;
     }
@@ -276,7 +276,7 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     let threw = false;
     try {
       const result = mergeMilestoneToMain(repo, "M060", roadmap);
-      assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("GSD-Milestone: M060"), "merge commit created");
+      assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("HX-Milestone: M060"), "merge commit created");
     } catch (err) {
       threw = true;
     }
@@ -314,7 +314,7 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     let errMsg = "";
     try {
       const result = mergeMilestoneToMain(dir, "M070", roadmap);
-      assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("GSD-Milestone: M070"), "merge commit created on master");
+      assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("HX-Milestone: M070"), "merge commit created on master");
     } catch (err) {
       threw = true;
       errMsg = err instanceof Error ? err.message : String(err);
@@ -394,7 +394,7 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     let threw = false;
     try {
       const result = mergeMilestoneToMain(repo, "M090", roadmap);
-      assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("GSD-Milestone: M090"), "#1738 merge succeeds after cleaning synced dirs");
+      assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("HX-Milestone: M090"), "#1738 merge succeeds after cleaning synced dirs");
     } catch (err: unknown) {
       threw = true;
     }
@@ -421,7 +421,7 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     let threw = false;
     try {
       const result = mergeMilestoneToMain(repo, "M100", roadmap);
-      assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("GSD-Milestone: M100"), "#2151: merge succeeds after stashing dirty files");
+      assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("HX-Milestone: M100"), "#2151: merge succeeds after stashing dirty files");
     } catch {
       threw = true;
     }
@@ -521,7 +521,7 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     let errMsg = "";
     try {
       const result = mergeMilestoneToMain(repo, "M140", roadmap);
-      assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("GSD-Milestone: M140"), "merge commit created");
+      assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("HX-Milestone: M140"), "merge commit created");
     } catch (err) {
       threw = true;
       errMsg = err instanceof Error ? err.message : String(err);
@@ -591,7 +591,7 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     assert.ok(existsSync(squashMsgPath), "SQUASH_MSG planted before merge");
 
     const result = mergeMilestoneToMain(repo, "M160", roadmap);
-    assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("GSD-Milestone: M160"), "merge commit created");
+    assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("HX-Milestone: M160"), "merge commit created");
 
     assert.ok(!existsSync(squashMsgPath), "#1853: SQUASH_MSG must not persist after successful squash-merge");
   });
@@ -611,7 +611,7 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     ]);
 
     const result = mergeMilestoneToMain(repo, "M170", roadmap);
-    assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("GSD-Milestone: M170"), "merge commit created");
+    assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("HX-Milestone: M170"), "merge commit created");
 
     assert.ok(
       existsSync(join(repo, "uncommitted-agent-code.ts")),

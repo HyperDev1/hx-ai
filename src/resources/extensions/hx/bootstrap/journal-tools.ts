@@ -51,7 +51,7 @@ export function registerJournalTools(pi: ExtensionAPI): void {
         };
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
-        process.stderr.write(`gsd-journal: gsd_journal_query tool failed: ${msg}\n`);
+        process.stderr.write(`gsd-journal: hx_journal_query tool failed: ${msg}\n`);
         return {
           content: [{ type: "text" as const, text: `Error querying journal: ${msg}` }],
           details: { operation: "journal_query", error: msg } as any,

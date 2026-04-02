@@ -31,7 +31,7 @@ import type { Requirement } from '../types.ts';
 // ═══════════════════════════════════════════════════════════════════════════
 
 function makeTmpDir(): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-tools-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'hx-tools-'));
   fs.mkdirSync(path.join(dir, ".hx"), { recursive: true });
   return dir;
 }
@@ -48,7 +48,7 @@ function cleanupDir(dir: string): void {
  * execute logic pattern: check DB -> call writer -> return result.
  */
 
-describe('gsd-tools', () => {
+describe('hx-tools', () => {
   test('gsd_decision_save', async () => {
     const tmpDir = makeTmpDir();
     try {

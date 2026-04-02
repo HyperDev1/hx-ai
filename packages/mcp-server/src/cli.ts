@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * @gsd-build/mcp-server CLI — stdio transport entry point.
+ * @hyperlab/hx-mcp-server CLI — stdio transport entry point.
  *
  * Connects the MCP server to stdin/stdout for use by Claude Code,
  * Cursor, and other MCP-compatible clients.
@@ -27,7 +27,7 @@ async function main(): Promise<void> {
   async function cleanup(): Promise<void> {
     if (cleaningUp) return;
     cleaningUp = true;
-    process.stderr.write('[gsd-mcp-server] Shutting down...\n');
+    process.stderr.write('[hx-mcp-server] Shutting down...\n');
     try {
       await sessionManager.cleanup();
     } catch {
@@ -50,10 +50,10 @@ async function main(): Promise<void> {
   // Connect and start serving
   try {
     await server.connect(transport);
-    process.stderr.write('[gsd-mcp-server] MCP server started on stdio\n');
+    process.stderr.write('[hx-mcp-server] MCP server started on stdio\n');
   } catch (err) {
     process.stderr.write(
-      `[gsd-mcp-server] Fatal: failed to start — ${err instanceof Error ? err.message : String(err)}\n`
+      `[hx-mcp-server] Fatal: failed to start — ${err instanceof Error ? err.message : String(err)}\n`
     );
     await sessionManager.cleanup();
     process.exit(1);
@@ -62,7 +62,7 @@ async function main(): Promise<void> {
 
 main().catch((err) => {
   process.stderr.write(
-    `[gsd-mcp-server] Fatal: ${err instanceof Error ? err.message : String(err)}\n`
+    `[hx-mcp-server] Fatal: ${err instanceof Error ? err.message : String(err)}\n`
   );
   process.exit(1);
 });

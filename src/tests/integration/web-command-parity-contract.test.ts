@@ -150,8 +150,8 @@ test("registered GSD command roots stay on the prompt/extension path", async () 
 
   // Non-gsd roots are extension commands that pass through to the bridge.
   // Derived dynamically so adding a new registration fails this assertion loudly.
-  const nonGsdRoots = registeredRoots.filter((r) => r !== "gsd")
-  assert.equal(nonGsdRoots.length, 4, "expected exactly 4 non-gsd passthrough roots; update this count when adding registrations")
+  const nonHxRoots = registeredRoots.filter((r) => r !== "hx")
+  assert.equal(nonHxRoots.length, 4, "expected exactly 4 non-hx passthrough roots; update this count when adding registrations")
   for (const root of nonGsdRoots) {
     assertPromptPassthrough(`/${root}`)
   }
@@ -303,7 +303,7 @@ test("GSD dispatch edge cases", async (t) => {
   await t.test("/hx export is GSD milestone export, distinct from built-in /export", () => {
     const outcome = dispatchBrowserSlashCommand("/hx export")
     assert.equal(outcome.kind, "surface")
-    assert.equal(outcome.surface, "gsd-export", "/hx export should be the GSD milestone export surface")
+    assert.equal(outcome.surface, "hx-export", "/hx export should be the HX milestone export surface")
   })
 
   await t.test("/hx forensics detailed preserves sub-args", () => {

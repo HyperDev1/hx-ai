@@ -35,7 +35,7 @@ function fallbackAutoDashboardData(): AutoDashboardData {
 }
 
 function resolveTsLoaderPath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs");
+  return join(packageRoot, "src", "resources", "extensions", "hx", "tests", "resolve-ts.mjs");
 }
 
 export function collectTestOnlyFallbackAutoDashboardData(): AutoDashboardData {

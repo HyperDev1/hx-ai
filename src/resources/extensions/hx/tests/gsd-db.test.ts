@@ -24,7 +24,7 @@ import {
 // ═══════════════════════════════════════════════════════════════════════════
 
 function tempDbPath(): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-db-test-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'hx-db-test-'));
   return path.join(dir, 'test.db');
 }
 
@@ -46,8 +46,8 @@ function cleanup(dbPath: string): void {
 // gsd-db tests
 // ═══════════════════════════════════════════════════════════════════════════
 
-describe('gsd-db', () => {
-  test('gsd-db: provider detection', () => {
+describe('hx-db', () => {
+  test('hx-db: provider detection', () => {
     const provider = getDbProvider();
     assert.ok(provider !== null, 'provider should be non-null');
     assert.ok(
@@ -56,7 +56,7 @@ describe('gsd-db', () => {
     );
   });
 
-  test('gsd-db: fresh DB schema init (memory)', () => {
+  test('hx-db: fresh DB schema init (memory)', () => {
     const ok = openDatabase(':memory:');
     assert.ok(ok, 'openDatabase should return true');
     assert.ok(isDbAvailable(), 'isDbAvailable should be true after open');
@@ -77,7 +77,7 @@ describe('gsd-db', () => {
     assert.ok(!isDbAvailable(), 'isDbAvailable should be false after close');
   });
 
-  test('gsd-db: double-init idempotency', () => {
+  test('hx-db: double-init idempotency', () => {
     const dbPath = tempDbPath();
     openDatabase(dbPath);
 
@@ -110,7 +110,7 @@ describe('gsd-db', () => {
     cleanup(dbPath);
   });
 
-  test('gsd-db: insert + get decision', () => {
+  test('hx-db: insert + get decision', () => {
     openDatabase(':memory:');
     insertDecision({
       id: 'D042',
@@ -139,7 +139,7 @@ describe('gsd-db', () => {
     closeDatabase();
   });
 
-  test('gsd-db: insert + get requirement', () => {
+  test('hx-db: insert + get requirement', () => {
     openDatabase(':memory:');
     insertRequirement({
       id: 'R007',
@@ -171,7 +171,7 @@ describe('gsd-db', () => {
     closeDatabase();
   });
 
-  test('gsd-db: active_decisions view excludes superseded', () => {
+  test('hx-db: active_decisions view excludes superseded', () => {
     openDatabase(':memory:');
 
     insertDecision({
@@ -223,7 +223,7 @@ describe('gsd-db', () => {
     closeDatabase();
   });
 
-  test('gsd-db: active_requirements view excludes superseded', () => {
+  test('hx-db: active_requirements view excludes superseded', () => {
     openDatabase(':memory:');
 
     insertRequirement({
@@ -267,7 +267,7 @@ describe('gsd-db', () => {
     closeDatabase();
   });
 
-  test('gsd-db: WAL mode on file-backed DB', () => {
+  test('hx-db: WAL mode on file-backed DB', () => {
     const dbPath = tempDbPath();
     openDatabase(dbPath);
 
@@ -278,7 +278,7 @@ describe('gsd-db', () => {
     cleanup(dbPath);
   });
 
-  test('gsd-db: transaction rollback on error', () => {
+  test('hx-db: transaction rollback on error', () => {
     openDatabase(':memory:');
 
     // Insert a decision normally
@@ -328,7 +328,7 @@ describe('gsd-db', () => {
     closeDatabase();
   });
 
-  test('gsd-db: query wrappers return null/empty when DB unavailable', () => {
+  test('hx-db: query wrappers return null/empty when DB unavailable', () => {
     // Ensure DB is closed
     closeDatabase();
     assert.ok(!isDbAvailable(), 'DB should not be available');

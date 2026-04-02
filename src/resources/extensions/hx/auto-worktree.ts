@@ -108,11 +108,11 @@ function isSamePath(a: string, b: string): boolean {
 let originalBase: string | null = null;
 
 function clearProjectRootStateFiles(basePath: string, milestoneId: string): void {
-  const gsdDir = hxRoot(basePath);
+  const hxDir = hxRoot(basePath);
   const transientFiles = [
-    join(gsdDir, "STATE.md"),
-    join(gsdDir, "auto.lock"),
-    join(gsdDir, "milestones", milestoneId, `${milestoneId}-META.json`),
+    join(hxDir, "STATE.md"),
+    join(hxDir, "auto.lock"),
+    join(hxDir, "milestones", milestoneId, `${milestoneId}-META.json`),
   ];
 
   for (const file of transientFiles) {
@@ -129,8 +129,8 @@ function clearProjectRootStateFiles(basePath: string, milestoneId: string): void
   // `git merge --squash`, git rejects the merge with "local changes would
   // be overwritten", causing silent data loss (#1738).
   const syncedDirs = [
-    join(gsdDir, "milestones", milestoneId),
-    join(gsdDir, "runtime", "units"),
+    join(hxDir, "milestones", milestoneId),
+    join(hxDir, "runtime", "units"),
   ];
 
   for (const dir of syncedDirs) {
@@ -297,8 +297,8 @@ export function readResourceVersion(): string | null {
   const manifestPath = join(agentDir, "managed-resources.json");
   try {
     const manifest = JSON.parse(readFileSync(manifestPath, "utf-8"));
-    return typeof manifest?.gsdVersion === "string"
-      ? manifest.gsdVersion
+    return typeof manifest?.hxVersion === "string"
+      ? manifest.hxVersion
       : null;
   } catch {
     return null;
@@ -316,7 +316,7 @@ export function checkResourcesStale(
   const current = readResourceVersion();
   if (current === null) return null;
   if (current !== versionOnStart) {
-    return "GSD resources were updated since this session started. Restart gsd to load the new code.";
+    return "HX resources were updated since this session started. Restart hx to load the new code.";
   }
   return null;
 }
@@ -336,12 +336,12 @@ export function checkResourcesStale(
  */
 export function escapeStaleWorktree(base: string): string {
   // Direct layout: /.gsd/worktrees/
-  const directMarker = `${pathSep}.gsd${pathSep}worktrees${pathSep}`;
+  const directMarker = `${pathSep}.hx${pathSep}worktrees${pathSep}`;
   let idx = base.indexOf(directMarker);
   if (idx === -1) {
-    // Symlink-resolved layout: /.gsd/projects/<hash>/worktrees/
+    // Symlink-resolved layout: /.hx/projects/<hash>/worktrees/
     const symlinkRe = new RegExp(
-      `\\${pathSep}\\.gsd\\${pathSep}projects\\${pathSep}[a-f0-9]+\\${pathSep}worktrees\\${pathSep}`,
+      `\\${pathSep}\\.hx\\${pathSep}projects\\${pathSep}[a-f0-9]+\\${pathSep}worktrees\\${pathSep}`,
     );
     const match = base.match(symlinkRe);
     if (!match || match.index === undefined) return base;
@@ -1339,9 +1339,9 @@ export function mergeMilestoneToMain(
     const sliceLines = completedSlices
       .map((s) => `- ${s.id}: ${s.title}`)
       .join("\n");
-    body = `\n\nCompleted slices:\n${sliceLines}\n\nGSD-Milestone: ${milestoneId}\nBranch: ${milestoneBranch}`;
+    body = `\n\nCompleted slices:\n${sliceLines}\n\nHX-Milestone: ${milestoneId}\nBranch: ${milestoneBranch}`;
   } else {
-    body = `\n\nGSD-Milestone: ${milestoneId}\nBranch: ${milestoneBranch}`;
+    body = `\n\nHX-Milestone: ${milestoneId}\nBranch: ${milestoneBranch}`;
   }
   const commitMessage = subject + body;
 
@@ -1416,7 +1416,7 @@ export function mergeMilestoneToMain(
     if (status) {
       execFileSync(
         "git",
-        ["stash", "push", "--include-untracked", "-m", `gsd: pre-merge stash for ${milestoneId}`],
+        ["stash", "push", "--include-untracked", "-m", `hx: pre-merge stash for ${milestoneId}`],
         { cwd: originalBasePath_, stdio: ["ignore", "pipe", "pipe"], encoding: "utf-8" },
       );
       stashed = true;
@@ -1543,11 +1543,11 @@ export function mergeMilestoneToMain(
       // .gsd/ conflicts during the merge itself: accept HEAD (the just-committed
       // version) and drop the now-applied stash.
       const uu = nativeConflictFiles(originalBasePath_);
-      const gsdUU = uu.filter((f) => f.startsWith(".hx/"));
-      const nonGsdUU = uu.filter((f) => !f.startsWith(".hx/"));
+      const hxUU = uu.filter((f) => f.startsWith(".hx/"));
+      const nonHxUU = uu.filter((f) => !f.startsWith(".hx/"));
 
-      if (gsdUU.length > 0) {
-        for (const f of gsdUU) {
+      if (hxUU.length > 0) {
+        for (const f of hxUU) {
           try {
             // Accept the committed (HEAD) version of the state file
             execFileSync("git", ["checkout", "HEAD", "--", f], {
@@ -1563,7 +1563,7 @@ export function mergeMilestoneToMain(
         }
       }
 
-      if (nonGsdUU.length === 0) {
+      if (nonHxUU.length === 0) {
         // All conflicts were .gsd/ files — safe to drop the stash
         try {
           execFileSync("git", ["stash", "drop"], {
@@ -1574,8 +1574,8 @@ export function mergeMilestoneToMain(
         } catch { /* stash may already be consumed */ }
       } else {
         // Non-.gsd conflicts remain — leave stash for manual resolution
-        logWarning("reconcile", "Stash pop conflict on non-.gsd files after merge", {
-          files: nonGsdUU.join(", "),
+        logWarning("reconcile", "Stash pop conflict on non-.hx files after merge", {
+          files: nonHxUU.join(", "),
         });
       }
     }
@@ -1661,7 +1661,7 @@ export function mergeMilestoneToMain(
         "--base", prTarget,
         "--head", milestoneBranch,
         "--title", `Milestone ${milestoneId} complete`,
-        "--body", "Auto-created by GSD on milestone completion.",
+        "--body", "Auto-created by HX on milestone completion.",
       ], {
         cwd: originalBasePath_,
         stdio: ["ignore", "pipe", "pipe"],

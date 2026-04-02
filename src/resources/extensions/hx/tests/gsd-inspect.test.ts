@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 
 import { formatInspectOutput, type InspectData } from '../commands-inspect.ts';
 
-describe('gsd-inspect', () => {
+describe('hx-inspect', () => {
   test('full output formatting', () => {
     const data: InspectData = {
       schemaVersion: 2,
@@ -23,7 +23,7 @@ describe('gsd-inspect', () => {
 
     const output = formatInspectOutput(data);
 
-    assert.match(output, /=== GSD Database Inspect ===/, "contains header");
+    assert.match(output, /=== HX Database Inspect ===/, "contains header");
     assert.match(output, /Schema version: 2/, "contains schema version");
     assert.match(output, /Decisions:\s+12/, "contains decisions count");
     assert.match(output, /Requirements:\s+8/, "contains requirements count");

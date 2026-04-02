@@ -370,7 +370,7 @@ async function defaultValidateApiKey(
     case "openrouter":
       return await validateBearerRequest(fetchImpl, providerId, "https://openrouter.ai/api/v1/models", apiKey, {
         "HTTP-Referer": "https://localhost",
-        "X-Title": "GSD onboarding",
+        "X-Title": "HX onboarding",
       });
     case "mistral":
       return await validateBearerRequest(fetchImpl, providerId, "https://api.mistral.ai/v1/models", apiKey);

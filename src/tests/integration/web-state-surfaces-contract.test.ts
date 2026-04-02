@@ -16,7 +16,7 @@ const workspaceStatus = await import("../../../web/lib/workspace-status.ts");
 // ─── Helpers ──────────────────────────────────────────────────────────
 function makeGsdFixture(): { root: string; gsdDir: string; cleanup: () => void } {
   const root = mkdtempSync(join(tmpdir(), "gsd-state-surfaces-"));
-  const gsdDir = join(root, ".gsd");
+  const hxDir = join(root, ".gsd");
   mkdirSync(gsdDir, { recursive: true });
   return {
     root,
@@ -31,7 +31,7 @@ test("indexWorkspace extracts risk, depends, and demo from roadmap", async (t) =
 
   t.after(() => { cleanup(); });
 
-  const milestoneDir = join(gsdDir, "milestones", "M001");
+  const milestoneDir = join(hxDir, "milestones", "M001");
   const sliceDir = join(milestoneDir, "slices", "S01");
   const tasksDir = join(sliceDir, "tasks");
   mkdirSync(tasksDir, { recursive: true });
@@ -84,7 +84,7 @@ test("indexWorkspace handles slices without risk/depends/demo", async (t) => {
 
   t.after(() => { cleanup(); });
 
-  const milestoneDir = join(gsdDir, "milestones", "M001");
+  const milestoneDir = join(hxDir, "milestones", "M001");
   const sliceDir = join(milestoneDir, "slices", "S01");
   mkdirSync(join(sliceDir, "tasks"), { recursive: true });
 
@@ -203,9 +203,9 @@ test("files API returns tree listing of .gsd/ directory", async (t) => {
   process.env.HX_WEB_PROJECT_CWD = root;
 
   // Create some files
-  writeFileSync(join(gsdDir, "STATE.md"), "# State\nactive");
-  writeFileSync(join(gsdDir, "PROJECT.md"), "# Project");
-  const msDir = join(gsdDir, "milestones", "M001");
+  writeFileSync(join(hxDir, "STATE.md"), "# State\nactive");
+  writeFileSync(join(hxDir, "PROJECT.md"), "# Project");
+  const msDir = join(hxDir, "milestones", "M001");
   mkdirSync(msDir, { recursive: true });
   writeFileSync(join(msDir, "M001-ROADMAP.md"), "# Roadmap");
 
@@ -243,7 +243,7 @@ test("files API returns file content for valid path", async (t) => {
   process.env.HX_WEB_PROJECT_CWD = root;
 
   const fileContent = "# State\n\nCurrent milestone: M001";
-  writeFileSync(join(gsdDir, "STATE.md"), fileContent);
+  writeFileSync(join(hxDir, "STATE.md"), fileContent);
 
   const request = new Request("http://localhost:3000/api/files?path=STATE.md");
   const response = await filesRoute.GET(request);
@@ -264,7 +264,7 @@ test("files API returns content for nested files", async (t) => {
 
   process.env.HX_WEB_PROJECT_CWD = root;
 
-  const msDir = join(gsdDir, "milestones", "M001");
+  const msDir = join(hxDir, "milestones", "M001");
   mkdirSync(msDir, { recursive: true });
   writeFileSync(join(msDir, "M001-ROADMAP.md"), "# Roadmap content");
 

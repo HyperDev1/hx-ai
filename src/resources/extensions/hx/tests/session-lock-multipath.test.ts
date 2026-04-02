@@ -19,7 +19,7 @@ import {
   releaseSessionLock,
   _getRegisteredLockDirs,
 } from '../session-lock.ts';
-import { gsdRoot } from '../paths.ts';
+import { hxRoot } from '../paths.ts';
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -37,7 +37,7 @@ describe('session-lock-multipath', async () => {
       assert.ok(result.acquired, 'lock acquired');
 
       const registered = _getRegisteredLockDirs();
-      const gsdDir = gsdRoot(base);
+      const gsdDir = hxRoot(base);
       assert.ok(registered.includes(gsdDir), 'gsdDir is registered in lock dir registry');
 
       releaseSessionLock(base);
@@ -82,10 +82,10 @@ describe('session-lock-multipath', async () => {
       releaseSessionLock(base);
 
       // Primary lock artifacts should be cleaned
-      const primaryLockFile = join(gsdRoot(base), 'auto.lock');
+      const primaryLockFile = join(hxRoot(base), 'auto.lock');
       assert.ok(!existsSync(primaryLockFile), 'primary auto.lock removed after release');
 
-      const primaryLockDir = gsdRoot(base) + '.lock';
+      const primaryLockDir = hxRoot(base) + '.lock';
       assert.ok(!existsSync(primaryLockDir), 'primary .hx.lock/ removed after release');
     } finally {
       rmSync(base, { recursive: true, force: true });
@@ -103,7 +103,7 @@ describe('session-lock-multipath', async () => {
       acquireSessionLock(base); // re-entrant
 
       const registered = _getRegisteredLockDirs();
-      const gsdDir = gsdRoot(base);
+      const gsdDir = hxRoot(base);
       // Should only appear once (Set deduplication)
       const count = registered.filter(d => d === gsdDir).length;
       assert.deepStrictEqual(count, 1, 'gsdDir registered exactly once after re-entrant acquisition');
@@ -133,7 +133,7 @@ describe('session-lock-multipath', async () => {
       assert.ok(r2.acquired, 'second base lock acquired');
 
       const registered = _getRegisteredLockDirs();
-      const gsd2 = gsdRoot(base2);
+      const gsd2 = hxRoot(base2);
       assert.ok(registered.includes(gsd2), 'second gsdDir is registered');
 
       releaseSessionLock(base2);
@@ -154,8 +154,8 @@ describe('session-lock-multipath', async () => {
       releaseSessionLock(base);
 
       // Verify everything is clean
-      const lockFile = join(gsdRoot(base), 'auto.lock');
-      const lockDir = gsdRoot(base) + '.lock';
+      const lockFile = join(hxRoot(base), 'auto.lock');
+      const lockDir = hxRoot(base) + '.lock';
       assert.ok(!existsSync(lockFile), 'auto.lock cleaned');
       assert.ok(!existsSync(lockDir), '.hx.lock/ cleaned');
       assert.deepStrictEqual(_getRegisteredLockDirs().length, 0, 'registry empty');

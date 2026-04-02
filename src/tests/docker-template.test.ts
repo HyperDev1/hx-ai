@@ -20,7 +20,7 @@ test("docker/Dockerfile.sandbox exists and uses Node 24 base", () => {
 
 test("docker/Dockerfile.sandbox installs @hyperlab/hx globally", () => {
   const content = readFile("docker/Dockerfile.sandbox");
-  assert.match(content, /npm install -g @hyperlab/hx/);
+  assert.match(content, /npm install -g @hyperlab\/hx/);
 });
 
 test("docker/Dockerfile.sandbox creates a non-root user", () => {

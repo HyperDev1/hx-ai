@@ -39,7 +39,7 @@ function resolveExtensionDir(): string {
 
   // Fallback: user-local agent directory
   const hxHome = process.env.HX_HOME || join(homedir(), ".hx");
-  const agentGsdDir = join(hxHome, "agent", "extensions", "gsd");
+  const agentGsdDir = join(hxHome, "agent", "extensions", "hx");
   if (existsSync(join(agentGsdDir, "prompts"))) return agentGsdDir;
 
   // Last resort: return the module dir (warmCache will silently handle the miss)
@@ -72,7 +72,7 @@ function warmCache(): void {
     // prompts/ may not exist in test environments — lazy loading still works.
     // Emit a diagnostic when running outside tests so wrong-path bugs are visible.
     if (!process.env.VITEST && !process.env.NODE_TEST) {
-      process.stderr.write(`[gsd:prompt-loader] warmCache: prompts dir not found: ${promptsDir}\n`);
+      process.stderr.write(`[hx:prompt-loader] warmCache: prompts dir not found: ${promptsDir}\n`);
     }
   }
 
@@ -87,7 +87,7 @@ function warmCache(): void {
   } catch {
     // templates/ may not exist in test environments — lazy loading still works.
     if (!process.env.VITEST && !process.env.NODE_TEST) {
-      process.stderr.write(`[gsd:prompt-loader] warmCache: templates dir not found: ${templatesDir}\n`);
+      process.stderr.write(`[hx:prompt-loader] warmCache: templates dir not found: ${templatesDir}\n`);
     }
   }
 }
@@ -110,7 +110,7 @@ export function loadPrompt(name: string, vars: Record<string, string> = {}): str
   }
 
   const effectiveVars = {
-    skillActivation: "If a `GSD Skill Preferences` block is present in system context, use it and the `<available_skills>` catalog in your system prompt to decide which skills to load and follow for this unit, without relaxing required verification or artifact rules.",
+    skillActivation: "If a `HX Skill Preferences` block is present in system context, use it and the `<available_skills>` catalog in your system prompt to decide which skills to load and follow for this unit, without relaxing required verification or artifact rules.",
     ...vars,
   };
 

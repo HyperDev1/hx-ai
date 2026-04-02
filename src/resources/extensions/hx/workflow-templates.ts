@@ -13,12 +13,12 @@ import { homedir } from "node:os";
 const __extensionDir = resolveGsdExtensionDir();
 const registryPath = join(__extensionDir, "workflow-templates", "registry.json");
 
-/** Resolve the GSD extension dir with fallback to ~/.gsd/agent/extensions/hx/. */
+/** Resolve the HX extension dir with fallback to ~/.hx/agent/extensions/hx/. */
 function resolveGsdExtensionDir(): string {
   const moduleDir = dirname(fileURLToPath(import.meta.url));
   if (existsSync(join(moduleDir, "workflow-templates"))) return moduleDir;
   const hxHome = process.env.HX_HOME || join(homedir(), ".hx");
-  const agentGsdDir = join(hxHome, "agent", "extensions", "gsd");
+  const agentGsdDir = join(hxHome, "agent", "extensions", "hx");
   if (existsSync(join(agentGsdDir, "workflow-templates"))) return agentGsdDir;
   return moduleDir;
 }
@@ -215,7 +215,7 @@ export function getTemplateInfo(name: string): string | null {
     "",
     `Description: ${t.description}`,
     `Complexity:  ${t.estimated_complexity}`,
-    `Requires .gsd/: ${t.requires_project ? "yes" : "no"}`,
+    `Requires .hx/: ${t.requires_project ? "yes" : "no"}`,
     "",
     "Phases:",
     ...t.phases.map((p, i) => `  ${i + 1}. ${p}`),

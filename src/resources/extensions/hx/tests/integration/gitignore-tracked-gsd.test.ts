@@ -32,7 +32,7 @@ function git(dir: string, ...args: string[]): string {
 }
 
 function makeTempRepo(): string {
-  const dir = mkdtempSync(join(tmpdir(), "gsd-gitignore-test-"));
+  const dir = mkdtempSync(join(tmpdir(), "hx-gitignore-test-"));
   git(dir, "init");
   git(dir, "config", "user.email", "test@test.com");
   git(dir, "config", "user.name", "Test");
@@ -67,7 +67,7 @@ test("hasGitTrackedGsdFiles returns true when .hx/ has tracked files", (t) => {
   mkdirSync(join(dir, ".hx", "milestones"), { recursive: true });
   writeFileSync(join(dir, ".hx", "PROJECT.md"), "# Test Project\n");
   git(dir, "add", ".hx/PROJECT.md");
-  git(dir, "commit", "-m", "add gsd");
+  git(dir, "commit", "-m", "add hx");
   assert.equal(hasGitTrackedGsdFiles(dir), true);
 });
 
@@ -91,7 +91,7 @@ test("ensureGitignore does NOT add .hx when .hx/ has tracked files (#1364)", (t)
     writeFileSync(join(dir, ".hx", "PROJECT.md"), "# Test Project\n");
     writeFileSync(join(dir, ".hx", "DECISIONS.md"), "# Decisions\n");
     git(dir, "add", ".hx/");
-    git(dir, "commit", "-m", "track gsd state");
+    git(dir, "commit", "-m", "track hx state");
 
     // Run ensureGitignore
     ensureGitignore(dir);
@@ -152,7 +152,7 @@ test("ensureGitignore with tracked .hx/ does not cause git to see files as delet
       "# M001\n",
     );
     git(dir, "add", ".hx/");
-    git(dir, "commit", "-m", "track gsd state");
+    git(dir, "commit", "-m", "track hx state");
 
     // Run ensureGitignore
     ensureGitignore(dir);
@@ -182,7 +182,7 @@ test("hasGitTrackedGsdFiles returns true (fail-safe) when git is not available",
     mkdirSync(join(dir, ".hx"), { recursive: true });
     writeFileSync(join(dir, ".hx", "PROJECT.md"), "# Project\n");
     git(dir, "add", ".hx/");
-    git(dir, "commit", "-m", "track gsd");
+    git(dir, "commit", "-m", "track hx");
 
     // Corrupt the git index to simulate git failure
     const indexPath = join(dir, ".git", "index.lock");
@@ -206,7 +206,7 @@ test("migrateToExternalState aborts when .hx/ has tracked files (#1364)", (t) =>
     mkdirSync(join(dir, ".hx", "milestones"), { recursive: true });
     writeFileSync(join(dir, ".hx", "PROJECT.md"), "# Project\n");
     git(dir, "add", ".hx/");
-    git(dir, "commit", "-m", "track gsd state");
+    git(dir, "commit", "-m", "track hx state");
 
     // Attempt migration — should abort without moving anything
     const result = migrateToExternalState(dir);
@@ -235,9 +235,9 @@ test("migrateToExternalState cleans git index so tracked files don't show as del
     writeFileSync(join(dir, ".hx", "PROJECT.md"), "# Project\n");
     writeFileSync(join(dir, ".hx", "milestones", "M001", "PLAN.md"), "# Plan\n");
     git(dir, "add", ".hx/");
-    git(dir, "commit", "-m", "track gsd state");
+    git(dir, "commit", "-m", "track hx state");
     git(dir, "rm", "-r", "--cached", ".hx/");
-    git(dir, "commit", "-m", "untrack gsd (simulates pre-migration project)");
+    git(dir, "commit", "-m", "untrack hx (simulates pre-migration project)");
 
     const result = migrateToExternalState(dir);
     assert.equal(result.migrated, true, "Migration should succeed");

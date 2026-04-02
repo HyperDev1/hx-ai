@@ -1,7 +1,7 @@
 /**
  * GSD Directory Validation — Safeguards against running in dangerous directories.
  *
- * Prevents GSD from creating .gsd/ structures in system paths, home directories,
+ * Prevents HX from creating .gsd/ structures in system paths, home directories,
  * or other locations where writing project scaffolding would be harmful.
  */
 
@@ -22,7 +22,7 @@ export interface DirectoryValidationResult {
 
 // ─── Blocked Paths ──────────────────────────────────────────────────────────────
 
-/** Paths where GSD must never create .gsd/ — no override possible. */
+/** Paths where HX must never create .gsd/ — no override possible. */
 const UNIX_BLOCKED_PATHS = new Set([
   "/",
   "/bin",

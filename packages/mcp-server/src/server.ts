@@ -1,5 +1,5 @@
 /**
- * MCP Server — registers 6 GSD orchestration tools on McpServer.
+ * MCP Server — registers 6 HX orchestration tools on McpServer.
  *
  * Uses dynamic imports for @modelcontextprotocol/sdk because TS Node16
  * cannot resolve the SDK's subpath exports statically (same pattern as
@@ -16,7 +16,7 @@ import type { SessionManager } from './session-manager.js';
 // ---------------------------------------------------------------------------
 
 const MCP_PKG = '@modelcontextprotocol/sdk';
-const SERVER_NAME = 'gsd';
+const SERVER_NAME = 'hx';
 const SERVER_VERSION = '2.51.0';
 
 // ---------------------------------------------------------------------------
@@ -34,36 +34,36 @@ function errorContent(message: string): { isError: true; content: Array<{ type: 
 }
 
 // ---------------------------------------------------------------------------
-// gsd_query filesystem reader
+// hx_query filesystem reader
 // ---------------------------------------------------------------------------
 
 async function readProjectState(projectDir: string, _query: string): Promise<Record<string, unknown>> {
-  const gsdDir = join(resolve(projectDir), '.gsd');
+  const hxDir = join(resolve(projectDir), '.hx');
   const result: Record<string, unknown> = { projectDir: resolve(projectDir) };
 
   // STATE.md — current execution state
   try {
-    result.state = await readFile(join(gsdDir, 'STATE.md'), 'utf-8');
+    result.state = await readFile(join(hxDir, 'STATE.md'), 'utf-8');
   } catch {
     result.state = null;
   }
 
   // PROJECT.md — project description
   try {
-    result.project = await readFile(join(gsdDir, 'PROJECT.md'), 'utf-8');
+    result.project = await readFile(join(hxDir, 'PROJECT.md'), 'utf-8');
   } catch {
     result.project = null;
   }
 
   // REQUIREMENTS.md — requirement contract
   try {
-    result.requirements = await readFile(join(gsdDir, 'REQUIREMENTS.md'), 'utf-8');
+    result.requirements = await readFile(join(hxDir, 'REQUIREMENTS.md'), 'utf-8');
   } catch {
     result.requirements = null;
   }
 
   // List milestones with basic metadata
-  const milestonesDir = join(gsdDir, 'milestones');
+  const milestonesDir = join(hxDir, 'milestones');
   try {
     const entries = await readdir(milestonesDir, { withFileTypes: true });
     const milestones: Array<{ id: string; hasRoadmap: boolean; hasSummary: boolean }> = [];
@@ -124,14 +124,14 @@ export async function createMcpServer(sessionManager: SessionManager): Promise<{
   );
 
   // -----------------------------------------------------------------------
-  // gsd_execute — start a new GSD auto-mode session
+  // hx_execute — start a new HX auto-mode session
   // -----------------------------------------------------------------------
   server.tool(
-    'gsd_execute',
-    'Start a GSD auto-mode session for a project directory. Returns a sessionId for tracking.',
+    'hx_execute',
+    'Start a HX auto-mode session for a project directory. Returns a sessionId for tracking.',
     {
       projectDir: z.string().describe('Absolute path to the project directory'),
-      command: z.string().optional().describe('Command to send (default: "/gsd auto")'),
+      command: z.string().optional().describe('Command to send (default: "/hx auto")'),
       model: z.string().optional().describe('Model ID override'),
       bare: z.boolean().optional().describe('Run in bare mode (skip user config)'),
     },
@@ -149,13 +149,13 @@ export async function createMcpServer(sessionManager: SessionManager): Promise<{
   );
 
   // -----------------------------------------------------------------------
-  // gsd_status — poll session status
+  // hx_status — poll session status
   // -----------------------------------------------------------------------
   server.tool(
-    'gsd_status',
-    'Get the current status of a GSD session including progress, recent events, and pending blockers.',
+    'hx_status',
+    'Get the current status of a HX session including progress, recent events, and pending blockers.',
     {
-      sessionId: z.string().describe('Session ID returned from gsd_execute'),
+      sessionId: z.string().describe('Session ID returned from hx_execute'),
     },
     async (args: Record<string, unknown>) => {
       const { sessionId } = args as { sessionId: string };
@@ -193,13 +193,13 @@ export async function createMcpServer(sessionManager: SessionManager): Promise<{
   );
 
   // -----------------------------------------------------------------------
-  // gsd_result — get accumulated session result
+  // hx_result — get accumulated session result
   // -----------------------------------------------------------------------
   server.tool(
-    'gsd_result',
-    'Get the result of a GSD session. Returns partial results if the session is still running.',
+    'hx_result',
+    'Get the result of a HX session. Returns partial results if the session is still running.',
     {
-      sessionId: z.string().describe('Session ID returned from gsd_execute'),
+      sessionId: z.string().describe('Session ID returned from hx_execute'),
     },
     async (args: Record<string, unknown>) => {
       const { sessionId } = args as { sessionId: string };
@@ -213,13 +213,13 @@ export async function createMcpServer(sessionManager: SessionManager): Promise<{
   );
 
   // -----------------------------------------------------------------------
-  // gsd_cancel — cancel a running session
+  // hx_cancel — cancel a running session
   // -----------------------------------------------------------------------
   server.tool(
-    'gsd_cancel',
-    'Cancel a running GSD session. Aborts the current operation and stops the process.',
+    'hx_cancel',
+    'Cancel a running HX session. Aborts the current operation and stops the process.',
     {
-      sessionId: z.string().describe('Session ID returned from gsd_execute'),
+      sessionId: z.string().describe('Session ID returned from hx_execute'),
     },
     async (args: Record<string, unknown>) => {
       const { sessionId } = args as { sessionId: string };
@@ -233,11 +233,11 @@ export async function createMcpServer(sessionManager: SessionManager): Promise<{
   );
 
   // -----------------------------------------------------------------------
-  // gsd_query — read project state from filesystem (no session needed)
+  // hx_query — read project state from filesystem (no session needed)
   // -----------------------------------------------------------------------
   server.tool(
-    'gsd_query',
-    'Query GSD project state from the filesystem. Returns STATE.md, PROJECT.md, requirements, and milestone listing. Does not require an active session.',
+    'hx_query',
+    'Query HX project state from the filesystem. Returns STATE.md, PROJECT.md, requirements, and milestone listing. Does not require an active session.',
     {
       projectDir: z.string().describe('Absolute path to the project directory'),
       query: z.string().describe('What to query (e.g. "status", "milestones", "requirements")'),
@@ -254,13 +254,13 @@ export async function createMcpServer(sessionManager: SessionManager): Promise<{
   );
 
   // -----------------------------------------------------------------------
-  // gsd_resolve_blocker — resolve a pending blocker
+  // hx_resolve_blocker — resolve a pending blocker
   // -----------------------------------------------------------------------
   server.tool(
-    'gsd_resolve_blocker',
-    'Resolve a pending blocker in a GSD session by sending a response to the UI request.',
+    'hx_resolve_blocker',
+    'Resolve a pending blocker in a HX session by sending a response to the UI request.',
     {
-      sessionId: z.string().describe('Session ID returned from gsd_execute'),
+      sessionId: z.string().describe('Session ID returned from hx_execute'),
       response: z.string().describe('Response to send for the pending blocker'),
     },
     async (args: Record<string, unknown>) => {

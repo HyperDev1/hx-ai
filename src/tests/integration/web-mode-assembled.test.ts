@@ -1020,10 +1020,10 @@ test("assembled slash-command behavior keeps built-ins safe while preserving GSD
   assert.equal(builtInReject.status, null);
 
   // /hx status is now a browser surface (S02), verify that
-  const gsdSurface = await submitBrowserInput("/hx status");
-  assert.equal(gsdSurface.outcome.kind, "surface");
-  assert.equal(gsdSurface.outcome.surface, "gsd-status");
-  assert.equal(gsdSurface.status, null);
+  const hxSurface = await submitBrowserInput("/hx status");
+  assert.equal(hxSurface.outcome.kind, "surface");
+  assert.equal(hxSurface.outcome.surface, "hx-status");
+  assert.equal(hxSurface.status, null);
 
   // /hx auto is a passthrough subcommand — reaches the bridge as a prompt
   const gsdPrompt = await submitBrowserInput("/hx auto");

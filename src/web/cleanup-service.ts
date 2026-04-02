@@ -11,7 +11,7 @@ const CLEANUP_MAX_BUFFER = 2 * 1024 * 1024
 const CLEANUP_MODULE_ENV = "HX_CLEANUP_MODULE"
 
 function resolveTsLoaderPath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs")
+  return join(packageRoot, "src", "resources", "extensions", "hx", "tests", "resolve-ts.mjs")
 }
 
 /**
@@ -40,14 +40,14 @@ export async function collectCleanupData(projectCwdOverride?: string): Promise<C
     'const { pathToFileURL } = await import("node:url");',
     `const mod = await import(pathToFileURL(process.env.${CLEANUP_MODULE_ENV}).href);`,
     'const basePath = process.env.HX_CLEANUP_BASE;',
-    // Get all GSD branches
+    // Get all HX branches
     'let branches = [];',
-    'try { branches = mod.nativeBranchList(basePath, "gsd/*"); } catch {}',
-    // Detect main branch and find which GSD branches are merged
+    'try { branches = mod.nativeBranchList(basePath, "hx/*"); } catch {}',
+    // Detect main branch and find which HX branches are merged
     'let mainBranch = "main";',
     'try { mainBranch = mod.nativeDetectMainBranch(basePath); } catch {}',
     'let merged = [];',
-    'try { merged = mod.nativeBranchListMerged(basePath, mainBranch, "gsd/*"); } catch {}',
+    'try { merged = mod.nativeBranchListMerged(basePath, mainBranch, "hx/*"); } catch {}',
     'const mergedSet = new Set(merged);',
     'const branchList = branches.map(b => ({ name: b, merged: mergedSet.has(b) }));',
     // Get snapshot refs

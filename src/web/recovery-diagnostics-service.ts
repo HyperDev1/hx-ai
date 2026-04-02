@@ -357,7 +357,7 @@ function resolveSummary(options: {
 }
 
 function resolveTsLoaderPath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs")
+  return join(packageRoot, "src", "resources", "extensions", "hx", "tests", "resolve-ts.mjs")
 }
 
 async function collectRecoveryDiagnosticsChildPayload(
