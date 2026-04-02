@@ -593,6 +593,16 @@ export async function stopAuto(
   const loadedPreferences = loadEffectiveHXPreferences()?.preferences;
   const reasonSuffix = reason ? ` — ${reason}` : "";
 
+  // ── Step 0: Abort the in-flight LLM turn ──
+  // Cancel the currently streaming agent turn so tool calls stop immediately.
+  // Without this, the agent keeps generating and executing tools even after
+  // auto-mode state is torn down. Mirrors interactive mode's Escape behavior.
+  try {
+    ctx?.abort();
+  } catch (e) {
+    debugLog("stop-abort-agent", { error: e instanceof Error ? e.message : String(e) });
+  }
+
   try {
     // ── Step 1: Timers and locks ──
     try {
