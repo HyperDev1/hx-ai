@@ -285,6 +285,24 @@ test("pre-dispatch hook action validation via validatePreferences", () => {
   assert.ok(e3.some(e => e.includes("invalid action")));
 });
 
+// ── Leading whitespace tolerance ─────────────────────────────────────────────
+
+test("parsePreferencesMarkdown tolerates leading blank lines before frontmatter", () => {
+  const content = "\n\nwidget_mode: full\n---\nversion: 1\nmode: solo\n---\n";
+  const prefs = parsePreferencesMarkdown(content);
+  // The stray lines before --- are stripped; frontmatter is parsed
+  assert.notEqual(prefs, null);
+  assert.equal(prefs!.version, 1);
+  assert.equal(prefs!.mode, "solo");
+});
+
+test("parsePreferencesMarkdown tolerates leading whitespace before frontmatter", () => {
+  const content = "  \n---\nversion: 1\n---\n";
+  const prefs = parsePreferencesMarkdown(content);
+  assert.notEqual(prefs, null);
+  assert.equal(prefs!.version, 1);
+});
+
 // ── Model config parsing ─────────────────────────────────────────────────────
 
 test("parses OpenRouter model config with org/model IDs and fallbacks", () => {

@@ -205,20 +205,31 @@ export function _resetParseWarningFlag(): void {
 
 /** @internal Exported for testing only */
 export function parsePreferencesMarkdown(content: string): GSDPreferences | null {
+  // Strip content before the first frontmatter delimiter.
+  // Handles leading whitespace, blank lines, or stray text (e.g. "widget_mode: full")
+  // that some agents or editors place before the opening "---".
+  let trimmed = content;
+  const fmIdx = content.search(/^---\r?\n/m);
+  if (fmIdx > 0) {
+    trimmed = content.slice(fmIdx);
+  } else if (fmIdx === -1) {
+    trimmed = content.replace(/^\s*/, '');
+  }
+
   // Use indexOf instead of [\s\S]*? regex to avoid backtracking (#468)
-  const startMarker = content.startsWith('---\r\n') ? '---\r\n' : '---\n';
-  if (content.startsWith(startMarker)) {
+  const startMarker = trimmed.startsWith('---\r\n') ? '---\r\n' : '---\n';
+  if (trimmed.startsWith(startMarker)) {
     const searchStart = startMarker.length;
-    const endIdx = content.indexOf('\n---', searchStart);
+    const endIdx = trimmed.indexOf('\n---', searchStart);
     if (endIdx === -1) return null;
-    const block = content.slice(searchStart, endIdx);
+    const block = trimmed.slice(searchStart, endIdx);
     return parseFrontmatterBlock(block.replace(/\r/g, ''));
   }
 
   // Fallback: heading+list format (e.g. "## Git\n- isolation: none") (#2036)
   // HX agents may write preferences files without frontmatter delimiters.
-  if (/^##\s+\w/m.test(content)) {
-    return parseHeadingListFormat(content);
+  if (/^##\s+\w/m.test(trimmed)) {
+    return parseHeadingListFormat(trimmed);
   }
 
   if (!_warnedUnrecognizedFormat) {
