@@ -11,7 +11,7 @@ import { join } from "node:path";
 import { deriveState } from "./state.js";
 import { gsdRoot } from "./paths.js";
 import { appendCapture, hasPendingCaptures, loadPendingCaptures } from "./captures.js";
-import { appendOverride, appendKnowledge } from "./files.js";
+import { appendOverride, appendKnowledge, findSimilarKnowledge } from "./files.js";
 import {
   formatDoctorIssuesForPrompt,
   formatDoctorReport,
@@ -264,27 +264,77 @@ export async function handleKnowledge(args: string, ctx: ExtensionCommandContext
 
   if (!typeArg || !["rule", "pattern", "lesson"].includes(typeArg)) {
     ctx.ui.notify(
-      "Usage: /gsd knowledge <rule|pattern|lesson> <description>\nExample: /gsd knowledge rule Use real DB for integration tests",
+      "Usage: /gsd knowledge <rule|pattern|lesson> <description>\n       /gsd knowledge --raw <rule|pattern|lesson> <description>\nExample: /gsd knowledge rule Use real DB for integration tests",
       "warning",
     );
     return;
   }
 
-  const entryText = parts.slice(1).join(" ").trim();
-  if (!entryText) {
-    ctx.ui.notify(`Usage: /gsd knowledge ${typeArg} <description>`, "warning");
+  // --raw flag: skip interactive refinement, use current behavior
+  const rawMode = parts.includes("--raw");
+  const filteredParts = parts.filter(p => p !== "--raw");
+  const actualTypeArg = filteredParts[0]?.toLowerCase();
+
+  if (!actualTypeArg || !["rule", "pattern", "lesson"].includes(actualTypeArg)) {
+    ctx.ui.notify(`Usage: /gsd knowledge ${rawMode ? "--raw " : ""}<rule|pattern|lesson> <description>`, "warning");
     return;
   }
 
-  const type = typeArg as "rule" | "pattern" | "lesson";
+  const entryText = filteredParts.slice(1).join(" ").trim();
+  if (!entryText) {
+    ctx.ui.notify(`Usage: /gsd knowledge ${actualTypeArg} <description>`, "warning");
+    return;
+  }
+
+  const type = actualTypeArg as "rule" | "pattern" | "lesson";
   const basePath = process.cwd();
   const state = await deriveState(basePath);
   const scope = state.activeMilestone?.id
     ? `${state.activeMilestone.id}${state.activeSlice ? `/${state.activeSlice.id}` : ""}`
     : "global";
 
-  await appendKnowledge(basePath, type, entryText, scope);
-  ctx.ui.notify(`Added ${type} to KNOWLEDGE.md: "${entryText}"`, "success");
+  // Interactive refinement: ask follow-up questions to fill empty fields
+  let fields: { why?: string; where?: string; rootCause?: string; fix?: string } | undefined;
+
+  if (!rawMode) {
+    fields = {};
+    if (type === "rule") {
+      const why = await ctx.ui.input(
+        "Why is this rule important? (press Enter to skip)",
+        "e.g., Prevents SQL injection, Ensures consistency",
+      );
+      if (why?.trim()) fields.why = why.trim();
+    } else if (type === "pattern") {
+      const where = await ctx.ui.input(
+        "Where in the codebase is this pattern used? (press Enter to skip)",
+        "e.g., src/services/, all API routes",
+      );
+      if (where?.trim()) fields.where = where.trim();
+    } else {
+      const rootCause = await ctx.ui.input(
+        "What was the root cause? (press Enter to skip)",
+        "e.g., Missing null check, Race condition",
+      );
+      if (rootCause?.trim()) fields.rootCause = rootCause.trim();
+      const fix = await ctx.ui.input(
+        "What's the fix? (press Enter to skip)",
+        "e.g., Added retry logic, Wrapped in try-catch",
+      );
+      if (fix?.trim()) fields.fix = fix.trim();
+    }
+  }
+
+  const result = await appendKnowledge(basePath, type, entryText, scope, fields);
+
+  if (!result.added && result.duplicateOf) {
+    ctx.ui.notify(
+      `Duplicate detected — similar ${type} already exists:\n  ${result.duplicateOf.id}: "${result.duplicateOf.text}"\nEntry not added. Use --raw to force.`,
+      "warning",
+    );
+    return;
+  }
+
+  ctx.ui.notify(`Added ${type} ${result.id} to KNOWLEDGE.md: "${entryText}"`, "success");
 }
 
 export async function handleRunHook(args: string, ctx: ExtensionCommandContext, pi: ExtensionAPI): Promise<void> {

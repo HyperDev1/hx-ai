@@ -791,14 +791,91 @@ export async function appendOverride(basePath: string, change: string, appliedAt
   }
 }
 
+export interface KnowledgeMatch {
+  id: string;
+  text: string;
+}
+
+export interface AppendKnowledgeResult {
+  added: boolean;
+  id?: string;
+  duplicateOf?: KnowledgeMatch;
+}
+
+/**
+ * Find an existing knowledge entry that is similar to the proposed entry.
+ * Checks within the same section (rules/patterns/lessons) for:
+ * - Case-insensitive exact match
+ * - Substring containment (either direction)
+ * Returns the first match found, or null.
+ */
+export function findSimilarKnowledge(
+  existing: string,
+  type: "rule" | "pattern" | "lesson",
+  entry: string,
+): KnowledgeMatch | null {
+  const sectionHeading = type === "rule" ? "## Rules" : type === "pattern" ? "## Patterns" : "## Lessons Learned";
+  const sectionIdx = existing.indexOf(sectionHeading);
+  if (sectionIdx === -1) return null;
+
+  const nextSection = existing.indexOf("\n## ", sectionIdx + sectionHeading.length);
+  const sectionContent = nextSection !== -1
+    ? existing.slice(sectionIdx, nextSection)
+    : existing.slice(sectionIdx);
+
+  // Extract table rows: | ID | ... | content | ... |
+  const rowPattern = /^\| ([KPL]\d+) \|(.+)\|$/gm;
+  const entryLower = entry.toLowerCase().trim();
+  let match;
+
+  while ((match = rowPattern.exec(sectionContent)) !== null) {
+    const id = match[1];
+    const cells = match[2].split("|").map(c => c.trim());
+
+    // The content column position varies by type:
+    // rule:    | # | Scope | Rule | Why | Added |  → column index 1 (Rule)
+    // pattern: | # | Pattern | Where | Notes |     → column index 0 (Pattern)
+    // lesson:  | # | What Happened | Root Cause | Fix | Scope | → column index 0 (What Happened)
+    const contentIdx = type === "rule" ? 1 : 0;
+    const cellText = cells[contentIdx] ?? "";
+    const cellLower = cellText.toLowerCase().trim();
+
+    if (!cellLower || cellLower === "—") continue;
+
+    // Exact match (case-insensitive)
+    if (cellLower === entryLower) {
+      return { id, text: cellText };
+    }
+
+    // Substring containment (either direction, min 10 chars to avoid false positives)
+    if (entryLower.length >= 10 && cellLower.includes(entryLower)) {
+      return { id, text: cellText };
+    }
+    if (cellLower.length >= 10 && entryLower.includes(cellLower)) {
+      return { id, text: cellText };
+    }
+  }
+
+  return null;
+}
+
 export async function appendKnowledge(
   basePath: string,
   type: "rule" | "pattern" | "lesson",
   entry: string,
   scope: string,
-): Promise<void> {
+  fields?: { why?: string; where?: string; rootCause?: string; fix?: string },
+): Promise<AppendKnowledgeResult> {
   const knowledgePath = resolveGsdRootFile(basePath, "KNOWLEDGE");
   const existing = await loadFile(knowledgePath);
+
+  // Duplicate detection
+  if (existing) {
+    const duplicate = findSimilarKnowledge(existing, type, entry);
+    if (duplicate) {
+      return { added: false, duplicateOf: duplicate };
+    }
+  }
 
   if (existing) {
     // Find the next ID for this type
@@ -815,11 +892,15 @@ export async function appendKnowledge(
     // Build the table row
     let row: string;
     if (type === "rule") {
-      row = `| ${nextId} | ${scope} | ${entry} | — | manual |`;
+      const why = fields?.why || "—";
+      row = `| ${nextId} | ${scope} | ${entry} | ${why} | manual |`;
     } else if (type === "pattern") {
-      row = `| ${nextId} | ${entry} | — | ${scope} |`;
+      const where = fields?.where || "—";
+      row = `| ${nextId} | ${entry} | ${where} | ${scope} |`;
     } else {
-      row = `| ${nextId} | ${entry} | — | — | ${scope} |`;
+      const rootCause = fields?.rootCause || "—";
+      const fix = fields?.fix || "—";
+      row = `| ${nextId} | ${entry} | ${rootCause} | ${fix} | ${scope} |`;
     }
 
     // Find the right section and append after the table header
@@ -836,9 +917,11 @@ export async function appendKnowledge(
       const before = existing.slice(0, insertPoint).trimEnd();
       const after = existing.slice(insertPoint);
       await saveFile(knowledgePath, before + "\n" + row + "\n" + after);
+      return { added: true, id: nextId };
     } else {
       // Section not found — append at end
       await saveFile(knowledgePath, existing.trimEnd() + "\n\n" + row + "\n");
+      return { added: true, id: nextId };
     }
   } else {
     // Create file from scratch with template header
@@ -851,13 +934,19 @@ export async function appendKnowledge(
     ].join("\n");
 
     let content: string;
+    const why = fields?.why || "—";
+    const where = fields?.where || "—";
+    const rootCause = fields?.rootCause || "—";
+    const fix = fields?.fix || "—";
+    let newId: string;
     if (type === "rule") {
+      newId = "K001";
       content = header + [
         "## Rules",
         "",
         "| # | Scope | Rule | Why | Added |",
         "|---|-------|------|-----|-------|",
-        `| K001 | ${scope} | ${entry} | — | manual |`,
+        `| K001 | ${scope} | ${entry} | ${why} | manual |`,
         "",
         "## Patterns",
         "",
@@ -871,6 +960,7 @@ export async function appendKnowledge(
         "",
       ].join("\n");
     } else if (type === "pattern") {
+      newId = "P001";
       content = header + [
         "## Rules",
         "",
@@ -881,7 +971,7 @@ export async function appendKnowledge(
         "",
         "| # | Pattern | Where | Notes |",
         "|---|---------|-------|-------|",
-        `| P001 | ${entry} | — | ${scope} |`,
+        `| P001 | ${entry} | ${where} | ${scope} |`,
         "",
         "## Lessons Learned",
         "",
@@ -890,6 +980,7 @@ export async function appendKnowledge(
         "",
       ].join("\n");
     } else {
+      newId = "L001";
       content = header + [
         "## Rules",
         "",
@@ -905,11 +996,12 @@ export async function appendKnowledge(
         "",
         "| # | What Happened | Root Cause | Fix | Scope |",
         "|---|--------------|------------|-----|-------|",
-        `| L001 | ${entry} | — | — | ${scope} |`,
+        `| L001 | ${entry} | ${rootCause} | ${fix} | ${scope} |`,
         "",
       ].join("\n");
     }
     await saveFile(knowledgePath, content);
+    return { added: true, id: newId };
   }
 }
 
