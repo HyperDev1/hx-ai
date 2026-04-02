@@ -71,9 +71,9 @@ function exitIfManagedResourcesAreNewer(currentAgentDir: string): void {
   }
 
   process.stderr.write(
-    `[gsd] ${chalk.yellow('Version mismatch detected')}\n` +
-    `[gsd] Synced resources are from ${chalk.bold(`v${managedVersion}`)}, but this \`gsd\` binary is ${chalk.dim(`v${currentVersion}`)}.\n` +
-    `[gsd] Run ${chalk.bold('npm install -g gsd-pi@latest')} or ${chalk.bold('gsd update')}, then try again.\n`,
+    `[hx] ${chalk.yellow('Version mismatch detected')}\n` +
+    `[hx] Synced resources are from ${chalk.bold(`v${managedVersion}`)}, but this \`gsd\` binary is ${chalk.dim(`v${currentVersion}`)}.\n` +
+    `[hx] Run ${chalk.bold('npm install -g @hyperlab/hx@latest')} or ${chalk.bold('hx update')}, then try again.\n`,
   )
   process.exit(1)
 }
@@ -151,11 +151,11 @@ async function ensureRtkBootstrap(): Promise<void> {
   ;(ensureRtkBootstrap as { _done?: boolean })._done = true
   markStartup('bootstrapRtk')
   if (!rtkStatus.available && rtkStatus.supported && rtkStatus.enabled && rtkStatus.reason) {
-    process.stderr.write(`[gsd] Warning: RTK unavailable — continuing without shell-command compression (${rtkStatus.reason}).\n`)
+    process.stderr.write(`[hx] Warning: RTK unavailable — continuing without shell-command compression (${rtkStatus.reason}).\n`)
   }
 }
 
-// `gsd update` — update to the latest version via npm
+// `hx update` — update to the latest version via npm
 if (cliFlags.messages[0] === 'update') {
   const { runUpdate } = await import('./update-cmd.js')
   await runUpdate()
@@ -168,12 +168,12 @@ exitIfManagedResourcesAreNewer(agentDir)
 // handles that prevent process.exit() from completing promptly.
 const hasSubcommand = cliFlags.messages.length > 0
 if (!process.stdin.isTTY && !isPrintMode && !hasSubcommand && !cliFlags.listModels && !cliFlags.web) {
-  process.stderr.write('[gsd] Error: Interactive mode requires a terminal (TTY).\n')
-  process.stderr.write('[gsd] Non-interactive alternatives:\n')
-  process.stderr.write('[gsd]   gsd --print "your message"     Single-shot prompt\n')
-  process.stderr.write('[gsd]   gsd --mode rpc                 JSON-RPC over stdin/stdout\n')
-  process.stderr.write('[gsd]   gsd --mode mcp                 MCP server over stdin/stdout\n')
-  process.stderr.write('[gsd]   gsd --mode text "message"      Text output mode\n')
+  process.stderr.write('[hx] Error: Interactive mode requires a terminal (TTY).\n')
+  process.stderr.write('[hx] Non-interactive alternatives:\n')
+  process.stderr.write('[hx]   hx --print "your message"     Single-shot prompt\n')
+  process.stderr.write('[hx]   hx --mode rpc                 JSON-RPC over stdin/stdout\n')
+  process.stderr.write('[hx]   hx --mode mcp                 MCP server over stdin/stdout\n')
+  process.stderr.write('[hx]   hx --mode text "message"      Text output mode\n')
   process.exit(1)
 }
 
@@ -186,7 +186,7 @@ if (subcommand && process.argv.includes('--help')) {
 }
 
 const packageCommand = await runPackageCommand({
-  appName: 'gsd',
+  appName: 'hx',
   args: process.argv.slice(2),
   cwd: process.cwd(),
   agentDir,
@@ -220,7 +220,7 @@ if (cliFlags.messages[0] === 'web' && cliFlags.messages[1] === 'stop') {
   }
 }
 
-// `gsd --web [path]` or `gsd web [start] [path]` — launch browser-only web mode
+// `hx --web [path]` or `gsd web [start] [path]` — launch browser-only web mode
 if (cliFlags.web || (cliFlags.messages[0] === 'web' && cliFlags.messages[1] !== 'stop')) {
   await ensureRtkBootstrap()
   const webFlags = parseWebCliArgs(process.argv)
@@ -344,7 +344,7 @@ if (!isPrintMode) {
 // Warn if terminal is too narrow for readable output
 if (!isPrintMode && process.stdout.columns && process.stdout.columns < 40) {
   process.stderr.write(
-    chalk.yellow(`[gsd] Terminal width is ${process.stdout.columns} columns (minimum recommended: 40). Output may be unreadable.\n`),
+    chalk.yellow(`[hx] Terminal width is ${process.stdout.columns} columns (minimum recommended: 40). Output may be unreadable.\n`),
   )
 }
 
@@ -482,7 +482,7 @@ if (isPrintMode) {
       // Downgrade conflicts with built-in tools to warnings (#1347)
       const isSuperseded = err.error.includes("supersedes");
       const prefix = isSuperseded ? "Extension conflict" : "Extension load error";
-      process.stderr.write(`[gsd] ${prefix}: ${err.error}\n`)
+      process.stderr.write(`[hx] ${prefix}: ${err.error}\n`)
     }
   }
 
@@ -615,7 +615,7 @@ if (extensionsResult.errors.length > 0) {
   for (const err of extensionsResult.errors) {
     const isSuperseded = err.error.includes("supersedes");
     const prefix = isSuperseded ? "Extension conflict" : "Extension load error";
-    process.stderr.write(`[gsd] ${prefix}: ${err.error}\n`)
+    process.stderr.write(`[hx] ${prefix}: ${err.error}\n`)
   }
 }
 
@@ -663,13 +663,13 @@ if (enabledModelPatterns && enabledModelPatterns.length > 0) {
 }
 
 if (!process.stdin.isTTY) {
-  process.stderr.write('[gsd] Error: Interactive mode requires a terminal (TTY).\n')
-  process.stderr.write('[gsd] Non-interactive alternatives:\n')
-  process.stderr.write('[gsd]   gsd --print "your message"     Single-shot prompt\n')
-  process.stderr.write('[gsd]   gsd --web [path]               Browser-only web mode\n')
-  process.stderr.write('[gsd]   gsd --mode rpc                 JSON-RPC over stdin/stdout\n')
-  process.stderr.write('[gsd]   gsd --mode mcp                 MCP server over stdin/stdout\n')
-  process.stderr.write('[gsd]   gsd --mode text "message"      Text output mode\n')
+  process.stderr.write('[hx] Error: Interactive mode requires a terminal (TTY).\n')
+  process.stderr.write('[hx] Non-interactive alternatives:\n')
+  process.stderr.write('[hx]   hx --print "your message"     Single-shot prompt\n')
+  process.stderr.write('[hx]   hx --web [path]               Browser-only web mode\n')
+  process.stderr.write('[hx]   hx --mode rpc                 JSON-RPC over stdin/stdout\n')
+  process.stderr.write('[hx]   hx --mode mcp                 MCP server over stdin/stdout\n')
+  process.stderr.write('[hx]   hx --mode text "message"      Text output mode\n')
   process.exit(1)
 }
 

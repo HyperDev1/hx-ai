@@ -1,5 +1,5 @@
 /**
- * GSD Welcome Screen
+ * HX Welcome Screen
  *
  * Two-panel bar layout: full-width accent bars at top/bottom (matching the
  * auto-mode progress widget style), logo left (fixed width), info right.
@@ -41,7 +41,7 @@ export function printWelcomeScreen(opts: WelcomeScreenOptions): void {
 
   // Narrow terminal fallback
   if (termWidth < 70) {
-    process.stderr.write(`\n  Get Shit Done v${version}\n  ${shortCwd}\n\n`)
+    process.stderr.write(`\n  HX — Hyperlab Coding Agent v${version}\n  ${shortCwd}\n\n`)
     return
   }
 
@@ -58,7 +58,7 @@ export function printWelcomeScreen(opts: WelcomeScreenOptions): void {
   const leftRows = ['', ...HX_LOGO, '']
 
   // ── Right rows (8 total, null = divider) ────────────────────────────────────
-  const titleLeft  = `  ${chalk.bold('Get Shit Done')}`
+  const titleLeft  = `  ${chalk.bold('HX — Hyperlab Coding Agent')}`
   const titleRight = chalk.dim(`v${version}`)
   const titleFill  = RIGHT_INNER - visLen(titleLeft) - visLen(titleRight)
   const titleRow   = titleLeft + ' '.repeat(Math.max(1, titleFill)) + titleRight
@@ -72,7 +72,7 @@ export function printWelcomeScreen(opts: WelcomeScreenOptions): void {
 
   // Tools left, hint right-aligned on the same row
   const toolsLeft  = toolParts.length > 0 ? chalk.dim('  ' + toolParts.join('  ·  ')) : ''
-  const hintRight  = chalk.dim('/gsd to begin  ·  /gsd help')
+  const hintRight  = chalk.dim('/hx to begin  ·  /hx help')
   const footerFill = RIGHT_INNER - visLen(toolsLeft) - visLen(hintRight)
   const footerRow  = toolsLeft + ' '.repeat(Math.max(1, footerFill)) + hintRight
 
