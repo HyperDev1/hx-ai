@@ -19,7 +19,7 @@ import { readCrashLock, clearLock, formatCrashInfo } from "./crash-recovery.js";
 import { listUnitRuntimeRecords, clearUnitRuntimeRecord } from "./unit-runtime.js";
 import { resolveExpectedArtifactPath } from "./auto.js";
 import {
-  hxRoot, milestonesDir, resolveMilestoneFile, resolveMilestonePath,
+  hxRoot, _clearHxRootCache, milestonesDir, resolveMilestoneFile, resolveMilestonePath,
   resolveSliceFile, resolveSlicePath, resolveHxRootFile, relHxRootFile,
   relMilestoneFile, relSliceFile,
 } from "./paths.js";
@@ -983,6 +983,40 @@ export async function showSmartEntry(
   }
 
   // ── Detection preamble — run before any bootstrap ────────────────────
+  if (!existsSync(hxRoot(basePath))) {
+    // .gsd/ exists but no .hx/ — offer GSD → HX migration
+    if (existsSync(join(basePath, ".gsd"))) {
+      const { migrateProjectGsdToHx, migrateGlobalGsdToHx } = await import("./migrate-gsd-to-hx.js");
+      const doMigrate = await showConfirm(ctx, {
+        title: "GSD → HX Migration",
+        message: "Found a .gsd/ directory from a previous GSD installation. Migrate it to .hx/?",
+        confirmLabel: "Migrate",
+        declineLabel: "Start fresh",
+      });
+      if (doMigrate) {
+        const result = migrateProjectGsdToHx(basePath);
+        if (result.migrated) {
+          _clearHxRootCache();
+          ctx.ui.notify("✓ Migrated project .gsd/ → .hx/", "info");
+        } else if (result.error) {
+          ctx.ui.notify(`Migration failed: ${result.error}`, "error");
+        }
+        // Also sync global state
+        const globalResult = migrateGlobalGsdToHx();
+        if (globalResult.migrated) {
+          ctx.ui.notify("✓ Synced global credentials from ~/.gsd/ → ~/.hx/", "info");
+        }
+        // Re-check — if migration succeeded, hxRoot now exists, skip init wizard
+        if (existsSync(hxRoot(basePath))) {
+          // Fall through to normal flow below
+        } else {
+          // Migration didn't produce .hx/ — fall through to init wizard
+        }
+      }
+      // If declined or migration didn't produce .hx/, fall through
+    }
+  }
+
   if (!existsSync(hxRoot(basePath))) {
     const detection = detectProjectState(basePath);
 

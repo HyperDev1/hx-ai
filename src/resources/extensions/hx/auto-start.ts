@@ -179,6 +179,18 @@ export async function bootstrapAutoSession(
       nativeInit(base, mainBranch);
     }
 
+    // ── GSD → HX migration — silent rename in auto-mode ──────────────
+    if (!existsSync(join(base, ".hx")) && existsSync(join(base, ".gsd"))) {
+      const { migrateProjectGsdToHx, migrateGlobalGsdToHx } = await import("./migrate-gsd-to-hx.js");
+      const gsdResult = migrateProjectGsdToHx(base);
+      if (gsdResult.migrated) {
+        const { _clearHxRootCache } = await import("./paths.js");
+        _clearHxRootCache();
+        ctx.ui.notify("Migrated .gsd/ → .hx/", "info");
+      }
+      migrateGlobalGsdToHx();
+    }
+
     // Migrate legacy in-project .hx/ to external state directory.
     // Migration MUST run before ensureGitignore to avoid adding ".hx" to
     // .gitignore when .hx/ is git-tracked (data-loss bug #1364).
