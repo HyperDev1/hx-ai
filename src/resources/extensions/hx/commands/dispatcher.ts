@@ -1,4 +1,4 @@
-import type { ExtensionAPI, ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionCommandContext } from "@hyperlab/hx-coding-agent";
 
 import { handleAutoCommand } from "./handlers/auto.js";
 import { handleCoreCommand } from "./handlers/core.js";

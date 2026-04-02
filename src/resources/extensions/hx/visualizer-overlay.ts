@@ -1,5 +1,5 @@
-import type { Theme } from "@gsd/pi-coding-agent";
-import { truncateToWidth, visibleWidth, matchesKey, Key } from "@gsd/pi-tui";
+import type { Theme } from "@hyperlab/hx-coding-agent";
+import { truncateToWidth, visibleWidth, matchesKey, Key } from "@hyperlab/hx-tui";
 import { loadVisualizerData, type VisualizerData } from "./visualizer-data.js";
 import {
   renderProgressView,

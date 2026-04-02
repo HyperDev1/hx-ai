@@ -1,5 +1,5 @@
 import type { AgentMessage } from "@gsd/pi-agent-core";
-import type { ImageContent, Message, TextContent } from "@gsd/pi-ai";
+import type { ImageContent, Message, TextContent } from "@hyperlab/hx-ai";
 import { randomUUID } from "crypto";
 import {
 	appendFileSync,

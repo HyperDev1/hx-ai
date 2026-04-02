@@ -1,4 +1,4 @@
-import type { ExtensionAPI, ExtensionContext } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@hyperlab/hx-coding-agent";
 
 import { checkAutoStartAfterDiscuss } from "../guided-flow.js";
 import { getAutoDashboardData, getAutoModeStartModel, isAutoActive, pauseAuto } from "../auto.js";

@@ -1,4 +1,4 @@
-import type { ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionCommandContext } from "@hyperlab/hx-coding-agent";
 import { existsSync, readFileSync } from "node:fs";
 import { clearCmuxSidebar, CmuxClient, detectCmuxEnvironment, resolveCmuxConfig } from "../cmux/index.js";
 import { saveFile } from "./files.js";

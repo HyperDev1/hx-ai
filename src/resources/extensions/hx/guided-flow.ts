@@ -6,7 +6,7 @@
  * No execution state, no hooks, no tools — the LLM does the rest.
  */
 
-import type { ExtensionAPI, ExtensionContext, ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext, ExtensionCommandContext } from "@hyperlab/hx-coding-agent";
 import { showNextAction } from "../shared/tui.js";
 import { loadFile } from "./files.js";
 import { isDbAvailable, getMilestoneSlices } from "./gsd-db.js";

@@ -3,7 +3,7 @@
 // handleUndoTask: Reset a single task's DB status to "pending" and re-render markdown.
 // handleResetSlice: Reset a slice and all its tasks, re-rendering plan + roadmap.
 
-import type { ExtensionCommandContext, ExtensionAPI } from "@gsd/pi-coding-agent";
+import type { ExtensionCommandContext, ExtensionAPI } from "@hyperlab/hx-coding-agent";
 import { existsSync, readFileSync, writeFileSync, unlinkSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { nativeRevertCommit, nativeRevertAbort } from "./native-git-bridge.js";

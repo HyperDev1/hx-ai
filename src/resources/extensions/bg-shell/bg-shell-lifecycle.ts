@@ -7,11 +7,11 @@ import type {
 	ExtensionAPI,
 	ExtensionContext,
 	Theme,
-} from "@gsd/pi-coding-agent";
+} from "@hyperlab/hx-coding-agent";
 import {
 	truncateToWidth,
 	visibleWidth,
-} from "@gsd/pi-tui";
+} from "@hyperlab/hx-tui";
 
 import {
 	processes,

@@ -1,5 +1,5 @@
 import type { AgentTool } from "@gsd/pi-agent-core";
-import type { ImageContent, TextContent } from "@gsd/pi-ai";
+import type { ImageContent, TextContent } from "@hyperlab/hx-ai";
 import { type Static, Type } from "@sinclair/typebox";
 import { constants } from "fs";
 import { access as fsAccess, readFile as fsReadFile } from "fs/promises";

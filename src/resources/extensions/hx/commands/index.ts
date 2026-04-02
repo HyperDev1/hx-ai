@@ -1,4 +1,4 @@
-import type { ExtensionAPI, ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionCommandContext } from "@hyperlab/hx-coding-agent";
 
 import { HX_COMMAND_DESCRIPTION, getGsdArgumentCompletions } from "./catalog.js";
 

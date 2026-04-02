@@ -25,15 +25,15 @@
  *   Esc          exit confirmation
  */
 
-import type { ExtensionCommandContext } from "@gsd/pi-coding-agent";
-import { type Theme } from "@gsd/pi-coding-agent";
+import type { ExtensionCommandContext } from "@hyperlab/hx-coding-agent";
+import { type Theme } from "@hyperlab/hx-coding-agent";
 import {
 	Editor,
 	Key,
 	matchesKey,
 	truncateToWidth,
 	type TUI,
-} from "@gsd/pi-tui";
+} from "@hyperlab/hx-tui";
 import { makeUI, INDENT } from "./ui.js";
 
 // ─── Exported types ───────────────────────────────────────────────────────────

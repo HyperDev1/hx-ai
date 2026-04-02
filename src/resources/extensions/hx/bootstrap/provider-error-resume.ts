@@ -2,7 +2,7 @@ import type {
   ExtensionAPI,
   ExtensionCommandContext,
   ExtensionContext,
-} from "@gsd/pi-coding-agent";
+} from "@hyperlab/hx-coding-agent";
 
 import { getAutoDashboardData, startAuto, type AutoDashboardData } from "../auto.js";
 

@@ -13,8 +13,8 @@
  *   agent_end      → if pending violation, inject rule via sendMessage
  */
 
-import type { ExtensionAPI, ExtensionContext } from "@gsd/pi-coding-agent";
-import type { AssistantMessageEvent } from "@gsd/pi-ai";
+import type { ExtensionAPI, ExtensionContext } from "@hyperlab/hx-coding-agent";
+import type { AssistantMessageEvent } from "@hyperlab/hx-ai";
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";

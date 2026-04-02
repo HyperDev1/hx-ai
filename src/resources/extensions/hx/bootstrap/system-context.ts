@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-import type { ExtensionContext } from "@gsd/pi-coding-agent";
+import type { ExtensionContext } from "@hyperlab/hx-coding-agent";
 
 import { debugTime } from "../debug-logger.js";
 import { loadPrompt } from "../prompt-loader.js";

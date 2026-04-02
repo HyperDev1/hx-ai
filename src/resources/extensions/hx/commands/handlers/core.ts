@@ -1,4 +1,4 @@
-import type { ExtensionCommandContext, ExtensionContext } from "@gsd/pi-coding-agent";
+import type { ExtensionCommandContext, ExtensionContext } from "@hyperlab/hx-coding-agent";
 import type { GSDState } from "../../types.js";
 
 import { computeProgressScore, formatProgressLine } from "../../progress-score.js";

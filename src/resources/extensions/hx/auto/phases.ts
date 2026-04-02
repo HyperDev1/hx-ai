@@ -7,7 +7,7 @@
  * Imports from: auto/types, auto/detect-stuck, auto/run-unit, auto/loop-deps
  */
 
-import { importExtensionModule, type ExtensionAPI, type ExtensionContext } from "@gsd/pi-coding-agent";
+import { importExtensionModule, type ExtensionAPI, type ExtensionContext } from "@hyperlab/hx-coding-agent";
 
 import type { AutoSession, SidecarItem } from "./session.js";
 import type { LoopDeps } from "./loop-deps.js";

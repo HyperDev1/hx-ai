@@ -170,19 +170,25 @@ if (process.env.HTTP_PROXY || process.env.HTTPS_PROXY || process.env.http_proxy 
 }
 
 // Ensure workspace packages are linked (or copied on Windows) before importing
-// cli.js (which imports @gsd/*).
+// cli.js (which imports @hyperlab/*).
 // npm postinstall handles this normally, but npx --ignore-scripts skips postinstall.
 // On Windows without Developer Mode or admin rights, symlinkSync will throw even for
 // 'junction' type — so we fall back to cpSync (a full directory copy) which works
 // everywhere without elevated permissions.
-const gsdScopeDir = join(gsdNodeModules, '@gsd')
+const hxScopeDir = join(gsdNodeModules, '@hyperlab')
 const packagesDir = join(gsdRoot, 'packages')
-const wsPackages = ['native', 'pi-agent-core', 'pi-ai', 'pi-coding-agent', 'pi-tui']
+const wsPackages: Record<string, string> = {
+  'hx-native': 'native',
+  'hx-agent-core': 'pi-agent-core',
+  'hx-ai': 'pi-ai',
+  'hx-coding-agent': 'pi-coding-agent',
+  'hx-tui': 'pi-tui',
+}
 try {
-  if (!existsSync(gsdScopeDir)) mkdirSync(gsdScopeDir, { recursive: true })
-  for (const pkg of wsPackages) {
-    const target = join(gsdScopeDir, pkg)
-    const source = join(packagesDir, pkg)
+  if (!existsSync(hxScopeDir)) mkdirSync(hxScopeDir, { recursive: true })
+  for (const [scopeName, dirName] of Object.entries(wsPackages)) {
+    const target = join(hxScopeDir, scopeName)
+    const source = join(packagesDir, dirName)
     if (!existsSync(source) || existsSync(target)) continue
     try {
       symlinkSync(source, target, 'junction')
@@ -197,10 +203,10 @@ try {
 // Validate critical workspace packages are resolvable. If still missing after the
 // symlink+copy attempts, emit a clear diagnostic instead of a cryptic
 // ERR_MODULE_NOT_FOUND from deep inside cli.js.
-const criticalPackages = ['pi-coding-agent']
-const missingPackages = criticalPackages.filter(pkg => !existsSync(join(gsdScopeDir, pkg)))
+const criticalPackages = ['hx-coding-agent']
+const missingPackages = criticalPackages.filter(pkg => !existsSync(join(hxScopeDir, pkg)))
 if (missingPackages.length > 0) {
-  const missing = missingPackages.map(p => `@gsd/${p}`).join(', ')
+  const missing = missingPackages.map(p => `@hyperlab/${p}`).join(', ')
   process.stderr.write(
     `\nError: GSD installation is broken — missing packages: ${missing}\n\n` +
     `This is usually caused by one of:\n` +

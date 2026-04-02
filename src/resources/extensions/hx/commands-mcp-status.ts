@@ -9,7 +9,7 @@
  *   /gsd mcp check <srv> — Detailed status for a specific server
  */
 
-import type { ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionCommandContext } from "@hyperlab/hx-coding-agent";
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";

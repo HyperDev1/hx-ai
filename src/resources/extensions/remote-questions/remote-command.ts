@@ -2,9 +2,9 @@
  * Remote Questions — /gsd remote command
  */
 
-import type { ExtensionAPI, ExtensionCommandContext } from "@gsd/pi-coding-agent";
-import { AuthStorage } from "@gsd/pi-coding-agent";
-import { Editor, type EditorTheme, Key, matchesKey, truncateToWidth } from "@gsd/pi-tui";
+import type { ExtensionAPI, ExtensionCommandContext } from "@hyperlab/hx-coding-agent";
+import { AuthStorage } from "@hyperlab/hx-coding-agent";
+import { Editor, type EditorTheme, Key, matchesKey, truncateToWidth } from "@hyperlab/hx-tui";
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { getGlobalGSDPreferencesPath, loadEffectiveGSDPreferences } from "../hx/preferences.js";

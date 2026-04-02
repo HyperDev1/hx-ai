@@ -14,7 +14,7 @@ import type {
   ExtensionAPI,
   ExtensionContext,
   ExtensionCommandContext,
-} from "@gsd/pi-coding-agent";
+} from "@hyperlab/hx-coding-agent";
 
 import { deriveState } from "./state.js";
 import { parseUnitId } from "./unit-id.js";

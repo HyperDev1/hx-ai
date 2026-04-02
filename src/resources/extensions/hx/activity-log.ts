@@ -14,7 +14,7 @@ import { join } from "node:path";
 import { HXError, HX_IO_ERROR } from "./errors.js";
 
 const SEQ_PREFIX_RE = /^(\d+)-/;
-import type { ExtensionContext } from "@gsd/pi-coding-agent";
+import type { ExtensionContext } from "@hyperlab/hx-coding-agent";
 import { hxRoot } from "./paths.js";
 
 interface ActivityLogState {

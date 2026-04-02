@@ -1,11 +1,11 @@
 import { Type } from "@sinclair/typebox";
-import type { ExtensionAPI } from "@gsd/pi-coding-agent";
-import { Text } from "@gsd/pi-tui";
+import type { ExtensionAPI } from "@hyperlab/hx-coding-agent";
+import { Text } from "@hyperlab/hx-tui";
 
 import { findMilestoneIds, nextMilestoneId, claimReservedId, getReservedMilestoneIds } from "../guided-flow.js";
 import { loadEffectiveGSDPreferences } from "../preferences.js";
 import { ensureDbOpen } from "./dynamic-tools.js";
-import { StringEnum } from "@gsd/pi-ai";
+import { StringEnum } from "@hyperlab/hx-ai";
 import { logError } from "../workflow-logger.js";
 
 /**

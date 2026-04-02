@@ -1,8 +1,8 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 
-import type { ExtensionAPI } from "@gsd/pi-coding-agent";
-import { Key } from "@gsd/pi-tui";
+import type { ExtensionAPI } from "@hyperlab/hx-coding-agent";
+import { Key } from "@hyperlab/hx-tui";
 
 import { GSDDashboardOverlay } from "../dashboard-overlay.js";
 import { ParallelMonitorOverlay } from "../parallel-monitor-overlay.js";

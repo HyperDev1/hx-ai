@@ -8,8 +8,8 @@
  * All provider logic lives in provider.ts (S01) — this is pure UI wiring.
  */
 
-import type { ExtensionAPI } from '@gsd/pi-coding-agent'
-import type { AutocompleteItem } from '@gsd/pi-tui'
+import type { ExtensionAPI } from '@hyperlab/hx-coding-agent'
+import type { AutocompleteItem } from '@hyperlab/hx-tui'
 import {
   getTavilyApiKey,
   getBraveApiKey,

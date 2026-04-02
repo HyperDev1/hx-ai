@@ -4,7 +4,7 @@
  * Contains: InspectData type, formatInspectOutput, handleInspect
  */
 
-import type { ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionCommandContext } from "@hyperlab/hx-coding-agent";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { hxRoot } from "./paths.js";

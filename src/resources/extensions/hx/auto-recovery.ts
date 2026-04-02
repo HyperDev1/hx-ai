@@ -7,7 +7,7 @@
  * globals or AutoContext dependency.
  */
 
-import type { ExtensionContext } from "@gsd/pi-coding-agent";
+import type { ExtensionContext } from "@hyperlab/hx-coding-agent";
 import { parseUnitId } from "./unit-id.js";
 import { atomicWriteSync } from "./atomic-write.js";
 import { clearParseCache } from "./files.js";

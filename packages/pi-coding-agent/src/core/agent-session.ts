@@ -23,8 +23,8 @@ import type {
 	AgentTool,
 	ThinkingLevel,
 } from "@gsd/pi-agent-core";
-import type { AssistantMessage, ImageContent, Message, Model, TextContent } from "@gsd/pi-ai";
-import { modelsAreEqual, resetApiProviders, supportsXhigh } from "@gsd/pi-ai";
+import type { AssistantMessage, ImageContent, Message, Model, TextContent } from "@hyperlab/hx-ai";
+import { modelsAreEqual, resetApiProviders, supportsXhigh } from "@hyperlab/hx-ai";
 import { Type } from "@sinclair/typebox";
 import { getDocsPath } from "../config.js";
 import { getErrorMessage } from "../utils/error.js";

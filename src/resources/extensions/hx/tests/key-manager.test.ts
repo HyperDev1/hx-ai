@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { AuthStorage } from "@gsd/pi-coding-agent";
+import { AuthStorage } from "@hyperlab/hx-coding-agent";
 import {
   maskKey,
   formatDuration,

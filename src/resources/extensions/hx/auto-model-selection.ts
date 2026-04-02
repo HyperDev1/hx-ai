@@ -4,8 +4,8 @@
  * and fallback chains.
  */
 
-import type { Api, Model } from "@gsd/pi-ai";
-import type { ExtensionAPI, ExtensionContext } from "@gsd/pi-coding-agent";
+import type { Api, Model } from "@hyperlab/hx-ai";
+import type { ExtensionAPI, ExtensionContext } from "@hyperlab/hx-coding-agent";
 import type { GSDPreferences } from "./preferences.js";
 import { resolveModelWithFallbacksForUnit, resolveDynamicRoutingConfig } from "./preferences.js";
 import type { ComplexityTier } from "./complexity-classifier.js";

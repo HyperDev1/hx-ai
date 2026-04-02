@@ -11,8 +11,8 @@ import { existsSync, statSync, readFileSync, openSync, readSync, closeSync, read
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 
-import type { Theme } from "@gsd/pi-coding-agent";
-import { truncateToWidth, visibleWidth, matchesKey, Key } from "@gsd/pi-tui";
+import type { Theme } from "@hyperlab/hx-coding-agent";
+import { truncateToWidth, visibleWidth, matchesKey, Key } from "@hyperlab/hx-tui";
 
 import { formatDuration, STATUS_GLYPH, STATUS_COLOR } from "../shared/mod.js";
 

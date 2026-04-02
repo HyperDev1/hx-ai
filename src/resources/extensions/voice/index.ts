@@ -1,7 +1,7 @@
-import type { ExtensionAPI, ExtensionContext } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@hyperlab/hx-coding-agent";
 import { shortcutDesc } from "../shared/mod.js";
-import type { AssistantMessage } from "@gsd/pi-ai";
-import { isKeyRelease, Key, matchesKey, truncateToWidth, visibleWidth } from "@gsd/pi-tui";
+import type { AssistantMessage } from "@hyperlab/hx-ai";
+import { isKeyRelease, Key, matchesKey, truncateToWidth, visibleWidth } from "@hyperlab/hx-tui";
 import { spawn, execFileSync, type ChildProcess } from "node:child_process";
 import * as fs from "node:fs";
 import * as path from "node:path";

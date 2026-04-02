@@ -1,7 +1,7 @@
 import { join } from "node:path";
 
-import type { ExtensionAPI, ExtensionContext } from "@gsd/pi-coding-agent";
-import { isToolCallEventType } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@hyperlab/hx-coding-agent";
+import { isToolCallEventType } from "@hyperlab/hx-coding-agent";
 
 import { buildMilestoneFileName, resolveMilestonePath, resolveSliceFile, resolveSlicePath } from "../paths.js";
 import { buildBeforeAgentStartResult } from "./system-context.js";

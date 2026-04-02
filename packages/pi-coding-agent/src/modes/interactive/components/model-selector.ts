@@ -1,4 +1,4 @@
-import { type Model, modelsAreEqual } from "@gsd/pi-ai";
+import { type Model, modelsAreEqual } from "@hyperlab/hx-ai";
 import {
 	Container,
 	type Focusable,
@@ -8,7 +8,7 @@ import {
 	Spacer,
 	Text,
 	type TUI,
-} from "@gsd/pi-tui";
+} from "@hyperlab/hx-tui";
 import type { ModelRegistry } from "../../../core/model-registry.js";
 import type { SettingsManager } from "../../../core/settings-manager.js";
 import { theme } from "../theme/theme.js";

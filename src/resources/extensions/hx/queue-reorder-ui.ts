@@ -8,9 +8,9 @@
  * Conflicting depends_on entries are auto-removed on confirm.
  */
 
-import type { ExtensionContext } from "@gsd/pi-coding-agent";
-import { type Theme } from "@gsd/pi-coding-agent";
-import { Key, matchesKey, truncateToWidth, type TUI } from "@gsd/pi-tui";
+import type { ExtensionContext } from "@hyperlab/hx-coding-agent";
+import { type Theme } from "@hyperlab/hx-coding-agent";
+import { Key, matchesKey, truncateToWidth, type TUI } from "@hyperlab/hx-tui";
 import { makeUI } from "../shared/tui.js";
 import { GLYPH } from "../shared/mod.js";
 import { validateQueueOrder, type DependencyValidation } from "./queue-order.js";

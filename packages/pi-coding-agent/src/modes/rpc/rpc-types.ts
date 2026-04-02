@@ -6,7 +6,7 @@
  */
 
 import type { AgentMessage, ThinkingLevel } from "@gsd/pi-agent-core";
-import type { ImageContent, Model } from "@gsd/pi-ai";
+import type { ImageContent, Model } from "@hyperlab/hx-ai";
 import type { SessionStats } from "../../core/agent-session.js";
 import type { BashResult } from "../../core/bash-executor.js";
 import type { CompactionResult } from "../../core/compaction/index.js";

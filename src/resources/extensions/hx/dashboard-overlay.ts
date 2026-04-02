@@ -6,8 +6,8 @@
  * Toggled with Ctrl+Alt+G (⌃⌥G on macOS) or opened from /gsd status.
  */
 
-import type { Theme } from "@gsd/pi-coding-agent";
-import { truncateToWidth, visibleWidth, matchesKey, Key } from "@gsd/pi-tui";
+import type { Theme } from "@hyperlab/hx-coding-agent";
+import { truncateToWidth, visibleWidth, matchesKey, Key } from "@hyperlab/hx-tui";
 import { deriveState } from "./state.js";
 import { loadFile } from "./files.js";
 import { isDbAvailable, getMilestoneSlices, getSliceTasks } from "./gsd-db.js";

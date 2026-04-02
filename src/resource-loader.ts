@@ -1,4 +1,4 @@
-import { DefaultResourceLoader } from '@gsd/pi-coding-agent'
+import { DefaultResourceLoader } from '@hyperlab/hx-coding-agent'
 import { createHash } from 'node:crypto'
 import { homedir } from 'node:os'
 import { chmodSync, copyFileSync, cpSync, existsSync, lstatSync, mkdirSync, openSync, closeSync, readFileSync, readlinkSync, readdirSync, rmSync, statSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs'
@@ -281,7 +281,7 @@ function copyDirRecursive(src: string, dest: string): void {
  * Native ESM `import()` ignores NODE_PATH — it resolves packages by walking
  * up the directory tree from the importing file. Extension files synced to
  * ~/.gsd/agent/extensions/ have no ancestor node_modules, so imports of
- * @gsd/* packages fail. The symlink makes Node's standard resolution find
+ * @hyperlab/* packages fail. The symlink makes Node's standard resolution find
  * them without requiring every call site to use jiti.
  */
 function ensureNodeModulesSymlink(agentDir: string): void {
@@ -308,7 +308,7 @@ function ensureNodeModulesSymlink(agentDir: string): void {
   try {
     symlinkSync(gsdNodeModules, agentNodeModules, 'junction')
   } catch (err) {
-    // This failure makes GSD non-functional — extensions can't resolve @gsd/* packages
+    // This failure makes GSD non-functional — extensions can't resolve @hyperlab/* packages
     console.error(`[gsd] WARN: Failed to symlink ${agentNodeModules} → ${gsdNodeModules}: ${err instanceof Error ? err.message : err}`)
   }
 }
@@ -408,7 +408,7 @@ export function initResources(agentDir: string): void {
 
   // Ensure ~/.gsd/agent/node_modules symlinks to GSD's node_modules on EVERY
   // launch, not just during resource syncs. A stale/broken symlink makes ALL
-  // extensions fail to resolve @gsd/* packages, rendering GSD non-functional.
+  // extensions fail to resolve @hyperlab/* packages, rendering GSD non-functional.
   ensureNodeModulesSymlink(agentDir)
 
   // Migrate legacy skills on every launch (not gated by manifest) so that

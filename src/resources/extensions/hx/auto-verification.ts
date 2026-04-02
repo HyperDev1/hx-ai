@@ -10,7 +10,7 @@
  * checks the result and handles control flow.
  */
 
-import type { ExtensionContext, ExtensionAPI } from "@gsd/pi-coding-agent";
+import type { ExtensionContext, ExtensionAPI } from "@hyperlab/hx-coding-agent";
 import { resolveSliceFile, resolveSlicePath } from "./paths.js";
 import { parseUnitId } from "./unit-id.js";
 import { isDbAvailable, getTask } from "./gsd-db.js";

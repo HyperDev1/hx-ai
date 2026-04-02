@@ -1,4 +1,4 @@
-import type { ExtensionAPI, ExtensionCommandContext } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionCommandContext } from "@hyperlab/hx-coding-agent";
 
 import { registerGSDCommand } from "../commands.js";
 import { registerExitCommand } from "../exit-command.js";

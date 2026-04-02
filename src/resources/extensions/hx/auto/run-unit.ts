@@ -4,7 +4,7 @@
  * Imports from: auto/types, auto/resolve
  */
 
-import type { ExtensionAPI, ExtensionContext } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@hyperlab/hx-coding-agent";
 
 import type { AutoSession } from "./session.js";
 import { NEW_SESSION_TIMEOUT_MS } from "./session.js";

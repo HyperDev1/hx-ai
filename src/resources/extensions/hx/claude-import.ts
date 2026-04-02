@@ -1,5 +1,5 @@
-import type { ExtensionCommandContext } from "@gsd/pi-coding-agent";
-import { SettingsManager, getAgentDir } from "@gsd/pi-coding-agent";
+import type { ExtensionCommandContext } from "@hyperlab/hx-coding-agent";
+import { SettingsManager, getAgentDir } from "@hyperlab/hx-coding-agent";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { basename, dirname, join, relative, resolve } from "node:path";
 import { homedir } from "node:os";

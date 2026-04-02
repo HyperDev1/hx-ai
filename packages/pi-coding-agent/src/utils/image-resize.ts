@@ -1,4 +1,4 @@
-import type { ImageContent } from "@gsd/pi-ai";
+import type { ImageContent } from "@hyperlab/hx-ai";
 import { ImageFormat, parseImage, SamplingFilter } from "@gsd/native/image";
 import type { NativeImageHandle } from "@gsd/native/image";
 

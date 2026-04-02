@@ -1,5 +1,5 @@
 import { Type } from "@sinclair/typebox";
-import type { ExtensionAPI } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI } from "@hyperlab/hx-coding-agent";
 
 import { queryJournal } from "../journal.js";
 

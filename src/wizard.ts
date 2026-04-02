@@ -1,4 +1,4 @@
-import type { AuthStorage } from '@gsd/pi-coding-agent'
+import type { AuthStorage } from '@hyperlab/hx-coding-agent'
 
 // ─── Env hydration ────────────────────────────────────────────────────────────
 

@@ -2,8 +2,8 @@
  * List available models with optional fuzzy search and discovery support
  */
 
-import type { Api, Model } from "@gsd/pi-ai";
-import { fuzzyFilter } from "@gsd/pi-tui";
+import type { Api, Model } from "@hyperlab/hx-ai";
+import { fuzzyFilter } from "@hyperlab/hx-tui";
 import type { ModelRegistry } from "../core/model-registry.js";
 
 export interface ListModelsOptions {
