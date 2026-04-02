@@ -27,7 +27,7 @@ export async function collectExportData(
   const { packageRoot, projectCwd } = config
 
   const resolveTsLoader = resolveTsLoaderPath(packageRoot)
-  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/export.ts")
+  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/hx/export.ts")
   const exportModulePath = moduleResolution.modulePath
 
   if (!moduleResolution.useCompiledJs && (!existsSync(resolveTsLoader) || !existsSync(exportModulePath))) {

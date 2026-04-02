@@ -3,7 +3,7 @@
  *
  * Scans ALL production .ts files and flags patterns that break on
  * Windows, Linux, or macOS. Modelled after the git-locale static
- * check in src/resources/extensions/gsd/tests/git-locale.test.ts.
+ * check in src/resources/extensions/hx/tests/git-locale.test.ts.
  *
  * Patterns 1, 3, 4 → hard fail (clear bugs).
  * Patterns 2, 5, 6 → warn only (logged, no assertion failure).
@@ -82,8 +82,8 @@ const ALLOW_SHELL_INTERPOLATION: Array<[string, string]> = [
   ["update-cmd.ts", "npm install -g ${NPM_PACKAGE}"],
   ["update-check.ts", "npm install -g ${NPM_PACKAGE_NAME}"],
   // Same constant forwarded through commands-handlers.
-  ["resources/extensions/gsd/commands-handlers.ts", "npm view ${NPM_PACKAGE}"],
-  ["resources/extensions/gsd/commands-handlers.ts", "npm install -g ${NPM_PACKAGE}"],
+  ["resources/extensions/hx/commands-handlers.ts", "npm view ${NPM_PACKAGE}"],
+  ["resources/extensions/hx/commands-handlers.ts", "npm install -g ${NPM_PACKAGE}"],
 ];
 
 function isAllowlisted(

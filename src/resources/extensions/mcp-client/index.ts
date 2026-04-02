@@ -2,7 +2,7 @@
  * MCP Client Extension — Native MCP server integration for pi
  *
  * Provides on-demand access to MCP servers configured in project files
- * (.mcp.json, .gsd/mcp.json) using the @modelcontextprotocol/sdk Client
+ * (.mcp.json, .hx/mcp.json) using the @modelcontextprotocol/sdk Client
  * directly — no external CLI dependency required.
  *
  * Three tools:
@@ -62,7 +62,7 @@ function readConfigs(): McpServerConfig[] {
 	const seen = new Set<string>();
 	const configPaths = [
 		join(process.cwd(), ".mcp.json"),
-		join(process.cwd(), ".gsd", "mcp.json"),
+		join(process.cwd(), ".hx", "mcp.json"),
 	];
 
 	for (const configPath of configPaths) {
@@ -179,7 +179,7 @@ async function closeAll(): Promise<void> {
 // ─── Formatters ───────────────────────────────────────────────────────────────
 
 function formatServerList(servers: McpServerConfig[]): string {
-	if (servers.length === 0) return "No MCP servers configured. Add servers to .mcp.json or .gsd/mcp.json.";
+	if (servers.length === 0) return "No MCP servers configured. Add servers to .mcp.json or .hx/mcp.json.";
 
 	const lines: string[] = [`${servers.length} MCP servers configured:\n`];
 
@@ -242,7 +242,7 @@ export default function (pi: ExtensionAPI) {
 		name: "mcp_servers",
 		label: "MCP Servers",
 		description:
-			"List all available MCP servers configured in project files (.mcp.json, .gsd/mcp.json). " +
+			"List all available MCP servers configured in project files (.mcp.json, .hx/mcp.json). " +
 			"Shows server names, transport type, and connection status. Use mcp_discover to get full tool schemas for a server.",
 		promptSnippet:
 			"List available MCP servers from project configuration",

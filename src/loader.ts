@@ -135,13 +135,13 @@ process.env.HX_VERSION = gsdVersion
 // to spawn gsd instead of pi when dispatching workflow tasks
 process.env.HX_BIN_PATH = process.argv[1]
 
-// HX_WORKFLOW_PATH — absolute path to bundled GSD-WORKFLOW.md, used by patched gsd extension
+// HX_WORKFLOW_PATH — absolute path to bundled HX-WORKFLOW.md, used by patched hx extension
 // when dispatching workflow prompts. Prefers dist/resources/ (stable, set at build time)
 // over src/resources/ (live working tree) — see resource-loader.ts for rationale.
 const distRes = join(gsdRoot, 'dist', 'resources')
 const srcRes = join(gsdRoot, 'src', 'resources')
 const resourcesDir = existsSync(distRes) ? distRes : srcRes
-process.env.HX_WORKFLOW_PATH = join(resourcesDir, 'GSD-WORKFLOW.md')
+process.env.HX_WORKFLOW_PATH = join(resourcesDir, 'HX-WORKFLOW.md')
 
 // HX_BUNDLED_EXTENSION_PATHS — dynamically discovered bundled extension entry points.
 // Uses the shared discoverExtensionEntryPaths() to scan the bundled resources

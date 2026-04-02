@@ -579,7 +579,7 @@ export function detectMonorepo(dirPath: string, checkExists?: (path: string) => 
 export function detectProjectKind(projectCwd: string): ProjectDetection {
   const checkExists = getBridgeDeps().existsSync ?? existsSync;
 
-  const hasGsdFolder = checkExists(join(projectCwd, ".gsd"));
+  const hasGsdFolder = checkExists(join(projectCwd, ".hx"));
   const hasPlanningFolder = checkExists(join(projectCwd, ".planning"));
   const hasGitRepo = checkExists(join(projectCwd, ".git"));
   const hasPackageJson = checkExists(join(projectCwd, "package.json"));
@@ -613,7 +613,7 @@ export function detectProjectKind(projectCwd: string): ProjectDetection {
 
   if (hasGsdFolder) {
     // Check if milestones exist
-    const milestonesDir = join(projectCwd, ".gsd", "milestones");
+    const milestonesDir = join(projectCwd, ".hx", "milestones");
     let hasMilestones = false;
     try {
       const dirs = readdirSync(milestonesDir, { withFileTypes: true });
@@ -990,7 +990,7 @@ async function loadWorkspaceIndexViaChildProcess(basePath: string, packageRoot: 
   const resolveTsLoader = join(packageRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs");
   const moduleResolution = resolveSubprocessModule(
     packageRoot,
-    "resources/extensions/gsd/workspace-index.ts",
+    "resources/extensions/hx/workspace-index.ts",
     checkExists,
   );
   const workspaceModulePath = moduleResolution.modulePath;

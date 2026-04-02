@@ -60,8 +60,8 @@ test("loader sets all 4 HX_ env vars and PI_PACKAGE_DIR", async (t) => {
     process.env.HX_CODING_AGENT_DIR = agentDir;
     process.env.HX_BIN_PATH = process.argv[1];
     const resourcesDir = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'resources');
-    process.env.HX_WORKFLOW_PATH = join(resourcesDir, 'GSD-WORKFLOW.md');
-    const exts = ['extensions/gsd/index.ts'].map(r => join(resourcesDir, r));
+    process.env.HX_WORKFLOW_PATH = join(resourcesDir, 'HX-WORKFLOW.md');
+    const exts = ['extensions/hx/index.ts'].map(r => join(resourcesDir, r));
     process.env.HX_BUNDLED_EXTENSION_PATHS = exts.join(delimiter);
 
     // Print for verification
@@ -345,7 +345,7 @@ test("loadStoredEnvKeys does not overwrite existing env vars", async (t) => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 test("deriveState returns pre-planning phase for empty .hx/ directory", async (t) => {
-  const { deriveState } = await import("../resources/extensions/gsd/state.ts");
+  const { deriveState } = await import("../resources/extensions/hx/state.ts");
   const tmp = mkdtempSync(join(tmpdir(), "gsd-state-smoke-"));
 
   // Create minimal .hx/ structure with no milestones
@@ -367,7 +367,7 @@ test("deriveState returns pre-planning phase for empty .hx/ directory", async (t
 });
 
 test("deriveState returns pre-planning phase when no .hx/ directory exists", async (t) => {
-  const { deriveState } = await import("../resources/extensions/gsd/state.ts");
+  const { deriveState } = await import("../resources/extensions/hx/state.ts");
   // Use a temp dir with no .hx/ subdirectory at all
   const tmp = mkdtempSync(join(tmpdir(), "gsd-state-nogsd-"));
 
@@ -381,7 +381,7 @@ test("deriveState returns pre-planning phase when no .hx/ directory exists", asy
 });
 
 test("deriveState shape is structurally complete", async (t) => {
-  const { deriveState } = await import("../resources/extensions/gsd/state.ts");
+  const { deriveState } = await import("../resources/extensions/hx/state.ts");
   const tmp = mkdtempSync(join(tmpdir(), "gsd-state-shape-"));
   mkdirSync(join(tmp, ".hx"), { recursive: true });
 
@@ -412,7 +412,7 @@ test("deriveState shape is structurally complete", async (t) => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 test("runGSDDoctor completes without throwing on empty .hx/ directory", async (t) => {
-  const { runGSDDoctor } = await import("../resources/extensions/gsd/doctor.ts");
+  const { runGSDDoctor } = await import("../resources/extensions/hx/doctor.ts");
   const tmp = mkdtempSync(join(tmpdir(), "gsd-doctor-smoke-"));
   mkdirSync(join(tmp, ".hx"), { recursive: true });
 
@@ -433,7 +433,7 @@ test("runGSDDoctor completes without throwing on empty .hx/ directory", async (t
 });
 
 test("runGSDDoctor issue objects have required fields", async (t) => {
-  const { runGSDDoctor } = await import("../resources/extensions/gsd/doctor.ts");
+  const { runGSDDoctor } = await import("../resources/extensions/hx/doctor.ts");
   const tmp = mkdtempSync(join(tmpdir(), "gsd-doctor-fields-"));
   mkdirSync(join(tmp, ".hx"), { recursive: true });
 
@@ -461,7 +461,7 @@ test("runGSDDoctor issue objects have required fields", async (t) => {
 });
 
 test("runGSDDoctor with fix:false never modifies the filesystem", async (t) => {
-  const { runGSDDoctor } = await import("../resources/extensions/gsd/doctor.ts");
+  const { runGSDDoctor } = await import("../resources/extensions/hx/doctor.ts");
   const tmp = mkdtempSync(join(tmpdir(), "gsd-doctor-readonly-"));
   const gsdDir = join(tmp, ".hx");
   mkdirSync(gsdDir, { recursive: true });

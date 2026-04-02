@@ -58,7 +58,7 @@ const AWS_AUTH_ERROR_RE =
  * Checks project-level first, then global (~/.gsd/agent/settings.json).
  */
 function getAwsAuthRefreshCommand(): string | undefined {
-	const configDir = process.env.PI_CONFIG_DIR || ".gsd";
+	const configDir = process.env.PI_CONFIG_DIR || ".hx";
 	const paths = [
 		join(process.cwd(), configDir, "settings.json"),
 		join(homedir(), configDir, "agent", "settings.json"),

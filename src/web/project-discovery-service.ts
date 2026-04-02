@@ -34,7 +34,7 @@ const EXCLUDED_DIRS = new Set(["node_modules", ".git"]);
  */
 export function readProjectProgress(projectPath: string): ProjectProgressInfo | null {
   try {
-    const content = readFileSync(join(projectPath, ".gsd", "STATE.md"), "utf-8");
+    const content = readFileSync(join(projectPath, ".hx", "STATE.md"), "utf-8");
     const lines = content.split("\n");
 
     let activeMilestone: string | null = null;

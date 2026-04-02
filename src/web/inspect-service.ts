@@ -12,7 +12,7 @@ export async function collectInspectData(projectCwdOverride?: string): Promise<I
   const config = resolveBridgeRuntimeConfig(undefined, projectCwdOverride)
   const { projectCwd } = config
 
-  const gsdDir = join(projectCwd, ".gsd")
+  const gsdDir = join(projectCwd, ".hx")
   const dbPath = join(gsdDir, "gsd-db.json")
 
   let schemaVersion: number | null = null

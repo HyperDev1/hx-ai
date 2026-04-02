@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { hxRoot } from "../gsd/paths.js";
+import { hxRoot } from "../hx/paths.js";
 import { formatTokenCount } from "./format-utils.js";
 import { buildRtkEnv, isRtkEnabled, resolveRtkBinaryPath } from "./rtk.js";
 

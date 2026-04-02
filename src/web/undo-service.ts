@@ -24,7 +24,7 @@ export async function collectUndoInfo(projectCwdOverride?: string): Promise<Undo
   const config = resolveBridgeRuntimeConfig(undefined, projectCwdOverride)
   const { projectCwd } = config
 
-  const gsdDir = join(projectCwd, ".gsd")
+  const gsdDir = join(projectCwd, ".hx")
   const completedPath = join(gsdDir, "completed-units.json")
 
   const empty: UndoInfo = {
@@ -121,8 +121,8 @@ export async function executeUndo(projectCwdOverride?: string): Promise<UndoResu
   const { packageRoot, projectCwd } = config
 
   const resolveTsLoader = resolveTsLoaderPath(packageRoot)
-  const undoResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/undo.ts")
-  const pathsResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/paths.ts")
+  const undoResolution = resolveSubprocessModule(packageRoot, "resources/extensions/hx/undo.ts")
+  const pathsResolution = resolveSubprocessModule(packageRoot, "resources/extensions/hx/paths.ts")
   const undoModulePath = undoResolution.modulePath
   const pathsModulePath = pathsResolution.modulePath
 
@@ -143,7 +143,7 @@ export async function executeUndo(projectCwdOverride?: string): Promise<UndoResu
     `const undoMod = await import(pathToFileURL(process.env.${UNDO_MODULE_ENV}).href);`,
     `const pathsMod = await import(pathToFileURL(process.env.${PATHS_MODULE_ENV}).href);`,
     'const basePath = process.env.HX_UNDO_BASE;',
-    'const gsdDir = pathsMod.gsdRoot(basePath);',
+    'const gsdDir = pathsMod.hxRoot(basePath);',
     'const completedPath = join(gsdDir, "completed-units.json");',
     'if (!existsSync(completedPath)) { process.stdout.write(JSON.stringify({ success: false, message: "No completed units to undo" })); process.exit(0); }',
     'let entries;',

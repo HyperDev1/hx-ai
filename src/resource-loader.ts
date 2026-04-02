@@ -29,7 +29,7 @@ const bundledExtensionsDir = join(resourcesDir, 'extensions')
 const resourceVersionManifestName = 'managed-resources.json'
 
 interface ManagedResourceManifest {
-  gsdVersion: string
+  hxVersion: string
   syncedAt?: number
   /** Content fingerprint of bundled resources — detects same-version content changes. */
   contentHash?: string
@@ -59,7 +59,7 @@ function getManagedResourceManifestPath(agentDir: string): string {
   return join(agentDir, resourceVersionManifestName)
 }
 
-function getBundledGsdVersion(): string {
+function getBundledHxVersion(): string {
   // Prefer HX_VERSION env var (set once by loader.ts) to avoid re-reading package.json
   if (process.env.HX_VERSION && process.env.HX_VERSION !== '0.0.0') {
     return process.env.HX_VERSION
@@ -96,7 +96,7 @@ function writeManagedResourceManifest(agentDir: string): void {
   } catch { /* non-fatal */ }
 
   const manifest: ManagedResourceManifest = {
-    gsdVersion: getBundledGsdVersion(),
+    hxVersion: getBundledHxVersion(),
     syncedAt: Date.now(),
     contentHash: computeResourceFingerprint(),
     installedExtensionRootFiles,
@@ -108,7 +108,7 @@ function writeManagedResourceManifest(agentDir: string): void {
 export function readManagedResourceVersion(agentDir: string): string | null {
   try {
     const manifest = JSON.parse(readFileSync(getManagedResourceManifestPath(agentDir), 'utf-8')) as ManagedResourceManifest
-    return typeof manifest?.gsdVersion === 'string' ? manifest.gsdVersion : null
+    return typeof manifest?.hxVersion === 'string' ? manifest.hxVersion : null
   } catch {
     return null
   }
@@ -381,7 +381,7 @@ function pruneRemovedBundledExtensions(
  *
  * - extensions/ → ~/.gsd/agent/extensions/   (overwrite when version changes)
  * - agents/     → ~/.gsd/agent/agents/        (overwrite when version changes)
- * - GSD-WORKFLOW.md → ~/.gsd/agent/GSD-WORKFLOW.md (fallback for env var miss)
+ * - HX-WORKFLOW.md → ~/.gsd/agent/HX-WORKFLOW.md (fallback for env var miss)
  *
  * Skills are NOT synced here. They are installed by the user via the
  * skills.sh CLI (`npx skills add <repo>`) into ~/.agents/skills/ — the
@@ -397,7 +397,7 @@ function pruneRemovedBundledExtensions(
 export function initResources(agentDir: string): void {
   mkdirSync(agentDir, { recursive: true })
 
-  const currentVersion = getBundledGsdVersion()
+  const currentVersion = getBundledHxVersion()
   const manifest = readManagedResourceManifest(agentDir)
 
   // Always prune root-level extension files that were removed from the bundle.
@@ -418,7 +418,7 @@ export function initResources(agentDir: string): void {
   // Skip the full copy when both version AND content fingerprint match.
   // Version-only checks miss same-version content changes (npm link dev workflow,
   // hotfixes within a release). The content hash catches those at ~1ms cost.
-  if (manifest && manifest.gsdVersion === currentVersion) {
+  if (manifest && manifest.hxVersion === currentVersion) {
     // Version matches — check content fingerprint for same-version staleness.
     const currentHash = computeResourceFingerprint()
     const hasStaleExtensionFiles = hasStaleCompiledExtensionSiblings(join(agentDir, 'extensions'))
@@ -439,11 +439,11 @@ export function initResources(agentDir: string): void {
   // above the manifest check so it runs on every launch (including retries
   // after partial copy failures).
 
-  // Sync GSD-WORKFLOW.md to agentDir as a fallback for when GSD_WORKFLOW_PATH
+  // Sync HX-WORKFLOW.md to agentDir as a fallback for when HX_WORKFLOW_PATH
   // env var is not set (e.g. fork/dev builds, alternative entry points).
-  const workflowSrc = join(resourcesDir, 'GSD-WORKFLOW.md')
+  const workflowSrc = join(resourcesDir, 'HX-WORKFLOW.md')
   if (existsSync(workflowSrc)) {
-    try { copyFileSync(workflowSrc, join(agentDir, 'GSD-WORKFLOW.md')) } catch { /* non-fatal */ }
+    try { copyFileSync(workflowSrc, join(agentDir, 'HX-WORKFLOW.md')) } catch { /* non-fatal */ }
   }
 
   // Ensure all newly copied files are owner-writable so the next run can

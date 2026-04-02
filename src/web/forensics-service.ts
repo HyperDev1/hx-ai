@@ -26,7 +26,7 @@ export async function collectForensicsData(projectCwdOverride?: string): Promise
   const { packageRoot, projectCwd } = config
 
   const resolveTsLoader = resolveTsLoaderPath(packageRoot)
-  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/forensics.ts")
+  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/hx/forensics.ts")
   const forensicsModulePath = moduleResolution.modulePath
 
   if (!moduleResolution.useCompiledJs && (!existsSync(resolveTsLoader) || !existsSync(forensicsModulePath))) {
@@ -57,7 +57,7 @@ export async function collectForensicsData(projectCwdOverride?: string): Promise
     '  metrics = { totalUnits: units.length, totalCost, totalDuration };',
     '}',
     'const result = {',
-    '  gsdVersion: report.gsdVersion,',
+    '  hxVersion: report.hxVersion,',
     '  timestamp: report.timestamp,',
     '  basePath: report.basePath,',
     '  activeMilestone: report.activeMilestone,',

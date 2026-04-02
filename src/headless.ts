@@ -285,7 +285,7 @@ async function runHeadlessOnce(options: HeadlessOptions, restartCount: number): 
     }
   }
 
-  // For new-milestone, load context and bootstrap .gsd/ before spawning RPC child
+  // For new-milestone, load context and bootstrap .hx/ before spawning RPC child
   if (isNewMilestone) {
     if (!options.context && !options.contextText) {
       process.stderr.write('[headless] Error: new-milestone requires --context <file> or --context-text <text>\n')
@@ -300,11 +300,11 @@ async function runHeadlessOnce(options: HeadlessOptions, restartCount: number): 
       process.exit(1)
     }
 
-    // Bootstrap .gsd/ if needed
-    const gsdDir = join(process.cwd(), '.gsd')
+    // Bootstrap .hx/ if needed
+    const gsdDir = join(process.cwd(), '.hx')
     if (!existsSync(gsdDir)) {
       if (!options.json) {
-        process.stderr.write('[headless] Bootstrapping .gsd/ project structure...\n')
+        process.stderr.write('[headless] Bootstrapping .hx/ project structure...\n')
       }
       bootstrapGsdProject(process.cwd())
     }
@@ -315,11 +315,11 @@ async function runHeadlessOnce(options: HeadlessOptions, restartCount: number): 
     writeFileSync(join(runtimeDir, 'headless-context.md'), contextContent, 'utf-8')
   }
 
-  // Validate .gsd/ directory (skip for new-milestone since we just bootstrapped it)
-  const gsdDir = join(process.cwd(), '.gsd')
+  // Validate .hx/ directory (skip for new-milestone since we just bootstrapped it)
+  const gsdDir = join(process.cwd(), '.hx')
   if (!isNewMilestone && !existsSync(gsdDir)) {
-    process.stderr.write('[headless] Error: No .gsd/ directory found in current directory.\n')
-    process.stderr.write("[headless] Run 'gsd' interactively first to initialize a project.\n")
+    process.stderr.write('[headless] Error: No .hx/ directory found in current directory.\n')
+    process.stderr.write("[headless] Run 'hx' interactively first to initialize a project.\n")
     process.exit(1)
   }
 
