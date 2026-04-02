@@ -52,22 +52,22 @@ describe("isInheritedRepo when git root is HOME (#2393)", () => {
 
     // Create a plain ~/.gsd directory at fakeHome — this simulates the
     // global GSD home directory, NOT a project .gsd.
-    mkdirSync(join(fakeHome, ".gsd", "projects"), { recursive: true });
+    mkdirSync(join(fakeHome, ".hx", "projects"), { recursive: true });
 
-    // Save and override env. Point GSD_HOME at fakeHome/.gsd so the
+    // Save and override env. Point HX_HOME at fakeHome/.gsd so the
     // function recognizes it as the global state directory.
-    origGsdHome = process.env.GSD_HOME;
-    origGsdStateDir = process.env.GSD_STATE_DIR;
-    process.env.GSD_HOME = join(fakeHome, ".gsd");
+    origGsdHome = process.env.HX_HOME;
+    origGsdStateDir = process.env.HX_STATE_DIR;
+    process.env.HX_HOME = join(fakeHome, ".hx");
     stateDir = mkdtempSync(join(tmpdir(), "gsd-state-"));
-    process.env.GSD_STATE_DIR = stateDir;
+    process.env.HX_STATE_DIR = stateDir;
   });
 
   afterEach(() => {
-    if (origGsdHome !== undefined) process.env.GSD_HOME = origGsdHome;
-    else delete process.env.GSD_HOME;
-    if (origGsdStateDir !== undefined) process.env.GSD_STATE_DIR = origGsdStateDir;
-    else delete process.env.GSD_STATE_DIR;
+    if (origGsdHome !== undefined) process.env.HX_HOME = origGsdHome;
+    else delete process.env.HX_HOME;
+    if (origGsdStateDir !== undefined) process.env.HX_STATE_DIR = origGsdStateDir;
+    else delete process.env.HX_STATE_DIR;
 
     rmSync(fakeHome, { recursive: true, force: true });
     rmSync(stateDir, { recursive: true, force: true });
@@ -94,7 +94,7 @@ describe("isInheritedRepo when git root is HOME (#2393)", () => {
     // .gsd is a symlink to an external state directory.
     const externalState = join(stateDir, "projects", "home-project");
     mkdirSync(externalState, { recursive: true });
-    const gsdDir = join(fakeHome, ".gsd");
+    const gsdDir = join(fakeHome, ".hx");
 
     // Remove the plain directory and replace with a symlink (real project .gsd)
     rmSync(gsdDir, { recursive: true, force: true });
@@ -141,12 +141,12 @@ describe("isInheritedRepo with stale .gsd at parent git root", () => {
     // Simulate a stale .gsd directory at the parent git root (e.g. from a
     // prior doctor run or accidental init). This is a real directory, NOT
     // a symlink, and NOT the global GSD home.
-    mkdirSync(join(parentRepo, ".gsd"), { recursive: true });
+    mkdirSync(join(parentRepo, ".hx"), { recursive: true });
 
     const projectDir = join(parentRepo, "my-project");
     mkdirSync(projectDir, { recursive: true });
 
-    // Without fix: isProjectGsd(join(root, ".gsd")) returns true because
+    // Without fix: isProjectGsd(join(root, ".hx")) returns true because
     // the stale .gsd is a real directory that isn't the global GSD home,
     // causing isInheritedRepo to return false (false negative).
     //
@@ -171,7 +171,7 @@ describe("isInheritedRepo with stale .gsd at parent git root", () => {
     mkdirSync(projectDir, { recursive: true });
 
     const externalState = mkdtempSync(join(tmpdir(), "gsd-ext-state-"));
-    symlinkSync(externalState, join(projectDir, ".gsd"));
+    symlinkSync(externalState, join(projectDir, ".hx"));
 
     // Before fix: the walk-up loop started at normalizedBase (projectDir),
     // found .gsd at projectDir, and returned false — even though projectDir

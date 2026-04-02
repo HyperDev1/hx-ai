@@ -1,7 +1,7 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 // ensureDbOpen — Tests that the lazy DB opener creates + migrates the database
-// when .gsd/ exists with Markdown content but no gsd.db file.
+// when .hx/ exists with Markdown content but no gsd.db file.
 //
 // This covers the bug where interactive (non-auto) sessions got
 // "GSD database is not available" because ensureDbOpen only opened
@@ -24,13 +24,13 @@ function cleanupDir(dir: string): void {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// ensureDbOpen creates DB + migrates when .gsd/ has Markdown
+// ensureDbOpen creates DB + migrates when .hx/ has Markdown
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe('ensure-db-open', () => {
   test('ensureDbOpen: creates DB from Markdown', async () => {
     const tmpDir = makeTmpDir();
-    const gsdDir = path.join(tmpDir, '.gsd');
+    const gsdDir = path.join(tmpDir, ".hx");
     fs.mkdirSync(gsdDir, { recursive: true });
 
     // Write a minimal DECISIONS.md so migration has content
@@ -59,7 +59,7 @@ describe('ensure-db-open', () => {
 
       const result = await ensureDbOpen();
 
-      assert.ok(result === true, 'ensureDbOpen should return true when .gsd/ has Markdown');
+      assert.ok(result === true, 'ensureDbOpen should return true when .hx/ has Markdown');
       assert.ok(fs.existsSync(dbPath), 'DB file should be created after ensureDbOpen');
       assert.ok(isDbAvailable(), 'DB should be available after ensureDbOpen');
 
@@ -78,12 +78,12 @@ describe('ensure-db-open', () => {
   });
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // ensureDbOpen returns false when no .gsd/ exists
+  // ensureDbOpen returns false when no .hx/ exists
   // ═══════════════════════════════════════════════════════════════════════════
 
-  test('ensureDbOpen: no .gsd/ returns false', async () => {
+  test('ensureDbOpen: no .hx/ returns false', async () => {
     const tmpDir = makeTmpDir();
-    // No .gsd/ directory at all
+    // No .hx/ directory at all
 
     try { closeDatabase(); } catch { /* ok */ }
     const origCwd = process.cwd;
@@ -92,7 +92,7 @@ describe('ensure-db-open', () => {
     try {
       const { ensureDbOpen } = await import('../bootstrap/dynamic-tools.ts');
       const result = await ensureDbOpen();
-      assert.ok(result === false, 'ensureDbOpen should return false when no .gsd/ exists');
+      assert.ok(result === false, 'ensureDbOpen should return false when no .hx/ exists');
       assert.ok(!isDbAvailable(), 'DB should not be available');
     } finally {
       process.cwd = origCwd;
@@ -106,7 +106,7 @@ describe('ensure-db-open', () => {
 
   test('ensureDbOpen: opens existing DB', async () => {
     const tmpDir = makeTmpDir();
-    const gsdDir = path.join(tmpDir, '.gsd');
+    const gsdDir = path.join(tmpDir, ".hx");
     fs.mkdirSync(gsdDir, { recursive: true });
 
     // Create a DB file first
@@ -133,14 +133,14 @@ describe('ensure-db-open', () => {
   });
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // ensureDbOpen returns false for empty .gsd/ (no Markdown, no DB)
+  // ensureDbOpen returns false for empty .hx/ (no Markdown, no DB)
   // ═══════════════════════════════════════════════════════════════════════════
 
-  test('ensureDbOpen: empty .gsd/ creates empty DB (#2510)', async () => {
+  test('ensureDbOpen: empty .hx/ creates empty DB (#2510)', async () => {
     const tmpDir = makeTmpDir();
-    const gsdDir = path.join(tmpDir, '.gsd');
+    const gsdDir = path.join(tmpDir, ".hx");
     fs.mkdirSync(gsdDir, { recursive: true });
-    // .gsd/ exists but no DECISIONS.md, REQUIREMENTS.md, or milestones/
+    // .hx/ exists but no DECISIONS.md, REQUIREMENTS.md, or milestones/
 
     try { closeDatabase(); } catch { /* ok */ }
     const origCwd = process.cwd;
@@ -149,7 +149,7 @@ describe('ensure-db-open', () => {
     try {
       const { ensureDbOpen } = await import('../bootstrap/dynamic-tools.ts');
       const result = await ensureDbOpen();
-      assert.ok(result === true, 'ensureDbOpen should create empty DB for fresh .gsd/');
+      assert.ok(result === true, 'ensureDbOpen should create empty DB for fresh .hx/');
       assert.ok(fs.existsSync(path.join(gsdDir, 'gsd.db')), 'DB file should be created');
       assert.ok(isDbAvailable(), 'DB should be available');
     } finally {

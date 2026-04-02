@@ -14,12 +14,12 @@ import { parkMilestone, unparkMilestone, discardMilestone, isParked, getParkedRe
 
 function createFixtureBase(): string {
   const base = mkdtempSync(join(tmpdir(), 'gsd-park-test-'));
-  mkdirSync(join(base, '.gsd', 'milestones'), { recursive: true });
+  mkdirSync(join(base, '.hx', 'milestones'), { recursive: true });
   return base;
 }
 
 function createMilestone(base: string, mid: string, opts?: { withRoadmap?: boolean; withSummary?: boolean; dependsOn?: string[] }): void {
-  const mDir = join(base, '.gsd', 'milestones', mid);
+  const mDir = join(base, '.hx', 'milestones', mid);
   mkdirSync(mDir, { recursive: true });
 
   if (opts?.dependsOn) {
@@ -257,7 +257,7 @@ test('discardMilestone removes directory', async () => {
       createMilestone(base, 'M001', { withRoadmap: true });
       clearCaches();
 
-      const mDir = join(base, '.gsd', 'milestones', 'M001');
+      const mDir = join(base, '.hx', 'milestones', 'M001');
       assert.ok(existsSync(mDir), 'milestone dir exists before discard');
 
       const success = discardMilestone(base, 'M001');
@@ -280,7 +280,7 @@ test('discardMilestone updates queue order', () => {
       clearCaches();
 
       // Write a queue order that includes M001
-      const queuePath = join(base, '.gsd', 'QUEUE-ORDER.json');
+      const queuePath = join(base, '.hx', 'QUEUE-ORDER.json');
       writeFileSync(queuePath, JSON.stringify({ order: ['M001', 'M002'], updatedAt: new Date().toISOString() }), 'utf-8');
 
       discardMilestone(base, 'M001');

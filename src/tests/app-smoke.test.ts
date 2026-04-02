@@ -2,7 +2,7 @@
  * Unit tests for the gsd CLI package.
  *
  * Tests the glue code that IS the product:
- * - app-paths resolve to ~/.gsd/
+ * - app-paths resolve to ~/.hx/
  * - loader sets all required env vars
  * - resource-loader syncs bundled resources
  * - wizard loadStoredEnvKeys hydrates env
@@ -32,23 +32,23 @@ function assertExtensionIndexExists(agentDir: string, extensionName: string): vo
 // 1. app-paths
 // ═══════════════════════════════════════════════════════════════════════════
 
-test("app-paths resolve to ~/.gsd/", async () => {
+test("app-paths resolve to ~/.hx/", async () => {
   const { appRoot, agentDir, sessionsDir, authFilePath } = await import("../app-paths.ts");
   // Use homedir() — process.env.HOME is undefined on Windows (uses USERPROFILE instead)
   const { homedir } = await import("node:os");
   const home = homedir();
 
-  assert.equal(appRoot, join(home, ".gsd"), "appRoot is ~/.gsd/");
-  assert.equal(agentDir, join(home, ".gsd", "agent"), "agentDir is ~/.gsd/agent/");
-  assert.equal(sessionsDir, join(home, ".gsd", "sessions"), "sessionsDir is ~/.gsd/sessions/");
-  assert.equal(authFilePath, join(home, ".gsd", "agent", "auth.json"), "authFilePath is ~/.gsd/agent/auth.json");
+  assert.equal(appRoot, join(home, ".hx"), "appRoot is ~/.hx/");
+  assert.equal(agentDir, join(home, ".hx", "agent"), "agentDir is ~/.hx/agent/");
+  assert.equal(sessionsDir, join(home, ".hx", "sessions"), "sessionsDir is ~/.hx/sessions/");
+  assert.equal(authFilePath, join(home, ".hx", "agent", "auth.json"), "authFilePath is ~/.hx/agent/auth.json");
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 2. loader env vars
 // ═══════════════════════════════════════════════════════════════════════════
 
-test("loader sets all 4 GSD_ env vars and PI_PACKAGE_DIR", async (t) => {
+test("loader sets all 4 HX_ env vars and PI_PACKAGE_DIR", async (t) => {
   // Run loader in a subprocess that prints env vars and exits before TUI starts
   const script = `
     import { fileURLToPath } from 'url';
@@ -57,19 +57,19 @@ test("loader sets all 4 GSD_ env vars and PI_PACKAGE_DIR", async (t) => {
 
     const pkgDir = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'pkg');
     process.env.PI_PACKAGE_DIR = pkgDir;
-    process.env.GSD_CODING_AGENT_DIR = agentDir;
-    process.env.GSD_BIN_PATH = process.argv[1];
+    process.env.HX_CODING_AGENT_DIR = agentDir;
+    process.env.HX_BIN_PATH = process.argv[1];
     const resourcesDir = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'resources');
-    process.env.GSD_WORKFLOW_PATH = join(resourcesDir, 'GSD-WORKFLOW.md');
+    process.env.HX_WORKFLOW_PATH = join(resourcesDir, 'GSD-WORKFLOW.md');
     const exts = ['extensions/gsd/index.ts'].map(r => join(resourcesDir, r));
-    process.env.GSD_BUNDLED_EXTENSION_PATHS = exts.join(delimiter);
+    process.env.HX_BUNDLED_EXTENSION_PATHS = exts.join(delimiter);
 
     // Print for verification
     console.log('PI_PACKAGE_DIR=' + process.env.PI_PACKAGE_DIR);
-    console.log('GSD_CODING_AGENT_DIR=' + process.env.GSD_CODING_AGENT_DIR);
-    console.log('GSD_BIN_PATH=' + process.env.GSD_BIN_PATH);
-    console.log('GSD_WORKFLOW_PATH=' + process.env.GSD_WORKFLOW_PATH);
-    console.log('GSD_BUNDLED_EXTENSION_PATHS=' + process.env.GSD_BUNDLED_EXTENSION_PATHS);
+    console.log('HX_CODING_AGENT_DIR=' + process.env.HX_CODING_AGENT_DIR);
+    console.log('HX_BIN_PATH=' + process.env.HX_BIN_PATH);
+    console.log('HX_WORKFLOW_PATH=' + process.env.HX_WORKFLOW_PATH);
+    console.log('HX_BUNDLED_EXTENSION_PATHS=' + process.env.HX_BUNDLED_EXTENSION_PATHS);
     process.exit(0);
   `;
 
@@ -93,15 +93,15 @@ test("loader sets all 4 GSD_ env vars and PI_PACKAGE_DIR", async (t) => {
 
   // Direct logic verification (no subprocess needed)
   const { agentDir: ad } = await import("../app-paths.ts");
-  assert.ok(ad.endsWith(join(".gsd", "agent")), "agentDir ends with .gsd/agent");
+  assert.ok(ad.endsWith(join(".hx", "agent")), "agentDir ends with .hx/agent");
 
   // Verify the env var names are in loader.ts source
   const loaderSrc = readFileSync(join(projectRoot, "src", "loader.ts"), "utf-8");
   assert.ok(loaderSrc.includes("PI_PACKAGE_DIR"), "loader sets PI_PACKAGE_DIR");
-  assert.ok(loaderSrc.includes("GSD_CODING_AGENT_DIR"), "loader sets GSD_CODING_AGENT_DIR");
-  assert.ok(loaderSrc.includes("GSD_BIN_PATH"), "loader sets GSD_BIN_PATH");
-  assert.ok(loaderSrc.includes("GSD_WORKFLOW_PATH"), "loader sets GSD_WORKFLOW_PATH");
-  assert.ok(loaderSrc.includes("GSD_BUNDLED_EXTENSION_PATHS"), "loader sets GSD_BUNDLED_EXTENSION_PATHS");
+  assert.ok(loaderSrc.includes("HX_CODING_AGENT_DIR"), "loader sets HX_CODING_AGENT_DIR");
+  assert.ok(loaderSrc.includes("HX_BIN_PATH"), "loader sets HX_BIN_PATH");
+  assert.ok(loaderSrc.includes("HX_WORKFLOW_PATH"), "loader sets HX_WORKFLOW_PATH");
+  assert.ok(loaderSrc.includes("HX_BUNDLED_EXTENSION_PATHS"), "loader sets HX_BUNDLED_EXTENSION_PATHS");
   assert.ok(loaderSrc.includes("applyRtkProcessEnv"), "loader applies RTK environment bootstrap");
   const rtkSrc = readFileSync(join(projectRoot, "src", "rtk.ts"), "utf-8");
   assert.ok(rtkSrc.includes("RTK_TELEMETRY_DISABLED"), "RTK helper disables telemetry for managed sessions");
@@ -344,18 +344,18 @@ test("loadStoredEnvKeys does not overwrite existing env vars", async (t) => {
 // 6. State derivation — Gap 2
 // ═══════════════════════════════════════════════════════════════════════════
 
-test("deriveState returns pre-planning phase for empty .gsd/ directory", async (t) => {
+test("deriveState returns pre-planning phase for empty .hx/ directory", async (t) => {
   const { deriveState } = await import("../resources/extensions/gsd/state.ts");
   const tmp = mkdtempSync(join(tmpdir(), "gsd-state-smoke-"));
 
-  // Create minimal .gsd/ structure with no milestones
-  mkdirSync(join(tmp, ".gsd"), { recursive: true });
+  // Create minimal .hx/ structure with no milestones
+  mkdirSync(join(tmp, ".hx"), { recursive: true });
 
   t.after(() => rmSync(tmp, { recursive: true, force: true }));
   const state = await deriveState(tmp);
 
   assert.equal(state.phase, "pre-planning",
-    `expected pre-planning phase for empty .gsd/, got: ${state.phase}`);
+    `expected pre-planning phase for empty .hx/, got: ${state.phase}`);
   assert.equal(state.activeMilestone, null, "no active milestone");
   assert.equal(state.activeSlice, null, "no active slice");
   assert.equal(state.activeTask, null, "no active task");
@@ -366,24 +366,24 @@ test("deriveState returns pre-planning phase for empty .gsd/ directory", async (
   assert.ok(state.nextAction.length > 0, "nextAction is non-empty");
 });
 
-test("deriveState returns pre-planning phase when no .gsd/ directory exists", async (t) => {
+test("deriveState returns pre-planning phase when no .hx/ directory exists", async (t) => {
   const { deriveState } = await import("../resources/extensions/gsd/state.ts");
-  // Use a temp dir with no .gsd/ subdirectory at all
+  // Use a temp dir with no .hx/ subdirectory at all
   const tmp = mkdtempSync(join(tmpdir(), "gsd-state-nogsd-"));
 
   t.after(() => rmSync(tmp, { recursive: true, force: true }));
-  // Should not throw — missing .gsd/ is a valid "no project" state
+  // Should not throw — missing .hx/ is a valid "no project" state
   const state = await deriveState(tmp);
 
   assert.equal(state.phase, "pre-planning",
-    `expected pre-planning phase when .gsd/ absent, got: ${state.phase}`);
+    `expected pre-planning phase when .hx/ absent, got: ${state.phase}`);
   assert.equal(state.activeMilestone, null, "no active milestone");
 });
 
 test("deriveState shape is structurally complete", async (t) => {
   const { deriveState } = await import("../resources/extensions/gsd/state.ts");
   const tmp = mkdtempSync(join(tmpdir(), "gsd-state-shape-"));
-  mkdirSync(join(tmp, ".gsd"), { recursive: true });
+  mkdirSync(join(tmp, ".hx"), { recursive: true });
 
   t.after(() => rmSync(tmp, { recursive: true, force: true }));
   const state = await deriveState(tmp);
@@ -411,10 +411,10 @@ test("deriveState shape is structurally complete", async (t) => {
 // 7. Doctor health checks — Gap 3
 // ═══════════════════════════════════════════════════════════════════════════
 
-test("runGSDDoctor completes without throwing on empty .gsd/ directory", async (t) => {
+test("runGSDDoctor completes without throwing on empty .hx/ directory", async (t) => {
   const { runGSDDoctor } = await import("../resources/extensions/gsd/doctor.ts");
   const tmp = mkdtempSync(join(tmpdir(), "gsd-doctor-smoke-"));
-  mkdirSync(join(tmp, ".gsd"), { recursive: true });
+  mkdirSync(join(tmp, ".hx"), { recursive: true });
 
   t.after(() => rmSync(tmp, { recursive: true, force: true }));
   // audit-only mode (fix: false) — should never throw
@@ -435,10 +435,10 @@ test("runGSDDoctor completes without throwing on empty .gsd/ directory", async (
 test("runGSDDoctor issue objects have required fields", async (t) => {
   const { runGSDDoctor } = await import("../resources/extensions/gsd/doctor.ts");
   const tmp = mkdtempSync(join(tmpdir(), "gsd-doctor-fields-"));
-  mkdirSync(join(tmp, ".gsd"), { recursive: true });
+  mkdirSync(join(tmp, ".hx"), { recursive: true });
 
   // Create a milestone dir with no ROADMAP.md to force a missing_roadmap issue
-  const mDir = join(tmp, ".gsd", "milestones", "M001");
+  const mDir = join(tmp, ".hx", "milestones", "M001");
   mkdirSync(mDir, { recursive: true });
   writeFileSync(join(mDir, "M001-CONTEXT.md"), "# Context\n");
 
@@ -463,7 +463,7 @@ test("runGSDDoctor issue objects have required fields", async (t) => {
 test("runGSDDoctor with fix:false never modifies the filesystem", async (t) => {
   const { runGSDDoctor } = await import("../resources/extensions/gsd/doctor.ts");
   const tmp = mkdtempSync(join(tmpdir(), "gsd-doctor-readonly-"));
-  const gsdDir = join(tmp, ".gsd");
+  const gsdDir = join(tmp, ".hx");
   mkdirSync(gsdDir, { recursive: true });
 
   // Write a sentinel file — doctor must not delete or modify it

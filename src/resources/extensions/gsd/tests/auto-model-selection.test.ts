@@ -12,14 +12,14 @@ function makeTempDir(prefix: string): string {
 
 test("resolvePreferredModelConfig synthesizes heavy routing ceiling when models section is absent", () => {
   const originalCwd = process.cwd();
-  const originalGsdHome = process.env.GSD_HOME;
+  const originalGsdHome = process.env.HX_HOME;
   const tempProject = makeTempDir("gsd-routing-project-");
   const tempGsdHome = makeTempDir("gsd-routing-home-");
 
   try {
-    mkdirSync(join(tempProject, ".gsd"), { recursive: true });
+    mkdirSync(join(tempProject, ".hx"), { recursive: true });
     writeFileSync(
-      join(tempProject, ".gsd", "PREFERENCES.md"),
+      join(tempProject, ".hx", "PREFERENCES.md"),
       [
         "---",
         "dynamic_routing:",
@@ -32,7 +32,7 @@ test("resolvePreferredModelConfig synthesizes heavy routing ceiling when models 
       ].join("\n"),
       "utf-8",
     );
-    process.env.GSD_HOME = tempGsdHome;
+    process.env.HX_HOME = tempGsdHome;
     process.chdir(tempProject);
 
     const config = resolvePreferredModelConfig("plan-slice", {
@@ -46,8 +46,8 @@ test("resolvePreferredModelConfig synthesizes heavy routing ceiling when models 
     });
   } finally {
     process.chdir(originalCwd);
-    if (originalGsdHome === undefined) delete process.env.GSD_HOME;
-    else process.env.GSD_HOME = originalGsdHome;
+    if (originalGsdHome === undefined) delete process.env.HX_HOME;
+    else process.env.HX_HOME = originalGsdHome;
     rmSync(tempProject, { recursive: true, force: true });
     rmSync(tempGsdHome, { recursive: true, force: true });
   }
@@ -55,14 +55,14 @@ test("resolvePreferredModelConfig synthesizes heavy routing ceiling when models 
 
 test("resolvePreferredModelConfig falls back to auto start model when heavy tier is absent", () => {
   const originalCwd = process.cwd();
-  const originalGsdHome = process.env.GSD_HOME;
+  const originalGsdHome = process.env.HX_HOME;
   const tempProject = makeTempDir("gsd-routing-project-");
   const tempGsdHome = makeTempDir("gsd-routing-home-");
 
   try {
-    mkdirSync(join(tempProject, ".gsd"), { recursive: true });
+    mkdirSync(join(tempProject, ".hx"), { recursive: true });
     writeFileSync(
-      join(tempProject, ".gsd", "PREFERENCES.md"),
+      join(tempProject, ".hx", "PREFERENCES.md"),
       [
         "---",
         "dynamic_routing:",
@@ -74,7 +74,7 @@ test("resolvePreferredModelConfig falls back to auto start model when heavy tier
       ].join("\n"),
       "utf-8",
     );
-    process.env.GSD_HOME = tempGsdHome;
+    process.env.HX_HOME = tempGsdHome;
     process.chdir(tempProject);
 
     const config = resolvePreferredModelConfig("execute-task", {
@@ -88,8 +88,8 @@ test("resolvePreferredModelConfig falls back to auto start model when heavy tier
     });
   } finally {
     process.chdir(originalCwd);
-    if (originalGsdHome === undefined) delete process.env.GSD_HOME;
-    else process.env.GSD_HOME = originalGsdHome;
+    if (originalGsdHome === undefined) delete process.env.HX_HOME;
+    else process.env.HX_HOME = originalGsdHome;
     rmSync(tempProject, { recursive: true, force: true });
     rmSync(tempGsdHome, { recursive: true, force: true });
   }
@@ -97,14 +97,14 @@ test("resolvePreferredModelConfig falls back to auto start model when heavy tier
 
 test("resolvePreferredModelConfig keeps explicit phase models as the ceiling", () => {
   const originalCwd = process.cwd();
-  const originalGsdHome = process.env.GSD_HOME;
+  const originalGsdHome = process.env.HX_HOME;
   const tempProject = makeTempDir("gsd-routing-project-");
   const tempGsdHome = makeTempDir("gsd-routing-home-");
 
   try {
-    mkdirSync(join(tempProject, ".gsd"), { recursive: true });
+    mkdirSync(join(tempProject, ".hx"), { recursive: true });
     writeFileSync(
-      join(tempProject, ".gsd", "PREFERENCES.md"),
+      join(tempProject, ".hx", "PREFERENCES.md"),
       [
         "---",
         "models:",
@@ -117,7 +117,7 @@ test("resolvePreferredModelConfig keeps explicit phase models as the ceiling", (
       ].join("\n"),
       "utf-8",
     );
-    process.env.GSD_HOME = tempGsdHome;
+    process.env.HX_HOME = tempGsdHome;
     process.chdir(tempProject);
 
     const config = resolvePreferredModelConfig("plan-slice", {
@@ -131,8 +131,8 @@ test("resolvePreferredModelConfig keeps explicit phase models as the ceiling", (
     });
   } finally {
     process.chdir(originalCwd);
-    if (originalGsdHome === undefined) delete process.env.GSD_HOME;
-    else process.env.GSD_HOME = originalGsdHome;
+    if (originalGsdHome === undefined) delete process.env.HX_HOME;
+    else process.env.HX_HOME = originalGsdHome;
     rmSync(tempProject, { recursive: true, force: true });
     rmSync(tempGsdHome, { recursive: true, force: true });
   }

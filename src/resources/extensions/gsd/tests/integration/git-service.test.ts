@@ -253,19 +253,19 @@ describe('git-service', async () => {
   );
 
   const expectedPaths = [
-    ".gsd/activity/",
-    ".gsd/runtime/",
-    ".gsd/worktrees/",
-    ".gsd/auto.lock",
-    ".gsd/metrics.json",
-    ".gsd/completed-units.json",
-    ".gsd/STATE.md",
-    ".gsd/gsd.db",
-    ".gsd/gsd.db-shm",
-    ".gsd/gsd.db-wal",
-    ".gsd/journal/",
-    ".gsd/doctor-history.jsonl",
-    ".gsd/DISCUSSION-MANIFEST.json",
+    ".hx/activity/",
+    ".hx/runtime/",
+    ".hx/worktrees/",
+    ".hx/auto.lock",
+    ".hx/metrics.json",
+    ".hx/completed-units.json",
+    ".hx/STATE.md",
+    ".hx/gsd.db",
+    ".hx/gsd.db-shm",
+    ".hx/gsd.db-wal",
+    ".hx/journal/",
+    ".hx/doctor-history.jsonl",
+    ".hx/DISCUSSION-MANIFEST.json",
   ];
 
   assert.deepStrictEqual(
@@ -275,12 +275,12 @@ describe('git-service', async () => {
   );
 
   assert.ok(
-    RUNTIME_EXCLUSION_PATHS.includes(".gsd/activity/"),
-    "includes .gsd/activity/"
+    RUNTIME_EXCLUSION_PATHS.includes(".hx/activity/"),
+    "includes .hx/activity/"
   );
   assert.ok(
-    RUNTIME_EXCLUSION_PATHS.includes(".gsd/STATE.md"),
-    "includes .gsd/STATE.md"
+    RUNTIME_EXCLUSION_PATHS.includes(".hx/STATE.md"),
+    "includes .hx/STATE.md"
   );
 
   // ─── runGit ────────────────────────────────────────────────────────────
@@ -351,12 +351,12 @@ describe('git-service', async () => {
     const svc = new GitServiceImpl(repo);
 
     // Create runtime files (should be excluded from staging)
-    createFile(repo, ".gsd/activity/log.jsonl", "log data");
-    createFile(repo, ".gsd/runtime/state.json", '{"state":true}');
-    createFile(repo, ".gsd/STATE.md", "# State");
-    createFile(repo, ".gsd/auto.lock", "lock");
-    createFile(repo, ".gsd/metrics.json", "{}");
-    createFile(repo, ".gsd/worktrees/wt/file.txt", "wt data");
+    createFile(repo, ".hx/activity/log.jsonl", "log data");
+    createFile(repo, ".hx/runtime/state.json", '{"state":true}');
+    createFile(repo, ".hx/STATE.md", "# State");
+    createFile(repo, ".hx/auto.lock", "lock");
+    createFile(repo, ".hx/metrics.json", "{}");
+    createFile(repo, ".hx/worktrees/wt/file.txt", "wt data");
 
     // Create a real file (should be staged)
     createFile(repo, "src/code.ts", 'console.log("hello");');
@@ -368,20 +368,20 @@ describe('git-service', async () => {
     // Verify only src/code.ts is in the commit
     const showStat = run("git show --stat --format= HEAD", repo);
     assert.ok(showStat.includes("src/code.ts"), "src/code.ts is in the commit");
-    assert.ok(!showStat.includes(".gsd/activity"), ".gsd/activity/ excluded from commit");
-    assert.ok(!showStat.includes(".gsd/runtime"), ".gsd/runtime/ excluded from commit");
-    assert.ok(!showStat.includes("STATE.md"), ".gsd/STATE.md excluded from commit");
-    assert.ok(!showStat.includes("auto.lock"), ".gsd/auto.lock excluded from commit");
-    assert.ok(!showStat.includes("metrics.json"), ".gsd/metrics.json excluded from commit");
-    assert.ok(!showStat.includes(".gsd/worktrees"), ".gsd/worktrees/ excluded from commit");
+    assert.ok(!showStat.includes(".hx/activity"), ".hx/activity/ excluded from commit");
+    assert.ok(!showStat.includes(".hx/runtime"), ".hx/runtime/ excluded from commit");
+    assert.ok(!showStat.includes("STATE.md"), ".hx/STATE.md excluded from commit");
+    assert.ok(!showStat.includes("auto.lock"), ".hx/auto.lock excluded from commit");
+    assert.ok(!showStat.includes("metrics.json"), ".hx/metrics.json excluded from commit");
+    assert.ok(!showStat.includes(".hx/worktrees"), ".hx/worktrees/ excluded from commit");
 
     // Verify runtime files are still untracked
-    // git status --short may collapse to "?? .gsd/" or show individual files
+    // git status --short may collapse to "?? .hx/" or show individual files
     // Use --untracked-files=all to force individual listing
     const statusOut = run("git status --short --untracked-files=all", repo);
-    assert.ok(statusOut.includes(".gsd/activity/"), "activity still untracked after commit");
-    assert.ok(statusOut.includes(".gsd/runtime/"), "runtime still untracked after commit");
-    assert.ok(statusOut.includes(".gsd/STATE.md"), "STATE.md still untracked after commit");
+    assert.ok(statusOut.includes(".hx/activity/"), "activity still untracked after commit");
+    assert.ok(statusOut.includes(".hx/runtime/"), "runtime still untracked after commit");
+    assert.ok(statusOut.includes(".hx/STATE.md"), "STATE.md still untracked after commit");
 
     rmSync(repo, { recursive: true, force: true });
   });
@@ -389,43 +389,43 @@ describe('git-service', async () => {
   // ─── GitServiceImpl: smart staging excludes tracked runtime files ──────
 
   test('GitServiceImpl: smart staging excludes tracked runtime files', () => {
-    // Reproduces the real bug: .gsd/ runtime files that are already tracked
-    // (in the git index) must be excluded from staging even when .gsd/ is
+    // Reproduces the real bug: .hx/ runtime files that are already tracked
+    // (in the git index) must be excluded from staging even when .hx/ is
     // in .gitignore. The old pathspec-exclude approach failed silently in
     // this case and fell back to `git add -A`, staging everything.
     //
     // The fix has three layers:
     // 1. Auto-cleanup: git rm --cached removes tracked runtime files from index
     // 2. Stage-then-unstage: git add -A + git reset HEAD replaces pathspec excludes
-    // 3. Pre-checkout discard: git checkout -- .gsd/ clears dirty runtime files
+    // 3. Pre-checkout discard: git checkout -- .hx/ clears dirty runtime files
 
     const repo = initTempRepo();
     const svc = new GitServiceImpl(repo);
 
-    // Simulate a repo where .gsd/ files were previously force-added
-    createFile(repo, ".gsd/metrics.json", '{"version":1}');
-    createFile(repo, ".gsd/completed-units.json", '["unit1"]');
-    createFile(repo, ".gsd/activity/log.jsonl", '{"ts":1}');
+    // Simulate a repo where .hx/ files were previously force-added
+    createFile(repo, ".hx/metrics.json", '{"version":1}');
+    createFile(repo, ".hx/completed-units.json", '["unit1"]');
+    createFile(repo, ".hx/activity/log.jsonl", '{"ts":1}');
     createFile(repo, "src/real.ts", "real code");
-    // Force-add .gsd/ files to simulate historical tracking
-    runGit(repo, ["add", "-f", ".gsd/metrics.json", ".gsd/completed-units.json", ".gsd/activity/log.jsonl", "src/real.ts"]);
+    // Force-add .hx/ files to simulate historical tracking
+    runGit(repo, ["add", "-f", ".hx/metrics.json", ".hx/completed-units.json", ".hx/activity/log.jsonl", "src/real.ts"]);
     runGit(repo, ["commit", "-F", "-"], { input: "init with tracked runtime files" });
 
-    // Add .gitignore with .gsd/ (matches real-world setup from ensureGitignore)
-    createFile(repo, ".gitignore", ".gsd/\n");
+    // Add .gitignore with .hx/ (matches real-world setup from ensureGitignore)
+    createFile(repo, ".gitignore", ".hx/\n");
     runGit(repo, ["add", ".gitignore"]);
     runGit(repo, ["commit", "-F", "-"], { input: "add gitignore" });
 
     // Verify runtime files are tracked (precondition)
-    const tracked = run("git ls-files .gsd/", repo);
+    const tracked = run("git ls-files .hx/", repo);
     assert.ok(tracked.includes("metrics.json"), "precondition: metrics.json tracked");
     assert.ok(tracked.includes("completed-units.json"), "precondition: completed-units.json tracked");
     assert.ok(tracked.includes("activity/log.jsonl"), "precondition: activity log tracked");
 
     // Now modify both runtime and real files
-    createFile(repo, ".gsd/metrics.json", '{"version":2}');
-    createFile(repo, ".gsd/completed-units.json", '["unit1","unit2"]');
-    createFile(repo, ".gsd/activity/log.jsonl", '{"ts":2}');
+    createFile(repo, ".hx/metrics.json", '{"version":2}');
+    createFile(repo, ".hx/completed-units.json", '["unit1","unit2"]');
+    createFile(repo, ".hx/activity/log.jsonl", '{"ts":2}');
     createFile(repo, "src/real.ts", "updated code");
 
     // autoCommit should commit real.ts. The first call also runs auto-cleanup
@@ -438,12 +438,12 @@ describe('git-service', async () => {
 
     // After the commit, runtime files must no longer be in the git index.
     // They remain on disk but are untracked (protected by .gitignore).
-    const trackedAfter = run("git ls-files .gsd/", repo);
-    assert.deepStrictEqual(trackedAfter, "", "no .gsd/ runtime files remain in the index");
+    const trackedAfter = run("git ls-files .hx/", repo);
+    assert.deepStrictEqual(trackedAfter, "", "no .hx/ runtime files remain in the index");
 
     // Verify a second autoCommit with changed runtime files does NOT stage them
-    createFile(repo, ".gsd/metrics.json", '{"version":3}');
-    createFile(repo, ".gsd/completed-units.json", '["unit1","unit2","unit3"]');
+    createFile(repo, ".hx/metrics.json", '{"version":3}');
+    createFile(repo, ".hx/completed-units.json", '["unit1","unit2","unit3"]');
     createFile(repo, "src/real.ts", "third version");
 
     const msg2 = svc.autoCommit("execute-task", "M001/S01/T02");
@@ -509,7 +509,7 @@ describe('git-service', async () => {
     const svc = new GitServiceImpl(repo);
 
     // Create only runtime files
-    createFile(repo, ".gsd/activity/x.jsonl", "data");
+    createFile(repo, ".hx/activity/x.jsonl", "data");
 
     const result = svc.autoCommit("task", "T02");
     assert.deepStrictEqual(result, null, "autoCommit returns null when only runtime files are dirty");
@@ -527,35 +527,35 @@ describe('git-service', async () => {
     const repo = initTempRepo();
     const svc = new GitServiceImpl(repo);
 
-    // Create both a .gsd/ planning file and a regular source file
-    createFile(repo, ".gsd/milestones/M001/M001-ROADMAP.md", "- [x] S01");
+    // Create both a .hx/ planning file and a regular source file
+    createFile(repo, ".hx/milestones/M001/M001-ROADMAP.md", "- [x] S01");
     createFile(repo, "src/feature.ts", "export const y = 2;");
 
-    // Auto-commit with .gsd/ excluded (simulates pre-switch)
-    const msg = svc.autoCommit("pre-switch", "main", [".gsd/"]);
-    assert.deepStrictEqual(msg, "chore: auto-commit after pre-switch\n\nGSD-Unit: main", "pre-switch autoCommit with .gsd/ exclusion commits");
+    // Auto-commit with .hx/ excluded (simulates pre-switch)
+    const msg = svc.autoCommit("pre-switch", "main", [".hx/"]);
+    assert.deepStrictEqual(msg, "chore: auto-commit after pre-switch\n\nGSD-Unit: main", "pre-switch autoCommit with .hx/ exclusion commits");
 
-    // Verify .gsd/ file was NOT committed
+    // Verify .hx/ file was NOT committed
     const show = run("git show --stat HEAD", repo);
-    assert.ok(!show.includes("ROADMAP"), ".gsd/ files excluded from pre-switch auto-commit");
-    assert.ok(show.includes("feature.ts"), "non-.gsd/ files included in pre-switch auto-commit");
+    assert.ok(!show.includes("ROADMAP"), ".hx/ files excluded from pre-switch auto-commit");
+    assert.ok(show.includes("feature.ts"), "non-.hx/ files included in pre-switch auto-commit");
 
     rmSync(repo, { recursive: true, force: true });
   });
 
-  // ─── GitServiceImpl: autoCommit extraExclusions — only .gsd/ dirty ────
+  // ─── GitServiceImpl: autoCommit extraExclusions — only .hx/ dirty ────
 
-  test('GitServiceImpl: autoCommit extraExclusions — only .gsd/ dirty', () => {
+  test('GitServiceImpl: autoCommit extraExclusions — only .hx/ dirty', () => {
     const repo = initTempRepo();
     const svc = new GitServiceImpl(repo);
 
-    // Create only .gsd/ planning files
-    createFile(repo, ".gsd/milestones/M001/M001-ROADMAP.md", "- [x] S01");
-    createFile(repo, ".gsd/STATE.md", "state content");
+    // Create only .hx/ planning files
+    createFile(repo, ".hx/milestones/M001/M001-ROADMAP.md", "- [x] S01");
+    createFile(repo, ".hx/STATE.md", "state content");
 
-    // Auto-commit with .gsd/ excluded — nothing else to commit
-    const result = svc.autoCommit("pre-switch", "main", [".gsd/"]);
-    assert.deepStrictEqual(result, null, "autoCommit returns null when only .gsd/ files are dirty and excluded");
+    // Auto-commit with .hx/ excluded — nothing else to commit
+    const result = svc.autoCommit("pre-switch", "main", [".hx/"]);
+    assert.deepStrictEqual(result, null, "autoCommit returns null when only .hx/ files are dirty and excluded");
 
     rmSync(repo, { recursive: true, force: true });
   });
@@ -1120,19 +1120,19 @@ describe('git-service', async () => {
     runGit(repo, ["config", "user.name", "Test"]);
 
     // Create and track runtime files (simulates pre-.gitignore state)
-    mkdirSync(join(repo, ".gsd", "activity"), { recursive: true });
-    mkdirSync(join(repo, ".gsd", "runtime"), { recursive: true });
-    writeFileSync(join(repo, ".gsd", "completed-units.json"), '["u1"]');
-    writeFileSync(join(repo, ".gsd", "metrics.json"), '{}');
-    writeFileSync(join(repo, ".gsd", "STATE.md"), "# State");
-    writeFileSync(join(repo, ".gsd", "activity", "log.jsonl"), "{}");
-    writeFileSync(join(repo, ".gsd", "runtime", "data.json"), "{}");
+    mkdirSync(join(repo, ".hx", "activity"), { recursive: true });
+    mkdirSync(join(repo, ".hx", "runtime"), { recursive: true });
+    writeFileSync(join(repo, ".hx", "completed-units.json"), '["u1"]');
+    writeFileSync(join(repo, ".hx", "metrics.json"), '{}');
+    writeFileSync(join(repo, ".hx", "STATE.md"), "# State");
+    writeFileSync(join(repo, ".hx", "activity", "log.jsonl"), "{}");
+    writeFileSync(join(repo, ".hx", "runtime", "data.json"), "{}");
     writeFileSync(join(repo, "src.ts"), "code");
     runGit(repo, ["add", "-A"]);
     runGit(repo, ["commit", "-m", "init"]);
 
     // Precondition: runtime files are tracked
-    const trackedBefore = run("git ls-files .gsd/", repo);
+    const trackedBefore = run("git ls-files .hx/", repo);
     assert.ok(trackedBefore.includes("completed-units.json"), "untrack: precondition — completed-units tracked");
     assert.ok(trackedBefore.includes("metrics.json"), "untrack: precondition — metrics tracked");
 
@@ -1140,7 +1140,7 @@ describe('git-service', async () => {
     untrackRuntimeFiles(repo);
 
     // Runtime files should be removed from the index
-    const trackedAfter = run("git ls-files .gsd/", repo);
+    const trackedAfter = run("git ls-files .hx/", repo);
     assert.deepStrictEqual(trackedAfter, "", "untrack: all runtime files removed from index");
 
     // Non-runtime files remain tracked
@@ -1148,9 +1148,9 @@ describe('git-service', async () => {
     assert.ok(srcTracked.includes("src.ts"), "untrack: non-runtime files remain tracked");
 
     // Files still exist on disk
-    assert.ok(existsSync(join(repo, ".gsd", "completed-units.json")),
+    assert.ok(existsSync(join(repo, ".hx", "completed-units.json")),
       "untrack: completed-units.json still on disk");
-    assert.ok(existsSync(join(repo, ".gsd", "metrics.json")),
+    assert.ok(existsSync(join(repo, ".hx", "metrics.json")),
       "untrack: metrics.json still on disk");
 
     // Idempotent — running again doesn't error
@@ -1171,18 +1171,18 @@ describe('git-service', async () => {
     runGit(repo, ["add", "-A"]);
     runGit(repo, ["commit", "-m", "init"]);
 
-    // Create .gsd/ runtime files + milestone artifacts + a normal source file
-    mkdirSync(join(repo, ".gsd", "milestones", "M001"), { recursive: true });
-    mkdirSync(join(repo, ".gsd", "runtime"), { recursive: true });
-    mkdirSync(join(repo, ".gsd", "activity"), { recursive: true });
-    writeFileSync(join(repo, ".gsd", "milestones", "M001", "ROADMAP.md"), "# Roadmap");
-    writeFileSync(join(repo, ".gsd", "PREFERENCES.md"), "---\nversion: 1\n---");
-    writeFileSync(join(repo, ".gsd", "STATE.md"), "# State");
-    writeFileSync(join(repo, ".gsd", "runtime", "units.json"), "{}");
-    writeFileSync(join(repo, ".gsd", "activity", "log.jsonl"), "{}");
+    // Create .hx/ runtime files + milestone artifacts + a normal source file
+    mkdirSync(join(repo, ".hx", "milestones", "M001"), { recursive: true });
+    mkdirSync(join(repo, ".hx", "runtime"), { recursive: true });
+    mkdirSync(join(repo, ".hx", "activity"), { recursive: true });
+    writeFileSync(join(repo, ".hx", "milestones", "M001", "ROADMAP.md"), "# Roadmap");
+    writeFileSync(join(repo, ".hx", "PREFERENCES.md"), "---\nversion: 1\n---");
+    writeFileSync(join(repo, ".hx", "STATE.md"), "# State");
+    writeFileSync(join(repo, ".hx", "runtime", "units.json"), "{}");
+    writeFileSync(join(repo, ".hx", "activity", "log.jsonl"), "{}");
     writeFileSync(join(repo, "src.ts"), "const x = 1;");
 
-    // smartStage excludes only runtime paths, not all of .gsd/ (#1326)
+    // smartStage excludes only runtime paths, not all of .hx/ (#1326)
     const svc = new GitServiceImpl(repo);
     const msg = svc.commit({ message: "test commit" });
     assert.ok(msg !== null, "smartStage: commit succeeds");
@@ -1190,11 +1190,11 @@ describe('git-service', async () => {
     const committed = run("git show --name-only HEAD", repo);
     assert.ok(committed.includes("src.ts"), "smartStage: source files ARE in commit");
     // Runtime files should NOT be committed
-    assert.ok(!committed.includes(".gsd/STATE.md"), "smartStage: STATE.md excluded (runtime)");
-    assert.ok(!committed.includes(".gsd/runtime/"), "smartStage: runtime/ excluded");
-    assert.ok(!committed.includes(".gsd/activity/"), "smartStage: activity/ excluded");
+    assert.ok(!committed.includes(".hx/STATE.md"), "smartStage: STATE.md excluded (runtime)");
+    assert.ok(!committed.includes(".hx/runtime/"), "smartStage: runtime/ excluded");
+    assert.ok(!committed.includes(".hx/activity/"), "smartStage: activity/ excluded");
     // Milestone artifacts SHOULD be committed when not gitignored (#1326)
-    assert.ok(committed.includes(".gsd/milestones/"), "smartStage: milestone artifacts ARE committed");
+    assert.ok(committed.includes(".hx/milestones/"), "smartStage: milestone artifacts ARE committed");
 
     rmSync(repo, { recursive: true, force: true });
   });
@@ -1211,7 +1211,7 @@ describe('git-service', async () => {
     assert.deepStrictEqual(readIntegrationBranch(repo, "M001"), "f-123-new-thing",
       "writeIntegrationBranch: metadata file exists on disk");
 
-    // No commit — .gsd/ is managed externally
+    // No commit — .hx/ is managed externally
     const commitsAfter = run("git rev-list --count HEAD", repo);
     assert.deepStrictEqual(commitsBefore, commitsAfter,
       "writeIntegrationBranch: no git commit created for integration branch");
@@ -1232,7 +1232,7 @@ describe('git-service', async () => {
     const { readFileSync } = await import("node:fs");
     const content = readFileSync(join(repo, ".gitignore"), "utf-8");
     const lines = content.split("\n").map(l => l.trim()).filter(l => l && !l.startsWith("#"));
-    assert.ok(lines.includes(".gsd"), "ensureGitignore: .gitignore contains .gsd");
+    assert.ok(lines.includes(".hx"), "ensureGitignore: .gitignore contains .hx");
 
     // Idempotent — calling again doesn't add duplicates
     const modified2 = ensureGitignore(repo);
@@ -1244,7 +1244,7 @@ describe('git-service', async () => {
   // ─── nativeAddAllWithExclusions: symlinked .gsd fallback ───────────────
 
   test('nativeAddAllWithExclusions: symlinked .gsd fallback', () => {
-    // When .gsd is a symlink, git rejects `:!.gsd/...` pathspecs with
+    // When .gsd is a symlink, git rejects `:!.hx/...` pathspecs with
     // "fatal: pathspec '...' is beyond a symbolic link". The fix falls
     // back to plain `git add -A`, which respects .gitignore.
     const repo = initTempRepo();
@@ -1256,10 +1256,11 @@ describe('git-service', async () => {
     writeFileSync(join(externalGsd, "STATE.md"), "# State");
 
     // Symlink .gsd -> external directory
-    symlinkSync(externalGsd, join(repo, ".gsd"));
+    symlinkSync(externalGsd, join(repo, ".hx"));
 
-    // Add .gitignore so git add -A fallback skips .gsd/
-    writeFileSync(join(repo, ".gitignore"), ".gsd\n");
+    // Add .gitignore so git add -A fallback skips .hx/
+    writeFileSync(join(repo, ".gitignore"), ".hx
+");
 
     // Create a real file that should be staged
     createFile(repo, "src/app.ts", "export const x = 1;");
@@ -1277,7 +1278,7 @@ describe('git-service', async () => {
     // Verify the real file was staged
     const staged = run("git diff --cached --name-only", repo);
     assert.ok(staged.includes("src/app.ts"), "real file staged despite symlinked .gsd");
-    assert.ok(!staged.includes(".gsd"), ".gsd content not staged");
+    assert.ok(!staged.includes(".hx"), ".hx content not staged");
 
     rmSync(repo, { recursive: true, force: true });
     rmSync(externalGsd, { recursive: true, force: true });
@@ -1289,8 +1290,8 @@ describe('git-service', async () => {
     // Verify the normal (non-symlink) case still works with pathspec exclusions
     const repo = initTempRepo();
 
-    createFile(repo, ".gsd/activity/log.jsonl", "log data");
-    createFile(repo, ".gsd/STATE.md", "# State");
+    createFile(repo, ".hx/activity/log.jsonl", "log data");
+    createFile(repo, ".hx/STATE.md", "# State");
     createFile(repo, "src/code.ts", "export const y = 2;");
 
     let threw = false;
@@ -1417,7 +1418,7 @@ describe('git-service', async () => {
   // ─── autoCommit: symlinked .gsd does NOT stage milestone artifacts (#2247) ──
 
   test('autoCommit: symlinked .gsd does NOT stage milestone artifacts (#2247)', () => {
-    // When .gsd is a symlink (external state project), .gsd/ files live outside
+    // When .gsd is a symlink (external state project), .hx/ files live outside
     // the repo by design. smartStage() must NOT force-stage them into git — the
     // .gitignore exclusion is correct and intentional.
     const repo = initTempRepo();
@@ -1428,10 +1429,11 @@ describe('git-service', async () => {
     mkdirSync(join(externalGsd, "activity"), { recursive: true });
     mkdirSync(join(externalGsd, "runtime"), { recursive: true });
 
-    symlinkSync(externalGsd, join(repo, ".gsd"));
+    symlinkSync(externalGsd, join(repo, ".hx"));
 
     // .gitignore blocks .gsd (as ensureGitignore would do for symlink projects)
-    writeFileSync(join(repo, ".gitignore"), ".gsd\n");
+    writeFileSync(join(repo, ".gitignore"), ".hx
+");
     run('git add .gitignore', repo);
     run('git commit -m "add gitignore"', repo);
 
@@ -1449,8 +1451,8 @@ describe('git-service', async () => {
 
     const committed = run("git show --name-only HEAD", repo);
     assert.ok(committed.includes("src/feature.ts"), "symlink autoCommit: source file committed");
-    assert.ok(!committed.includes(".gsd/milestones/"),
-      "symlink autoCommit: .gsd/milestones/ files are NOT staged (external state stays external)");
+    assert.ok(!committed.includes(".hx/milestones/"),
+      "symlink autoCommit: .hx/milestones/ files are NOT staged (external state stays external)");
 
     try { rmSync(repo, { recursive: true, force: true }); } catch {}
     try { rmSync(externalGsd, { recursive: true, force: true }); } catch {}

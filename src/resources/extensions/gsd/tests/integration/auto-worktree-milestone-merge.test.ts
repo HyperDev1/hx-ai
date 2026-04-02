@@ -36,8 +36,8 @@ function createTempRepo(): string {
   run("git config user.email test@test.com", dir);
   run("git config user.name Test", dir);
   writeFileSync(join(dir, "README.md"), "# test\n");
-  mkdirSync(join(dir, ".gsd"), { recursive: true });
-  writeFileSync(join(dir, ".gsd", "STATE.md"), "# State\n");
+  mkdirSync(join(dir, ".hx"), { recursive: true });
+  writeFileSync(join(dir, ".hx", "STATE.md"), "# State\n");
   run("git add .", dir);
   run("git commit -m init", dir);
   run("git branch -M main", dir);
@@ -60,7 +60,7 @@ function addSliceToMilestone(
   commits: Array<{ file: string; content: string; message: string }>,
 ): void {
   const normalizedPath = wtPath.replaceAll("\\", "/");
-  const marker = "/.gsd/worktrees/";
+  const marker = "/.hx/worktrees/";
   const idx = normalizedPath.indexOf(marker);
   const worktreeName = idx !== -1 ? normalizedPath.slice(idx + marker.length).split("/")[0] : null;
 
@@ -125,7 +125,7 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     const branches = run("git branch", repo);
     assert.ok(!branches.includes("milestone/M010"), "milestone branch deleted");
 
-    const worktreeDir = join(repo, ".gsd", "worktrees", "M010");
+    const worktreeDir = join(repo, ".hx", "worktrees", "M010");
     assert.ok(!existsSync(worktreeDir), "worktree directory removed");
 
     assert.strictEqual(getAutoWorktreeOriginalBase(), null, "originalBase cleared after merge");
@@ -224,7 +224,7 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     assert.strictEqual(typeof result.pushed, "boolean", "pushed flag remains boolean");
   });
 
-  test("auto-resolve .gsd/ state file conflicts", () => {
+  test("auto-resolve .hx/ state file conflicts", () => {
     const repo = freshRepo();
     const wtPath = createAutoWorktree(repo, "M050");
 
@@ -232,12 +232,12 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
       { file: "feature.ts", content: "export const feature = true;\n", message: "add feature" },
     ]);
 
-    writeFileSync(join(wtPath, ".gsd", "STATE.md"), "# State\n\n## Updated on milestone branch\n");
+    writeFileSync(join(wtPath, ".hx", "STATE.md"), "# State\n\n## Updated on milestone branch\n");
     run("git add .", wtPath);
     run('git commit -m "chore: update state on milestone branch"', wtPath);
 
     run("git checkout main", repo);
-    writeFileSync(join(repo, ".gsd", "STATE.md"), "# State\n\n## Updated on main\n");
+    writeFileSync(join(repo, ".hx", "STATE.md"), "# State\n\n## Updated on main\n");
     run("git add .", repo);
     run('git commit -m "chore: update state on main"', repo);
 
@@ -254,7 +254,7 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     } catch (err) {
       threw = true;
     }
-    assert.ok(!threw, "auto-resolves .gsd/ state file conflicts without throwing");
+    assert.ok(!threw, "auto-resolves .hx/ state file conflicts without throwing");
     assert.ok(existsSync(join(repo, "feature.ts")), "feature.ts merged to main");
   });
 
@@ -291,8 +291,8 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     run("git config user.email test@test.com", dir);
     run("git config user.name Test", dir);
     writeFileSync(join(dir, "README.md"), "# master-branch repo\n");
-    mkdirSync(join(dir, ".gsd"), { recursive: true });
-    writeFileSync(join(dir, ".gsd", "STATE.md"), "# State\n");
+    mkdirSync(join(dir, ".hx"), { recursive: true });
+    writeFileSync(join(dir, ".hx", "STATE.md"), "# State\n");
     run("git add .", dir);
     run("git commit -m init", dir);
     const defaultBranch = run("git rev-parse --abbrev-ref HEAD", dir);
@@ -303,7 +303,7 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
       { file: "master-feature.ts", content: "export const masterFeature = true;\n", message: "add master feature" },
     ]);
 
-    const metaFile = join(dir, ".gsd", "milestones", "M070", "M070-META.json");
+    const metaFile = join(dir, ".hx", "milestones", "M070", "M070-META.json");
     assert.ok(!existsSync(metaFile), "no META.json — integration branch not captured");
 
     const roadmap = makeRoadmap("M070", "Master branch milestone", [
@@ -367,7 +367,7 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     assert.ok(!threw, `empty milestone with no code changes should not throw (got: ${errMsg})`);
   });
 
-  test("#1738 bug 3: synced .gsd/ dirs cleaned before merge", () => {
+  test("#1738 bug 3: synced .hx/ dirs cleaned before merge", () => {
     const repo = freshRepo();
     const wtPath = createAutoWorktree(repo, "M090");
 
@@ -375,15 +375,15 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
       { file: "sync-test.ts", content: "export const sync = true;\n", message: "add sync-test" },
     ]);
 
-    const msDir = join(repo, ".gsd", "milestones", "M090", "slices", "S01");
+    const msDir = join(repo, ".hx", "milestones", "M090", "slices", "S01");
     mkdirSync(msDir, { recursive: true });
     writeFileSync(join(msDir, "S01-PLAN.md"), "# synced plan\n");
     writeFileSync(
-      join(repo, ".gsd", "milestones", "M090", "M090-ROADMAP.md"),
+      join(repo, ".hx", "milestones", "M090", "M090-ROADMAP.md"),
       "# synced roadmap\n",
     );
 
-    const runtimeDir = join(repo, ".gsd", "runtime", "units");
+    const runtimeDir = join(repo, ".hx", "runtime", "units");
     mkdirSync(runtimeDir, { recursive: true });
     writeFileSync(join(runtimeDir, "unit-001.json"), '{"stale": true}');
 
@@ -398,7 +398,7 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     } catch (err: unknown) {
       threw = true;
     }
-    assert.ok(!threw, "#1738 merge does not fail on synced .gsd/ files");
+    assert.ok(!threw, "#1738 merge does not fail on synced .hx/ files");
     assert.ok(existsSync(join(repo, "sync-test.ts")), "sync-test.ts on main after merge");
   });
 
@@ -619,13 +619,13 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     );
   });
 
-  test("#1906: codeFilesChanged=false when only .gsd/ metadata merged", () => {
+  test("#1906: codeFilesChanged=false when only .hx/ metadata merged", () => {
     const repo = freshRepo();
     const wtPath = createAutoWorktree(repo, "M180");
 
-    mkdirSync(join(wtPath, ".gsd", "milestones", "M180"), { recursive: true });
+    mkdirSync(join(wtPath, ".hx", "milestones", "M180"), { recursive: true });
     writeFileSync(
-      join(wtPath, ".gsd", "milestones", "M180", "SUMMARY.md"),
+      join(wtPath, ".hx", "milestones", "M180", "SUMMARY.md"),
       "# M180 Summary\n\nThis milestone was planned but not implemented.\n",
     );
     run("git add .", wtPath);
@@ -635,7 +635,7 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
 
     const result = mergeMilestoneToMain(repo, "M180", roadmap);
     assert.strictEqual(result.codeFilesChanged, false,
-      "#1906: codeFilesChanged must be false when only .gsd/ files were merged");
+      "#1906: codeFilesChanged must be false when only .hx/ files were merged");
   });
 
   test("#1906: codeFilesChanged=true when real code is merged", () => {

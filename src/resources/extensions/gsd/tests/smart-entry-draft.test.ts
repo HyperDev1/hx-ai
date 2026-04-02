@@ -20,7 +20,7 @@ function assert(condition: boolean, message: string): void {
 // ─── Fixture: milestone with only CONTEXT-DRAFT.md ──────────────────────
 
 const tmpBase = mkdtempSync(join(tmpdir(), "gsd-smart-entry-draft-test-"));
-const gsd = join(tmpBase, ".gsd");
+const gsd = join(tmpBase, ".hx");
 
 mkdirSync(join(gsd, "milestones", "M001"), { recursive: true });
 

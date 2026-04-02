@@ -28,7 +28,7 @@ import {
 test('write-gate: blocks CONTEXT.md write during discussion without depth verification (absolute path)', () => {
   const result = shouldBlockContextWrite(
     'write',
-    '/Users/dev/project/.gsd/milestones/M001/M001-CONTEXT.md',
+    '/Users/dev/project/.hx/milestones/M001/M001-CONTEXT.md',
     'M001',
     false,
   );
@@ -41,7 +41,7 @@ test('write-gate: blocks CONTEXT.md write during discussion without depth verifi
 test('write-gate: blocks CONTEXT.md write during discussion without depth verification (relative path)', () => {
   const result = shouldBlockContextWrite(
     'write',
-    '.gsd/milestones/M005/M005-CONTEXT.md',
+    '.hx/milestones/M005/M005-CONTEXT.md',
     'M005',
     false,
   );
@@ -54,7 +54,7 @@ test('write-gate: blocks CONTEXT.md write during discussion without depth verifi
 test('write-gate: allows CONTEXT.md write after depth verification', () => {
   const result = shouldBlockContextWrite(
     'write',
-    '/Users/dev/project/.gsd/milestones/M001/M001-CONTEXT.md',
+    '/Users/dev/project/.hx/milestones/M001/M001-CONTEXT.md',
     'M001',
     true,
   );
@@ -67,7 +67,7 @@ test('write-gate: allows CONTEXT.md write after depth verification', () => {
 test('write-gate: allows CONTEXT.md write outside discussion phase', () => {
   const result = shouldBlockContextWrite(
     'write',
-    '.gsd/milestones/M001/M001-CONTEXT.md',
+    '.hx/milestones/M001/M001-CONTEXT.md',
     null,
     false,
   );
@@ -80,7 +80,7 @@ test('write-gate: allows non-CONTEXT.md writes during discussion', () => {
   // DISCUSSION.md
   const r1 = shouldBlockContextWrite(
     'write',
-    '.gsd/milestones/M001/M001-DISCUSSION.md',
+    '.hx/milestones/M001/M001-DISCUSSION.md',
     'M001',
     false,
   );
@@ -89,7 +89,7 @@ test('write-gate: allows non-CONTEXT.md writes during discussion', () => {
   // Slice file
   const r2 = shouldBlockContextWrite(
     'write',
-    '.gsd/milestones/M001/slices/S01/S01-PLAN.md',
+    '.hx/milestones/M001/slices/S01/S01-PLAN.md',
     'M001',
     false,
   );
@@ -110,7 +110,7 @@ test('write-gate: allows non-CONTEXT.md writes during discussion', () => {
 test('write-gate: regex does not match slice context files (S01-CONTEXT.md)', () => {
   const result = shouldBlockContextWrite(
     'write',
-    '.gsd/milestones/M001/slices/S01/S01-CONTEXT.md',
+    '.hx/milestones/M001/slices/S01/S01-CONTEXT.md',
     'M001',
     false,
   );
@@ -122,7 +122,7 @@ test('write-gate: regex does not match slice context files (S01-CONTEXT.md)', ()
 test('write-gate: blocked reason contains depth_verification keyword', () => {
   const result = shouldBlockContextWrite(
     'write',
-    '.gsd/milestones/M999/M999-CONTEXT.md',
+    '.hx/milestones/M999/M999-CONTEXT.md',
     'M999',
     false,
   );
@@ -136,7 +136,7 @@ test('write-gate: blocked reason contains depth_verification keyword', () => {
 test('write-gate: blocks CONTEXT.md write in queue mode without depth verification', () => {
   const result = shouldBlockContextWrite(
     'write',
-    '.gsd/milestones/M001/M001-CONTEXT.md',
+    '.hx/milestones/M001/M001-CONTEXT.md',
     null,   // no milestoneId in queue mode
     false,  // not depth-verified
     true,   // queue phase active
@@ -150,7 +150,7 @@ test('write-gate: blocks CONTEXT.md write in queue mode without depth verificati
 test('write-gate: allows CONTEXT.md write in queue mode after depth verification', () => {
   const result = shouldBlockContextWrite(
     'write',
-    '.gsd/milestones/M001/M001-CONTEXT.md',
+    '.hx/milestones/M001/M001-CONTEXT.md',
     null,   // no milestoneId in queue mode
     true,   // depth-verified
     true,   // queue phase active
@@ -169,7 +169,7 @@ test('write-gate: markDepthVerified unblocks queue-mode writes when milestoneId 
   // Before marking: should block
   const blocked = shouldBlockContextWrite(
     'write',
-    '.gsd/milestones/M001/M001-CONTEXT.md',
+    '.hx/milestones/M001/M001-CONTEXT.md',
     null,
     isDepthVerified(),
     isQueuePhaseActive(),
@@ -182,7 +182,7 @@ test('write-gate: markDepthVerified unblocks queue-mode writes when milestoneId 
   // After marking: should pass
   const allowed = shouldBlockContextWrite(
     'write',
-    '.gsd/milestones/M001/M001-CONTEXT.md',
+    '.hx/milestones/M001/M001-CONTEXT.md',
     null,
     isDepthVerified(),
     isQueuePhaseActive(),

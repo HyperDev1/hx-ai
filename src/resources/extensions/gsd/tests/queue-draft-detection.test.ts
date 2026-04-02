@@ -10,7 +10,7 @@ import { buildExistingMilestonesContext } from "../guided-flow.js";
 describe('queue-draft-detection', () => {
   test('draft and context milestone detection', async () => {
     const tmpBase = mkdtempSync(join(tmpdir(), "gsd-queue-draft-test-"));
-    const gsd = join(tmpBase, ".gsd");
+    const gsd = join(tmpBase, ".hx");
 
     try {
       // M001: has only CONTEXT-DRAFT.md (draft milestone)

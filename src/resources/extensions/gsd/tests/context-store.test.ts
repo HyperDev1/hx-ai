@@ -383,7 +383,7 @@ describe("context-store: queryArtifact", () => {
       full_content: '# My Project\n\nProject description here.',
     });
     insertArtifact({
-      path: '.gsd/milestones/M001/M001-PLAN.md',
+      path: '.hx/milestones/M001/M001-PLAN.md',
       artifact_type: 'milestone_plan',
       milestone_id: 'M001',
       slice_id: null,
@@ -394,7 +394,7 @@ describe("context-store: queryArtifact", () => {
     const project = queryArtifact('PROJECT.md');
     assert.strictEqual(project, '# My Project\n\nProject description here.', 'queryArtifact returns full_content for PROJECT.md');
 
-    const plan = queryArtifact('.gsd/milestones/M001/M001-PLAN.md');
+    const plan = queryArtifact('.hx/milestones/M001/M001-PLAN.md');
     assert.strictEqual(plan, '# M001 Plan\n\nMilestone content.', 'queryArtifact returns full_content for milestone plan');
   });
 

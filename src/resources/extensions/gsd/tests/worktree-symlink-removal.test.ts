@@ -1,7 +1,7 @@
 /**
- * Regression test for #1852: removeWorktree targets wrong path when .gsd/ is a symlink.
+ * Regression test for #1852: removeWorktree targets wrong path when .hx/ is a symlink.
  *
- * When .gsd/ is a symlink to an external state directory, git registers
+ * When .hx/ is a symlink to an external state directory, git registers
  * the worktree at the resolved (real) path. But removeWorktree recomputes
  * the path via worktreePath() which uses the unresolved symlink, causing
  * a mismatch — the removal silently fails.
@@ -28,8 +28,8 @@ function run(command: string, cwd: string): string {
   return execSync(command, { cwd, stdio: ["ignore", "pipe", "pipe"], encoding: "utf-8" }).trim();
 }
 
-// Set up a test repo with .gsd/ as a symlink to an external directory,
-// mimicking the external state directory layout (~/.gsd/projects/<hash>/).
+// Set up a test repo with .hx/ as a symlink to an external directory,
+// mimicking the external state directory layout (~/.hx/projects/<hash>/).
 // Resolve tmpdir to handle macOS /tmp -> /private/var/... symlink.
 const realTmp = realpathSync(tmpdir());
 const base = mkdtempSync(join(realTmp, "gsd-wt-symlink-test-"));
@@ -43,13 +43,13 @@ run('git config user.email "test@example.com"', base);
 mkdirSync(join(externalState, "worktrees"), { recursive: true });
 
 // Create .gsd as a symlink to the external state directory
-symlinkSync(externalState, join(base, ".gsd"));
+symlinkSync(externalState, join(base, ".hx"));
 
 // Verify the symlink is in place
-assert.ok(existsSync(join(base, ".gsd")), ".gsd symlink exists");
+assert.ok(existsSync(join(base, ".hx")), ".hx symlink exists");
 assert.ok(
-  realpathSync(join(base, ".gsd")) === externalState,
-  ".gsd resolves to external state dir",
+  realpathSync(join(base, ".hx")) === externalState,
+  ".hx resolves to external state dir",
 );
 
 // Create initial commit so we have a valid repo
@@ -58,7 +58,7 @@ run("git add .", base);
 run('git commit -m "init"', base);
 
 describe('worktree-symlink-removal', async () => {
-  console.log("\n=== #1852: removeWorktree with symlinked .gsd/ ===");
+  console.log("\n=== #1852: removeWorktree with symlinked .hx/ ===");
 
   // Create a worktree — git will resolve the symlink and register
   // the worktree at the external path
@@ -85,10 +85,10 @@ describe('worktree-symlink-removal', async () => {
   // to compute a LOCAL path that differs from git's REGISTERED path (the
   // resolved external path). The stale local dir passes existsSync but is not
   // a real git worktree, so nativeWorktreeRemove fails silently.
-  unlinkSync(join(base, ".gsd"));  // remove the symlink
-  mkdirSync(join(base, ".gsd", "worktrees", "M002"), { recursive: true });
+  unlinkSync(join(base, ".hx"));  // remove the symlink
+  mkdirSync(join(base, ".hx", "worktrees", "M002"), { recursive: true });
   // Write a dummy file so the stale directory is non-empty
-  writeFileSync(join(base, ".gsd", "worktrees", "M002", "stale.txt"), "stale sync artifact", "utf-8");
+  writeFileSync(join(base, ".hx", "worktrees", "M002", "stale.txt"), "stale sync artifact", "utf-8");
 
   // Now worktreePath(base, "M002") points to the LOCAL stale dir, not the
   // external path where git actually registered the worktree.

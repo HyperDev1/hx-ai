@@ -10,7 +10,7 @@ test("deriveState reports complete when all milestone slices are done", async ()
   const base = mkdtempSync(join(tmpdir(), "gsd-smart-entry-complete-"));
 
   try {
-    const milestoneDir = join(base, ".gsd", "milestones", "M001");
+    const milestoneDir = join(base, ".hx", "milestones", "M001");
     mkdirSync(milestoneDir, { recursive: true });
 
     writeFileSync(

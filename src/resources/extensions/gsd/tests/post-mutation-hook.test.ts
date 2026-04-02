@@ -22,7 +22,7 @@ function cleanupDir(dirPath: string): void {
 
 /** Create a minimal project directory with a PLAN.md for complete-task to find. */
 function createProject(basePath: string): void {
-  const sliceDir = path.join(basePath, '.gsd', 'milestones', 'M001', 'slices', 'S01');
+  const sliceDir = path.join(basePath, '.hx', 'milestones', 'M001', 'slices', 'S01');
   const tasksDir = path.join(sliceDir, 'tasks');
   fs.mkdirSync(tasksDir, { recursive: true });
   fs.writeFileSync(path.join(sliceDir, 'S01-PLAN.md'), `# S01: Test Slice
@@ -70,7 +70,7 @@ test('post-mutation-hook: event-log.jsonl exists after handleCompleteTask', asyn
     const result = await handleCompleteTask(makeCompleteTaskParams(), base);
     assert.ok(!('error' in result), `handler should succeed, got: ${JSON.stringify(result)}`);
 
-    const logPath = path.join(base, '.gsd', 'event-log.jsonl');
+    const logPath = path.join(base, '.hx', 'event-log.jsonl');
     assert.ok(fs.existsSync(logPath), 'event-log.jsonl should exist after handler completes');
   } finally {
     closeDatabase();
@@ -87,7 +87,7 @@ test('post-mutation-hook: event log contains complete-task event with correct pa
   try {
     await handleCompleteTask(makeCompleteTaskParams(), base);
 
-    const logPath = path.join(base, '.gsd', 'event-log.jsonl');
+    const logPath = path.join(base, '.hx', 'event-log.jsonl');
     const events = readEvents(logPath);
     assert.ok(events.length > 0, 'event log should have at least one event');
 
@@ -115,7 +115,7 @@ test('post-mutation-hook: state-manifest.json exists after handleCompleteTask', 
     const result = await handleCompleteTask(makeCompleteTaskParams(), base);
     assert.ok(!('error' in result), `handler should succeed, got: ${JSON.stringify(result)}`);
 
-    const manifestPath = path.join(base, '.gsd', 'state-manifest.json');
+    const manifestPath = path.join(base, '.hx', 'state-manifest.json');
     assert.ok(fs.existsSync(manifestPath), 'state-manifest.json should exist after handler completes');
   } finally {
     closeDatabase();
@@ -157,7 +157,7 @@ test('post-mutation-hook: handler still returns success even if projections dir 
   openDatabase(dbPath);
 
   // Create tasks dir but NO plan file (projections will soft-fail)
-  const tasksDir = path.join(base, '.gsd', 'milestones', 'M001', 'slices', 'S01', 'tasks');
+  const tasksDir = path.join(base, '.hx', 'milestones', 'M001', 'slices', 'S01', 'tasks');
   fs.mkdirSync(tasksDir, { recursive: true });
 
   try {

@@ -81,7 +81,7 @@ test("#2313: syncWorktreeStateBack should include metrics.json in ROOT_STATE_FIL
 
 test("#2313: functional — completed-units archive creates milestone-specific file", () => {
   const tmpBase = mkdtempSync(join(tmpdir(), "gsd-completed-units-"));
-  const gsdDir = join(tmpBase, ".gsd");
+  const gsdDir = join(tmpBase, ".hx");
   mkdirSync(gsdDir, { recursive: true });
 
   // Simulate existing completed-units.json with data

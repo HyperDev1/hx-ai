@@ -20,12 +20,12 @@ import {
 
 function createFixtureBase(): string {
   const base = mkdtempSync(join(tmpdir(), 'gsd-derive-db-'));
-  mkdirSync(join(base, '.gsd', 'milestones'), { recursive: true });
+  mkdirSync(join(base, '.hx', 'milestones'), { recursive: true });
   return base;
 }
 
 function writeFile(base: string, relativePath: string, content: string): void {
-  const full = join(base, '.gsd', relativePath);
+  const full = join(base, '.hx', relativePath);
   mkdirSync(join(full, '..'), { recursive: true });
   writeFileSync(full, content);
 }
@@ -275,7 +275,7 @@ describe('derive-state-db', async () => {
     const base = createFixtureBase();
     try {
       // Write minimal milestone dir (needed for milestone discovery)
-      mkdirSync(join(base, '.gsd', 'milestones', 'M001'), { recursive: true });
+      mkdirSync(join(base, '.hx', 'milestones', 'M001'), { recursive: true });
       // Write REQUIREMENTS.md to disk (DB content is no longer used by deriveState)
       writeFile(base, 'REQUIREMENTS.md', REQUIREMENTS_CONTENT);
 
@@ -320,8 +320,8 @@ describe('derive-state-db', async () => {
       // Create milestone dirs on disk (needed for directory scanning)
       // Also write roadmap files to disk — resolveMilestoneFile checks file existence
       // The DB only provides content, not file discovery
-      mkdirSync(join(base, '.gsd', 'milestones', 'M001'), { recursive: true });
-      mkdirSync(join(base, '.gsd', 'milestones', 'M002'), { recursive: true });
+      mkdirSync(join(base, '.hx', 'milestones', 'M001'), { recursive: true });
+      mkdirSync(join(base, '.hx', 'milestones', 'M002'), { recursive: true });
       writeFile(base, 'milestones/M001/M001-ROADMAP.md', completedRoadmap);
       writeFile(base, 'milestones/M001/M001-VALIDATION.md', `---\nverdict: pass\nremediation_round: 0\n---\n\n# Validation\nPassed.`);
       writeFile(base, 'milestones/M001/M001-SUMMARY.md', summaryContent);
@@ -939,8 +939,8 @@ describe('derive-state-db', async () => {
     const base = createFixtureBase();
     try {
       // Ghost: milestone dir exists with only META.json, no context/roadmap/summary
-      mkdirSync(join(base, '.gsd', 'milestones', 'M001'), { recursive: true });
-      writeFileSync(join(base, '.gsd', 'milestones', 'M001', 'META.json'), '{}');
+      mkdirSync(join(base, '.hx', 'milestones', 'M001'), { recursive: true });
+      writeFileSync(join(base, '.hx', 'milestones', 'M001', 'META.json'), '{}');
       // Real milestone
       writeFile(base, 'milestones/M002/M002-CONTEXT.md', '# M002: Real\n\nReal milestone.');
 

@@ -306,13 +306,13 @@ describe(
 			});
 
 			it('should not persist marketplace agent directories into package sources', async (t) => {
-				const isolatedAgentDir = join(tempDir, '.gsd', 'agent');
+				const isolatedAgentDir = join(tempDir, '.hx', 'agent');
 				const settingsPath = join(isolatedAgentDir, 'settings.json');
 				rmSync(isolatedAgentDir, { recursive: true, force: true });
-				process.env.GSD_CODING_AGENT_DIR = isolatedAgentDir;
+				process.env.HX_CODING_AGENT_DIR = isolatedAgentDir;
 
 				t.after(() => {
-					delete process.env.GSD_CODING_AGENT_DIR;
+					delete process.env.HX_CODING_AGENT_DIR;
 					rmSync(isolatedAgentDir, { recursive: true, force: true });
 				});
 

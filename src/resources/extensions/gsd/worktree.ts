@@ -71,19 +71,19 @@ export function captureIntegrationBranch(basePath: string, milestoneId: string):
 /**
  * Find the worktrees segment in a path, supporting both direct
  * (`/.hx/worktrees/`) and symlink-resolved (`/.hx/projects/<hash>/worktrees/`)
- * layouts.  When `.gsd` is a symlink to `~/.gsd/projects/<hash>`, resolved
+ * layouts.  When `.hx` is a symlink to `~/.hx/projects/<hash>`, resolved
  * paths contain the intermediate `projects/<hash>/` segment that the old
  * single-marker check missed.
  */
 function findWorktreeSegment(normalizedPath: string): { gsdIdx: number; afterWorktrees: number } | null {
-  // Direct layout: /.gsd/worktrees/<name>
+  // Direct layout: /.hx/worktrees/<name>
   const directMarker = "/.hx/worktrees/";
   const idx = normalizedPath.indexOf(directMarker);
   if (idx !== -1) {
     return { gsdIdx: idx, afterWorktrees: idx + directMarker.length };
   }
-  // Symlink-resolved layout: /.gsd/projects/<hash>/worktrees/<name>
-  const symlinkRe = /\/\.gsd\/projects\/[a-f0-9]+\/worktrees\//;
+  // Symlink-resolved layout: /.hx/projects/<hash>/worktrees/<name>
+  const symlinkRe = /\/\.hx\/projects\/[a-f0-9]+\/worktrees\//;
   const match = normalizedPath.match(symlinkRe);
   if (match && match.index !== undefined) {
     return { gsdIdx: match.index, afterWorktrees: match.index + match[0].length };
@@ -93,7 +93,7 @@ function findWorktreeSegment(normalizedPath: string): { gsdIdx: number; afterWor
 
 /**
  * Detect the active worktree name from the current working directory.
- * Returns null if not inside a GSD worktree (.gsd/worktrees/<name>/).
+ * Returns null if not inside a GSD worktree (.hx/worktrees/<name>/).
  */
 export function detectWorktreeName(basePath: string): string | null {
   const normalizedPath = basePath.replaceAll("\\", "/");
@@ -112,8 +112,8 @@ export function detectWorktreeName(basePath: string): string | null {
  * When the worker was spawned with HX_PROJECT_ROOT set, use that directly —
  * the coordinator already knows the real project root unambiguously.
  *
- * When `/.hx/` in the resolved path is actually the user-level `~/.gsd/`
- * (common when `.gsd` is a symlink into `~/.gsd/projects/<hash>`), the
+ * When `/.hx/` in the resolved path is actually the user-level `~/.hx/`
+ * (common when `.hx` is a symlink into `~/.hx/projects/<hash>`), the
  * string-slice heuristic would return `~` — which is catastrophically wrong.
  * In that case, fall back to reading the worktree's `.git` file, which
  * contains a `gitdir:` pointer to the real project's `.git/worktrees/<name>`,
@@ -134,14 +134,14 @@ export function resolveProjectRoot(basePath: string): string {
 
   // Candidate root via the string-slice heuristic
   const sepChar = basePath.includes("\\") ? "\\" : "/";
-  const gsdMarker = `${sepChar}.gsd${sepChar}`;
+  const gsdMarker = `${sepChar}.hx${sepChar}`;
   const gsdIdx = basePath.indexOf(gsdMarker);
   const candidate = gsdIdx !== -1
     ? basePath.slice(0, gsdIdx)
     : basePath.slice(0, seg.gsdIdx);
 
   // Layer 2: Guard against resolving to the user's home directory.
-  // When .gsd is a symlink into ~/.gsd/projects/<hash>, the resolved path
+  // When .gsd is a symlink into ~/.hx/projects/<hash>, the resolved path
   // contains /.gsd/ at the user-level boundary. Slicing there yields ~ — wrong.
   const hxHome = normalizePathForCompare(process.env.HX_HOME || join(homedir(), ".hx"));
   const candidateGsdPath = normalizePathForCompare(join(candidate, ".hx"));

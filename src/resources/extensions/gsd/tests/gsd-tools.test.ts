@@ -32,7 +32,7 @@ import type { Requirement } from '../types.ts';
 
 function makeTmpDir(): string {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-tools-'));
-  fs.mkdirSync(path.join(dir, '.gsd'), { recursive: true });
+  fs.mkdirSync(path.join(dir, ".hx"), { recursive: true });
   return dir;
 }
 
@@ -52,7 +52,7 @@ describe('gsd-tools', () => {
   test('gsd_decision_save', async () => {
     const tmpDir = makeTmpDir();
     try {
-      const dbPath = path.join(tmpDir, '.gsd', 'gsd.db');
+      const dbPath = path.join(tmpDir, '.hx', 'gsd.db');
       openDatabase(dbPath);
       assert.ok(isDbAvailable(), 'DB should be available after open');
 
@@ -79,7 +79,7 @@ describe('gsd-tools', () => {
       assert.deepStrictEqual(row!.choice, 'SQLite', 'Decision choice should match');
 
       // Verify DECISIONS.md was generated
-      const mdPath = path.join(tmpDir, '.gsd', 'DECISIONS.md');
+      const mdPath = path.join(tmpDir, '.hx', 'DECISIONS.md');
       assert.ok(fs.existsSync(mdPath), 'DECISIONS.md should be created');
       const mdContent = fs.readFileSync(mdPath, 'utf-8');
       assert.ok(mdContent.includes('D001'), 'DECISIONS.md should contain D001');
@@ -117,7 +117,7 @@ describe('gsd-tools', () => {
   test('gsd_requirement_update', async () => {
     const tmpDir = makeTmpDir();
     try {
-      const dbPath = path.join(tmpDir, '.gsd', 'gsd.db');
+      const dbPath = path.join(tmpDir, '.hx', 'gsd.db');
       openDatabase(dbPath);
 
       // Seed a requirement
@@ -154,7 +154,7 @@ describe('gsd-tools', () => {
       assert.deepStrictEqual(updated!.primary_owner, 'S03', 'Primary owner should be preserved');
 
       // Verify REQUIREMENTS.md was generated
-      const mdPath = path.join(tmpDir, '.gsd', 'REQUIREMENTS.md');
+      const mdPath = path.join(tmpDir, '.hx', 'REQUIREMENTS.md');
       assert.ok(fs.existsSync(mdPath), 'REQUIREMENTS.md should be created');
       const mdContent = fs.readFileSync(mdPath, 'utf-8');
       assert.ok(mdContent.includes('R001'), 'REQUIREMENTS.md should contain R001');
@@ -182,7 +182,7 @@ describe('gsd-tools', () => {
   test('gsd_summary_save', async () => {
     const tmpDir = makeTmpDir();
     try {
-      const dbPath = path.join(tmpDir, '.gsd', 'gsd.db');
+      const dbPath = path.join(tmpDir, '.hx', 'gsd.db');
       openDatabase(dbPath);
 
       // (c) Summary tool creates artifact row
@@ -209,7 +209,7 @@ describe('gsd-tools', () => {
       assert.deepStrictEqual(rows[0]['slice_id'] as string, 'S01', 'Slice ID should match');
 
       // Verify file was written to disk
-      const filePath = path.join(tmpDir, '.gsd', 'milestones', 'M001', 'slices', 'S01', 'S01-SUMMARY.md');
+      const filePath = path.join(tmpDir, '.hx', 'milestones', 'M001', 'slices', 'S01', 'S01-SUMMARY.md');
       assert.ok(fs.existsSync(filePath), 'Summary file should be written to disk');
       const fileContent = fs.readFileSync(filePath, 'utf-8');
       assert.ok(fileContent.includes('S01 Summary'), 'File should contain summary content');
@@ -225,7 +225,7 @@ describe('gsd-tools', () => {
         tmpDir,
       );
 
-      const mFilePath = path.join(tmpDir, '.gsd', 'milestones', 'M001', 'M001-CONTEXT.md');
+      const mFilePath = path.join(tmpDir, '.hx', 'milestones', 'M001', 'M001-CONTEXT.md');
       assert.ok(fs.existsSync(mFilePath), 'Milestone-level artifact file should be created');
 
       // Test task-level artifact
@@ -241,7 +241,7 @@ describe('gsd-tools', () => {
         tmpDir,
       );
 
-      const tFilePath = path.join(tmpDir, '.gsd', 'milestones', 'M001', 'slices', 'S01', 'tasks', 'T01-SUMMARY.md');
+      const tFilePath = path.join(tmpDir, '.hx', 'milestones', 'M001', 'slices', 'S01', 'tasks', 'T01-SUMMARY.md');
       assert.ok(fs.existsSync(tFilePath), 'Task-level artifact file should be created');
 
       closeDatabase();
@@ -266,7 +266,7 @@ describe('gsd-tools', () => {
   test('Tool result format', async () => {
     const tmpDir = makeTmpDir();
     try {
-      const dbPath = path.join(tmpDir, '.gsd', 'gsd.db');
+      const dbPath = path.join(tmpDir, '.hx', 'gsd.db');
       openDatabase(dbPath);
 
       // Verify result follows AgentToolResult interface: {content: [{type: "text", text}], details}

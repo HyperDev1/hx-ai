@@ -48,22 +48,22 @@ test("detectProjectState: empty directory returns state=none", (t) => {
   assert.equal(result.v2, undefined);
 });
 
-test("detectProjectState: directory with .gsd/milestones/M001 returns v2-gsd", (t) => {
+test("detectProjectState: directory with .hx/milestones/M001 returns v2-gsd", (t) => {
   const dir = makeTempDir("v2-gsd");
   t.after(() => cleanup(dir));
 
-  mkdirSync(join(dir, ".gsd", "milestones", "M001"), { recursive: true });
+  mkdirSync(join(dir, ".hx", "milestones", "M001"), { recursive: true });
   const result = detectProjectState(dir);
   assert.equal(result.state, "v2-gsd");
   assert.ok(result.v2);
   assert.equal(result.v2!.milestoneCount, 1);
 });
 
-test("detectProjectState: directory with empty .gsd/milestones returns v2-gsd-empty", (t) => {
+test("detectProjectState: directory with empty .hx/milestones returns v2-gsd-empty", (t) => {
   const dir = makeTempDir("v2-empty");
   t.after(() => cleanup(dir));
 
-  mkdirSync(join(dir, ".gsd", "milestones"), { recursive: true });
+  mkdirSync(join(dir, ".hx", "milestones"), { recursive: true });
   const result = detectProjectState(dir);
   assert.equal(result.state, "v2-gsd-empty");
   assert.ok(result.v2);
@@ -88,18 +88,18 @@ test("detectProjectState: v2 takes priority over v1 when both exist", (t) => {
   const dir = makeTempDir("both");
   t.after(() => cleanup(dir));
 
-  mkdirSync(join(dir, ".gsd", "milestones", "M001"), { recursive: true });
+  mkdirSync(join(dir, ".hx", "milestones", "M001"), { recursive: true });
   mkdirSync(join(dir, ".planning"), { recursive: true });
   const result = detectProjectState(dir);
   assert.equal(result.state, "v2-gsd");
 });
 
-test("detectProjectState: detects preferences in .gsd/", (t) => {
+test("detectProjectState: detects preferences in .hx/", (t) => {
   const dir = makeTempDir("prefs");
   t.after(() => cleanup(dir));
 
-  mkdirSync(join(dir, ".gsd", "milestones"), { recursive: true });
-  writeFileSync(join(dir, ".gsd", "PREFERENCES.md"), "---\nversion: 1\n---\n", "utf-8");
+  mkdirSync(join(dir, ".hx", "milestones"), { recursive: true });
+  writeFileSync(join(dir, ".hx", "PREFERENCES.md"), "---\nversion: 1\n---\n", "utf-8");
   const result = detectProjectState(dir);
   assert.ok(result.v2);
   assert.equal(result.v2!.hasPreferences, true);

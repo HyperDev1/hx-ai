@@ -104,7 +104,7 @@ test("validateDirectory: subdirectory of home is NOT blocked", () => {
 // Regression test for #1317: GSD worktree inside $HOME must not be blocked even
 // when the resolved project root equals $HOME (e.g. home dir is a git repo).
 test("validateDirectory: GSD worktree path nested under home is NOT blocked (#1317)", () => {
-  const worktreePath = join(homedir(), ".gsd", "worktrees", "M001");
+  const worktreePath = join(homedir(), ".hx", "worktrees", "M001");
   mkdirSync(worktreePath, { recursive: true });
   try {
     // The worktree CWD itself is a valid location — it must pass.
@@ -112,7 +112,7 @@ test("validateDirectory: GSD worktree path nested under home is NOT blocked (#13
     assert.equal(result.safe, true, "GSD worktree path should be safe to run in");
     assert.equal(result.severity, "ok");
   } finally {
-    rmSync(join(homedir(), ".gsd", "worktrees", "M001"), { recursive: true, force: true });
+    rmSync(join(homedir(), ".hx", "worktrees", "M001"), { recursive: true, force: true });
   }
 });
 

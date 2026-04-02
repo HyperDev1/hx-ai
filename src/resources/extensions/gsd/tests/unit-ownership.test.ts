@@ -41,7 +41,7 @@ test('claimUnit: creates claim file and records agent', () => {
   try {
     claimUnit(base, 'M001/S01/T01', 'executor-01');
 
-    assert.ok(existsSync(join(base, '.gsd', 'unit-claims.json')), 'claim file should exist');
+    assert.ok(existsSync(join(base, '.hx', 'unit-claims.json')), 'claim file should exist');
     assert.equal(getOwner(base, 'M001/S01/T01'), 'executor-01');
   } finally {
     cleanup(base);

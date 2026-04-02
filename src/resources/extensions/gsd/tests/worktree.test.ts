@@ -40,10 +40,10 @@ const base = mkdtempSync(join(tmpdir(), "gsd-branch-test-"));
 run("git init -b main", base);
 run('git config user.name "Pi Test"', base);
 run('git config user.email "pi@example.com"', base);
-mkdirSync(join(base, ".gsd", "milestones", "M001", "slices", "S01", "tasks"), { recursive: true });
+mkdirSync(join(base, ".hx", "milestones", "M001", "slices", "S01", "tasks"), { recursive: true });
 writeFileSync(join(base, "README.md"), "hello\n", "utf-8");
-writeFileSync(join(base, ".gsd", "milestones", "M001", "M001-ROADMAP.md"), `# M001: Demo\n\n## Slices\n- [ ] **S01: Slice One** \`risk:low\` \`depends:[]\`\n  > After this: demo works\n`, "utf-8");
-writeFileSync(join(base, ".gsd", "milestones", "M001", "slices", "S01", "S01-PLAN.md"), `# S01: Slice One\n\n**Goal:** Demo\n**Demo:** Demo\n\n## Must-Haves\n- done\n\n## Tasks\n- [ ] **T01: Implement** \`est:10m\`\n  do it\n`, "utf-8");
+writeFileSync(join(base, ".hx", "milestones", "M001", "M001-ROADMAP.md"), `# M001: Demo\n\n## Slices\n- [ ] **S01: Slice One** \`risk:low\` \`depends:[]\`\n  > After this: demo works\n`, "utf-8");
+writeFileSync(join(base, ".hx", "milestones", "M001", "slices", "S01", "S01-PLAN.md"), `# S01: Slice One\n\n**Goal:** Demo\n**Demo:** Demo\n\n## Must-Haves\n- done\n\n## Tasks\n- [ ] **T01: Implement** \`est:10m\`\n  do it\n`, "utf-8");
 run("git add .", base);
 run('git commit -m "chore: init"', base);
 
@@ -95,8 +95,8 @@ describe('worktree', async () => {
 
   console.log("\n=== detectWorktreeName ===");
   assert.deepStrictEqual(detectWorktreeName("/projects/myapp"), null, "no worktree in plain path");
-  assert.deepStrictEqual(detectWorktreeName("/projects/myapp/.gsd/worktrees/feature-auth"), "feature-auth", "detects worktree name");
-  assert.deepStrictEqual(detectWorktreeName("/projects/myapp/.gsd/worktrees/my-wt/subdir"), "my-wt", "detects worktree with subdir");
+  assert.deepStrictEqual(detectWorktreeName("/projects/myapp/.hx/worktrees/feature-auth"), "feature-auth", "detects worktree name");
+  assert.deepStrictEqual(detectWorktreeName("/projects/myapp/.hx/worktrees/my-wt/subdir"), "my-wt", "detects worktree with subdir");
 
   // ═══════════════════════════════════════════════════════════════════════
   // Integration branch — facade-level tests
@@ -181,22 +181,22 @@ describe('worktree', async () => {
   // ── detectWorktreeName: symlink-resolved paths ───────────────────────────
   console.log("\n=== detectWorktreeName (symlink-resolved paths) ===");
   assert.deepStrictEqual(
-    detectWorktreeName("/Users/fran/.gsd/projects/89e1c9ad49bf/worktrees/M001"),
+    detectWorktreeName("/Users/fran/.hx/projects/89e1c9ad49bf/worktrees/M001"),
     "M001",
     "detects milestone in symlink-resolved path",
   );
   assert.deepStrictEqual(
-    detectWorktreeName("/Users/fran/.gsd/projects/abc123/worktrees/M002/subdir"),
+    detectWorktreeName("/Users/fran/.hx/projects/abc123/worktrees/M002/subdir"),
     "M002",
     "detects milestone with trailing subdir in symlink-resolved path",
   );
   assert.deepStrictEqual(
-    detectWorktreeName("/Users/fran/.gsd/projects/abc123"),
+    detectWorktreeName("/Users/fran/.hx/projects/abc123"),
     null,
     "returns null for project root without worktrees segment",
   );
   assert.deepStrictEqual(
-    detectWorktreeName("/foo/.gsd/worktrees/M001"),
+    detectWorktreeName("/foo/.hx/worktrees/M001"),
     "M001",
     "still detects direct layout path",
   );
@@ -209,26 +209,26 @@ describe('worktree', async () => {
   // the real project root (no git worktree metadata in these synthetic paths),
   // resolveProjectRoot returns the input unchanged rather than returning ~.
   
-  // With GSD_PROJECT_ROOT env var set (layer 1 — coordinator passes it)
-  process.env.GSD_PROJECT_ROOT = "/real/project";
+  // With HX_PROJECT_ROOT env var set (layer 1 — coordinator passes it)
+  process.env.HX_PROJECT_ROOT = "/real/project";
   assert.deepStrictEqual(
-    resolveProjectRoot("/Users/fran/.gsd/projects/89e1c9ad49bf/worktrees/M001"),
+    resolveProjectRoot("/Users/fran/.hx/projects/89e1c9ad49bf/worktrees/M001"),
     "/real/project",
-    "uses GSD_PROJECT_ROOT when set",
+    "uses HX_PROJECT_ROOT when set",
   );
-  delete process.env.GSD_PROJECT_ROOT;
+  delete process.env.HX_PROJECT_ROOT;
 
-  // Without GSD_PROJECT_ROOT, direct layout still works (no ~/.gsd collision)
+  // Without HX_PROJECT_ROOT, direct layout still works (no ~/.gsd collision)
   assert.deepStrictEqual(
     resolveProjectRoot("/some/repo"),
     "/some/repo",
-    "ignores GSD_PROJECT_ROOT override for non-worktree paths",
+    "ignores HX_PROJECT_ROOT override for non-worktree paths",
   );
-  delete process.env.GSD_PROJECT_ROOT;
+  delete process.env.HX_PROJECT_ROOT;
 
-  // Without GSD_PROJECT_ROOT, direct layout still works (no ~/.gsd collision)
+  // Without HX_PROJECT_ROOT, direct layout still works (no ~/.gsd collision)
   assert.deepStrictEqual(
-    resolveProjectRoot("/foo/.gsd/worktrees/M001"),
+    resolveProjectRoot("/foo/.hx/worktrees/M001"),
     "/foo",
     "still resolves direct layout path",
   );
@@ -238,9 +238,9 @@ describe('worktree', async () => {
     "returns unchanged for non-worktree path",
   );
 
-  // Without GSD_PROJECT_ROOT, direct layout with nested subdirs
+  // Without HX_PROJECT_ROOT, direct layout with nested subdirs
   assert.deepStrictEqual(
-    resolveProjectRoot("/data/.gsd/worktrees/M003/nested"),
+    resolveProjectRoot("/data/.hx/worktrees/M003/nested"),
     "/data",
     "resolves correctly with nested subdirs after worktree name (direct layout)",
   );
@@ -249,27 +249,27 @@ describe('worktree', async () => {
   {
     const fakeHome = mkdtempSync(join(tmpdir(), "gsd-home-"));
     const project = realpathSync(mkdtempSync(join(tmpdir(), "gsd-proj-")));
-    const storage = join(fakeHome, ".gsd", "projects", "abc123def456");
+    const storage = join(fakeHome, ".hx", "projects", "abc123def456");
     mkdirSync(storage, { recursive: true });
-    symlinkSync(storage, join(project, ".gsd"));
+    symlinkSync(storage, join(project, ".hx"));
 
     run("git init -b main", project);
     run("git config user.name 'Pi Test'", project);
     run("git config user.email 'pi@example.com'", project);
     writeFileSync(join(project, "README.md"), "init\n");
     run("git add -A && git commit -m init", project);
-    run("git worktree add .gsd/worktrees/M001 -b worktree/M001", project);
+    run("git worktree add .hx/worktrees/M001 -b worktree/M001", project);
 
-    const deep = join(project, ".gsd", "worktrees", "M001", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k");
+    const deep = join(project, ".hx", "worktrees", "M001", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k");
     mkdirSync(deep, { recursive: true });
 
-    process.env.GSD_HOME = join(fakeHome, ".gsd");
+    process.env.HX_HOME = join(fakeHome, ".hx");
     assert.deepStrictEqual(
       normalizePath(resolveProjectRoot(realpathSync(deep))),
       normalizePath(project),
       "resolves to real project root from deep symlink-resolved worktree path",
     );
-    delete process.env.GSD_HOME;
+    delete process.env.HX_HOME;
 
     rmSync(project, { recursive: true, force: true });
     rmSync(fakeHome, { recursive: true, force: true });

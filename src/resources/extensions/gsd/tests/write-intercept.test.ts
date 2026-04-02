@@ -7,48 +7,48 @@ import { isBlockedStateFile, BLOCKED_WRITE_ERROR } from '../write-intercept.ts';
 
 // ─── isBlockedStateFile: blocked paths ───────────────────────────────────
 
-test('write-intercept: blocks unix .gsd/STATE.md path', () => {
-  assert.strictEqual(isBlockedStateFile('/project/.gsd/STATE.md'), true);
+test('write-intercept: blocks unix .hx/STATE.md path', () => {
+  assert.strictEqual(isBlockedStateFile('/project/.hx/STATE.md'), true);
 });
 
-test('write-intercept: blocks relative path with dir prefix before .gsd/STATE.md', () => {
-  assert.strictEqual(isBlockedStateFile('project/.gsd/STATE.md'), true);
+test('write-intercept: blocks relative path with dir prefix before .hx/STATE.md', () => {
+  assert.strictEqual(isBlockedStateFile('project/.hx/STATE.md'), true);
 });
 
-test('write-intercept: blocks bare relative .gsd/STATE.md (no leading separator)', () => {
-  // (^|[/\\]) matches paths that start with .gsd/ — covers the case where write
+test('write-intercept: blocks bare relative .hx/STATE.md (no leading separator)', () => {
+  // (^|[/\\]) matches paths that start with .hx/ — covers the case where write
   // tools receive a bare relative path before the file exists (realpathSync fails).
-  assert.strictEqual(isBlockedStateFile('.gsd/STATE.md'), true);
+  assert.strictEqual(isBlockedStateFile('.hx/STATE.md'), true);
 });
 
-test('write-intercept: blocks nested project .gsd/STATE.md path', () => {
-  assert.strictEqual(isBlockedStateFile('/Users/dev/my-project/.gsd/STATE.md'), true);
+test('write-intercept: blocks nested project .hx/STATE.md path', () => {
+  assert.strictEqual(isBlockedStateFile('/Users/dev/my-project/.hx/STATE.md'), true);
 });
 
-test('write-intercept: blocks .gsd/projects/<name>/STATE.md (symlinked projects path)', () => {
-  assert.strictEqual(isBlockedStateFile('/home/user/.gsd/projects/my-project/STATE.md'), true);
+test('write-intercept: blocks .hx/projects/<name>/STATE.md (symlinked projects path)', () => {
+  assert.strictEqual(isBlockedStateFile('/home/user/.hx/projects/my-project/STATE.md'), true);
 });
 
 // ─── isBlockedStateFile: allowed paths ───────────────────────────────────
 
-test('write-intercept: allows .gsd/ROADMAP.md', () => {
-  assert.strictEqual(isBlockedStateFile('/project/.gsd/ROADMAP.md'), false);
+test('write-intercept: allows .hx/ROADMAP.md', () => {
+  assert.strictEqual(isBlockedStateFile('/project/.hx/ROADMAP.md'), false);
 });
 
-test('write-intercept: allows .gsd/PLAN.md', () => {
-  assert.strictEqual(isBlockedStateFile('/project/.gsd/PLAN.md'), false);
+test('write-intercept: allows .hx/PLAN.md', () => {
+  assert.strictEqual(isBlockedStateFile('/project/.hx/PLAN.md'), false);
 });
 
-test('write-intercept: allows .gsd/REQUIREMENTS.md', () => {
-  assert.strictEqual(isBlockedStateFile('/project/.gsd/REQUIREMENTS.md'), false);
+test('write-intercept: allows .hx/REQUIREMENTS.md', () => {
+  assert.strictEqual(isBlockedStateFile('/project/.hx/REQUIREMENTS.md'), false);
 });
 
-test('write-intercept: allows .gsd/SUMMARY.md', () => {
-  assert.strictEqual(isBlockedStateFile('/project/.gsd/SUMMARY.md'), false);
+test('write-intercept: allows .hx/SUMMARY.md', () => {
+  assert.strictEqual(isBlockedStateFile('/project/.hx/SUMMARY.md'), false);
 });
 
-test('write-intercept: allows .gsd/PROJECT.md', () => {
-  assert.strictEqual(isBlockedStateFile('/project/.gsd/PROJECT.md'), false);
+test('write-intercept: allows .hx/PROJECT.md', () => {
+  assert.strictEqual(isBlockedStateFile('/project/.hx/PROJECT.md'), false);
 });
 
 test('write-intercept: allows regular source files', () => {
@@ -56,10 +56,10 @@ test('write-intercept: allows regular source files', () => {
 });
 
 test('write-intercept: allows slice plan files', () => {
-  assert.strictEqual(isBlockedStateFile('/project/.gsd/milestones/M001/slices/S01/S01-PLAN.md'), false);
+  assert.strictEqual(isBlockedStateFile('/project/.hx/milestones/M001/slices/S01/S01-PLAN.md'), false);
 });
 
-test('write-intercept: does not block files named STATE.md outside .gsd/', () => {
+test('write-intercept: does not block files named STATE.md outside .hx/', () => {
   assert.strictEqual(isBlockedStateFile('/project/docs/STATE.md'), false);
 });
 

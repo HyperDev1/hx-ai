@@ -74,7 +74,7 @@ const windowsCwd = "C:\\Users\\user\\project\\.gsd\\worktrees\\M001";
 const cdCommand = `cd ${bashPath(windowsCwd)}`;
 assert.deepStrictEqual(
   cdCommand,
-  "cd 'C:/Users/user/project/.gsd/worktrees/M001'",
+  "cd 'C:/Users/user/project/.hx/worktrees/M001'",
   "cd command uses forward slashes for Windows worktree path",
 );
 
@@ -92,6 +92,6 @@ const windowsWtDir = "C:\\Users\\user\\project\\.gsd\\worktrees\\M001";
 const helpCommand = `rm -rf "${windowsWtDir.replaceAll("\\", "/")}"`;
 assert.deepStrictEqual(
   helpCommand,
-  'rm -rf "C:/Users/user/project/.gsd/worktrees/M001"',
+  'rm -rf "C:/Users/user/project/.hx/worktrees/M001"',
   "orphan cleanup help command uses forward slashes",
 );

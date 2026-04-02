@@ -61,8 +61,8 @@ test("syncGsdStateToWorktree copies canonical PREFERENCES.md", async () => {
   // Functional test: create a mock source and destination, call the sync
   const srcBase = mkdtempSync(join(tmpdir(), "gsd-wt-prefs-src-"));
   const dstBase = mkdtempSync(join(tmpdir(), "gsd-wt-prefs-dst-"));
-  const srcGsd = join(srcBase, ".gsd");
-  const dstGsd = join(dstBase, ".gsd");
+  const srcGsd = join(srcBase, ".hx");
+  const dstGsd = join(dstBase, ".hx");
   mkdirSync(srcGsd, { recursive: true });
   mkdirSync(dstGsd, { recursive: true });
 
@@ -97,8 +97,8 @@ test("syncGsdStateToWorktree copies canonical PREFERENCES.md", async () => {
 test("syncGsdStateToWorktree falls back to legacy lowercase preferences.md", async () => {
   const srcBase = mkdtempSync(join(tmpdir(), "gsd-wt-prefs-legacy-src-"));
   const dstBase = mkdtempSync(join(tmpdir(), "gsd-wt-prefs-legacy-dst-"));
-  const srcGsd = join(srcBase, ".gsd");
-  const dstGsd = join(dstBase, ".gsd");
+  const srcGsd = join(srcBase, ".hx");
+  const dstGsd = join(dstBase, ".hx");
   mkdirSync(srcGsd, { recursive: true });
   mkdirSync(dstGsd, { recursive: true });
 

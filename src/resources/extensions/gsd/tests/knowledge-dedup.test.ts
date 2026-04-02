@@ -92,8 +92,8 @@ test("knowledge: findSimilarKnowledge works for lessons", () => {
 test("knowledge: appendKnowledge returns duplicate info when entry exists", async () => {
   const tmp = makeTempDir("know-dup");
   try {
-    mkdirSync(join(tmp, ".gsd"), { recursive: true });
-    writeFileSync(join(tmp, ".gsd", "KNOWLEDGE.md"), SAMPLE_KNOWLEDGE, "utf-8");
+    mkdirSync(join(tmp, ".hx"), { recursive: true });
+    writeFileSync(join(tmp, ".hx", "KNOWLEDGE.md"), SAMPLE_KNOWLEDGE, "utf-8");
 
     const result = await appendKnowledge(tmp, "rule", "Always use prepared statements for DB queries", "global");
     assert.strictEqual(result.added, false, "should not add duplicate");
@@ -107,14 +107,14 @@ test("knowledge: appendKnowledge returns duplicate info when entry exists", asyn
 test("knowledge: appendKnowledge adds entry when no duplicate", async () => {
   const tmp = makeTempDir("know-new");
   try {
-    mkdirSync(join(tmp, ".gsd"), { recursive: true });
-    writeFileSync(join(tmp, ".gsd", "KNOWLEDGE.md"), SAMPLE_KNOWLEDGE, "utf-8");
+    mkdirSync(join(tmp, ".hx"), { recursive: true });
+    writeFileSync(join(tmp, ".hx", "KNOWLEDGE.md"), SAMPLE_KNOWLEDGE, "utf-8");
 
     const result = await appendKnowledge(tmp, "rule", "Never commit .env files", "global");
     assert.strictEqual(result.added, true);
     assert.strictEqual(result.id, "K003", "should be K003 (next after K002)");
 
-    const content = readFileSync(join(tmp, ".gsd", "KNOWLEDGE.md"), "utf-8");
+    const content = readFileSync(join(tmp, ".hx", "KNOWLEDGE.md"), "utf-8");
     assert.ok(content.includes("Never commit .env files"), "entry should be in file");
   } finally {
     rmSync(tmp, { recursive: true, force: true });
@@ -128,7 +128,7 @@ test("knowledge: appendKnowledge creates file from scratch with fields", async (
     assert.strictEqual(result.added, true);
     assert.strictEqual(result.id, "K001");
 
-    const content = readFileSync(join(tmp, ".gsd", "KNOWLEDGE.md"), "utf-8");
+    const content = readFileSync(join(tmp, ".hx", "KNOWLEDGE.md"), "utf-8");
     assert.ok(content.includes("Use TypeScript strict mode"), "entry should be in file");
     assert.ok(content.includes("Catches null errors early"), "why field should be in file");
   } finally {
@@ -139,8 +139,8 @@ test("knowledge: appendKnowledge creates file from scratch with fields", async (
 test("knowledge: appendKnowledge passes fields to existing file", async () => {
   const tmp = makeTempDir("know-fields");
   try {
-    mkdirSync(join(tmp, ".gsd"), { recursive: true });
-    writeFileSync(join(tmp, ".gsd", "KNOWLEDGE.md"), SAMPLE_KNOWLEDGE, "utf-8");
+    mkdirSync(join(tmp, ".hx"), { recursive: true });
+    writeFileSync(join(tmp, ".hx", "KNOWLEDGE.md"), SAMPLE_KNOWLEDGE, "utf-8");
 
     const result = await appendKnowledge(tmp, "lesson", "Build failed after upgrade", "M001", {
       rootCause: "Breaking change in v5",
@@ -148,7 +148,7 @@ test("knowledge: appendKnowledge passes fields to existing file", async () => {
     });
     assert.strictEqual(result.added, true);
 
-    const content = readFileSync(join(tmp, ".gsd", "KNOWLEDGE.md"), "utf-8");
+    const content = readFileSync(join(tmp, ".hx", "KNOWLEDGE.md"), "utf-8");
     assert.ok(content.includes("Build failed after upgrade"));
     assert.ok(content.includes("Breaking change in v5"), "rootCause should be in file");
     assert.ok(content.includes("Pin dependency to v4"), "fix should be in file");
@@ -160,8 +160,8 @@ test("knowledge: appendKnowledge passes fields to existing file", async () => {
 test("knowledge: appendKnowledge pattern with where field", async () => {
   const tmp = makeTempDir("know-pattern");
   try {
-    mkdirSync(join(tmp, ".gsd"), { recursive: true });
-    writeFileSync(join(tmp, ".gsd", "KNOWLEDGE.md"), SAMPLE_KNOWLEDGE, "utf-8");
+    mkdirSync(join(tmp, ".hx"), { recursive: true });
+    writeFileSync(join(tmp, ".hx", "KNOWLEDGE.md"), SAMPLE_KNOWLEDGE, "utf-8");
 
     const result = await appendKnowledge(tmp, "pattern", "Repository pattern for data access", "global", {
       where: "src/repositories/",
@@ -169,7 +169,7 @@ test("knowledge: appendKnowledge pattern with where field", async () => {
     assert.strictEqual(result.added, true);
     assert.strictEqual(result.id, "P003");
 
-    const content = readFileSync(join(tmp, ".gsd", "KNOWLEDGE.md"), "utf-8");
+    const content = readFileSync(join(tmp, ".hx", "KNOWLEDGE.md"), "utf-8");
     assert.ok(content.includes("Repository pattern for data access"));
     assert.ok(content.includes("src/repositories/"), "where field should be in file");
   } finally {

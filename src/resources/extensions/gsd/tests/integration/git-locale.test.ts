@@ -61,7 +61,7 @@ describe('git-locale', async () => {
     const repo = initTempRepo();
 
     writeFileSync(join(repo, ".gitignore"), ".gsd\n");
-    createFile(repo, ".gsd/STATE.md", "# State");
+    createFile(repo, ".hx/STATE.md", "# State");
     createFile(repo, "src/app.ts", "export const x = 1;");
 
     // Save original LC_ALL / LANG and force German locale env

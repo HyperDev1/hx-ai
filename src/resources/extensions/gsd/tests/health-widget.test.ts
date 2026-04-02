@@ -50,7 +50,7 @@ test("detectHealthWidgetProjectState: bootstrapped .gsd without milestones retur
   const dir = makeTempDir("initialized");
   t.after(() => { cleanup(dir); });
 
-  mkdirSync(join(dir, ".gsd"), { recursive: true });
+  mkdirSync(join(dir, ".hx"), { recursive: true });
   assert.equal(detectHealthWidgetProjectState(dir), "initialized");
 });
 
@@ -58,7 +58,7 @@ test("detectHealthWidgetProjectState: milestone without metrics returns active",
   const dir = makeTempDir("active");
   t.after(() => { cleanup(dir); });
 
-  mkdirSync(join(dir, ".gsd", "milestones", "M001"), { recursive: true });
+  mkdirSync(join(dir, ".hx", "milestones", "M001"), { recursive: true });
   assert.equal(detectHealthWidgetProjectState(dir), "active");
 });
 
@@ -102,9 +102,9 @@ test("detectHealthWidgetProjectState: metrics file alone does not imply project"
   const dir = makeTempDir("metrics-only");
   t.after(() => { cleanup(dir); });
 
-  mkdirSync(join(dir, ".gsd"), { recursive: true });
+  mkdirSync(join(dir, ".hx"), { recursive: true });
   writeFileSync(
-    join(dir, ".gsd", "metrics.json"),
+    join(dir, ".hx", "metrics.json"),
     JSON.stringify({ version: 1, projectStartedAt: Date.now(), units: [] }),
     "utf-8",
   );

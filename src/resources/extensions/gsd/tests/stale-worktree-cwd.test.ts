@@ -1,7 +1,7 @@
 /**
  * stale-worktree-cwd.test.ts — Tests for #608 fix.
  *
- * Verifies that when process.cwd() is inside a stale .gsd/worktrees/ path,
+ * Verifies that when process.cwd() is inside a stale .hx/worktrees/ path,
  * startAuto escapes back to the project root before proceeding.
  */
 
@@ -37,7 +37,7 @@ function createTempRepo(): string {
 // ─── escapeStaleWorktree is called by startAuto, test the detection logic ────
 
 test("detects stale worktree path and extracts project root", () => {
-  // Simulate the path pattern: /project/.gsd/worktrees/M004/...
+  // Simulate the path pattern: /project/.hx/worktrees/M004/...
   const projectRoot = "/Users/test/myproject";
   const stalePath = `${projectRoot}${sep}.gsd${sep}worktrees${sep}M004`;
 
@@ -66,7 +66,7 @@ test("mergeMilestoneToMain restores cwd to project root", () => {
     tempDir = createTempRepo();
 
     // Create milestone planning artifacts
-    const msDir = join(tempDir, ".gsd", "milestones", "M050");
+    const msDir = join(tempDir, ".hx", "milestones", "M050");
     mkdirSync(msDir, { recursive: true });
     writeFileSync(join(msDir, "CONTEXT.md"), "# M050 Context\n");
     const roadmap = [
@@ -112,8 +112,8 @@ test("process.cwd() inside removed worktree is recoverable", () => {
   try {
     tempDir = createTempRepo();
 
-    // Create a .gsd/worktrees/M099 directory to simulate stale state
-    const staleWtDir = join(tempDir, ".gsd", "worktrees", "M099");
+    // Create a .hx/worktrees/M099 directory to simulate stale state
+    const staleWtDir = join(tempDir, ".hx", "worktrees", "M099");
     mkdirSync(staleWtDir, { recursive: true });
 
     // Enter the stale directory

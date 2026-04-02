@@ -272,7 +272,7 @@ test("runProviderChecks optional providers show ok when key set", () => {
 test("runProviderChecks detects key from auth.json", () => {
   withEnv({ ANTHROPIC_API_KEY: undefined }, () => {
     const tmpHome = realpathSync(mkdtempSync(join(tmpdir(), "gsd-providers-test-")));
-    const agentDir = join(tmpHome, ".gsd", "agent");
+    const agentDir = join(tmpHome, ".hx", "agent");
     mkdirSync(agentDir, { recursive: true });
 
     // AuthStorage persists credentials with provider ID as the top-level key:
@@ -297,7 +297,7 @@ test("runProviderChecks detects key from auth.json", () => {
 test("runProviderChecks ignores empty placeholder keys in auth.json", () => {
   withEnv({ ANTHROPIC_API_KEY: undefined, ANTHROPIC_OAUTH_TOKEN: undefined, COPILOT_GITHUB_TOKEN: undefined, GH_TOKEN: undefined, GITHUB_TOKEN: undefined }, () => {
     const tmpHome = realpathSync(mkdtempSync(join(tmpdir(), "gsd-providers-test-")));
-    const agentDir = join(tmpHome, ".gsd", "agent");
+    const agentDir = join(tmpHome, ".hx", "agent");
     mkdirSync(agentDir, { recursive: true });
 
     // Empty key — what onboarding writes when user skips
@@ -393,7 +393,7 @@ test("runProviderChecks reports ok via Copilot auth.json for Anthropic", () => {
     GITHUB_TOKEN: undefined,
   }, () => {
     const tmpHome = realpathSync(mkdtempSync(join(tmpdir(), "gsd-providers-copilot-auth-test-")));
-    const agentDir = join(tmpHome, ".gsd", "agent");
+    const agentDir = join(tmpHome, ".hx", "agent");
     mkdirSync(agentDir, { recursive: true });
 
     // GitHub Copilot OAuth in auth.json
@@ -417,9 +417,9 @@ test("runProviderChecks reports ok via Copilot auth.json for Anthropic", () => {
 test("runProviderChecks uses provider-qualified anthropic-vertex model IDs", () => {
   const tmpHome = realpathSync(mkdtempSync(join(tmpdir(), "gsd-providers-vertex-prefix-home-")));
   const repo = realpathSync(mkdtempSync(join(tmpdir(), "gsd-providers-vertex-prefix-repo-")));
-  mkdirSync(join(repo, ".gsd"), { recursive: true });
+  mkdirSync(join(repo, ".hx"), { recursive: true });
   writeFileSync(
-    join(repo, ".gsd", "PREFERENCES.md"),
+    join(repo, ".hx", "PREFERENCES.md"),
     [
       "---",
       "models:",
@@ -452,9 +452,9 @@ test("runProviderChecks uses provider-qualified anthropic-vertex model IDs", () 
 test("runProviderChecks uses object provider field for anthropic-vertex models", () => {
   const tmpHome = realpathSync(mkdtempSync(join(tmpdir(), "gsd-providers-vertex-provider-home-")));
   const repo = realpathSync(mkdtempSync(join(tmpdir(), "gsd-providers-vertex-provider-repo-")));
-  mkdirSync(join(repo, ".gsd"), { recursive: true });
+  mkdirSync(join(repo, ".hx"), { recursive: true });
   writeFileSync(
-    join(repo, ".gsd", "PREFERENCES.md"),
+    join(repo, ".hx", "PREFERENCES.md"),
     [
       "---",
       "models:",

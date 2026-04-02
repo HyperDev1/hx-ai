@@ -16,7 +16,7 @@ import {
 
 function makeTmpBase(): string {
   const base = join(tmpdir(), `gsd-test-${randomUUID()}`);
-  mkdirSync(join(base, ".gsd"), { recursive: true });
+  mkdirSync(join(base, ".hx"), { recursive: true });
   return base;
 }
 

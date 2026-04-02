@@ -238,11 +238,11 @@ describe("workflow-logger", () => {
       cleanup(dir);
     });
 
-    test("writes entry to .gsd/audit-log.jsonl after setLogBasePath", () => {
+    test("writes entry to .hx/audit-log.jsonl after setLogBasePath", () => {
       setLogBasePath(dir);
       logWarning("engine", "audit test entry");
 
-      const auditPath = join(dir, ".gsd", "audit-log.jsonl");
+      const auditPath = join(dir, ".hx", "audit-log.jsonl");
       assert.ok(existsSync(auditPath), "audit-log.jsonl should exist");
       const content = readFileSync(auditPath, "utf-8");
       const entry = JSON.parse(content.trim());
@@ -256,7 +256,7 @@ describe("workflow-logger", () => {
       _resetLogs();
       logWarning("engine", "post-reset entry");
 
-      const auditPath = join(dir, ".gsd", "audit-log.jsonl");
+      const auditPath = join(dir, ".hx", "audit-log.jsonl");
       assert.ok(existsSync(auditPath), "audit-log.jsonl should exist after _resetLogs");
       const content = readFileSync(auditPath, "utf-8");
       const entry = JSON.parse(content.trim());
@@ -291,11 +291,11 @@ describe("workflow-logger", () => {
       cleanup(dir);
     });
 
-    test("writes entry to .gsd/audit-log.jsonl after setLogBasePath", () => {
+    test("writes entry to .hx/audit-log.jsonl after setLogBasePath", () => {
       setLogBasePath(dir);
       logWarning("engine", "audit test entry");
 
-      const auditPath = join(dir, ".gsd", "audit-log.jsonl");
+      const auditPath = join(dir, ".hx", "audit-log.jsonl");
       assert.ok(existsSync(auditPath), "audit-log.jsonl should exist");
       const content = readFileSync(auditPath, "utf-8");
       const entry = JSON.parse(content.trim());
@@ -309,7 +309,7 @@ describe("workflow-logger", () => {
       _resetLogs();
       logWarning("engine", "post-reset entry");
 
-      const auditPath = join(dir, ".gsd", "audit-log.jsonl");
+      const auditPath = join(dir, ".hx", "audit-log.jsonl");
       assert.ok(existsSync(auditPath), "audit-log.jsonl should exist after _resetLogs");
       const content = readFileSync(auditPath, "utf-8");
       const entry = JSON.parse(content.trim());
