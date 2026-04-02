@@ -3,7 +3,7 @@ import type { ExtensionAPI, ExtensionCommandContext } from "@hyperlab/hx-coding-
 import { HX_COMMAND_DESCRIPTION, getGsdArgumentCompletions } from "./catalog.js";
 
 export function registerGSDCommand(pi: ExtensionAPI): void {
-  pi.registerCommand("gsd", {
+  pi.registerCommand("hx", {
     description: HX_COMMAND_DESCRIPTION,
     getArgumentCompletions: getGsdArgumentCompletions,
     handler: async (args: string, ctx: ExtensionCommandContext) => {
