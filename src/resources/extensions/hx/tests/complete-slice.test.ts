@@ -13,7 +13,7 @@ import {
   getSlice,
   updateSliceStatus,
   getSliceTasks,
-} from '../gsd-db.ts';
+} from '../hx-db.ts';
 import { handleCompleteSlice } from '../tools/complete-slice.ts';
 import type { CompleteSliceParams } from '../types.ts';
 

@@ -18,7 +18,7 @@ describe("isSafeToAutoResolve", () => {
   test("returns true for .hx/ prefixed paths", () => {
     assert.ok(isSafeToAutoResolve(".hx/STATE.md"));
     assert.ok(isSafeToAutoResolve(".hx/milestones/M001/CONTEXT.md"));
-    assert.ok(isSafeToAutoResolve(".hx/gsd.db"));
+    assert.ok(isSafeToAutoResolve(".hx/hx.db"));
   });
 
   // ─── Build artifact patterns ─────────────────────────────────────────────

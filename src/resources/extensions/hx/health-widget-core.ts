@@ -38,11 +38,11 @@ function formatCost(n: number): string {
  */
 export function buildHealthLines(data: HealthWidgetData): string[] {
   if (data.projectState === "none") {
-    return ["  GSD  No project loaded — run /gsd to start"];
+    return ["  GSD  No project loaded — run /hx to start"];
   }
 
   if (data.projectState === "initialized") {
-    return ["  GSD  Project initialized — run /gsd to continue setup"];
+    return ["  GSD  Project initialized — run /hx to continue setup"];
   }
 
   const parts: string[] = [];

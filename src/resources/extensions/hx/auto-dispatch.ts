@@ -13,7 +13,7 @@ import type { GSDState } from "./types.js";
 import type { GSDPreferences } from "./preferences.js";
 import type { UatType } from "./files.js";
 import { loadFile, extractUatType, loadActiveOverrides } from "./files.js";
-import { isDbAvailable, getMilestoneSlices, getPendingGates, markAllGatesOmitted, getMilestone } from "./gsd-db.js";
+import { isDbAvailable, getMilestoneSlices, getPendingGates, markAllGatesOmitted, getMilestone } from "./hx-db.js";
 import { extractVerdict, isAcceptableUatVerdict } from "./verdict-parser.js";
 
 import {
@@ -84,7 +84,7 @@ export interface DispatchRule {
 function missingSliceStop(mid: string, phase: string): DispatchAction {
   return {
     action: "stop",
-    reason: `${mid}: phase "${phase}" has no active slice — run /gsd doctor.`,
+    reason: `${mid}: phase "${phase}" has no active slice — run /hx doctor.`,
     level: "error",
   };
 }
@@ -109,7 +109,7 @@ const MAX_REWRITE_ATTEMPTS = 3;
 // ─── Disk-persisted rewrite attempt counter ──────────────────────────────────
 // The counter must survive session restarts (crash recovery, pause/resume,
 // step-mode). Storing it on the in-memory session object caused the circuit
-// breaker to never trip — see https://github.com/gsd-build/gsd-2/issues/2203
+// breaker to never trip — see https://github.com/hx-build/hx-2/issues/2203
 function rewriteCountPath(basePath: string): string {
   return join(hxRoot(basePath), "runtime", "rewrite-count.json");
 }
@@ -233,7 +233,7 @@ export const DISPATCH_RULES: DispatchRule[] = [
         if (verdict && !isAcceptableUatVerdict(verdict, uatType)) {
           return {
             action: "stop" as const,
-            reason: `UAT verdict for ${sliceId} is "${verdict}" — blocking progression until resolved.\nReview the UAT result and update the verdict to PASS, or re-run /gsd auto after fixing.`,
+            reason: `UAT verdict for ${sliceId} is "${verdict}" — blocking progression until resolved.\nReview the UAT result and update the verdict to PASS, or re-run /hx auto after fixing.`,
             level: "warning" as const,
           };
         }
@@ -650,7 +650,7 @@ export const DISPATCH_RULES: DispatchRule[] = [
       if (missingSlices.length > 0) {
         return {
           action: "stop",
-          reason: `Cannot complete milestone ${mid}: slices ${missingSlices.join(", ")} are missing SUMMARY files. Run /gsd doctor to diagnose.`,
+          reason: `Cannot complete milestone ${mid}: slices ${missingSlices.join(", ")} are missing SUMMARY files. Run /hx doctor to diagnose.`,
           level: "error",
         };
       }
@@ -753,7 +753,7 @@ export async function resolveDispatch(
   // No rule matched — unhandled phase
   return {
     action: "stop",
-    reason: `Unhandled phase "${ctx.state.phase}" — run /gsd doctor to diagnose.`,
+    reason: `Unhandled phase "${ctx.state.phase}" — run /hx doctor to diagnose.`,
     level: "info",
     matchedRule: "<no-match>",
   };

@@ -30,10 +30,10 @@ test("resolveRtkAssetName maps supported release assets correctly", () => {
 
 test("prependPathEntry preserves the original PATH key casing and avoids duplicates", () => {
   const env: NodeJS.ProcessEnv = { Path: "/usr/bin" };
-  prependPathEntry(env, "/tmp/gsd-bin");
-  assert.equal(env.Path, `/tmp/gsd-bin${delimiter}${"/usr/bin"}`);
-  prependPathEntry(env, "/tmp/gsd-bin");
-  assert.equal(env.Path, `/tmp/gsd-bin${delimiter}${"/usr/bin"}`);
+  prependPathEntry(env, "/tmp/hx-bin");
+  assert.equal(env.Path, `/tmp/hx-bin${delimiter}${"/usr/bin"}`);
+  prependPathEntry(env, "/tmp/hx-bin");
+  assert.equal(env.Path, `/tmp/hx-bin${delimiter}${"/usr/bin"}`);
 });
 
 test("buildRtkEnv prepends the managed bin dir and disables telemetry", () => {

@@ -57,7 +57,7 @@ import {
   type MilestoneRow,
   type SliceRow,
   type TaskRow,
-} from './gsd-db.js';
+} from './hx-db.js';
 
 /**
  * A "ghost" milestone directory contains only META.json (and no substantive
@@ -146,7 +146,7 @@ export async function getActiveMilestoneId(basePath: string): Promise<string | n
   if (isDbAvailable()) {
     const allMilestones = getAllMilestones();
     if (allMilestones.length > 0) {
-      // Respect queue-order.json so /gsd queue reordering is honored (#2556).
+      // Respect queue-order.json so /hx queue reordering is honored (#2556).
       // Without this, the DB path uses lexicographic sort while the dispatch
       // guard uses queue order — causing a deadlock.
       const customOrder = loadQueueOrder(basePath);
@@ -282,7 +282,7 @@ export async function deriveStateFromDb(basePath: string): Promise<GSDState> {
   let allMilestones = getAllMilestones();
 
   // Incremental disk→DB sync: milestone directories created outside the DB
-  // write path (via /gsd queue, manual mkdir, or complete-milestone writing the
+  // write path (via /hx queue, manual mkdir, or complete-milestone writing the
   // next CONTEXT.md) are never inserted by the initial migration guard in
   // auto-start.ts because that guard only runs when gsd.db doesn't exist yet.
   // Reconcile here so deriveStateFromDb never silently misses queued milestones.
@@ -338,7 +338,7 @@ export async function deriveStateFromDb(basePath: string): Promise<GSDState> {
       phase: 'pre-planning',
       recentDecisions: [],
       blockers: [],
-      nextAction: 'No milestones found. Run /gsd to create one.',
+      nextAction: 'No milestones found. Run /hx to create one.',
       registry: [],
       requirements,
       progress: { milestones: { done: 0, total: 0 } },
@@ -502,7 +502,7 @@ export async function deriveStateFromDb(basePath: string): Promise<GSDState> {
         activeMilestone: null, activeSlice: null, activeTask: null,
         phase: 'pre-planning',
         recentDecisions: [], blockers: [],
-        nextAction: `All remaining milestones are parked (${parkedIds}). Run /gsd unpark <id> or create a new milestone.`,
+        nextAction: `All remaining milestones are parked (${parkedIds}). Run /hx unpark <id> or create a new milestone.`,
         registry, requirements,
         progress: { milestones: milestoneProgress },
       };
@@ -513,7 +513,7 @@ export async function deriveStateFromDb(basePath: string): Promise<GSDState> {
         activeMilestone: null, activeSlice: null, activeTask: null,
         phase: 'pre-planning',
         recentDecisions: [], blockers: [],
-        nextAction: 'No milestones found. Run /gsd to create one.',
+        nextAction: 'No milestones found. Run /hx to create one.',
         registry: [], requirements,
         progress: { milestones: { done: 0, total: 0 } },
       };
@@ -570,7 +570,7 @@ export async function deriveStateFromDb(basePath: string): Promise<GSDState> {
   // ── All slices done → validating/completing ─────────────────────────
   // Guard: [].every() === true (vacuous truth). Without the length check,
   // an empty slice array causes a premature phase transition to
-  // validating-milestone. See: https://github.com/gsd-build/gsd-2/issues/2667
+  // validating-milestone. See: https://github.com/hx-build/hx-2/issues/2667
   const allSlicesDone = activeMilestoneSlices.length > 0 && activeMilestoneSlices.every(s => isClosedStatus(s.status));
   if (allSlicesDone) {
     const validationFile = resolveMilestoneFile(basePath, activeMilestone.id, "VALIDATION");
@@ -880,7 +880,7 @@ export async function _deriveStateImpl(basePath: string): Promise<GSDState> {
       phase: 'pre-planning',
       recentDecisions: [],
       blockers: [],
-      nextAction: 'No milestones found. Run /gsd to create one.',
+      nextAction: 'No milestones found. Run /hx to create one.',
       registry: [],
       requirements,
       progress: {
@@ -1116,7 +1116,7 @@ export async function _deriveStateImpl(basePath: string): Promise<GSDState> {
         phase: 'pre-planning',
         recentDecisions: [],
         blockers: [],
-        nextAction: `All remaining milestones are parked (${parkedIds}). Run /gsd unpark <id> or create a new milestone.`,
+        nextAction: `All remaining milestones are parked (${parkedIds}). Run /hx unpark <id> or create a new milestone.`,
         registry,
         requirements,
         progress: {
@@ -1133,7 +1133,7 @@ export async function _deriveStateImpl(basePath: string): Promise<GSDState> {
         phase: 'pre-planning',
         recentDecisions: [],
         blockers: [],
-        nextAction: 'No milestones found. Run /gsd to create one.',
+        nextAction: 'No milestones found. Run /hx to create one.',
         registry: [],
         requirements,
         progress: {
@@ -1459,7 +1459,7 @@ export async function _deriveStateImpl(basePath: string): Promise<GSDState> {
   }
 
   // ── REPLAN-TRIGGER detection: triage-initiated replan ──────────────────
-  // Manual `/gsd triage` writes REPLAN-TRIGGER.md when a capture is classified
+  // Manual `/hx triage` writes REPLAN-TRIGGER.md when a capture is classified
   // as "replan". Detect it here and transition to replanning-slice so the
   // dispatch loop picks it up (instead of silently advancing past it).
   if (!blockerTaskId) {

@@ -2,7 +2,7 @@
  * GSD Parallel Monitor Overlay
  *
  * Full-screen TUI overlay showing real-time parallel worker progress.
- * Opened via `/gsd parallel watch` or Ctrl+Alt+P.
+ * Opened via `/hx parallel watch` or Ctrl+Alt+P.
  * Reads the same data sources as `scripts/parallel-monitor.mjs` but
  * renders as a native pi-tui overlay with theme integration.
  */
@@ -393,7 +393,7 @@ export class ParallelMonitorOverlay {
     if (this.workers.length === 0) {
       lines.push("");
       lines.push(t.fg("warning", "  No parallel workers found."));
-      lines.push(t.fg("muted", "  Run /gsd parallel start to begin."));
+      lines.push(t.fg("muted", "  Run /hx parallel start to begin."));
     } else {
       for (const wk of this.workers) {
         lines.push("");

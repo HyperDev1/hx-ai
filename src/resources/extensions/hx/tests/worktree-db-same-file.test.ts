@@ -27,7 +27,7 @@ import {
   closeDatabase,
   reconcileWorktreeDb,
   insertDecision,
-} from "../gsd-db.ts";
+} from "../hx-db.ts";
 import { isInfrastructureError } from "../auto/infra-errors.ts";
 
 // ─── Fix 1 & 2: reconcileWorktreeDb same-file guard ─────────────────

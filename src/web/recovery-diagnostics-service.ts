@@ -206,12 +206,12 @@ function buildCommandSuggestions(
     }
   }
 
-  if (phase === "planning") add("/gsd", "Open GSD planning")
-  if (phase === "executing" || phase === "summarizing") add("/gsd auto", "Resume GSD auto mode")
-  if (activeScope) add(`/gsd doctor ${activeScope}`, "Inspect scoped doctor report")
-  if (activeScope) add(`/gsd doctor fix ${activeScope}`, "Apply scoped doctor fixes")
-  if (validationCount > 0 && activeScope) add(`/gsd doctor audit ${activeScope}`, "Audit validation diagnostics")
-  add("/gsd status", "Check current-project status")
+  if (phase === "planning") add("/hx", "Open HX planning")
+  if (phase === "executing" || phase === "summarizing") add("/hx auto", "Resume HX auto mode")
+  if (activeScope) add(`/hx doctor ${activeScope}`, "Inspect scoped doctor report")
+  if (activeScope) add(`/hx doctor fix ${activeScope}`, "Apply scoped doctor fixes")
+  if (validationCount > 0 && activeScope) add(`/hx doctor audit ${activeScope}`, "Audit validation diagnostics")
+  add("/hx status", "Check current-project status")
 
   return [...suggestions.values()]
 }

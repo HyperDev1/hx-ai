@@ -1,7 +1,7 @@
 /**
  * discuss-queued-milestones.test.ts — Tests for #2307.
  *
- * /gsd discuss was previously gated on state.activeMilestone, which prevented
+ * /hx discuss was previously gated on state.activeMilestone, which prevented
  * users from discussing queued (pending) milestones during roadmap grooming.
  *
  * These tests verify:
@@ -174,7 +174,7 @@ describe("discuss-queued-milestones (#2307)", () => {
 
     // The old guard was a simple early-exit:
     //   if (!state.activeMilestone) {
-    //     ctx.ui.notify("No active milestone. Run /gsd to create one first.", "warning");
+    //     ctx.ui.notify("No active milestone. Run /hx to create one first.", "warning");
     //     return;
     //   }
     //

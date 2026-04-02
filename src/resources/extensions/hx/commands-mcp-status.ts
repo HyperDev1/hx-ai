@@ -1,12 +1,12 @@
 /**
- * MCP Status — `/gsd mcp` command handler.
+ * MCP Status — `/hx mcp` command handler.
  *
  * Shows configured MCP servers, their connection status, and available tools.
  *
  * Subcommands:
- *   /gsd mcp             — Overview of all servers (alias: /gsd mcp status)
- *   /gsd mcp status      — Same as bare /gsd mcp
- *   /gsd mcp check <srv> — Detailed status for a specific server
+ *   /hx mcp             — Overview of all servers (alias: /hx mcp status)
+ *   /hx mcp status      — Same as bare /hx mcp
+ *   /hx mcp check <srv> — Detailed status for a specific server
  */
 
 import type { ExtensionCommandContext } from "@hyperlab/hx-coding-agent";
@@ -111,7 +111,7 @@ export function formatMcpStatusReport(servers: McpServerStatus[]): string {
   }
 
   lines.push("");
-  lines.push("Use /gsd mcp check <server> for details on a specific server.");
+  lines.push("Use /hx mcp check <server> for details on a specific server.");
   lines.push("Use mcp_discover to connect and list tools for a server.");
 
   return lines.join("\n");
@@ -147,7 +147,7 @@ export function formatMcpServerDetail(server: McpServerDetail): string {
 // ─── Command handler ────────────────────────────────────────────────────────
 
 /**
- * Handle `/gsd mcp [status|check <server>]`.
+ * Handle `/hx mcp [status|check <server>]`.
  */
 export async function handleMcpStatus(
   args: string,
@@ -156,7 +156,7 @@ export async function handleMcpStatus(
   const trimmed = args.trim().toLowerCase();
   const configs = readMcpConfigs();
 
-  // /gsd mcp check <server>
+  // /hx mcp check <server>
   if (trimmed.startsWith("check ")) {
     const serverName = args.trim().slice("check ".length).trim();
     const config = configs.find((c) => c.name === serverName);
@@ -201,7 +201,7 @@ export async function handleMcpStatus(
     return;
   }
 
-  // /gsd mcp or /gsd mcp status
+  // /hx mcp or /hx mcp status
   if (!trimmed || trimmed === "status") {
     // Build status for each server
     const statuses: McpServerStatus[] = [];
@@ -239,7 +239,7 @@ export async function handleMcpStatus(
 
   // Unknown subcommand
   ctx.ui.notify(
-    "Usage: /gsd mcp [status|check <server>]\n\n" +
+    "Usage: /hx mcp [status|check <server>]\n\n" +
     "  status           Show all MCP server statuses (default)\n" +
     "  check <server>   Detailed status for a specific server",
     "warning",

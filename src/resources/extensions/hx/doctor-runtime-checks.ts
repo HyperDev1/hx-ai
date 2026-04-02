@@ -307,7 +307,7 @@ export async function checkRuntimeHealth(
         ".hx/activity/",
         ".hx/runtime/",
         ".hx/auto.lock",
-        ".hx/gsd.db",
+        ".hx/hx.db",
         ".hx/completed-units.json",
       ];
 
@@ -468,7 +468,7 @@ export async function checkRuntimeHealth(
             code: "metrics_ledger_bloat",
             scope: "project",
             unitId: "project",
-            message: `metrics.json has ${parsed.units.length} unit entries (${fileSizeMB}MB) — threshold is ${BLOAT_UNITS_THRESHOLD}. Run /gsd doctor --fix to prune to the newest 1500 entries.`,
+            message: `metrics.json has ${parsed.units.length} unit entries (${fileSizeMB}MB) — threshold is ${BLOAT_UNITS_THRESHOLD}. Run /hx doctor --fix to prune to the newest 1500 entries.`,
             file: ".hx/metrics.json",
             fixable: true,
           });
@@ -528,18 +528,18 @@ export async function checkRuntimeHealth(
   }
 
   // ── Snapshot ref bloat ────────────────────────────────────────────────
-  // refs/gsd/snapshots/ accumulate over time. Prune to newest 5 per label
+  // refs/hx/snapshots/ accumulate over time. Prune to newest 5 per label
   // when total count exceeds threshold.
   try {
     if (nativeIsRepo(basePath)) {
-      const refs = nativeForEachRef(basePath, "refs/gsd/snapshots/");
+      const refs = nativeForEachRef(basePath, "refs/hx/snapshots/");
       if (refs.length > 50) {
         issues.push({
           severity: "warning",
           code: "snapshot_ref_bloat",
           scope: "project",
           unitId: "project",
-          message: `${refs.length} snapshot refs found under refs/gsd/snapshots/ — pruning to newest 5 per label will reclaim git storage`,
+          message: `${refs.length} snapshot refs found under refs/hx/snapshots/ — pruning to newest 5 per label will reclaim git storage`,
           fixable: true,
         });
 

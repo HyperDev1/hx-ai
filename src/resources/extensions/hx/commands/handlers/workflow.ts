@@ -28,7 +28,7 @@ import { validateDefinition } from "../../definition-loader.js";
 // ─── Custom Workflow Subcommands ─────────────────────────────────────────
 
 const WORKFLOW_USAGE = [
-  "Usage: /gsd workflow <subcommand>",
+  "Usage: /hx workflow <subcommand>",
   "",
   "  new               — Create a new workflow definition (via skill)",
   "  run <name> [k=v]  — Create a run and start auto-mode",
@@ -43,7 +43,7 @@ async function handleCustomWorkflow(
   ctx: ExtensionCommandContext,
   pi: ExtensionAPI,
 ): Promise<boolean> {
-  // Bare `/gsd workflow` — show usage
+  // Bare `/hx workflow` — show usage
   if (!sub) {
     ctx.ui.notify(WORKFLOW_USAGE, "info");
     return true;
@@ -59,7 +59,7 @@ async function handleCustomWorkflow(
   if (sub === "run" || sub.startsWith("run ")) {
     const args = sub.slice("run".length).trim();
     if (!args) {
-      ctx.ui.notify("Usage: /gsd workflow run <name> [param=value ...]", "warning");
+      ctx.ui.notify("Usage: /hx workflow run <name> [param=value ...]", "warning");
       return true;
     }
     const parts = args.split(/\s+/);
@@ -79,7 +79,7 @@ async function handleCustomWorkflow(
       ctx.ui.notify(`Created workflow run: ${defName}\nRun dir: ${runDir}`, "info");
       await startAuto(ctx, pi, base, false);
     } catch (err) {
-      // Clean up engine state so a failed workflow run doesn't pollute the next /gsd auto
+      // Clean up engine state so a failed workflow run doesn't pollute the next /hx auto
       setActiveEngineId(null);
       setActiveRunDir(null);
       const msg = err instanceof Error ? err.message : String(err);
@@ -109,7 +109,7 @@ async function handleCustomWorkflow(
   if (sub === "validate" || sub.startsWith("validate ")) {
     const defName = sub.slice("validate".length).trim();
     if (!defName) {
-      ctx.ui.notify("Usage: /gsd workflow validate <name>", "warning");
+      ctx.ui.notify("Usage: /hx workflow validate <name>", "warning");
       return true;
     }
     const base = projectRoot();
@@ -138,7 +138,7 @@ async function handleCustomWorkflow(
   if (sub === "pause") {
     const engineId = getActiveEngineId();
     if (engineId === "dev" || engineId === null) {
-      ctx.ui.notify("No custom workflow is running. Use /gsd pause for dev workflow.", "warning");
+      ctx.ui.notify("No custom workflow is running. Use /hx pause for dev workflow.", "warning");
       return true;
     }
     if (!isAutoActive()) {
@@ -154,7 +154,7 @@ async function handleCustomWorkflow(
   if (sub === "resume") {
     const engineId = getActiveEngineId();
     if (engineId === "dev" || engineId === null) {
-      ctx.ui.notify("No custom workflow to resume. Use /gsd auto for dev workflow.", "warning");
+      ctx.ui.notify("No custom workflow to resume. Use /hx auto for dev workflow.", "warning");
       return true;
     }
     try {
@@ -173,7 +173,7 @@ async function handleCustomWorkflow(
 }
 
 export async function handleWorkflowCommand(trimmed: string, ctx: ExtensionCommandContext, pi: ExtensionAPI): Promise<boolean> {
-  // ── Custom workflow commands (`/gsd workflow ...`) ──
+  // ── Custom workflow commands (`/hx workflow ...`) ──
   if (trimmed === "workflow" || trimmed.startsWith("workflow ")) {
     const sub = trimmed.slice("workflow".length).trim();
     return handleCustomWorkflow(sub, ctx, pi);
@@ -190,8 +190,8 @@ export async function handleWorkflowCommand(trimmed: string, ctx: ExtensionComma
   if (trimmed === "quick" || trimmed.startsWith("quick ")) {
     if (isAutoActive()) {
       ctx.ui.notify(
-        "/gsd quick cannot run while auto-mode is active.\n" +
-        "Stop auto-mode first with /gsd stop, then run /gsd quick.",
+        "/hx quick cannot run while auto-mode is active.\n" +
+        "Stop auto-mode first with /hx stop, then run /hx quick.",
         "error",
       );
       return true;
@@ -233,14 +233,14 @@ export async function handleWorkflowCommand(trimmed: string, ctx: ExtensionComma
       targetId = state.activeMilestone.id;
     }
     if (isParked(basePath, targetId)) {
-      ctx.ui.notify(`${targetId} is already parked. Use /gsd unpark ${targetId} to reactivate.`, "info");
+      ctx.ui.notify(`${targetId} is already parked. Use /hx unpark ${targetId} to reactivate.`, "info");
       return true;
     }
     const reasonParts = arg.replace(targetId, "").trim().replace(/^["']|["']$/g, "");
-    const reason = reasonParts || "Parked via /gsd park";
+    const reason = reasonParts || "Parked via /hx park";
     const success = parkMilestone(basePath, targetId, reason);
     ctx.ui.notify(
-      success ? `Parked ${targetId}. Run /gsd unpark ${targetId} to reactivate.` : `Could not park ${targetId} — milestone not found.`,
+      success ? `Parked ${targetId}. Run /hx unpark ${targetId} to reactivate.` : `Could not park ${targetId} — milestone not found.`,
       success ? "info" : "warning",
     );
     return true;
@@ -259,7 +259,7 @@ export async function handleWorkflowCommand(trimmed: string, ctx: ExtensionComma
       if (parkedEntries.length === 1) {
         targetId = parkedEntries[0].id;
       } else {
-        ctx.ui.notify(`Parked milestones: ${parkedEntries.map((entry) => entry.id).join(", ")}. Specify which to unpark: /gsd unpark <id>`, "info");
+        ctx.ui.notify(`Parked milestones: ${parkedEntries.map((entry) => entry.id).join(", ")}. Specify which to unpark: /hx unpark <id>`, "info");
         return true;
       }
     }

@@ -15,7 +15,7 @@ import {
   insertSlice,
   insertTask,
   updateTaskStatus,
-} from '../gsd-db.ts';
+} from '../hx-db.ts';
 // ─── Fixture Helpers ───────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
@@ -750,7 +750,7 @@ describe('derive-state-db', async () => {
       insertTask({ id: 'T02', sliceId: 'S01', milestoneId: 'M001', title: 'Done Task', status: 'complete' });
 
       // Seed the replan_triggered_at column — DB path uses column instead of disk file
-      const { _getAdapter } = await import('../gsd-db.ts');
+      const { _getAdapter } = await import('../hx-db.ts');
       const adapter = _getAdapter();
       adapter!.prepare(
         "UPDATE slices SET replan_triggered_at = :ts WHERE milestone_id = :mid AND id = :sid",
@@ -1002,7 +1002,7 @@ describe('derive-state-db', async () => {
       writeFile(base, 'milestones/M002/M002-CONTEXT.md', '# M002: Queued\n\nQueued milestone.');
 
       openDatabase(':memory:');
-      // Only insert M001 — simulates the state after migration guard ran then /gsd queue added M002
+      // Only insert M001 — simulates the state after migration guard ran then /hx queue added M002
       insertMilestone({ id: 'M001', title: 'First', status: 'complete' });
 
       invalidateStateCache();

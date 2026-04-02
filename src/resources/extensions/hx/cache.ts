@@ -12,7 +12,7 @@
 import { invalidateStateCache } from './state.js';
 import { clearPathCache } from './paths.js';
 import { clearParseCache } from './files.js';
-import { clearArtifacts } from './gsd-db.js';
+import { clearArtifacts } from './hx-db.js';
 
 /**
  * Invalidate all GSD runtime caches in one call.

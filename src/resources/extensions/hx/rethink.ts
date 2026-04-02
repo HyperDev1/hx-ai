@@ -16,7 +16,7 @@ import { hxRoot } from "./paths.js";
 import { findMilestoneIds } from "./milestone-ids.js";
 import { loadQueueOrder, validateQueueOrder } from "./queue-order.js";
 import { isParked, getParkedReason } from "./milestone-actions.js";
-import { getMilestoneSlices, isDbAvailable } from "./gsd-db.js";
+import { getMilestoneSlices, isDbAvailable } from "./hx-db.js";
 import { buildExistingMilestonesContext } from "./guided-flow-queue.js";
 import { loadPrompt } from "./prompt-loader.js";
 
@@ -35,7 +35,7 @@ export async function handleRethink(
   const basePath = process.cwd();
   const root = hxRoot(basePath);
   if (!existsSync(root)) {
-    ctx.ui.notify("No GSD project found. Run /gsd init first.", "warning");
+    ctx.ui.notify("No GSD project found. Run /hx init first.", "warning");
     return;
   }
 

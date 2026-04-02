@@ -1,7 +1,7 @@
 /**
  * dispatch-workflow-idle-race.test.ts — Regression test for #discuss double-loop bug.
  *
- * /gsd discuss was dispatching a slice discussion then immediately calling
+ * /hx discuss was dispatching a slice discussion then immediately calling
  * waitForIdle() before the agent had a chance to set runningPrompt. Since
  * waitForIdle() returns `this.runningPrompt ?? Promise.resolve()`, it resolved
  * instantly when called before the turn started, causing the picker to loop back

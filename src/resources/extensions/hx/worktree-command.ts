@@ -347,7 +347,7 @@ async function handleCreate(
           `This worktree inherited existing GSD milestones from the main branch.`,
           ``,
           `  Continue — keep milestones and pick up where main left off`,
-          `  Start fresh — clear milestones so /gsd auto starts a new project`,
+          `  Start fresh — clear milestones so /hx auto starts a new project`,
         ].join("\n"),
         confirmLabel: "Continue",
         declineLabel: "Start fresh",
@@ -362,7 +362,7 @@ async function handleCreate(
       ? `  ${CLR.muted("Auto-committed on previous branch before switching.")}`
       : "";
     const freshNote = clearedPlans
-      ? `  ${CLR.ok("✓")} Cleared milestones — ${CLR.hint("/gsd auto")} will start fresh.`
+      ? `  ${CLR.ok("✓")} Cleared milestones — ${CLR.hint("/hx auto")} will start fresh.`
       : "";
     ctx.ui.notify(
       [
@@ -668,7 +668,7 @@ async function handleMerge(
     const mainDbPath = join(basePath, ".hx", "hx.db");
     if (existsSync(wtDbPath) && existsSync(mainDbPath)) {
       try {
-        const { reconcileWorktreeDb } = await import("./gsd-db.js");
+        const { reconcileWorktreeDb } = await import("./hx-db.js");
         reconcileWorktreeDb(mainDbPath, wtDbPath);
       } catch { /* non-fatal */ }
     }

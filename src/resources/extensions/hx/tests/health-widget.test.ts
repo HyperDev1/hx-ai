@@ -64,13 +64,13 @@ test("detectHealthWidgetProjectState: milestone without metrics returns active",
 
 test("buildHealthLines: none state shows onboarding copy", (t) => {
   assert.deepEqual(buildHealthLines(activeData({ projectState: "none" })), [
-    "  GSD  No project loaded — run /gsd to start",
+    "  GSD  No project loaded — run /hx to start",
   ]);
 });
 
 test("buildHealthLines: initialized state shows continue setup copy", (t) => {
   assert.deepEqual(buildHealthLines(activeData({ projectState: "initialized" })), [
-    "  GSD  Project initialized — run /gsd to continue setup",
+    "  GSD  Project initialized — run /hx to continue setup",
   ]);
 });
 

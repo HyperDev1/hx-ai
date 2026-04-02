@@ -1,6 +1,6 @@
 /**
  * Service Tier — gating, status formatting, icon resolution, and
- * the /gsd fast command handler.
+ * the /hx fast command handler.
  *
  * Service tiers (priority/flex) are an OpenAI feature that only applies
  * to gpt-5.4 variants. This module centralizes the model-gating logic
@@ -35,7 +35,7 @@ const SERVICE_TIER_SCOPE_NOTE = "Only affects gpt-5.4 models, regardless of prov
  * (set via CAPABILITY_PATCHES in packages/pi-ai/src/models.ts). When callers
  * have access to the full Model object, prefer reading capabilities directly.
  *
- * See: https://github.com/gsd-build/gsd-2/issues/2546
+ * See: https://github.com/hx-build/hx-2/issues/2546
  */
 const SERVICE_TIER_MODEL_PREFIXES = ["gpt-5.4"] as const;
 
@@ -61,9 +61,9 @@ export function formatServiceTierStatus(tier: ServiceTierSetting): string {
       "Service tier: disabled",
       "",
       "Usage:",
-      "  /gsd fast on     Set to priority (2x cost, faster)",
-      "  /gsd fast flex   Set to flex (0.5x cost, slower)",
-      "  /gsd fast off    Disable service tier",
+      "  /hx fast on     Set to priority (2x cost, faster)",
+      "  /hx fast flex   Set to flex (0.5x cost, slower)",
+      "  /hx fast off    Disable service tier",
       "",
       SERVICE_TIER_SCOPE_NOTE,
     ].join("\n");
@@ -74,9 +74,9 @@ export function formatServiceTierStatus(tier: ServiceTierSetting): string {
     `Service tier: ${label}`,
     "",
     "Usage:",
-    "  /gsd fast on     Set to priority (2x cost, faster)",
-    "  /gsd fast flex   Set to flex (0.5x cost, slower)",
-    "  /gsd fast off    Disable service tier",
+    "  /hx fast on     Set to priority (2x cost, faster)",
+    "  /hx fast flex   Set to flex (0.5x cost, slower)",
+    "  /hx fast off    Disable service tier",
     "",
     SERVICE_TIER_SCOPE_NOTE,
   ].join("\n");
@@ -157,7 +157,7 @@ async function writeGlobalServiceTier(
 // ─── Command Handler ─────────────────────────────────────────────────────────
 
 /**
- * Handle `/gsd fast [on|off|flex|status]`.
+ * Handle `/hx fast [on|off|flex|status]`.
  */
 export async function handleFast(args: string, ctx: ExtensionCommandContext): Promise<void> {
   const trimmed = args.trim().toLowerCase();
@@ -190,7 +190,7 @@ export async function handleFast(args: string, ctx: ExtensionCommandContext): Pr
   }
 
   ctx.ui.notify(
-    "Usage: /gsd fast [on|off|flex|status]\n\n  on    Priority tier (2x cost, faster)\n  off   Disable service tier\n  flex  Flex tier (0.5x cost, slower)\n  status Show current setting",
+    "Usage: /hx fast [on|off|flex|status]\n\n  on    Priority tier (2x cost, faster)\n  off   Disable service tier\n  flex  Flex tier (0.5x cost, slower)\n  status Show current setting",
     "warning",
   );
 }

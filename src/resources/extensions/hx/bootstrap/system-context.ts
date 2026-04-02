@@ -28,7 +28,7 @@ function warnDeprecatedAgentInstructions(): void {
       console.warn(
         `[GSD] DEPRECATED: ${path} is no longer loaded. ` +
         `Migrate your instructions to AGENTS.md (or CLAUDE.md) in the same directory. ` +
-        `See https://github.com/gsd-build/GSD-2/issues/1492`,
+        `See https://github.com/hx-build/GSD-2/issues/1492`,
       );
     }
   }
@@ -46,7 +46,7 @@ export async function buildBeforeAgentStartResult(
   if (shouldPromptToEnableCmux(loadedPreferences?.preferences)) {
     markCmuxPromptShown();
     ctx.ui.notify(
-      "cmux detected. Run /gsd cmux on to enable sidebar metadata, notifications, and visual subagent splits for this project.",
+      "cmux detected. Run /hx cmux on to enable sidebar metadata, notifications, and visual subagent splits for this project.",
       "info",
     );
   }

@@ -1,7 +1,7 @@
 /**
- * Tests that /gsd quick is blocked when auto-mode is active.
+ * Tests that /hx quick is blocked when auto-mode is active.
  *
- * Relates to #2417: /gsd quick freezes terminal when auto-mode is active.
+ * Relates to #2417: /hx quick freezes terminal when auto-mode is active.
  * The fix adds an isAutoActive() guard in handleWorkflowCommand before
  * delegating to handleQuick.
  */
@@ -13,7 +13,7 @@ import { join } from "node:path";
 
 // ─── Structural test: verify the guard exists in source ──────────────────────
 
-describe("/gsd quick auto-mode guard (#2417)", () => {
+describe("/hx quick auto-mode guard (#2417)", () => {
   it("handleWorkflowCommand checks isAutoActive() before calling handleQuick", () => {
     // Read the source file and verify the guard is structurally present
     const src = readFileSync(
@@ -47,7 +47,7 @@ describe("/gsd quick auto-mode guard (#2417)", () => {
     );
   });
 
-  it("guard shows error message mentioning /gsd stop", () => {
+  it("guard shows error message mentioning /hx stop", () => {
     const src = readFileSync(
       join(
         import.meta.dirname,
@@ -61,12 +61,12 @@ describe("/gsd quick auto-mode guard (#2417)", () => {
 
     // The error message should tell the user to stop auto-mode first
     assert.ok(
-      src.includes("/gsd quick cannot run while auto-mode is active"),
+      src.includes("/hx quick cannot run while auto-mode is active"),
       "error message explains that quick cannot run during auto-mode",
     );
     assert.ok(
-      src.includes("/gsd stop"),
-      "error message mentions /gsd stop as the resolution",
+      src.includes("/hx stop"),
+      "error message mentions /hx stop as the resolution",
     );
   });
 

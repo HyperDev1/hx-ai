@@ -7,7 +7,7 @@ import {
 } from "../bundled-extension-paths.ts";
 
 test("bundled extension paths use the platform delimiter by default", () => {
-  const paths = ["/tmp/gsd/a.ts", "/tmp/gsd/b.ts"];
+  const paths = ["/tmp/hx/a.ts", "/tmp/hx/b.ts"];
   const encoded = serializeBundledExtensionPaths(paths);
 
   assert.equal(encoded, paths.join(delimiter));

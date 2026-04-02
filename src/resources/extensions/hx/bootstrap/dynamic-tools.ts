@@ -10,13 +10,13 @@ import { setLogBasePath } from "../workflow-logger.js";
 /**
  * Resolve the correct DB path for the current working directory.
  * If `basePath` is inside a `.hx/worktrees/<MID>/` directory, returns
- * the project root's `.hx/gsd.db` (shared WAL — R012). Otherwise
- * returns `<basePath>/.gsd/gsd.db`.
+ * the project root's `.hx/hx.db` (shared WAL — R012). Otherwise
+ * returns `<basePath>/.gsd/hx.db`.
  */
 export function resolveProjectRootDbPath(basePath: string): string {
   // Detect worktree: look for `.hx/worktrees/` in the path segments.
   // A worktree path looks like: /project/root/.gsd/worktrees/M001/...
-  // We need to resolve back to /project/root/.gsd/gsd.db
+  // We need to resolve back to /project/root/.gsd/hx.db
   const marker = `${sep}.gsd${sep}worktrees${sep}`;
   const idx = basePath.indexOf(marker);
   if (idx !== -1) {
@@ -37,14 +37,14 @@ export function resolveProjectRootDbPath(basePath: string): string {
 
 export async function ensureDbOpen(): Promise<boolean> {
   try {
-    const db = await import("../gsd-db.js");
+    const db = await import("../hx-db.js");
     if (db.isDbAvailable()) return true;
 
     const basePath = process.cwd();
     const dbPath = resolveProjectRootDbPath(basePath);
     const gsdDir = join(basePath, ".hx");
 
-    // Derive the project root from the DB path (strip .gsd/gsd.db)
+    // Derive the project root from the DB path (strip .gsd/hx.db)
     const projectRoot = join(dbPath, "..", "..");
 
     // Open existing DB file (may be at project root for worktrees)

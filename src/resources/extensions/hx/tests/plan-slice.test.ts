@@ -4,7 +4,7 @@ import { mkdtempSync, mkdirSync, rmSync, readFileSync, existsSync, writeFileSync
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
-import { openDatabase, closeDatabase, insertMilestone, insertSlice, getSlice, getSliceTasks, getTask } from '../gsd-db.ts';
+import { openDatabase, closeDatabase, insertMilestone, insertSlice, getSlice, getSliceTasks, getTask } from '../hx-db.ts';
 import { handlePlanSlice } from '../tools/plan-slice.ts';
 import { parsePlan } from '../parsers-legacy.ts';
 import { parseTaskPlanFile } from '../files.ts';

@@ -9,8 +9,8 @@ import {
   getMilestone,
   getMilestoneSlices,
   getSliceTasks,
-} from "./gsd-db.js";
-import type { MilestoneRow, SliceRow, TaskRow } from "./gsd-db.js";
+} from "./hx-db.js";
+import type { MilestoneRow, SliceRow, TaskRow } from "./hx-db.js";
 import { atomicWriteSync } from "./atomic-write.js";
 import { join } from "node:path";
 import { mkdirSync, existsSync } from "node:fs";

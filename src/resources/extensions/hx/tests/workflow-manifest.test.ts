@@ -12,7 +12,7 @@ import {
   insertMilestone,
   insertSlice,
   insertTask,
-} from '../gsd-db.ts';
+} from '../hx-db.ts';
 import {
   writeManifest,
   readManifest,

@@ -249,7 +249,7 @@ export interface GSDPreferences {
   github?: GitHubSyncConfig;
   /** OpenAI service tier preference. "priority" = 2x cost, faster. "flex" = 0.5x cost, slower. Only affects gpt-5.4 models. */
   service_tier?: "priority" | "flex";
-  /** Opt-in: search existing issues and PRs before filing from /gsd forensics. Uses additional AI tokens. */
+  /** Opt-in: search existing issues and PRs before filing from /hx forensics. Uses additional AI tokens. */
   forensics_dedup?: boolean;
   /** Opt-in: show per-prompt and cumulative session token cost in the footer. Default: false. */
   show_token_cost?: boolean;

@@ -1,5 +1,5 @@
 /**
- * GSD Init Wizard — Per-project onboarding.
+ * HX Init Wizard — Per-project onboarding.
  *
  * Guides users through project setup when entering a directory without .gsd/.
  * Detects project ecosystem, offers v1 migration, configures project preferences,
@@ -54,7 +54,7 @@ const DEFAULT_PREFS: ProjectPreferences = {
 
 /**
  * Run the project init wizard.
- * Called when entering a directory without .gsd/ (or via /gsd init).
+ * Called when entering a directory without .gsd/ (or via /hx init).
  */
 export async function showProjectInit(
   ctx: ExtensionCommandContext,
@@ -74,13 +74,13 @@ export async function showProjectInit(
   // ── Step 2: Git setup ──────────────────────────────────────────────────────
   if (!signals.isGitRepo) {
     const gitChoice = await showNextAction(ctx, {
-      title: "GSD — Project Setup",
-      summary: ["This folder is not a git repository. GSD uses git for version control and isolation."],
+      title: "HX — Project Setup",
+      summary: ["This folder is not a git repository. HX uses git for version control and isolation."],
       actions: [
         { id: "init_git", label: "Initialize git", description: "Create a git repo in this folder", recommended: true },
         { id: "skip_git", label: "Skip", description: "Continue without git (limited functionality)" },
       ],
-      notYetMessage: "Run /gsd init when ready.",
+      notYetMessage: "Run /hx init when ready.",
     });
 
     if (gitChoice === "not_yet") return { completed: false, bootstrapped: false };
@@ -96,7 +96,7 @@ export async function showProjectInit(
 
   // ── Step 3: Mode selection ─────────────────────────────────────────────────
   const modeChoice = await showNextAction(ctx, {
-    title: "GSD — Workflow Mode",
+    title: "HX — Workflow Mode",
     summary: ["How are you working on this project?"],
     actions: [
       {
@@ -111,7 +111,7 @@ export async function showProjectInit(
         description: "Multiple contributors — branch-based, PR-friendly workflow",
       },
     ],
-    notYetMessage: "Run /gsd init when ready.",
+    notYetMessage: "Run /hx init when ready.",
   });
 
   if (modeChoice === "not_yet") return { completed: false, bootstrapped: false };
@@ -128,18 +128,18 @@ export async function showProjectInit(
   if (signals.verificationCommands.length > 0) {
     const verifyLines = signals.verificationCommands.map((cmd, i) => `  ${i + 1}. ${cmd}`);
     const verifyChoice = await showNextAction(ctx, {
-      title: "GSD — Verification Commands",
+      title: "HX — Verification Commands",
       summary: [
         "Auto-detected verification commands:",
         ...verifyLines,
         "",
-        "GSD runs these after each code change to verify nothing is broken.",
+        "HX runs these after each code change to verify nothing is broken.",
       ],
       actions: [
         { id: "accept", label: "Use these commands", description: "Accept auto-detected commands", recommended: true },
         { id: "skip", label: "Skip verification", description: "Don't verify after changes" },
       ],
-      notYetMessage: "Run /gsd init when ready.",
+      notYetMessage: "Run /hx init when ready.",
     });
 
     if (verifyChoice === "not_yet") return { completed: false, bootstrapped: false };
@@ -152,13 +152,13 @@ export async function showProjectInit(
   gitSummary.push(`Main branch: ${prefs.mainBranch}`);
 
   const gitChoice = await showNextAction(ctx, {
-    title: "GSD — Git Settings",
+    title: "HX — Git Settings",
     summary: ["Default git settings for this project:", ...gitSummary],
     actions: [
       { id: "accept", label: "Accept defaults", description: "Use standard git settings", recommended: true },
       { id: "customize", label: "Customize", description: "Change git settings" },
     ],
-    notYetMessage: "Run /gsd init when ready.",
+    notYetMessage: "Run /hx init when ready.",
   });
 
   if (gitChoice === "not_yet") return { completed: false, bootstrapped: false };
@@ -169,22 +169,22 @@ export async function showProjectInit(
 
   // ── Step 6: Custom instructions ────────────────────────────────────────────
   const instructionChoice = await showNextAction(ctx, {
-    title: "GSD — Project Instructions",
+    title: "HX — Project Instructions",
     summary: [
-      "Any rules GSD should follow for this project?",
+      "Any rules HX should follow for this project?",
       "",
       "Examples:",
       '  - "Use TypeScript strict mode"',
       '  - "Always write tests for new code"',
       '  - "This is a monorepo, only touch packages/api"',
       "",
-      "You can always add more later via /gsd prefs project.",
+      "You can always add more later via /hx prefs project.",
     ],
     actions: [
       { id: "skip", label: "Skip for now", description: "No special instructions", recommended: true },
       { id: "add", label: "Add instructions", description: "Enter project-specific rules" },
     ],
-    notYetMessage: "Run /gsd init when ready.",
+    notYetMessage: "Run /hx init when ready.",
   });
 
   if (instructionChoice === "not_yet") return { completed: false, bootstrapped: false };
@@ -205,7 +205,7 @@ export async function showProjectInit(
 
   // ── Step 7: Advanced (optional) ────────────────────────────────────────────
   const advancedChoice = await showNextAction(ctx, {
-    title: "GSD — Advanced Settings",
+    title: "HX — Advanced Settings",
     summary: [
       `Token profile: ${prefs.tokenProfile}`,
       `Skip research phase: ${prefs.skipResearch ? "yes" : "no"}`,
@@ -215,7 +215,7 @@ export async function showProjectInit(
       { id: "accept", label: "Accept defaults", description: "Use standard settings", recommended: true },
       { id: "customize", label: "Customize", description: "Change advanced settings" },
     ],
-    notYetMessage: "Run /gsd init when ready.",
+    notYetMessage: "Run /hx init when ready.",
   });
 
   if (advancedChoice === "not_yet") return { completed: false, bootstrapped: false };
@@ -238,7 +238,7 @@ export async function showProjectInit(
   ensureGitignore(basePath);
   untrackRuntimeFiles(basePath);
 
-  ctx.ui.notify("GSD initialized. Starting your first milestone...", "info");
+  ctx.ui.notify("HX initialized. Starting your first milestone...", "info");
 
   return { completed: true, bootstrapped: true };
 }
@@ -254,7 +254,7 @@ export async function offerMigration(
   v1: NonNullable<ProjectDetection["v1"]>,
 ): Promise<"migrate" | "fresh" | "cancel"> {
   const summary = [
-    "Found .planning/ directory (GSD v1 format)",
+    "Found .planning/ directory (HX v1 format)",
   ];
   if (v1.phaseCount > 0) {
     summary.push(`${v1.phaseCount} phase${v1.phaseCount > 1 ? "s" : ""} detected`);
@@ -264,12 +264,12 @@ export async function offerMigration(
   }
 
   const choice = await showNextAction(ctx, {
-    title: "GSD — Legacy Project Detected",
+    title: "HX — Legacy Project Detected",
     summary,
     actions: [
       {
         id: "migrate",
-        label: "Migrate to GSD v2",
+        label: "Migrate to HX v2",
         description: "Convert .planning/ to .gsd/ format",
         recommended: true,
       },
@@ -279,7 +279,7 @@ export async function offerMigration(
         description: "Ignore .planning/ and create new .gsd/",
       },
     ],
-    notYetMessage: "Run /gsd init when ready.",
+    notYetMessage: "Run /hx init when ready.",
   });
 
   if (choice === "not_yet") return "cancel";
@@ -289,21 +289,21 @@ export async function offerMigration(
 // ─── Re-init Handler ────────────────────────────────────────────────────────────
 
 /**
- * Handle /gsd init when .gsd/ already exists.
+ * Handle /hx init when .gsd/ already exists.
  * Offers preference reset without destructive milestone deletion.
  */
 export async function handleReinit(
   ctx: ExtensionCommandContext,
   detection: ProjectDetection,
 ): Promise<void> {
-  const summary = ["GSD is already initialized in this project."];
+  const summary = ["HX is already initialized in this project."];
   if (detection.v2) {
     summary.push(`${detection.v2.milestoneCount} milestone(s) found`);
     summary.push(`Preferences: ${detection.v2.hasPreferences ? "configured" : "not set"}`);
   }
 
   const choice = await showNextAction(ctx, {
-    title: "GSD — Already Initialized",
+    title: "HX — Already Initialized",
     summary,
     actions: [
       {
@@ -318,11 +318,11 @@ export async function handleReinit(
         description: "Keep everything as-is",
       },
     ],
-    notYetMessage: "Run /gsd init when ready.",
+    notYetMessage: "Run /hx init when ready.",
   });
 
   if (choice === "prefs") {
-    ctx.ui.notify("Use /gsd prefs project to update project preferences.", "info");
+    ctx.ui.notify("Use /hx prefs project to update project preferences.", "info");
   }
 }
 
@@ -365,7 +365,7 @@ async function customizeAdvancedPrefs(
   const profileChoice = await showNextAction(ctx, {
     title: "Token usage profile",
     summary: [
-      "Controls how much context GSD uses per task.",
+      "Controls how much context HX uses per task.",
       "Budget: cheaper, faster. Quality: thorough, more expensive.",
     ],
     actions: [
@@ -382,7 +382,7 @@ async function customizeAdvancedPrefs(
   const researchChoice = await showNextAction(ctx, {
     title: "Research phase",
     summary: [
-      "GSD can research the codebase before planning each milestone.",
+      "HX can research the codebase before planning each milestone.",
       "Small projects may not need this step.",
     ],
     actions: [
@@ -479,9 +479,9 @@ function buildPreferencesFile(prefs: ProjectPreferences): string {
 
   lines.push("---");
   lines.push("");
-  lines.push("# GSD Project Preferences");
+  lines.push("# HX Project Preferences");
   lines.push("");
-  lines.push("Generated by `/gsd init`. Edit directly or use `/gsd prefs project` to modify.");
+  lines.push("Generated by `/hx init`. Edit directly or use `/hx prefs project` to modify.");
   lines.push("");
   lines.push("See `~/.gsd/agent/extensions/hx/docs/preferences-reference.md` for full field documentation.");
   lines.push("");
@@ -498,7 +498,7 @@ function buildContextSeed(signals: ProjectSignals): string | null {
 
   lines.push("# Project Context");
   lines.push("");
-  lines.push("Auto-detected by GSD init wizard. Edit or expand as needed.");
+  lines.push("Auto-detected by HX init wizard. Edit or expand as needed.");
   lines.push("");
 
   if (signals.primaryLanguage) {

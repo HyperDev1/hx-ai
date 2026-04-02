@@ -1,7 +1,7 @@
 /**
  * Headless Orchestrator — `gsd headless`
  *
- * Runs any /gsd subcommand without a TUI by spawning a child process in
+ * Runs any /hx subcommand without a TUI by spawning a child process in
  * RPC mode, auto-responding to extension UI requests, and streaming
  * progress to stderr.
  *
@@ -811,11 +811,11 @@ async function runHeadlessOnce(options: HeadlessOptions, restartCount: number): 
   }
 
   if (!options.json) {
-    process.stderr.write(`[headless] Running /gsd ${options.command}${options.commandArgs.length > 0 ? ' ' + options.commandArgs.join(' ') : ''}...\n`)
+    process.stderr.write(`[headless] Running /hx ${options.command}${options.commandArgs.length > 0 ? ' ' + options.commandArgs.join(' ') : ''}...\n`)
   }
 
   // Send the command
-  const command = `/gsd ${options.command}${options.commandArgs.length > 0 ? ' ' + options.commandArgs.join(' ') : ''}`
+  const command = `/hx ${options.command}${options.commandArgs.length > 0 ? ' ' + options.commandArgs.join(' ') : ''}`
   try {
     await client.prompt(command)
   } catch (err) {
@@ -828,7 +828,7 @@ async function runHeadlessOnce(options: HeadlessOptions, restartCount: number): 
     await completionPromise
   }
 
-  // Auto-mode chaining: if --auto and milestone creation succeeded, send /gsd auto
+  // Auto-mode chaining: if --auto and milestone creation succeeded, send /hx auto
   if (isNewMilestone && options.auto && milestoneReady && !blocked && exitCode === EXIT_SUCCESS) {
     if (!options.json) {
       process.stderr.write('[headless] Milestone ready — chaining into auto-mode...\n')
@@ -845,7 +845,7 @@ async function runHeadlessOnce(options: HeadlessOptions, restartCount: number): 
     })
 
     try {
-      await client.prompt('/gsd auto')
+      await client.prompt('/hx auto')
     } catch (err) {
       process.stderr.write(`[headless] Error: Failed to start auto-mode: ${err instanceof Error ? err.message : String(err)}\n`)
       exitCode = EXIT_ERROR

@@ -5,9 +5,9 @@ import path from "node:path";
 import fs from "node:fs";
 
 import { handleInspect } from "../commands-inspect.ts";
-import { closeDatabase, openDatabase } from "../gsd-db.ts";
+import { closeDatabase, openDatabase } from "../hx-db.ts";
 
-test("/gsd inspect opens existing database when it was not yet opened in session", async (t) => {
+test("/hx inspect opens existing database when it was not yet opened in session", async (t) => {
   closeDatabase();
 
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "gsd-inspect-db-"));

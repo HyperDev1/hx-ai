@@ -38,7 +38,7 @@ export async function closeoutUnit(
       const llmCallFn = buildMemoryLLMCall(ctx);
       if (llmCallFn) {
         extractMemoriesFromUnit(activityFile, unitType, unitId, llmCallFn).catch((err) => {
-          if (process.env.HX_DEBUG) console.error(`[gsd] memory extraction failed for ${unitType}/${unitId}:`, err);
+          if (process.env.HX_DEBUG) console.error(`[hx] memory extraction failed for ${unitType}/${unitId}:`, err);
         });
       }
     } catch { /* non-fatal */ }

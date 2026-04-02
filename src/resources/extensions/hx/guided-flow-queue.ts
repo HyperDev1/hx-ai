@@ -48,7 +48,7 @@ export async function showQueue(
   // ── Ensure .gsd/ exists ─────────────────────────────────────────────
   const gsd = hxRoot(basePath);
   if (!existsSync(gsd)) {
-    ctx.ui.notify("No GSD project found. Run /gsd to start one first.", "warning");
+    ctx.ui.notify("No GSD project found. Run /hx to start one first.", "warning");
     return;
   }
 
@@ -56,7 +56,7 @@ export async function showQueue(
   const milestoneIds = findMilestoneIds(basePath);
 
   if (milestoneIds.length === 0) {
-    ctx.ui.notify("No milestones exist yet. Run /gsd to create the first one.", "warning");
+    ctx.ui.notify("No milestones exist yet. Run /hx to create the first one.", "warning");
     return;
   }
 
@@ -88,7 +88,7 @@ export async function showQueue(
           description: "Queue new milestones via discussion.",
         },
       ],
-      notYetMessage: "Run /gsd queue when ready.",
+      notYetMessage: "Run /hx queue when ready.",
     });
 
     if (choice === "reorder") {

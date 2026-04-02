@@ -32,19 +32,19 @@ function createMockCtx() {
   };
 }
 
-test("/gsd description includes discuss", () => {
+test("/hx description includes discuss", () => {
   const pi = createMockPi();
   registerGSDCommand(pi as any);
 
   const gsd = pi.commands.get("gsd");
-  assert.ok(gsd, "registerGSDCommand should register /gsd");
+  assert.ok(gsd, "registerGSDCommand should register /hx");
   assert.ok(
     gsd.description.includes("discuss"),
     "description should include discuss",
   );
 });
 
-test("/gsd next completions include --debug", () => {
+test("/hx next completions include --debug", () => {
   const pi = createMockPi();
   registerGSDCommand(pi as any);
 
@@ -54,7 +54,7 @@ test("/gsd next completions include --debug", () => {
   assert.ok(debug, "next --debug should appear in completions");
 });
 
-test("/gsd widget completions include full|small|min|off", () => {
+test("/hx widget completions include full|small|min|off", () => {
   const pi = createMockPi();
   registerGSDCommand(pi as any);
 
@@ -66,17 +66,17 @@ test("/gsd widget completions include full|small|min|off", () => {
   }
 });
 
-test("bare /gsd skip shows usage and does not fall through to unknown-command warning", async () => {
+test("bare /hx skip shows usage and does not fall through to unknown-command warning", async () => {
   const ctx = createMockCtx();
 
   await handleGSDCommand("skip", ctx as any, {} as any);
 
   assert.ok(
-    ctx.notifications.some((n) => n.message.includes("Usage: /gsd skip <unit-id>")),
+    ctx.notifications.some((n) => n.message.includes("Usage: /hx skip <unit-id>")),
     "should show skip usage guidance",
   );
   assert.ok(
-    !ctx.notifications.some((n) => n.message.startsWith("Unknown: /gsd skip")),
+    !ctx.notifications.some((n) => n.message.startsWith("Unknown: /hx skip")),
     "should not emit unknown-command warning for bare skip",
   );
 });

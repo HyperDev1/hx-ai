@@ -522,7 +522,7 @@ function createMilestoneWorktree(basePath: string, milestoneId: string): string 
  * The worker runs `gsd headless --json auto` in the milestone's worktree
  * with HX_MILESTONE_LOCK set to isolate state derivation.
  *
- * IMPORTANT: We use `headless --json auto` instead of `--print "/gsd auto"`.
+ * IMPORTANT: We use `headless --json auto` instead of `--print "/hx auto"`.
  * --print mode calls session.prompt() which returns immediately after the
  * extension command handler fires, because auto-mode's ctx.newSession()
  * resets the session and unblocks the outer prompt() await. This causes

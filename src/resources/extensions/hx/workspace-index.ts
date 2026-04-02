@@ -1,7 +1,7 @@
 import { join } from "node:path";
 
 import { loadFile } from "./files.js";
-import { isDbAvailable, getMilestoneSlices, getSliceTasks } from "./gsd-db.js";
+import { isDbAvailable, getMilestoneSlices, getSliceTasks } from "./hx-db.js";
 import { parseRoadmap, parsePlan } from "./parsers-legacy.js";
 import {
   resolveMilestoneFile,
@@ -233,10 +233,10 @@ export async function getSuggestedNextCommands(basePath: string): Promise<string
     : index.active.milestoneId;
 
   const commands = new Set<string>();
-  if (index.active.phase === "planning") commands.add("/gsd");
-  if (index.active.phase === "executing" || index.active.phase === "summarizing") commands.add("/gsd auto");
-  if (scope) commands.add(`/gsd doctor ${scope}`);
-  if (scope) commands.add(`/gsd doctor fix ${scope}`);
-  commands.add("/gsd status");
+  if (index.active.phase === "planning") commands.add("/hx");
+  if (index.active.phase === "executing" || index.active.phase === "summarizing") commands.add("/hx auto");
+  if (scope) commands.add(`/hx doctor ${scope}`);
+  if (scope) commands.add(`/hx doctor fix ${scope}`);
+  commands.add("/hx status");
   return [...commands];
 }

@@ -17,7 +17,7 @@ import {
   getDecisionById,
   _getAdapter,
   insertArtifact,
-} from '../gsd-db.ts';
+} from '../hx-db.ts';
 import {
   saveDecisionToDb,
   updateRequirementInDb,

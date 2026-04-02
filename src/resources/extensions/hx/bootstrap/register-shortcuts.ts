@@ -10,10 +10,10 @@ import { shortcutDesc } from "../../shared/mod.js";
 
 export function registerShortcuts(pi: ExtensionAPI): void {
   pi.registerShortcut(Key.ctrlAlt("g"), {
-    description: shortcutDesc("Open GSD dashboard", "/gsd status"),
+    description: shortcutDesc("Open GSD dashboard", "/hx status"),
     handler: async (ctx) => {
       if (!existsSync(join(process.cwd(), ".hx"))) {
-        ctx.ui.notify("No .gsd/ directory found. Run /gsd to start.", "info");
+        ctx.ui.notify("No .gsd/ directory found. Run /hx to start.", "info");
         return;
       }
       await ctx.ui.custom<void>(
@@ -32,11 +32,11 @@ export function registerShortcuts(pi: ExtensionAPI): void {
   });
 
   pi.registerShortcut(Key.ctrlAlt("p"), {
-    description: shortcutDesc("Open parallel worker monitor", "/gsd parallel watch"),
+    description: shortcutDesc("Open parallel worker monitor", "/hx parallel watch"),
     handler: async (ctx) => {
       const parallelDir = join(process.cwd(), ".hx", "parallel");
       if (!existsSync(parallelDir)) {
-        ctx.ui.notify("No parallel workers found. Run /gsd parallel start first.", "info");
+        ctx.ui.notify("No parallel workers found. Run /hx parallel start first.", "info");
         return;
       }
       await ctx.ui.custom<void>(

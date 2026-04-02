@@ -23,7 +23,7 @@ import {
   markCaptureResolved,
   markCaptureExecuted,
 } from "./captures.js";
-import { isDbAvailable, insertTask, getSliceTasks } from "./gsd-db.js";
+import { isDbAvailable, insertTask, getSliceTasks } from "./hx-db.js";
 
 // ─── Resolution Executors ─────────────────────────────────────────────────────
 
@@ -167,7 +167,7 @@ export function executeReplan(
     // Also write replan_triggered_at column for DB-backed detection
     try {
       const req = createRequire(import.meta.url);
-      const { isDbAvailable, _getAdapter } = req("./gsd-db.js");
+      const { isDbAvailable, _getAdapter } = req("./hx-db.js");
       if (isDbAvailable()) {
         const adapter = _getAdapter();
         if (adapter) {

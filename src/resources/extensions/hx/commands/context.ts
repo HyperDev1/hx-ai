@@ -41,7 +41,7 @@ export async function guardRemoteSession(
   if (process.env.HX_WEB_BRIDGE_TUI === "1") {
     ctx.ui.notify(
       `Another auto-mode session (PID ${remote.pid}) is running on this project (${unitLabel}). ` +
-      `Stop it first with /gsd stop, or use /gsd steer to redirect it.`,
+      `Stop it first with /hx stop, or use /hx steer to redirect it.`,
       "warning",
     );
     return false;
@@ -63,7 +63,7 @@ export async function guardRemoteSession(
       {
         id: "steer",
         label: "Steer the session",
-        description: "Use /gsd steer <instruction> to redirect the running session.",
+        description: "Use /hx steer <instruction> to redirect the running session.",
       },
       {
         id: "stop",
@@ -76,7 +76,7 @@ export async function guardRemoteSession(
         description: "Start a new session, terminating the existing one.",
       },
     ],
-    notYetMessage: "Run /gsd when ready.",
+    notYetMessage: "Run /hx when ready.",
   });
 
   if (choice === "status") {
@@ -85,8 +85,8 @@ export async function guardRemoteSession(
   }
   if (choice === "steer") {
     ctx.ui.notify(
-      "Use /gsd steer <instruction> to redirect the running auto-mode session.\n" +
-      "Example: /gsd steer Use Postgres instead of SQLite",
+      "Use /hx steer <instruction> to redirect the running auto-mode session.\n" +
+      "Example: /hx steer Use Postgres instead of SQLite",
       "info",
     );
     return false;

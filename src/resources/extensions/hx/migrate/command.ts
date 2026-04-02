@@ -1,5 +1,5 @@
 /**
- * /gsd migrate — one-shot migration from .planning to .gsd
+ * /hx migrate — one-shot migration from .planning to .gsd
  *
  * Thin UX orchestrator: resolves paths, runs the validate → parse → transform →
  * preview → write pipeline, and shows confirmation UI via showNextAction.
@@ -99,7 +99,7 @@ export async function handleMigrate(
     ctx.ui.notify(
       `Directory not found: ${sourcePath}\n\n` +
       'Migration converts a .planning/ directory (from older GSD versions) into .gsd/ format.\n' +
-      'If you are starting a new project, use /gsd:new-project instead.\n' +
+      'If you are starting a new project, use /hx:new-project instead.\n' +
       'If migrating, ensure the path contains a .planning/ directory.',
       "error",
     );
@@ -168,7 +168,7 @@ export async function handleMigrate(
         description: "Exit without writing anything",
       },
     ],
-    notYetMessage: "Run /gsd migrate again when ready.",
+    notYetMessage: "Run /hx migrate again when ready.",
   });
 
   if (choice !== "confirm") {
@@ -210,7 +210,7 @@ export async function handleMigrate(
         description: "Trust the migration output as-is",
       },
     ],
-    notYetMessage: "Run /gsd migrate again to re-migrate, or review .gsd manually.",
+    notYetMessage: "Run /hx migrate again to re-migrate, or review .gsd manually.",
   });
 
   if (reviewChoice === "review") {

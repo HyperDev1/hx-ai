@@ -15,7 +15,7 @@ import {
   _getAdapter,
   copyWorktreeDb,
   reconcileWorktreeDb,
-} from '../gsd-db.ts';
+} from '../hx-db.ts';
 
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -133,7 +133,7 @@ console.log('\n=== worktree-db: copyWorktreeDb ===');
 // Test: returns false when source doesn't exist (no throw)
 {
   const destDir = tempDir();
-  const result = copyWorktreeDb('/nonexistent/path/gsd.db', path.join(destDir, 'gsd.db'));
+  const result = copyWorktreeDb('/nonexistent/path/hx.db', path.join(destDir, 'gsd.db'));
   assert.deepStrictEqual(result, false, 'returns false for missing source');
   cleanup(destDir);
 }

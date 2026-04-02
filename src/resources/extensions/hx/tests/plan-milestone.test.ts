@@ -4,7 +4,7 @@ import { mkdtempSync, mkdirSync, rmSync, readFileSync, existsSync, writeFileSync
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
-import { openDatabase, closeDatabase, getMilestone, getMilestoneSlices } from '../gsd-db.ts';
+import { openDatabase, closeDatabase, getMilestone, getMilestoneSlices } from '../hx-db.ts';
 import { handlePlanMilestone } from '../tools/plan-milestone.ts';
 import { parseRoadmap } from '../parsers-legacy.ts';
 

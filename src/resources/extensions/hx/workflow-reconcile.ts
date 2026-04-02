@@ -9,7 +9,7 @@ import {
   insertVerificationEvidence,
   upsertDecision,
   openDatabase,
-} from "./gsd-db.js";
+} from "./hx-db.js";
 import { writeManifest } from "./workflow-manifest.js";
 import { atomicWriteSync } from "./atomic-write.js";
 import { acquireSyncLock, releaseSyncLock } from "./sync-lock.js";
@@ -275,7 +275,7 @@ export function reconcileWorktreeLogs(
   const lock = acquireSyncLock(mainBasePath);
   if (!lock.acquired) {
     process.stderr.write(
-      `[gsd] reconcile: could not acquire sync lock — another reconciliation may be in progress\n`,
+      `[hx] reconcile: could not acquire sync lock — another reconciliation may be in progress\n`,
     );
     return { autoMerged: 0, conflicts: [] };
   }
@@ -316,7 +316,7 @@ function _reconcileWorktreeLogsInner(
     // D-04: atomic all-or-nothing — block entire merge
     writeConflictsFile(mainBasePath, conflicts, worktreeBasePath);
     process.stderr.write(
-      `[gsd] reconcile: ${conflicts.length} conflict(s) detected — see ${join(mainBasePath, ".hx", "CONFLICTS.md")}\n`,
+      `[hx] reconcile: ${conflicts.length} conflict(s) detected — see ${join(mainBasePath, ".hx", "CONFLICTS.md")}\n`,
     );
     return { autoMerged: 0, conflicts };
   }
@@ -342,7 +342,7 @@ function _reconcileWorktreeLogsInner(
     writeManifest(mainBasePath);
   } catch (err) {
     process.stderr.write(
-      `[gsd] reconcile: manifest write failed (non-fatal): ${(err as Error).message}\n`,
+      `[hx] reconcile: manifest write failed (non-fatal): ${(err as Error).message}\n`,
     );
   }
 

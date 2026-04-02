@@ -8,7 +8,7 @@
 
 import type { ExtensionAPI, ExtensionContext } from "@hyperlab/hx-coding-agent";
 import { readUnitRuntimeRecord, writeUnitRuntimeRecord } from "./unit-runtime.js";
-import { isDbAvailable, getMilestoneSlices, getSliceTasks } from "./gsd-db.js";
+import { isDbAvailable, getMilestoneSlices, getSliceTasks } from "./hx-db.js";
 import { resolveAutoSupervisorConfig } from "./preferences.js";
 import type { GSDPreferences } from "./preferences.js";
 import { computeBudgets, resolveExecutorContextWindow } from "./context-budget.js";

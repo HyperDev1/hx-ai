@@ -107,13 +107,13 @@ export function formatCrashInfo(lock: LockData): string {
 
   // Add recovery guidance based on what was happening when it crashed
   if (lock.unitType === "starting" && lock.unitId === "bootstrap") {
-    lines.push(`No work was lost. Run /gsd auto to restart.`);
+    lines.push(`No work was lost. Run /hx auto to restart.`);
   } else if (lock.unitType.includes("research") || lock.unitType.includes("plan")) {
-    lines.push(`The ${lock.unitType} unit may be incomplete. Run /gsd auto to re-run it.`);
+    lines.push(`The ${lock.unitType} unit may be incomplete. Run /hx auto to re-run it.`);
   } else if (lock.unitType.includes("execute")) {
-    lines.push(`Task execution was interrupted. Run /gsd auto to resume — completed work is preserved.`);
+    lines.push(`Task execution was interrupted. Run /hx auto to resume — completed work is preserved.`);
   } else if (lock.unitType.includes("complete")) {
-    lines.push(`Slice/milestone completion was interrupted. Run /gsd auto to finish.`);
+    lines.push(`Slice/milestone completion was interrupted. Run /hx auto to finish.`);
   }
 
   return lines.join("\n");

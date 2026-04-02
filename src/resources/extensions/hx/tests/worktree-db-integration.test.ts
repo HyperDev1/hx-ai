@@ -5,7 +5,7 @@
  * Uses real temp git repos and real SQLite databases.
  *
  * Test cases:
- *   1. Copy: createAutoWorktree seeds .hx/gsd.db into the worktree when main has one
+ *   1. Copy: createAutoWorktree seeds .hx/hx.db into the worktree when main has one
  *   2. Copy-skip: createAutoWorktree silently skips when main has no gsd.db
  *   3. Reconcile: reconcileWorktreeDb merges worktree rows into main DB
  *   4. Reconcile-skip: reconcileWorktreeDb is non-fatal when both paths are nonexistent
@@ -27,7 +27,7 @@ import {
   upsertDecision,
   getActiveDecisions,
   isDbAvailable,
-} from "../gsd-db.ts";
+} from "../hx-db.ts";
 
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -161,7 +161,7 @@ describe('worktree-db-integration', async () => {
     {
       let threw = false;
       try {
-        reconcileWorktreeDb("/nonexistent/path/gsd.db", "/also/nonexistent/gsd.db");
+        reconcileWorktreeDb("/nonexistent/path/hx.db", "/also/nonexistent/hx.db");
       } catch {
         threw = true;
       }

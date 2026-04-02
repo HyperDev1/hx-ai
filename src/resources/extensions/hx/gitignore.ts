@@ -28,9 +28,9 @@ const HX_RUNTIME_PATTERNS = [
   ".hx/metrics.json",
   ".hx/completed-units.json",
   ".hx/STATE.md",
-  ".hx/gsd.db",
-  ".hx/gsd.db-shm",   // SQLite WAL sidecar — always created alongside hx.db (#2296)
-  ".hx/gsd.db-wal",   // SQLite WAL sidecar — always created alongside hx.db (#2296)
+  ".hx/hx.db",
+  ".hx/hx.db-shm",   // SQLite WAL sidecar — always created alongside hx.db (#2296)
+  ".hx/hx.db-wal",   // SQLite WAL sidecar — always created alongside hx.db (#2296)
   ".hx/journal/",     // daily-rotated JSONL event journal (#2296)
   ".hx/doctor-history.jsonl", // doctor run history (#2296)
   ".hx/DISCUSSION-MANIFEST.json",

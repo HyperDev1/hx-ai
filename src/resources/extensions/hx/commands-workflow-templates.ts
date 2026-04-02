@@ -1,7 +1,7 @@
 /**
- * GSD Workflow Template Commands — /gsd start, /gsd templates
+ * GSD Workflow Template Commands — /hx start, /hx templates
  *
- * Handles the `/gsd start [template] [description]` and `/gsd templates` commands.
+ * Handles the `/hx start [template] [description]` and `/hx templates` commands.
  * Resolves templates by name or auto-detection, then dispatches the workflow prompt.
  */
 
@@ -157,7 +157,7 @@ function findInProgressWorkflows(basePath: string): WorkflowState[] {
   return results;
 }
 
-// ─── /gsd start ──────────────────────────────────────────────────────────────
+// ─── /hx start ──────────────────────────────────────────────────────────────
 
 export async function handleStart(
   args: string,
@@ -166,7 +166,7 @@ export async function handleStart(
 ): Promise<void> {
   const trimmed = args.trim();
 
-  // /gsd start --list → same as /gsd templates
+  // /hx start --list → same as /hx templates
   if (trimmed === "--list" || trimmed === "list") {
     ctx.ui.notify(listTemplates(), "info");
     return;
@@ -178,7 +178,7 @@ export async function handleStart(
   if (isAutoActive()) {
     ctx.ui.notify(
       "Cannot start a workflow template while auto-mode is running.\n" +
-      "Run /gsd pause first, then /gsd start.",
+      "Run /hx pause first, then /hx start.",
       "warning",
     );
     return;
@@ -187,13 +187,13 @@ export async function handleStart(
   if (isAutoPaused()) {
     ctx.ui.notify(
       "Auto-mode is paused. Starting a workflow template will run independently.\n" +
-      "The paused auto-mode session can be resumed later with /gsd auto.",
+      "The paused auto-mode session can be resumed later with /hx auto.",
       "info",
     );
   }
 
   // ─── Resume detection ───────────────────────────────────────────────────
-  // /gsd start --resume or /gsd start resume → resume in-progress workflow
+  // /hx start --resume or /hx start resume → resume in-progress workflow
   if (trimmed === "--resume" || trimmed === "resume") {
     const basePath = process.cwd();
     const inProgress = findInProgressWorkflows(basePath);
@@ -244,7 +244,7 @@ export async function handleStart(
     return;
   }
 
-  // Show in-progress workflows when /gsd start is called with no args
+  // Show in-progress workflows when /hx start is called with no args
   if (!trimmed) {
     const basePath = process.cwd();
     const inProgress = findInProgressWorkflows(basePath);
@@ -256,13 +256,13 @@ export async function handleStart(
         `In-progress workflow found:\n` +
         `  ${wf.templateName}: "${wf.description}"\n` +
         `  Phase ${completedCount + 1}/${wf.phases.length}: ${activePhase?.name ?? "unknown"}\n\n` +
-        `Run /gsd start resume to continue it.\n`,
+        `Run /hx start resume to continue it.\n`,
         "info",
       );
     }
   }
 
-  // /gsd start --dry-run <template> → preview without executing
+  // /hx start --dry-run <template> → preview without executing
   const dryRun = trimmed.includes("--dry-run");
   const cleanedArgs = trimmed.replace(/--dry-run\s*/, "").trim();
 
@@ -298,10 +298,10 @@ export async function handleStart(
       );
     } else if (detected.length > 1) {
       const choices = detected.slice(0, 4).map(
-        (m) => `  /gsd start ${m.id} ${cleanedArgs}`
+        (m) => `  /hx start ${m.id} ${cleanedArgs}`
       );
       ctx.ui.notify(
-        `Multiple templates could match. Pick one:\n\n${choices.join("\n")}\n\nOr specify explicitly: /gsd start <template> <description>`,
+        `Multiple templates could match. Pick one:\n\n${choices.join("\n")}\n\nOr specify explicitly: /hx start <template> <description>`,
         "info",
       );
       return;
@@ -312,7 +312,7 @@ export async function handleStart(
   if (!match) {
     if (!trimmed) {
       ctx.ui.notify(
-        "Usage: /gsd start <template> [description]\n\n" +
+        "Usage: /hx start <template> [description]\n\n" +
         "Templates:\n" +
         "  bugfix          Triage → fix → verify → ship\n" +
         "  small-feature   Scope → plan → implement → verify\n" +
@@ -324,19 +324,19 @@ export async function handleStart(
         "  dep-upgrade     Assess → upgrade → fix → verify\n" +
         "  full-project    Complete GSD with full ceremony\n\n" +
         "Examples:\n" +
-        "  /gsd start bugfix fix login button not responding\n" +
-        "  /gsd start spike evaluate auth libraries\n" +
-        "  /gsd start hotfix critical: API returns 500\n" +
-        "  /gsd start revise analytics dashboard layout needs rework\n\n" +
+        "  /hx start bugfix fix login button not responding\n" +
+        "  /hx start spike evaluate auth libraries\n" +
+        "  /hx start hotfix critical: API returns 500\n" +
+        "  /hx start revise analytics dashboard layout needs rework\n\n" +
         "Flags:\n" +
         "  --dry-run       Preview what would happen without executing\n" +
         "  --issue <ref>   Link to a GitHub issue\n\n" +
-        "Run /gsd templates for detailed template info.",
+        "Run /hx templates for detailed template info.",
         "info",
       );
     } else {
       ctx.ui.notify(
-        `No template matched "${firstWord}". Run /gsd start to see available templates.`,
+        `No template matched "${firstWord}". Run /hx start to see available templates.`,
         "warning",
       );
     }
@@ -391,21 +391,21 @@ export async function handleStart(
     const root = hxRoot(basePath);
     if (!existsSync(root)) {
       ctx.ui.notify(
-        "Routing to /gsd init for full project setup...",
+        "Routing to /hx init for full project setup...",
         "info",
       );
-      // Trigger /gsd init by dispatching to the handler
+      // Trigger /hx init by dispatching to the handler
       pi.sendMessage(
         {
           customType: "gsd-workflow-template",
-          content: "The user wants to start a full GSD project. Run `/gsd init` to bootstrap the project, then `/gsd auto` to begin execution.",
+          content: "The user wants to start a full GSD project. Run `/hx init` to bootstrap the project, then `/hx auto` to begin execution.",
           display: false,
         },
         { triggerTurn: true },
       );
     } else {
       ctx.ui.notify(
-        "Project already initialized. Use `/gsd auto` to continue or `/gsd discuss` to start a new milestone.",
+        "Project already initialized. Use `/hx auto` to continue or `/hx discuss` to start a new milestone.",
         "info",
       );
     }
@@ -499,7 +499,7 @@ export async function handleStart(
   );
 }
 
-// ─── /gsd templates ──────────────────────────────────────────────────────────
+// ─── /hx templates ──────────────────────────────────────────────────────────
 
 export async function handleTemplates(
   args: string,
@@ -507,7 +507,7 @@ export async function handleTemplates(
 ): Promise<void> {
   const trimmed = args.trim();
 
-  // /gsd templates info <name>
+  // /hx templates info <name>
   if (trimmed.startsWith("info ")) {
     const name = trimmed.replace(/^info\s+/, "").trim();
     const info = getTemplateInfo(name);
@@ -515,19 +515,19 @@ export async function handleTemplates(
       ctx.ui.notify(info, "info");
     } else {
       ctx.ui.notify(
-        `Unknown template "${name}". Run /gsd templates to see available templates.`,
+        `Unknown template "${name}". Run /hx templates to see available templates.`,
         "warning",
       );
     }
     return;
   }
 
-  // /gsd templates — list all
+  // /hx templates — list all
   ctx.ui.notify(listTemplates(), "info");
 }
 
 /**
- * Return template IDs for autocomplete in /gsd templates info <name>.
+ * Return template IDs for autocomplete in /hx templates info <name>.
  */
 export function getTemplateCompletions(prefix: string): Array<{ value: string; label: string; description: string }> {
   try {

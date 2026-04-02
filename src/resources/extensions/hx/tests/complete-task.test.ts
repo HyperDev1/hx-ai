@@ -14,7 +14,7 @@ import {
   getTask,
   getSliceTasks,
   insertVerificationEvidence,
-} from '../gsd-db.ts';
+} from '../hx-db.ts';
 import { handleCompleteTask } from '../tools/complete-task.ts';
 
 const { assertEq, assertTrue, assertMatch, report } = createTestContext();

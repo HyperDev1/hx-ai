@@ -47,20 +47,20 @@ export function formatInspectOutput(data: InspectData): string {
 
 export async function handleInspect(ctx: ExtensionCommandContext): Promise<void> {
   try {
-    const { isDbAvailable, _getAdapter, openDatabase } = await import("./gsd-db.js");
+    const { isDbAvailable, _getAdapter, openDatabase } = await import("./hx-db.js");
 
     if (!isDbAvailable()) {
       const gsdDir = hxRoot(process.cwd());
       const dbPath = join(gsdDir, "hx.db");
       if (!existsSync(gsdDir) || !existsSync(dbPath) || !openDatabase(dbPath)) {
-        ctx.ui.notify("No GSD database available. Run /gsd auto to create one.", "info");
+        ctx.ui.notify("No GSD database available. Run /hx auto to create one.", "info");
         return;
       }
     }
 
     const adapter = _getAdapter();
     if (!adapter) {
-      ctx.ui.notify("No GSD database available. Run /gsd auto to create one.", "info");
+      ctx.ui.notify("No GSD database available. Run /hx auto to create one.", "info");
       return;
     }
 
@@ -92,7 +92,7 @@ export async function handleInspect(ctx: ExtensionCommandContext): Promise<void>
 
     ctx.ui.notify(formatInspectOutput(data), "info");
   } catch (err) {
-    process.stderr.write(`hx-db: /gsd inspect failed: ${getErrorMessage(err)}\n`);
+    process.stderr.write(`hx-db: /hx inspect failed: ${getErrorMessage(err)}\n`);
     ctx.ui.notify("Failed to inspect GSD database. Check stderr for details.", "error");
   }
 }

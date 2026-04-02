@@ -10,7 +10,7 @@ import {
   getActiveRequirements,
   insertArtifact,
   _getAdapter,
-} from '../gsd-db.ts';
+} from '../hx-db.ts';
 import {
   parseDecisionsTable,
   parseRequirementsSections,
@@ -28,7 +28,7 @@ const DECISIONS_MD = `# Decisions Register
 | # | When | Scope | Decision | Choice | Rationale | Revisable? |
 |---|------|-------|----------|--------|-----------|------------|
 | D001 | M001 | library | SQLite library | better-sqlite3 | Sync API | No |
-| D002 | M001 | arch | DB location | .hx/gsd.db | Derived state | No |
+| D002 | M001 | arch | DB location | .hx/hx.db | Derived state | No |
 | D010 | M001/S01 | library | Provider strategy (amends D001) | node:sqlite fallback | Zero deps | No |
 | D020 | M001/S02 | library | Importer approach (amends D010) | Direct parse | Simple | Yes |
 `;
@@ -194,7 +194,7 @@ test('md-importer: made_by column parsing (new 8-column format)', () => {
 | # | When | Scope | Decision | Choice | Rationale | Revisable? | Made By |
 |---|------|-------|----------|--------|-----------|------------|---------|
 | D001 | M001 | library | SQLite library | better-sqlite3 | Sync API | No | human |
-| D002 | M001 | arch | DB location | .hx/gsd.db | Derived state | No | agent |
+| D002 | M001 | arch | DB location | .hx/hx.db | Derived state | No | agent |
 | D003 | M002 | impl | Config format | JSON | Simple | Yes | collaborative |
 | D004 | M002 | impl | Cache strategy | LRU | Predictable | No | bogus |
 `;
@@ -389,7 +389,7 @@ test('md-importer: round-trip fidelity', () => {
     assert.deepStrictEqual(d002?.when_context, 'M001', 'D002 when_context round-trip');
     assert.deepStrictEqual(d002?.scope, 'arch', 'D002 scope round-trip');
     assert.deepStrictEqual(d002?.decision, 'DB location', 'D002 decision round-trip');
-    assert.deepStrictEqual(d002?.choice, '.hx/gsd.db', 'D002 choice round-trip');
+    assert.deepStrictEqual(d002?.choice, '.hx/hx.db', 'D002 choice round-trip');
     assert.deepStrictEqual(d002?.rationale, 'Derived state', 'D002 rationale round-trip');
 
     const r002 = getRequirementById('R002');

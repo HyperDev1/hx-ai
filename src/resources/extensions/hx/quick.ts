@@ -1,5 +1,5 @@
 /**
- * GSD Quick Mode — /gsd quick <task>
+ * GSD Quick Mode — /hx quick <task>
  * Copyright (c) 2026 Jeremy McSpadden <jeremy@fluxlabs.net>
  *
  * Lightweight task execution with GSD guarantees (atomic commits, state
@@ -168,7 +168,7 @@ export async function handleQuick(
   // Validate: .gsd/ must exist
   if (!existsSync(root)) {
     ctx.ui.notify(
-      "No .gsd/ directory found. Run /gsd to initialize a project first.",
+      "No .gsd/ directory found. Run /hx to initialize a project first.",
       "error",
     );
     return;
@@ -178,7 +178,7 @@ export async function handleQuick(
   let description = args.trim();
   if (!description) {
     ctx.ui.notify(
-      "Usage: /gsd quick <task description>\n\nExample: /gsd quick fix login button not responding on mobile",
+      "Usage: /hx quick <task description>\n\nExample: /hx quick fix login button not responding on mobile",
       "info",
     );
     return;

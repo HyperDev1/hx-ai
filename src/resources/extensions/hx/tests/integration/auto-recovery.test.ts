@@ -22,7 +22,7 @@ import {
   insertMilestone,
   insertSlice,
   insertTask,
-} from "../../gsd-db.ts";
+} from "../../hx-db.ts";
 import { renderPlanFromDb } from "../../markdown-renderer.ts";
 
 function makeTmpBase(): string {
@@ -465,7 +465,7 @@ test("verifyExpectedArtifact plan-slice passes for rendered slice/task plan arti
         estimate: "30m",
         files: ["src/resources/extensions/hx/markdown-renderer.ts"],
         verify: "node --test markdown-renderer.test.ts",
-        inputs: ["src/resources/extensions/hx/gsd-db.ts"],
+        inputs: ["src/resources/extensions/hx/hx-db.ts"],
         expectedOutput: ["src/resources/extensions/hx/tests/markdown-renderer.test.ts"],
         observabilityImpact: "Renderer tests cover the failure mode.",
       },
@@ -538,7 +538,7 @@ test("verifyExpectedArtifact plan-slice fails after deleting a rendered task pla
         estimate: "30m",
         files: ["src/resources/extensions/hx/markdown-renderer.ts"],
         verify: "node --test markdown-renderer.test.ts",
-        inputs: ["src/resources/extensions/hx/gsd-db.ts"],
+        inputs: ["src/resources/extensions/hx/hx-db.ts"],
         expectedOutput: ["src/resources/extensions/hx/tests/markdown-renderer.test.ts"],
         observabilityImpact: "Renderer tests cover the failure mode.",
       },

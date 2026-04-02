@@ -3,7 +3,7 @@ import {
   closeDatabase,
   isDbAvailable,
   _getAdapter,
-} from '../gsd-db.ts';
+} from '../hx-db.ts';
 import {
   getActiveMemories,
   getActiveMemoriesRanked,

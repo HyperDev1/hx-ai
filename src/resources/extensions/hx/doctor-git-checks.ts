@@ -4,7 +4,7 @@ import { join, sep } from "node:path";
 import type { DoctorIssue, DoctorIssueCode } from "./doctor-types.js";
 import { loadFile } from "./files.js";
 import { parseRoadmap as parseLegacyRoadmap } from "./parsers-legacy.js";
-import { isDbAvailable, getMilestoneSlices } from "./gsd-db.js";
+import { isDbAvailable, getMilestoneSlices } from "./hx-db.js";
 import { resolveMilestoneFile } from "./paths.js";
 import { deriveState, isMilestoneComplete } from "./state.js";
 import { listWorktrees, resolveGitDir, worktreesDir } from "./worktree-manager.js";

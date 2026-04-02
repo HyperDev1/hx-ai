@@ -25,7 +25,7 @@ import {
   isDbAvailable,
   getMilestone,
   getMilestoneSlices,
-} from "./gsd-db.js";
+} from "./hx-db.js";
 import { atomicWriteSync } from "./atomic-write.js";
 import { execFileSync } from "node:child_process";
 import { safeCopy, safeCopyRecursive } from "./safe-fs.js";

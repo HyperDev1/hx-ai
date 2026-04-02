@@ -12,7 +12,7 @@ import {
   getDecisionById,
   getRequirementById,
   _getAdapter,
-} from '../gsd-db.ts';
+} from '../hx-db.ts';
 import {
   parseDecisionsTable,
   parseRequirementsSections,
@@ -67,7 +67,7 @@ const SAMPLE_DECISIONS: Decision[] = [
     when_context: 'M001',
     scope: 'arch',
     decision: 'DB location',
-    choice: '.hx/gsd.db',
+    choice: '.hx/hx.db',
     rationale: 'Derived state',
     revisable: 'No',
     made_by: 'agent',

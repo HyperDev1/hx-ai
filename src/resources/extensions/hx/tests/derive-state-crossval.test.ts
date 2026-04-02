@@ -19,7 +19,7 @@ import {
   insertMilestone,
   insertSlice,
   insertTask,
-} from '../gsd-db.ts';
+} from '../hx-db.ts';
 import { migrateHierarchyToDb } from '../md-importer.ts';
 import type { GSDState } from '../types.ts';
 

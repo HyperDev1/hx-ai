@@ -133,7 +133,7 @@ export function registerHooks(pi: ExtensionAPI): void {
       completedWork: `Task ${state.activeTask.id} (${state.activeTask.title}) was in progress when compaction occurred.`,
       remainingWork: "Check the task plan for remaining steps.",
       decisions: "Check task summary files for prior decisions.",
-      context: "Session was auto-compacted by Pi. Resume with /gsd.",
+      context: "Session was auto-compacted by Pi. Resume with /hx.",
       nextAction: `Resume task ${state.activeTask.id}: ${state.activeTask.title}.`,
     }));
   });

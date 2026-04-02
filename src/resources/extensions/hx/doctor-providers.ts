@@ -225,8 +225,8 @@ function checkLlmProviders(): ProviderCheckResult[] {
         detail: providerId === "anthropic-vertex"
           ? "Set ANTHROPIC_VERTEX_PROJECT_ID and authenticate with Google ADC"
           : info?.hasOAuth
-          ? `Run /gsd keys to authenticate`
-          : `Set ${envVar} or run /gsd keys`,
+          ? `Run /hx keys to authenticate`
+          : `Set ${envVar} or run /hx keys`,
         required: true,
       });
     } else if (lookup.backedOff) {
@@ -283,7 +283,7 @@ function checkRemoteQuestionsProvider(): ProviderCheckResult | null {
         category: "remote",
         status: "warning",
         message: `${label} — channel configured but token not found`,
-        detail: info?.envVar ? `Set ${info.envVar} or run /gsd keys` : `Run /gsd keys to configure`,
+        detail: info?.envVar ? `Set ${info.envVar} or run /hx keys` : `Run /hx keys to configure`,
         required: true,
       };
     }

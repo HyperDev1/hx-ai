@@ -196,8 +196,8 @@ export function listTemplates(): string {
     lines.push("");
   }
 
-  lines.push("Usage: /gsd start <template> [description]");
-  lines.push("       /gsd templates info <name>");
+  lines.push("Usage: /hx start <template> [description]");
+  lines.push("       /hx templates info <name>");
 
   return lines.join("\n");
 }

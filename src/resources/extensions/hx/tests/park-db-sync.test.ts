@@ -17,7 +17,7 @@ import {
   closeDatabase,
   insertMilestone,
   getMilestone,
-} from "../gsd-db.ts";
+} from "../hx-db.ts";
 
 function createBase(): string {
   const base = mkdtempSync(join(tmpdir(), "gsd-park-db-"));

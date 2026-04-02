@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import { randomUUID } from "node:crypto";
 
 import { handleValidateMilestone } from "../tools/validate-milestone.js";
-import { openDatabase, closeDatabase, _getAdapter, insertMilestone } from "../gsd-db.js";
+import { openDatabase, closeDatabase, _getAdapter, insertMilestone } from "../hx-db.js";
 import { clearPathCache } from "../paths.js";
 import { clearParseCache } from "../files.js";
 

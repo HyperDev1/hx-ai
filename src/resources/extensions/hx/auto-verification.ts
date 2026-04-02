@@ -13,7 +13,7 @@
 import type { ExtensionContext, ExtensionAPI } from "@hyperlab/hx-coding-agent";
 import { resolveSliceFile, resolveSlicePath } from "./paths.js";
 import { parseUnitId } from "./unit-id.js";
-import { isDbAvailable, getTask } from "./gsd-db.js";
+import { isDbAvailable, getTask } from "./hx-db.js";
 import { loadEffectiveGSDPreferences } from "./preferences.js";
 import {
   runVerificationGate,

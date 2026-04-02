@@ -3,7 +3,7 @@
 import { resolveMilestoneFile } from "./paths.js";
 import { findMilestoneIds } from "./guided-flow.js";
 import { parseUnitId } from "./unit-id.js";
-import { isDbAvailable, getMilestoneSlices } from "./gsd-db.js";
+import { isDbAvailable, getMilestoneSlices } from "./hx-db.js";
 import { parseRoadmap } from "./parsers-legacy.js";
 import { readFileSync } from "node:fs";
 

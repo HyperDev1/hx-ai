@@ -364,11 +364,11 @@ test("files API returns empty tree when .gsd/ does not exist", async (t) => {
 // ─── Group 6: Mock-free invariant — no static mock data ──────────────
 
 const VIEW_FILES = [
-  "web/components/gsd/dashboard.tsx",
-  "web/components/gsd/roadmap.tsx",
-  "web/components/gsd/activity-view.tsx",
-  "web/components/gsd/files-view.tsx",
-  "web/components/gsd/dual-terminal.tsx",
+  "web/components/hx/dashboard.tsx",
+  "web/components/hx/roadmap.tsx",
+  "web/components/hx/activity-view.tsx",
+  "web/components/hx/files-view.tsx",
+  "web/components/hx/dual-terminal.tsx",
 ];
 
 // Patterns that indicate hardcoded mock data arrays
@@ -404,15 +404,15 @@ test("view components contain no static mock data arrays", () => {
 test("view components read from real data sources (store or API)", () => {
   // Views that derive state from the workspace store
   const STORE_VIEWS = [
-    "web/components/gsd/dashboard.tsx",
-    "web/components/gsd/roadmap.tsx",
-    "web/components/gsd/activity-view.tsx",
-    "web/components/gsd/terminal.tsx",
+    "web/components/hx/dashboard.tsx",
+    "web/components/hx/roadmap.tsx",
+    "web/components/hx/activity-view.tsx",
+    "web/components/hx/terminal.tsx",
   ];
 
   // FilesView fetches from /api/files (real endpoint), not the workspace store — that's correct
   const API_VIEWS = [
-    { path: "web/components/gsd/files-view.tsx", apiPattern: "/api/files" },
+    { path: "web/components/hx/files-view.tsx", apiPattern: "/api/files" },
   ];
 
   for (const filePath of STORE_VIEWS) {
@@ -438,7 +438,7 @@ test("view components read from real data sources (store or API)", () => {
 // from the dashboard. Live signals are visible in the terminal/power mode instead.
 
 test("status bar consumes statusTexts from store", () => {
-  const statusBarPath = resolve(import.meta.dirname, "../../../web/components/gsd/status-bar.tsx");
+  const statusBarPath = resolve(import.meta.dirname, "../../../web/components/hx/status-bar.tsx");
   const source = readFileSync(statusBarPath, "utf-8");
 
   assert.ok(
@@ -452,10 +452,10 @@ test("status bar consumes statusTexts from store", () => {
 });
 
 test("browser shell renders title overrides, widgets, and editor prefills from store-backed state", () => {
-  const storePath = resolve(import.meta.dirname, "../../../web/lib/gsd-workspace-store.tsx");
-  const appShellPath = resolve(import.meta.dirname, "../../../web/components/gsd/app-shell.tsx");
-  const statusBarPath = resolve(import.meta.dirname, "../../../web/components/gsd/status-bar.tsx");
-  const terminalPath = resolve(import.meta.dirname, "../../../web/components/gsd/terminal.tsx");
+  const storePath = resolve(import.meta.dirname, "../../../web/lib/hx-workspace-store.tsx");
+  const appShellPath = resolve(import.meta.dirname, "../../../web/components/hx/app-shell.tsx");
+  const statusBarPath = resolve(import.meta.dirname, "../../../web/components/hx/status-bar.tsx");
+  const terminalPath = resolve(import.meta.dirname, "../../../web/components/hx/terminal.tsx");
 
   const storeSource = readFileSync(storePath, "utf-8");
   const appShellSource = readFileSync(appShellPath, "utf-8");
@@ -478,7 +478,7 @@ test("browser shell renders title overrides, widgets, and editor prefills from s
 });
 
 test("terminal consumes activeToolExecution from store", () => {
-  const terminalPath = resolve(import.meta.dirname, "../../../web/components/gsd/terminal.tsx");
+  const terminalPath = resolve(import.meta.dirname, "../../../web/components/hx/terminal.tsx");
   const source = readFileSync(terminalPath, "utf-8");
 
   assert.ok(
@@ -489,11 +489,11 @@ test("terminal consumes activeToolExecution from store", () => {
 
 test("live browser panels consume live selectors and expose inspectable freshness markers", () => {
   const contractPath = resolve(import.meta.dirname, "../../../web/lib/command-surface-contract.ts")
-  const storePath = resolve(import.meta.dirname, "../../../web/lib/gsd-workspace-store.tsx")
-  const dashboardPath = resolve(import.meta.dirname, "../../../web/components/gsd/dashboard.tsx")
-  const sidebarPath = resolve(import.meta.dirname, "../../../web/components/gsd/sidebar.tsx")
-  const roadmapPath = resolve(import.meta.dirname, "../../../web/components/gsd/roadmap.tsx")
-  const statusBarPath = resolve(import.meta.dirname, "../../../web/components/gsd/status-bar.tsx")
+  const storePath = resolve(import.meta.dirname, "../../../web/lib/hx-workspace-store.tsx")
+  const dashboardPath = resolve(import.meta.dirname, "../../../web/components/hx/dashboard.tsx")
+  const sidebarPath = resolve(import.meta.dirname, "../../../web/components/hx/sidebar.tsx")
+  const roadmapPath = resolve(import.meta.dirname, "../../../web/components/hx/roadmap.tsx")
+  const statusBarPath = resolve(import.meta.dirname, "../../../web/components/hx/status-bar.tsx")
 
   const contractSource = readFileSync(contractPath, "utf-8")
   const storeSource = readFileSync(storePath, "utf-8")
@@ -528,9 +528,9 @@ test("live browser panels consume live selectors and expose inspectable freshnes
 })
 
 test("workflow action surfaces route new-milestone CTAs through the shared command path", () => {
-  const dashboardPath = resolve(import.meta.dirname, "../../../web/components/gsd/dashboard.tsx")
-  const sidebarPath = resolve(import.meta.dirname, "../../../web/components/gsd/sidebar.tsx")
-  const chatPath = resolve(import.meta.dirname, "../../../web/components/gsd/chat-mode.tsx")
+  const dashboardPath = resolve(import.meta.dirname, "../../../web/components/hx/dashboard.tsx")
+  const sidebarPath = resolve(import.meta.dirname, "../../../web/components/hx/sidebar.tsx")
+  const chatPath = resolve(import.meta.dirname, "../../../web/components/hx/chat-mode.tsx")
 
   const dashboardSource = readFileSync(dashboardPath, "utf-8")
   const sidebarSource = readFileSync(sidebarPath, "utf-8")
@@ -545,14 +545,14 @@ test("workflow action surfaces route new-milestone CTAs through the shared comma
   assert.doesNotMatch(dashboardSource, /NewMilestoneDialog/, "dashboard.tsx must not import or render the deprecated new-milestone dialog")
   assert.doesNotMatch(sidebarSource, /NewMilestoneDialog/, "sidebar.tsx must not import or render the deprecated new-milestone dialog")
   assert.doesNotMatch(chatSource, /NewMilestoneDialog/, "chat-mode.tsx must not import or render the deprecated new-milestone dialog")
-  assert.doesNotMatch(chatSource, /buildPromptCommand\("\/gsd auto", bridge\)/, "chat-mode.tsx must not hardcode a special /gsd auto path for new-milestone CTA dispatch")
+  assert.doesNotMatch(chatSource, /buildPromptCommand\("\/hx auto", bridge\)/, "chat-mode.tsx must not hardcode a special /hx auto path for new-milestone CTA dispatch")
 })
 
 test("sidebar Git affordance opens a real git-summary surface with visible repo/not-repo/error states", () => {
   const contractPath = resolve(import.meta.dirname, "../../../web/lib/command-surface-contract.ts");
-  const storePath = resolve(import.meta.dirname, "../../../web/lib/gsd-workspace-store.tsx");
-  const surfacePath = resolve(import.meta.dirname, "../../../web/components/gsd/command-surface.tsx");
-  const sidebarPath = resolve(import.meta.dirname, "../../../web/components/gsd/sidebar.tsx");
+  const storePath = resolve(import.meta.dirname, "../../../web/lib/hx-workspace-store.tsx");
+  const surfacePath = resolve(import.meta.dirname, "../../../web/components/hx/command-surface.tsx");
+  const sidebarPath = resolve(import.meta.dirname, "../../../web/components/hx/sidebar.tsx");
 
   const contractSource = readFileSync(contractPath, "utf-8");
   const storeSource = readFileSync(storePath, "utf-8");
@@ -574,10 +574,10 @@ test("sidebar Git affordance opens a real git-summary surface with visible repo/
 
 test("recovery diagnostics surface stays on a dedicated route with explicit stale and action state", () => {
   const contractPath = resolve(import.meta.dirname, "../../../web/lib/command-surface-contract.ts");
-  const storePath = resolve(import.meta.dirname, "../../../web/lib/gsd-workspace-store.tsx");
-  const surfacePath = resolve(import.meta.dirname, "../../../web/components/gsd/command-surface.tsx");
-  const dashboardPath = resolve(import.meta.dirname, "../../../web/components/gsd/dashboard.tsx");
-  const sidebarPath = resolve(import.meta.dirname, "../../../web/components/gsd/sidebar.tsx");
+  const storePath = resolve(import.meta.dirname, "../../../web/lib/hx-workspace-store.tsx");
+  const surfacePath = resolve(import.meta.dirname, "../../../web/components/hx/command-surface.tsx");
+  const dashboardPath = resolve(import.meta.dirname, "../../../web/components/hx/dashboard.tsx");
+  const sidebarPath = resolve(import.meta.dirname, "../../../web/components/hx/sidebar.tsx");
 
   const contractSource = readFileSync(contractPath, "utf-8");
   const storeSource = readFileSync(storePath, "utf-8");

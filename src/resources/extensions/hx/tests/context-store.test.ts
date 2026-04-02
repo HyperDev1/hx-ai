@@ -7,7 +7,7 @@ import {
   insertDecision,
   insertRequirement,
   insertArtifact,
-} from '../gsd-db.ts';
+} from '../hx-db.ts';
 import {
   queryDecisions,
   queryRequirements,

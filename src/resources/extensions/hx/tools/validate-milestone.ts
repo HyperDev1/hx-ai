@@ -11,7 +11,7 @@ import {
   transaction,
   insertAssessment,
   deleteAssessmentByScope,
-} from "../gsd-db.js";
+} from "../hx-db.js";
 import { resolveMilestonePath, clearPathCache } from "../paths.js";
 import { saveFile, clearParseCache } from "../files.js";
 import { invalidateStateCache } from "../state.js";

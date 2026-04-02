@@ -18,7 +18,7 @@ import {
   insertMilestone,
   insertSlice,
   insertTask,
-} from "../gsd-db.ts";
+} from "../hx-db.ts";
 import { createTestContext } from "./test-helpers.ts";
 
 const { assertEq, assertTrue, report } = createTestContext();

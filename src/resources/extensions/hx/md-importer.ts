@@ -17,7 +17,7 @@ import {
   openDatabase,
   transaction,
   _getAdapter,
-} from './gsd-db.js';
+} from './hx-db.js';
 import {
   resolveHxRootFile,
   resolveMilestoneFile,

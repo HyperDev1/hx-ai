@@ -47,7 +47,7 @@ export async function handleCleanupBranches(ctx: ExtensionCommandContext, basePa
     const { loadFile } = await import("./files.js");
     const { parseRoadmap } = await import("./parsers-legacy.js");
     const { isMilestoneComplete } = await import("./state.js");
-    const { isDbAvailable, getMilestone } = await import("./gsd-db.js");
+    const { isDbAvailable, getMilestone } = await import("./hx-db.js");
 
     const attachedBranches = new Set(
       listWorktrees(basePath).map((wt) => wt.branch),
@@ -121,7 +121,7 @@ export async function handleCleanupBranches(ctx: ExtensionCommandContext, basePa
 export async function handleCleanupSnapshots(ctx: ExtensionCommandContext, basePath: string): Promise<void> {
   let refs: string[];
   try {
-    refs = nativeForEachRef(basePath, "refs/gsd/snapshots/");
+    refs = nativeForEachRef(basePath, "refs/hx/snapshots/");
   } catch {
     ctx.ui.notify("No snapshot refs to clean up.", "info");
     return;
@@ -233,7 +233,7 @@ export async function handleCleanupWorktrees(ctx: ExtensionCommandContext, baseP
 
 export async function handleSkip(unitArg: string, ctx: ExtensionCommandContext, basePath: string): Promise<void> {
   if (!unitArg) {
-    ctx.ui.notify("Usage: /gsd skip <unit-id>  (e.g., /gsd skip execute-task/M001/S01/T03 or /gsd skip T03)", "info");
+    ctx.ui.notify("Usage: /hx skip <unit-id>  (e.g., /hx skip execute-task/M001/S01/T03 or /hx skip T03)", "info");
     return;
   }
 
@@ -442,7 +442,7 @@ export async function handleCleanupProjects(args: string, ctx: ExtensionCommandC
   }
 
   if (!fix && orphaned.length > 0) {
-    lines.push(`Run /gsd cleanup projects --fix to permanently delete ${pl(orphaned.length, "orphaned director")}${orphaned.length === 1 ? "y" : "ies"}.`);
+    lines.push(`Run /hx cleanup projects --fix to permanently delete ${pl(orphaned.length, "orphaned director")}${orphaned.length === 1 ? "y" : "ies"}.`);
     ctx.ui.notify(lines.join("\n"), "warning");
     return;
   }
@@ -479,7 +479,7 @@ export async function handleCleanupProjects(args: string, ctx: ExtensionCommandC
  * Prints counts of recovered items and the resulting project phase.
  */
 export async function handleRecover(ctx: ExtensionCommandContext, basePath: string): Promise<void> {
-  const { isDbAvailable: dbAvailable, _getAdapter, transaction: dbTransaction } = await import("./gsd-db.js");
+  const { isDbAvailable: dbAvailable, _getAdapter, transaction: dbTransaction } = await import("./hx-db.js");
   const { migrateHierarchyToDb } = await import("./md-importer.js");
   const { invalidateStateCache } = await import("./state.js");
 

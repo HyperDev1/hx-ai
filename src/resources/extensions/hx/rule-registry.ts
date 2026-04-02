@@ -135,7 +135,7 @@ export class RuleRegistry {
     }
     return {
       action: "stop",
-      reason: `Unhandled phase "${ctx.state.phase}" — run /gsd doctor to diagnose.`,
+      reason: `Unhandled phase "${ctx.state.phase}" — run /hx doctor to diagnose.`,
       level: "info",
       matchedRule: "<no-match>",
     };

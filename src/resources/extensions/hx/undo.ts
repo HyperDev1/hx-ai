@@ -12,7 +12,7 @@ import { deriveState } from "./state.js";
 import { invalidateAllCaches } from "./cache.js";
 import { hxRoot, resolveTasksDir, resolveSlicePath, resolveTaskFile, buildTaskFileName, buildSliceFileName } from "./paths.js";
 import { sendDesktopNotification } from "./notifications.js";
-import { getTask, getSlice, getSliceTasks, updateTaskStatus, updateSliceStatus } from "./gsd-db.js";
+import { getTask, getSlice, getSliceTasks, updateTaskStatus, updateSliceStatus } from "./hx-db.js";
 import { renderPlanCheckboxes, renderRoadmapCheckboxes } from "./markdown-renderer.js";
 
 /**
@@ -59,7 +59,7 @@ export async function handleUndo(args: string, ctx: ExtensionCommandContext, _pi
       `  - Delete summary artifacts\n` +
       `  - Uncheck task in PLAN (if execute-task)\n` +
       `  - Attempt to revert associated git commits\n\n` +
-      `Run /gsd undo --force to confirm.`,
+      `Run /hx undo --force to confirm.`,
       "warning",
     );
     return;
@@ -209,7 +209,7 @@ export async function handleUndoTask(
 
   if (!rawId) {
     ctx.ui.notify(
-      "Usage: /gsd undo-task <taskId> [--force]\n\n" +
+      "Usage: /hx undo-task <taskId> [--force]\n\n" +
       "Accepts: T01, S01/T01, or M001/S01/T01\n" +
       "Resets the task's DB status to pending and re-renders plan checkboxes.",
       "warning",
@@ -240,7 +240,7 @@ export async function handleUndoTask(
       `  - Set task status to "pending" in DB\n` +
       `  - Delete task summary file (if exists)\n` +
       `  - Re-render plan checkboxes\n\n` +
-      `Run /gsd undo-task ${rawId} --force to confirm.`,
+      `Run /hx undo-task ${rawId} --force to confirm.`,
       "warning",
     );
     return;
@@ -288,7 +288,7 @@ export async function handleResetSlice(
 
   if (!rawId) {
     ctx.ui.notify(
-      "Usage: /gsd reset-slice <sliceId> [--force]\n\n" +
+      "Usage: /hx reset-slice <sliceId> [--force]\n\n" +
       "Accepts: S01 or M001/S01\n" +
       "Resets the slice and all its tasks, re-renders plan + roadmap checkboxes.",
       "warning",
@@ -323,7 +323,7 @@ export async function handleResetSlice(
       `  - Set slice status to "active" in DB\n` +
       `  - Delete task summary files, slice summary, and UAT files\n` +
       `  - Re-render plan + roadmap checkboxes\n\n` +
-      `Run /gsd reset-slice ${rawId} --force to confirm.`,
+      `Run /hx reset-slice ${rawId} --force to confirm.`,
       "warning",
     );
     return;

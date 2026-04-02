@@ -10,7 +10,7 @@ import assert from 'node:assert/strict';
 import * as path from 'node:path';
 import * as os from 'node:os';
 import * as fs from 'node:fs';
-import { closeDatabase, isDbAvailable, getDecisionById } from '../gsd-db.ts';
+import { closeDatabase, isDbAvailable, getDecisionById } from '../hx-db.ts';
 
 function makeTmpDir(): string {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-ensure-db-'));
@@ -111,7 +111,7 @@ describe('ensure-db-open', () => {
 
     // Create a DB file first
     const dbPath = path.join(gsdDir, 'gsd.db');
-    const { openDatabase } = await import('../gsd-db.ts');
+    const { openDatabase } = await import('../hx-db.ts');
     openDatabase(dbPath);
     closeDatabase();
 

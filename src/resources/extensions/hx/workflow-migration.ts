@@ -5,7 +5,7 @@
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { _getAdapter, transaction } from "./gsd-db.js";
+import { _getAdapter, transaction } from "./hx-db.js";
 import { parseRoadmap, parsePlan } from "./parsers-legacy.js";
 
 // ─── needsAutoMigration ───────────────────────────────────────────────────

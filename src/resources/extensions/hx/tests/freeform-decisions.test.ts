@@ -6,7 +6,7 @@ import * as fs from 'node:fs';
 import {
   openDatabase,
   closeDatabase,
-} from '../gsd-db.ts';
+} from '../hx-db.ts';
 import {
   parseDecisionsTable,
 } from '../md-importer.ts';

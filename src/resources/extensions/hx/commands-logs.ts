@@ -1,13 +1,13 @@
 /**
- * /gsd logs — Browse activity logs, debug logs, and metrics.
+ * /hx logs — Browse activity logs, debug logs, and metrics.
  *
  * Subcommands:
- *   /gsd logs              — List recent activity + debug logs
- *   /gsd logs <N>          — Show summary of activity log #N
- *   /gsd logs debug        — List debug log files
- *   /gsd logs debug <N>    — Show debug log summary #N
- *   /gsd logs tail [N]     — Show last N activity log entries (default 5)
- *   /gsd logs clear        — Remove old activity and debug logs
+ *   /hx logs              — List recent activity + debug logs
+ *   /hx logs <N>          — Show summary of activity log #N
+ *   /hx logs debug        — List debug log files
+ *   /hx logs debug <N>    — Show debug log summary #N
+ *   /hx logs tail [N]     — Show last N activity log entries (default 5)
+ *   /hx logs clear        — Remove old activity and debug logs
  */
 
 import type { ExtensionCommandContext } from "@hyperlab/hx-coding-agent";
@@ -247,34 +247,34 @@ export async function handleLogs(args: string, ctx: ExtensionCommandContext): Pr
   const parts = args.trim().split(/\s+/).filter(Boolean);
   const subCmd = parts[0] ?? "";
 
-  // /gsd logs clear
+  // /hx logs clear
   if (subCmd === "clear") {
     await handleLogsClear(basePath, ctx);
     return;
   }
 
-  // /gsd logs debug [N]
+  // /hx logs debug [N]
   if (subCmd === "debug") {
     const idx = parts[1] ? parseInt(parts[1], 10) : undefined;
     await handleLogsDebug(basePath, ctx, idx);
     return;
   }
 
-  // /gsd logs tail [N]
+  // /hx logs tail [N]
   if (subCmd === "tail") {
     const count = parts[1] ? parseInt(parts[1], 10) : 5;
     await handleLogsTail(basePath, ctx, count);
     return;
   }
 
-  // /gsd logs <N> — show specific activity log
+  // /hx logs <N> — show specific activity log
   if (subCmd && /^\d+$/.test(subCmd)) {
     const seq = parseInt(subCmd, 10);
     await handleLogsShow(basePath, ctx, seq);
     return;
   }
 
-  // /gsd logs — list overview
+  // /hx logs — list overview
   await handleLogsList(basePath, ctx);
 }
 
@@ -314,7 +314,7 @@ async function handleLogsList(basePath: string, ctx: ExtensionCommandContext): P
       lines.push(`  ... and ${activities.length - 15} older entries`);
     }
     lines.push("");
-    lines.push("  View details: /gsd logs <#>");
+    lines.push("  View details: /hx logs <#>");
   }
 
   if (debugLogs.length > 0) {
@@ -327,7 +327,7 @@ async function handleLogsList(basePath: string, ctx: ExtensionCommandContext): P
       lines.push(`  ${i + 1}. ${d.filename}  ${size}  ${age}`);
     }
     lines.push("");
-    lines.push("  View details: /gsd logs debug <#>");
+    lines.push("  View details: /hx logs debug <#>");
   }
 
   // Metrics summary
@@ -347,7 +347,7 @@ async function handleLogsList(basePath: string, ctx: ExtensionCommandContext): P
   }
 
   lines.push("");
-  lines.push("Tip: Enable debug logging with HX_DEBUG=1 before /gsd auto");
+  lines.push("Tip: Enable debug logging with HX_DEBUG=1 before /hx auto");
 
   ctx.ui.notify(lines.join("\n"), "info");
 }
@@ -357,7 +357,7 @@ async function handleLogsShow(basePath: string, ctx: ExtensionCommandContext, se
   const entry = activities.find(e => e.seq === seq);
 
   if (!entry) {
-    ctx.ui.notify(`Activity log #${seq} not found. Run /gsd logs to see available logs.`, "warning");
+    ctx.ui.notify(`Activity log #${seq} not found. Run /hx logs to see available logs.`, "warning");
     return;
   }
 
@@ -430,7 +430,7 @@ async function handleLogsDebug(basePath: string, ctx: ExtensionCommandContext, i
       lines.push(`  ${i + 1}. ${d.filename}  ${formatSize(d.size)}  ${formatAge(d.mtime)}`);
     }
     lines.push("");
-    lines.push("View details: /gsd logs debug <#>");
+    lines.push("View details: /hx logs debug <#>");
     ctx.ui.notify(lines.join("\n"), "info");
     return;
   }

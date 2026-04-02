@@ -309,7 +309,7 @@ function ensureNodeModulesSymlink(agentDir: string): void {
     symlinkSync(gsdNodeModules, agentNodeModules, 'junction')
   } catch (err) {
     // This failure makes GSD non-functional — extensions can't resolve @hyperlab/* packages
-    console.error(`[gsd] WARN: Failed to symlink ${agentNodeModules} → ${gsdNodeModules}: ${err instanceof Error ? err.message : err}`)
+    console.error(`[hx] WARN: Failed to symlink ${agentNodeModules} → ${gsdNodeModules}: ${err instanceof Error ? err.message : err}`)
   }
 }
 
@@ -389,7 +389,7 @@ function pruneRemovedBundledExtensions(
  *
  * Skips the copy when the managed-resources.json version matches the current
  * GSD version, avoiding ~128ms of synchronous cpSync on every startup.
- * After `npm update -g @glittercowboy/gsd`, versions will differ and the
+ * After `npm update -g @glittercowboy/hx`, versions will differ and the
  * copy runs once to land the new resources.
  *
  * Inspectable: `ls ~/.gsd/agent/extensions/`

@@ -174,7 +174,7 @@ import {
   deregisterSigtermHandler as _deregisterSigtermHandler,
   detectWorkingTreeActivity,
 } from "./auto-supervisor.js";
-import { isDbAvailable } from "./gsd-db.js";
+import { isDbAvailable } from "./hx-db.js";
 import { countPendingCaptures } from "./captures.js";
 import { clearCmuxSidebar, logCmuxEvent, syncCmuxSidebar } from "../cmux/index.js";
 
@@ -439,8 +439,8 @@ export function stopAutoRemote(projectRoot: string): {
 /**
  * Check if a remote auto-mode session is running (from a different process).
  * Reads the crash lock, checks PID liveness, and returns session details.
- * Used by the guard in commands.ts to prevent bare /gsd, /gsd next, and
- * /gsd auto from stealing the session lock.
+ * Used by the guard in commands.ts to prevent bare /hx, /hx next, and
+ * /hx auto from stealing the session lock.
  */
 export function checkRemoteAutoSession(projectRoot: string): {
   running: boolean;
@@ -559,7 +559,7 @@ function cleanupAfterLoopExit(ctx: ExtensionContext): void {
   s.active = false;
   clearUnitTimeout();
 
-  // Clear crash lock and release session lock so the next `/gsd next` does
+  // Clear crash lock and release session lock so the next `/hx next` does
   // not see a stale lock with the current PID and treat it as a "remote"
   // session (which would cause it to SIGTERM itself). (#2730)
   try {
@@ -672,7 +672,7 @@ export async function stopAuto(
     // ── Step 5: DB cleanup ──
     if (isDbAvailable()) {
       try {
-        const { closeDatabase } = await import("./gsd-db.js");
+        const { closeDatabase } = await import("./hx-db.js");
         closeDatabase();
       } catch (e) {
         debugLog("db-close-failed", {
@@ -815,7 +815,7 @@ export async function stopAuto(
 
 /**
  * Pause auto-mode without destroying state. Context is preserved.
- * The user can interact with the agent, then `/gsd auto` resumes
+ * The user can interact with the agent, then `/hx auto` resumes
  * from disk state. Called when the user presses Escape during auto-mode.
  */
 export async function pauseAuto(
@@ -884,7 +884,7 @@ export async function pauseAuto(
   ctx?.ui.setStatus("gsd-auto", "paused");
   ctx?.ui.setWidget("gsd-progress", undefined);
   ctx?.ui.setFooter(undefined);
-  const resumeCmd = s.stepMode ? "/gsd next" : "/gsd auto";
+  const resumeCmd = s.stepMode ? "/hx next" : "/hx auto";
   ctx?.ui.notify(
     `${s.stepMode ? "Step" : "Auto"}-mode paused (Escape). Type to interact, or ${resumeCmd} to resume.`,
     "info",
@@ -1366,7 +1366,7 @@ function buildRecoveryContext(): import("./auto-timeout-recovery.js").RecoveryCo
 
 /**
  * Dispatch a hook unit directly, bypassing normal pre-dispatch hooks.
- * Used for manual hook triggers via /gsd run-hook.
+ * Used for manual hook triggers via /hx run-hook.
  */
 export async function dispatchHookUnit(
   ctx: ExtensionContext,

@@ -1,5 +1,5 @@
 /**
- * API Key Manager — /gsd keys
+ * API Key Manager — /hx keys
  *
  * Comprehensive CLI for managing API keys: list, add, remove, test, rotate, doctor.
  * Works with AuthStorage from pi-coding-agent — no core package changes needed.
@@ -260,7 +260,7 @@ export async function handleAddKey(
   if (providerArg) {
     provider = findProvider(providerArg);
     if (!provider) {
-      ctx.ui.notify(`Unknown provider: "${providerArg}". Use /gsd keys list to see available providers.`, "error");
+      ctx.ui.notify(`Unknown provider: "${providerArg}". Use /hx keys list to see available providers.`, "error");
       return false;
     }
   } else {
@@ -742,7 +742,7 @@ export function runKeyDoctor(auth: AuthStorage): DoctorFinding[] {
         findings.push({
           severity: "warning",
           provider: provider.id,
-          message: `${provider.label}: empty key stored (from skipped setup) — run /gsd keys add ${provider.id}`,
+          message: `${provider.label}: empty key stored (from skipped setup) — run /hx keys add ${provider.id}`,
         });
       }
     }
@@ -812,7 +812,7 @@ export function runKeyDoctor(auth: AuthStorage): DoctorFinding[] {
   if (!hasAnyLlm) {
     findings.push({
       severity: "error",
-      message: "No LLM provider configured — run /gsd keys add or /login",
+      message: "No LLM provider configured — run /hx keys add or /login",
     });
   }
 
@@ -879,7 +879,7 @@ export function formatDoctorFindings(findings: DoctorFinding[]): string {
 // ─── Main Handler ───────────────────────────────────────────────────────────────
 
 /**
- * Main entry point for /gsd keys [subcommand].
+ * Main entry point for /hx keys [subcommand].
  */
 export async function handleKeys(
   args: string,
@@ -972,14 +972,14 @@ export async function handleKeys(
 
     default:
       ctx.ui.notify(
-        "Usage: /gsd keys [list|add|remove|test|rotate|doctor]\n\n" +
-        "  /gsd keys              Show key status dashboard\n" +
-        "  /gsd keys list         List all configured keys\n" +
-        "  /gsd keys add [id]     Add a key for a provider\n" +
-        "  /gsd keys remove [id]  Remove a key\n" +
-        "  /gsd keys test [id]    Validate key(s) with API call\n" +
-        "  /gsd keys rotate [id]  Replace an existing key\n" +
-        "  /gsd keys doctor       Health check all keys",
+        "Usage: /hx keys [list|add|remove|test|rotate|doctor]\n\n" +
+        "  /hx keys              Show key status dashboard\n" +
+        "  /hx keys list         List all configured keys\n" +
+        "  /hx keys add [id]     Add a key for a provider\n" +
+        "  /hx keys remove [id]  Remove a key\n" +
+        "  /hx keys test [id]    Validate key(s) with API call\n" +
+        "  /hx keys rotate [id]  Replace an existing key\n" +
+        "  /hx keys doctor       Health check all keys",
         "info",
       );
       return;

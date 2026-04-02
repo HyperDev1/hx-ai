@@ -18,7 +18,7 @@ import {
   openDatabase,
   closeDatabase,
   getAllMilestones,
-} from "../gsd-db.ts";
+} from "../hx-db.ts";
 
 test("deriveState populates empty DB from disk milestones (#2631)", async () => {
   const base = mkdtempSync(join(tmpdir(), "gsd-empty-db-"));

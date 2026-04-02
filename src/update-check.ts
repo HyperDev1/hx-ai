@@ -218,5 +218,3 @@ export async function checkAndPromptForUpdates(options: UpdateCheckOptions = {})
 
   return false
 }
-lse
-}

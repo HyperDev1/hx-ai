@@ -196,9 +196,9 @@ export const RUNTIME_EXCLUSION_PATHS: readonly string[] = [
   ".hx/metrics.json",
   ".hx/completed-units.json",
   ".hx/STATE.md",
-  ".hx/gsd.db",
-  ".hx/gsd.db-shm",   // SQLite WAL sidecar — always created alongside gsd.db (#2296)
-  ".hx/gsd.db-wal",   // SQLite WAL sidecar — always created alongside gsd.db (#2296)
+  ".hx/hx.db",
+  ".hx/hx.db-shm",   // SQLite WAL sidecar — always created alongside gsd.db (#2296)
+  ".hx/hx.db-wal",   // SQLite WAL sidecar — always created alongside gsd.db (#2296)
   ".hx/journal/",     // daily-rotated JSONL event journal (#2296)
   ".hx/doctor-history.jsonl", // doctor run history (#2296)
   ".hx/DISCUSSION-MANIFEST.json",
@@ -606,7 +606,7 @@ export class GitServiceImpl {
   /**
    * Create a snapshot ref for the given label (typically a slice branch name).
    * Enabled by default; opt out with prefs.snapshots === false.
-   * Ref path: refs/gsd/snapshots/<label>/<timestamp>
+   * Ref path: refs/hx/snapshots/<label>/<timestamp>
    * The ref points at HEAD, capturing the current commit before destructive operations.
    */
   createSnapshot(label: string): void {
@@ -621,7 +621,7 @@ export class GitServiceImpl {
       + String(now.getMinutes()).padStart(2, "0")
       + String(now.getSeconds()).padStart(2, "0");
 
-    const refPath = `refs/gsd/snapshots/${label}/${ts}`;
+    const refPath = `refs/hx/snapshots/${label}/${ts}`;
     nativeUpdateRef(this.basePath, refPath, "HEAD");
   }
 

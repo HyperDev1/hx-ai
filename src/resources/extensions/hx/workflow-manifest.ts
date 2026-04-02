@@ -4,7 +4,7 @@ import {
   type MilestoneRow,
   type SliceRow,
   type TaskRow,
-} from "./gsd-db.js";
+} from "./hx-db.js";
 import type { Decision } from "./types.js";
 import { atomicWriteSync } from "./atomic-write.js";
 import { readFileSync, existsSync, mkdirSync } from "node:fs";

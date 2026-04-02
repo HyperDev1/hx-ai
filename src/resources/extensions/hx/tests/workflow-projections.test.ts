@@ -4,7 +4,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { renderPlanContent } from '../workflow-projections.ts';
-import type { SliceRow, TaskRow } from '../gsd-db.ts';
+import type { SliceRow, TaskRow } from '../hx-db.ts';
 
 // ─── Test fixtures ────────────────────────────────────────────────────────
 

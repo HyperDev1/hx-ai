@@ -24,7 +24,7 @@ import {
   updateTaskStatus,
   setTaskSummaryMd,
   deleteVerificationEvidence,
-} from "../gsd-db.js";
+} from "../hx-db.js";
 import { resolveSliceFile, resolveTasksDir, clearPathCache } from "../paths.js";
 import { checkOwnership, taskUnitKey } from "../unit-ownership.js";
 import { saveFile, clearParseCache } from "../files.js";

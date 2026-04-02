@@ -117,7 +117,7 @@ export function migrateLegacyFlatSessions(baseSessionsDir: string, projectSessio
 
 function emitWebModeFailure(stderr: WritableLike, status: WebModeLaunchStatus): void {
   if (status.ok) return
-  stderr.write(`[gsd] Web mode launch failed: ${status.failureReason}\n`)
+  stderr.write(`[hx] Web mode launch failed: ${status.failureReason}\n`)
 }
 
 /**
@@ -244,7 +244,7 @@ export async function runWebCliBranch(
     currentCwd = resolve(defaultCwd, webPath)
     const checkExists = existsSync
     if (!checkExists(currentCwd)) {
-      stderr.write(`[gsd] Project path does not exist: ${currentCwd}\n`)
+      stderr.write(`[hx] Project path does not exist: ${currentCwd}\n`)
       return {
         handled: true,
         exitCode: 1,
@@ -265,7 +265,7 @@ export async function runWebCliBranch(
         launchInputs: { cwd: currentCwd, projectSessionsDir: '', agentDir: deps.agentDir ?? defaultAgentDir },
       }
     }
-    stderr.write(`[gsd] Using project path: ${currentCwd}\n`)
+    stderr.write(`[hx] Using project path: ${currentCwd}\n`)
   } else {
     currentCwd = defaultCwd
   }

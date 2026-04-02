@@ -15,7 +15,7 @@ import {
   getMilestoneSlices,
   getSliceTasks,
   updateMilestoneStatus,
-} from "../gsd-db.js";
+} from "../hx-db.js";
 import { resolveMilestonePath, clearPathCache } from "../paths.js";
 import { isClosedStatus } from "../status-guards.js";
 import { saveFile, clearParseCache } from "../files.js";

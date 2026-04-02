@@ -10,7 +10,7 @@ export function safeMkdir(dirPath: string): boolean {
     mkdirSync(dirPath, { recursive: true })
     return true
   } catch (err) {
-    if (process.env.HX_DEBUG) console.error(`[gsd] mkdir failed: ${dirPath}`, err)
+    if (process.env.HX_DEBUG) console.error(`[hx] mkdir failed: ${dirPath}`, err)
     return false
   }
 }
@@ -25,7 +25,7 @@ export function safeCopy(src: string, dst: string, opts?: CopySyncOptions): bool
     cpSync(src, dst, opts)
     return true
   } catch (err) {
-    if (process.env.HX_DEBUG) console.error(`[gsd] copy failed: ${src} → ${dst}`, err)
+    if (process.env.HX_DEBUG) console.error(`[hx] copy failed: ${src} → ${dst}`, err)
     return false
   }
 }
@@ -41,7 +41,7 @@ export function safeCopyRecursive(src: string, dst: string, opts?: Omit<CopySync
     cpSync(src, dst, { ...opts, recursive: true })
     return true
   } catch (err) {
-    if (process.env.HX_DEBUG) console.error(`[gsd] recursive copy failed: ${src} → ${dst}`, err)
+    if (process.env.HX_DEBUG) console.error(`[hx] recursive copy failed: ${src} → ${dst}`, err)
     return false
   }
 }

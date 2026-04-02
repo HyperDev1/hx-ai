@@ -24,7 +24,7 @@ import { getLoadedSkills, type Skill } from "@hyperlab/hx-coding-agent";
 import { join, basename } from "node:path";
 import { existsSync } from "node:fs";
 import { computeBudgets, resolveExecutorContextWindow, truncateAtSectionBoundary } from "./context-budget.js";
-import { getPendingGates } from "./gsd-db.js";
+import { getPendingGates } from "./hx-db.js";
 import { formatDecisionsCompact, formatRequirementsCompact } from "./structured-data-formatter.js";
 
 // ─── Preamble Cap ─────────────────────────────────────────────────────────────
@@ -188,7 +188,7 @@ export async function inlineDependencySummaries(
   // DB primary path — get slice depends directly
   let depends: string[] | null = null;
   try {
-    const { isDbAvailable, getSlice } = await import("./gsd-db.js");
+    const { isDbAvailable, getSlice } = await import("./hx-db.js");
     if (isDbAvailable()) {
       const slice = getSlice(mid, sid);
       if (slice) {
@@ -263,7 +263,7 @@ export async function inlineDecisionsFromDb(
 ): Promise<string | null> {
   const inlineLevel = level ?? resolveInlineLevel();
   try {
-    const { isDbAvailable } = await import("./gsd-db.js");
+    const { isDbAvailable } = await import("./hx-db.js");
     if (isDbAvailable()) {
       const { queryDecisions, formatDecisionsForPrompt } = await import("./context-store.js");
       const decisions = queryDecisions({ milestoneId, scope });
@@ -290,7 +290,7 @@ export async function inlineRequirementsFromDb(
 ): Promise<string | null> {
   const inlineLevel = level ?? resolveInlineLevel();
   try {
-    const { isDbAvailable } = await import("./gsd-db.js");
+    const { isDbAvailable } = await import("./hx-db.js");
     if (isDbAvailable()) {
       const { queryRequirements, formatRequirementsForPrompt } = await import("./context-store.js");
       const requirements = queryRequirements({ sliceId });
@@ -316,7 +316,7 @@ export async function inlineProjectFromDb(
   base: string,
 ): Promise<string | null> {
   try {
-    const { isDbAvailable } = await import("./gsd-db.js");
+    const { isDbAvailable } = await import("./hx-db.js");
     if (isDbAvailable()) {
       const { queryProject } = await import("./context-store.js");
       const content = queryProject();
@@ -718,7 +718,7 @@ export async function checkNeedsReassessment(
 ): Promise<{ sliceId: string } | null> {
   // DB primary path — fall through to file-based when DB has no data for this milestone
   try {
-    const { isDbAvailable, getMilestoneSlices } = await import("./gsd-db.js");
+    const { isDbAvailable, getMilestoneSlices } = await import("./hx-db.js");
     if (isDbAvailable()) {
       const slices = getMilestoneSlices(mid);
       if (slices.length > 0) {
@@ -772,7 +772,7 @@ export async function checkNeedsRunUat(
 ): Promise<{ sliceId: string; uatType: UatType } | null> {
   // DB primary path — fall through to file-based when DB has no data for this milestone
   try {
-    const { isDbAvailable, getMilestoneSlices } = await import("./gsd-db.js");
+    const { isDbAvailable, getMilestoneSlices } = await import("./hx-db.js");
     if (isDbAvailable()) {
       const slices = getMilestoneSlices(mid);
       if (slices.length > 0) {
@@ -984,7 +984,7 @@ export async function buildResearchSlicePrompt(
   inlined.push(await inlineFile(roadmapPath, roadmapRel, "Milestone Roadmap"));
   const contextInline = await inlineFileOptional(contextPath, contextRel, "Milestone Context");
   if (contextInline) inlined.push(contextInline);
-  // Slice CONTEXT from /gsd discuss — contains user decisions and scope constraints
+  // Slice CONTEXT from /hx discuss — contains user decisions and scope constraints
   const sliceContextPath = resolveSliceFile(base, mid, sid, "CONTEXT");
   const sliceContextRel = relSliceFile(base, mid, sid, "CONTEXT");
   const sliceContextInline = await inlineFileOptional(sliceContextPath, sliceContextRel, "Slice Context (from discussion)");
@@ -1039,7 +1039,7 @@ export async function buildPlanSlicePrompt(
 
   const inlined: string[] = [];
   inlined.push(await inlineFile(roadmapPath, roadmapRel, "Milestone Roadmap"));
-  // Slice CONTEXT from /gsd discuss — contains user decisions and scope constraints
+  // Slice CONTEXT from /hx discuss — contains user decisions and scope constraints
   const sliceContextPath = resolveSliceFile(base, mid, sid, "CONTEXT");
   const sliceContextRel = relSliceFile(base, mid, sid, "CONTEXT");
   const sliceContextInline = await inlineFileOptional(sliceContextPath, sliceContextRel, "Slice Context (from discussion)");
@@ -1301,7 +1301,7 @@ export async function buildCompleteMilestonePrompt(
   // Inline all slice summaries (deduplicated by slice ID)
   let sliceIds: string[] = [];
   try {
-    const { isDbAvailable, getMilestoneSlices } = await import("./gsd-db.js");
+    const { isDbAvailable, getMilestoneSlices } = await import("./hx-db.js");
     if (isDbAvailable()) {
       sliceIds = getMilestoneSlices(mid).map(s => s.id);
     }
@@ -1372,7 +1372,7 @@ export async function buildValidateMilestonePrompt(
 
   // Inline verification classes from planning (if available in DB)
   try {
-    const { isDbAvailable, getMilestone } = await import("./gsd-db.js");
+    const { isDbAvailable, getMilestone } = await import("./hx-db.js");
     if (isDbAvailable()) {
       const milestone = getMilestone(mid);
       if (milestone) {
@@ -1391,7 +1391,7 @@ export async function buildValidateMilestonePrompt(
   // Inline all slice summaries and UAT results
   let valSliceIds: string[] = [];
   try {
-    const { isDbAvailable, getMilestoneSlices } = await import("./gsd-db.js");
+    const { isDbAvailable, getMilestoneSlices } = await import("./hx-db.js");
     if (isDbAvailable()) {
       valSliceIds = getMilestoneSlices(mid).map(s => s.id);
     }
@@ -1846,7 +1846,7 @@ export async function buildRewriteDocsPrompt(
         // DB primary path — get incomplete tasks
         let incompleteTasks: { id: string }[] | null = null;
         try {
-          const { isDbAvailable, getSliceTasks } = await import("./gsd-db.js");
+          const { isDbAvailable, getSliceTasks } = await import("./hx-db.js");
           if (isDbAvailable()) {
             incompleteTasks = getSliceTasks(mid, sid)
               .filter(t => t.status !== "complete" && t.status !== "done")

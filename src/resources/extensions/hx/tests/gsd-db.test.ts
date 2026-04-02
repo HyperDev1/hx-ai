@@ -17,7 +17,7 @@ import {
   transaction,
   _getAdapter,
   _resetProvider,
-} from '../gsd-db.ts';
+} from '../hx-db.ts';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Helper: create a temp file path for file-backed DB tests

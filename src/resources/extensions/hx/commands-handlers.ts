@@ -104,7 +104,7 @@ export async function handleSkillHealth(args: string, ctx: ExtensionCommandConte
 
   const basePath = projectRoot();
 
-  // /gsd skill-health <skill-name> — detail view
+  // /hx skill-health <skill-name> — detail view
   if (args && !args.startsWith("--")) {
     const detail = formatSkillDetail(basePath, args);
     ctx.ui.notify(detail, "info");
@@ -138,7 +138,7 @@ export async function handleCapture(args: string, ctx: ExtensionCommandContext):
   // Strip surrounding quotes from the argument
   let text = args.trim();
   if (!text) {
-    ctx.ui.notify('Usage: /gsd capture "your thought here"', "warning");
+    ctx.ui.notify('Usage: /hx capture "your thought here"', "warning");
     return;
   }
   // Remove wrapping quotes (single or double)
@@ -146,7 +146,7 @@ export async function handleCapture(args: string, ctx: ExtensionCommandContext):
     text = text.slice(1, -1);
   }
   if (!text) {
-    ctx.ui.notify('Usage: /gsd capture "your thought here"', "warning");
+    ctx.ui.notify('Usage: /hx capture "your thought here"', "warning");
     return;
   }
 
@@ -274,11 +274,11 @@ export async function handleKnowledge(args: string, ctx: ExtensionCommandContext
     const fullText = filteredParts.join(" ").trim();
     if (!fullText) {
       ctx.ui.notify(
-        "Usage: /gsd knowledge [rule|pattern|lesson] <description>\n" +
-        "       /gsd knowledge <description>  (AI auto-classifies)\n" +
-        "       /gsd knowledge --raw <rule|pattern|lesson> <description>\n" +
-        "Example: /gsd knowledge rule Use real DB for integration tests\n" +
-        "         /gsd knowledge always use prepared statements",
+        "Usage: /hx knowledge [rule|pattern|lesson] <description>\n" +
+        "       /hx knowledge <description>  (AI auto-classifies)\n" +
+        "       /hx knowledge --raw <rule|pattern|lesson> <description>\n" +
+        "Example: /hx knowledge rule Use real DB for integration tests\n" +
+        "         /hx knowledge always use prepared statements",
         "warning",
       );
       return;
@@ -309,10 +309,10 @@ export async function handleKnowledge(args: string, ctx: ExtensionCommandContext
   // ─── No-type mode without pi: fall back to usage message ──────────────
   if (!isExplicitType) {
     ctx.ui.notify(
-      "Usage: /gsd knowledge <rule|pattern|lesson> <description>\n" +
-      "       /gsd knowledge <description>  (AI auto-classifies, requires active session)\n" +
-      "       /gsd knowledge --raw <rule|pattern|lesson> <description>\n" +
-      "Example: /gsd knowledge rule Use real DB for integration tests",
+      "Usage: /hx knowledge <rule|pattern|lesson> <description>\n" +
+      "       /hx knowledge <description>  (AI auto-classifies, requires active session)\n" +
+      "       /hx knowledge --raw <rule|pattern|lesson> <description>\n" +
+      "Example: /hx knowledge rule Use real DB for integration tests",
       "warning",
     );
     return;
@@ -323,7 +323,7 @@ export async function handleKnowledge(args: string, ctx: ExtensionCommandContext
 
   const entryText = filteredParts.slice(1).join(" ").trim();
   if (!entryText) {
-    ctx.ui.notify(`Usage: /gsd knowledge ${actualTypeArg} <description>`, "warning");
+    ctx.ui.notify(`Usage: /hx knowledge ${actualTypeArg} <description>`, "warning");
     return;
   }
 
@@ -403,7 +403,7 @@ export async function handleKnowledge(args: string, ctx: ExtensionCommandContext
 
 export async function handleKnowledgeSearch(query: string, ctx: ExtensionCommandContext): Promise<void> {
   if (!query.trim()) {
-    ctx.ui.notify("Usage: /gsd knowledge search <text>", "warning");
+    ctx.ui.notify("Usage: /hx knowledge search <text>", "warning");
     return;
   }
 
@@ -414,7 +414,7 @@ export async function handleKnowledgeSearch(query: string, ctx: ExtensionCommand
   const existing = await loadFile(knowledgePath);
 
   if (!existing) {
-    ctx.ui.notify("No KNOWLEDGE.md found. Add entries with /gsd knowledge rule|pattern|lesson.", "warning");
+    ctx.ui.notify("No KNOWLEDGE.md found. Add entries with /hx knowledge rule|pattern|lesson.", "warning");
     return;
   }
 
@@ -435,7 +435,7 @@ export async function handleKnowledgeSearch(query: string, ctx: ExtensionCommand
 export async function handleRunHook(args: string, ctx: ExtensionCommandContext, pi: ExtensionAPI): Promise<void> {
   const parts = args.trim().split(/\s+/);
   if (parts.length < 3) {
-    ctx.ui.notify(`Usage: /gsd run-hook <hook-name> <unit-type> <unit-id>
+    ctx.ui.notify(`Usage: /hx run-hook <hook-name> <unit-type> <unit-id>
 
 Unit types:
   execute-task   - Task execution (unit-id: M001/S01/T01)
@@ -445,8 +445,8 @@ Unit types:
   complete-milestone - Milestone completion (unit-id: M001)
 
 Examples:
-  /gsd run-hook code-review execute-task M001/S01/T01
-  /gsd run-hook lint-check plan-slice M001/S01`, "warning");
+  /hx run-hook code-review execute-task M001/S01/T01
+  /hx run-hook lint-check plan-slice M001/S01`, "warning");
     return;
   }
 
@@ -515,7 +515,7 @@ function compareSemverLocal(a: string, b: string): number {
 export async function handleUpdate(ctx: ExtensionCommandContext): Promise<void> {
   const { execSync } = await import("node:child_process");
 
-  const NPM_PACKAGE = "gsd-pi";
+  const NPM_PACKAGE = "@hyperlab/hx";
   const current = process.env.HX_VERSION || "0.0.0";
 
   ctx.ui.notify(`Current version: v${current}\nChecking npm registry...`, "info");

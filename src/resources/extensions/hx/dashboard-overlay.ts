@@ -3,14 +3,14 @@
  *
  * Full-screen overlay showing auto-mode progress: milestone/slice/task
  * breakdown, current unit, completed units, timing, and activity log.
- * Toggled with Ctrl+Alt+G (⌃⌥G on macOS) or opened from /gsd status.
+ * Toggled with Ctrl+Alt+G (⌃⌥G on macOS) or opened from /hx status.
  */
 
 import type { Theme } from "@hyperlab/hx-coding-agent";
 import { truncateToWidth, visibleWidth, matchesKey, Key } from "@hyperlab/hx-tui";
 import { deriveState } from "./state.js";
 import { loadFile } from "./files.js";
-import { isDbAvailable, getMilestoneSlices, getSliceTasks } from "./gsd-db.js";
+import { isDbAvailable, getMilestoneSlices, getSliceTasks } from "./hx-db.js";
 import { resolveMilestoneFile, resolveSliceFile } from "./paths.js";
 import { getAutoDashboardData } from "./auto.js";
 import type { AutoDashboardData } from "./auto-dashboard.js";
@@ -347,7 +347,7 @@ export class GSDDashboardOverlay {
       )));
       lines.push(blank());
     } else if (this.dashData.paused) {
-      lines.push(row(th.fg("dim", "/gsd auto to resume")));
+      lines.push(row(th.fg("dim", "/hx auto to resume")));
       lines.push(blank());
     } else if (isRemote) {
       const rs = this.dashData.remoteSession!;
@@ -357,7 +357,7 @@ export class GSDDashboardOverlay {
       lines.push(row(th.fg("text", `Remote session: ${unitDisplay}`)));
       lines.push(blank());
     } else {
-      lines.push(row(th.fg("dim", "No unit running · /gsd auto to start")));
+      lines.push(row(th.fg("dim", "No unit running · /hx auto to start")));
       lines.push(blank());
     }
 

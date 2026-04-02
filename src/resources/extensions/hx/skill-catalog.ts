@@ -642,7 +642,7 @@ export const SKILL_CATALOG: SkillPack[] = [
  * NOT shown directly to users during init (greenfield installs essentials
  * only and defers stack-specific skills).  These mappings are available for:
  *   1. The LLM to install skills after establishing a design
- *   2. The `/gsd skills` command (explicit user request)
+ *   2. The `/hx skills` command (explicit user request)
  *   3. Re-running brownfield detection after project files are created
  */
 export const GREENFIELD_STACKS: Array<{
@@ -1021,7 +1021,7 @@ export async function runSkillInstallStep(
           description: "Install skills later with npx skills add",
         },
       ],
-      notYetMessage: "Run /gsd init when ready.",
+      notYetMessage: "Run /hx init when ready.",
     });
 
     if (choice === "install") {
@@ -1066,7 +1066,7 @@ export async function runSkillInstallStep(
           description: "Install skills later with npx skills add",
         },
       ],
-      notYetMessage: "Run /gsd init when ready.",
+      notYetMessage: "Run /hx init when ready.",
     });
 
     if (choice === "install") {

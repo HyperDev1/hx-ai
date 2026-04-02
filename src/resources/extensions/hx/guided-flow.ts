@@ -9,7 +9,7 @@
 import type { ExtensionAPI, ExtensionContext, ExtensionCommandContext } from "@hyperlab/hx-coding-agent";
 import { showNextAction } from "../shared/tui.js";
 import { loadFile } from "./files.js";
-import { isDbAvailable, getMilestoneSlices } from "./gsd-db.js";
+import { isDbAvailable, getMilestoneSlices } from "./hx-db.js";
 import { loadPrompt, inlineTemplate } from "./prompt-loader.js";
 import { buildSkillActivationBlock } from "./auto-prompts.js";
 import { deriveState } from "./state.js";
@@ -181,7 +181,7 @@ export function checkAutoStartAfterDiscuss(): boolean {
   ctx.ui.notify(`Milestone ${milestoneId} ready.`, "info");
   startAuto(ctx, pi, basePath, false, { step }).catch((err) => {
     ctx.ui.notify(`Auto-start failed: ${getErrorMessage(err)}`, "error");
-    if (process.env.HX_DEBUG) console.error('[gsd] auto start error:', err);
+    if (process.env.HX_DEBUG) console.error('[hx] auto start error:', err);
     debugLog("auto-start-failed", { error: getErrorMessage(err) });
   });
   return true;
@@ -507,7 +507,7 @@ async function buildDiscussSlicePrompt(
 }
 
 /**
- * /gsd discuss — show a picker of non-done slices and run a slice interview.
+ * /hx discuss — show a picker of non-done slices and run a slice interview.
  * Loops back to the picker after each discussion so the user can chain
  * multiple slice interviews in one session.
  */
@@ -518,7 +518,7 @@ export async function showDiscuss(
 ): Promise<void> {
   // Guard: no .gsd/ project
   if (!existsSync(hxRoot(basePath))) {
-    ctx.ui.notify("No GSD project found. Run /gsd to start one first.", "warning");
+    ctx.ui.notify("No GSD project found. Run /hx to start one first.", "warning");
     return;
   }
 
@@ -532,7 +532,7 @@ export async function showDiscuss(
   if (!state.activeMilestone?.id) {
     const pendingMilestones = state.registry.filter(m => m.status === "pending");
     if (pendingMilestones.length === 0) {
-      ctx.ui.notify("No active milestone. Run /gsd to create one first.", "warning");
+      ctx.ui.notify("No active milestone. Run /hx to create one first.", "warning");
       return;
     }
     await showDiscussQueuedMilestone(ctx, pi, basePath, pendingMilestones);
@@ -549,7 +549,7 @@ export async function showDiscuss(
     const draftContent = draftFile ? await loadFile(draftFile) : null;
 
     const choice = await showNextAction(ctx, {
-      title: `GSD — ${mid}: ${milestoneTitle}`,
+      title: `HX — ${mid}: ${milestoneTitle}`,
       summary: ["This milestone has a draft context from a prior discussion.", "It needs a dedicated discussion before auto-planning can begin."],
       actions: [
         {
@@ -569,7 +569,7 @@ export async function showDiscuss(
           description: "Leave this milestone as-is and start something new.",
         },
       ],
-      notYetMessage: "Run /gsd discuss when ready to discuss this milestone.",
+      notYetMessage: "Run /hx discuss when ready to discuss this milestone.",
     });
 
     if (choice === "discuss_draft") {
@@ -614,7 +614,7 @@ export async function showDiscuss(
   const roadmapFile = resolveMilestoneFile(basePath, mid, "ROADMAP");
   const roadmapContent = roadmapFile ? await loadFile(roadmapFile) : null;
   if (!roadmapContent && !isDbAvailable()) {
-    ctx.ui.notify("No roadmap yet for this milestone. Run /gsd to plan first.", "warning");
+    ctx.ui.notify("No roadmap yet for this milestone. Run /hx to plan first.", "warning");
     return;
   }
 
@@ -651,8 +651,8 @@ export async function showDiscuss(
       const lockData = readSessionLockData(basePath);
       const remoteAutoRunning = lockData && lockData.pid !== process.pid && isSessionLockProcessAlive(lockData);
       const nextStep = remoteAutoRunning
-        ? "Auto-mode is already running — use /gsd status to check progress."
-        : "Run /gsd to start planning.";
+        ? "Auto-mode is already running — use /hx status to check progress."
+        : "Run /hx to start planning.";
       ctx.ui.notify(
         `All ${pendingSlices.length} slices discussed. ${nextStep}`,
         "info",
@@ -690,13 +690,13 @@ export async function showDiscuss(
     }
 
     const choice = await showNextAction(ctx, {
-      title: "GSD — Discuss a slice",
+      title: "HX — Discuss a slice",
       summary: [
         `${mid}: ${milestoneTitle}`,
         "Pick a slice to interview. Context file will be written when done.",
       ],
       actions,
-      notYetMessage: "Run /gsd discuss when ready.",
+      notYetMessage: "Run /hx discuss when ready.",
     });
 
     if (choice === "not_yet") return;
@@ -762,13 +762,13 @@ async function showDiscussQueuedMilestone(
   });
 
   const choice = await showNextAction(ctx, {
-    title: "GSD — Discuss a queued milestone",
+    title: "HX — Discuss a queued milestone",
     summary: [
       "Select a queued milestone to discuss.",
       "Discussing will update its context file. It will not be activated.",
     ],
     actions,
-    notYetMessage: "Run /gsd discuss when ready.",
+    notYetMessage: "Run /hx discuss when ready.",
   });
 
   if (choice === "not_yet") return;
@@ -816,8 +816,8 @@ async function dispatchDiscussForMilestone(
 /**
  * Self-heal: scan runtime records and clear stale ones left behind when
  * auto-mode crashed mid-unit. auto.ts has its own selfHealRuntimeRecords()
- * but guided-flow (manual /gsd mode) never called it — meaning stale records
- * persisted until the next /gsd auto run.  This ensures the wizard always
+ * but guided-flow (manual /hx mode) never called it — meaning stale records
+ * persisted until the next /hx auto run.  This ensures the wizard always
  * starts from a clean state regardless of how the previous session ended.
  */
 function selfHealRuntimeRecords(basePath: string, ctx: ExtensionContext): { cleared: number } {
@@ -890,7 +890,7 @@ async function handleMilestoneActions(
         description: "Return to the previous menu.",
       },
     ],
-    notYetMessage: "Run /gsd when ready.",
+    notYetMessage: "Run /hx when ready.",
   });
 
   if (choice === "park") {
@@ -902,7 +902,7 @@ async function handleMilestoneActions(
         { id: "blocked_external", label: "Blocked externally", description: "Waiting on an external dependency or decision." },
         { id: "needs_rethink", label: "Needs rethinking", description: "The approach needs to be reconsidered." },
       ],
-      notYetMessage: "Run /gsd when ready.",
+      notYetMessage: "Run /hx when ready.",
     });
 
     // User pressed "Not yet" / Escape — cancel the park operation
@@ -915,7 +915,7 @@ async function handleMilestoneActions(
 
     const success = parkMilestone(basePath, milestoneId, reasonText);
     if (success) {
-      ctx.ui.notify(`Parked ${milestoneId}. Run /gsd unpark ${milestoneId} to reactivate.`, "info");
+      ctx.ui.notify(`Parked ${milestoneId}. Run /hx unpark ${milestoneId} to reactivate.`, "info");
     } else {
       ctx.ui.notify(`Could not park ${milestoneId} — milestone not found or already parked.`, "warning");
     }
@@ -962,7 +962,7 @@ export async function showSmartEntry(
   const stepMode = options?.step;
 
   // ── Clear stale milestone ID reservations from previous cancelled sessions ──
-  // Reservations only need to survive within a single /gsd interaction.
+  // Reservations only need to survive within a single /hx interaction.
   // Without this, each cancelled session permanently bumps the next ID. (#2488)
   clearReservedMilestoneIds();
 
@@ -974,7 +974,7 @@ export async function showSmartEntry(
   }
   if (dirCheck.severity === "warning") {
     const proceed = await showConfirm(ctx, {
-      title: "GSD — Unusual Directory",
+      title: "HX — Unusual Directory",
       message: dirCheck.reason!,
       confirmLabel: "Continue anyway",
       declineLabel: "Cancel",
@@ -1038,10 +1038,10 @@ export async function showSmartEntry(
 
     if (!isBootstrapCrash) {
       const resume = await showNextAction(ctx, {
-        title: "GSD — Interrupted Session Detected",
+        title: "HX — Interrupted Session Detected",
         summary: [formatCrashInfo(crashLock)],
         actions: [
-          { id: "resume", label: "Resume with /gsd auto", description: "Pick up where it left off", recommended: true },
+          { id: "resume", label: "Resume with /hx auto", description: "Pick up where it left off", recommended: true },
           { id: "continue", label: "Continue manually", description: "Open the wizard as normal" },
         ],
       });
@@ -1056,8 +1056,8 @@ export async function showSmartEntry(
 
   if (!state.activeMilestone?.id) {
     // Guard: if a discuss session is already in flight, don't re-inject the prompt.
-    // Both /gsd and /gsd auto reach this branch when no milestone exists yet.
-    // Without this guard, every subsequent /gsd call overwrites pendingAutoStart
+    // Both /hx and /hx auto reach this branch when no milestone exists yet.
+    // Without this guard, every subsequent /hx call overwrites pendingAutoStart
     // and fires another dispatchWorkflow, resetting the conversation mid-interview.
     if (pendingAutoStart) {
       ctx.ui.notify("Discussion already in progress — answer the question above to continue.", "info");
@@ -1077,7 +1077,7 @@ export async function showSmartEntry(
           if (entries.length > 0) {
             ctx.ui.notify(
               `Milestone directory has ${entries.length} entries but none were recognized as milestones. ` +
-              `This may indicate a corrupted state or wrong working directory. Run \`/gsd doctor\` to diagnose.`,
+              `This may indicate a corrupted state or wrong working directory. Run \`/hx doctor\` to diagnose.`,
               "warning",
             );
             return;
@@ -1099,7 +1099,7 @@ export async function showSmartEntry(
       ), "gsd-run", ctx, "discuss-milestone");
     } else {
       const choice = await showNextAction(ctx, {
-        title: "GSD — Get Shit Done",
+        title: "HX — Hyperlab Coding Agent",
         summary: ["No active milestone."],
         actions: [
           {
@@ -1109,7 +1109,7 @@ export async function showSmartEntry(
             recommended: true,
           },
         ],
-        notYetMessage: "Run /gsd when ready.",
+        notYetMessage: "Run /hx when ready.",
       });
 
       if (choice === "new_milestone") {
@@ -1129,7 +1129,7 @@ export async function showSmartEntry(
   // ── All milestones complete → New milestone ──────────────────────────
   if (state.phase === "complete") {
     const choice = await showNextAction(ctx, {
-      title: `GSD — ${milestoneId}: ${milestoneTitle}`,
+      title: `HX — ${milestoneId}: ${milestoneTitle}`,
       summary: ["All milestones complete."],
       actions: [
         {
@@ -1144,7 +1144,7 @@ export async function showSmartEntry(
           description: "Review what was built.",
         },
       ],
-      notYetMessage: "Run /gsd when ready.",
+      notYetMessage: "Run /hx when ready.",
     });
 
     if (choice === "new_milestone") {
@@ -1170,7 +1170,7 @@ export async function showSmartEntry(
     const draftContent = draftFile ? await loadFile(draftFile) : null;
 
     const choice = await showNextAction(ctx, {
-      title: `GSD — ${milestoneId}: ${milestoneTitle}`,
+      title: `HX — ${milestoneId}: ${milestoneTitle}`,
       summary: ["This milestone has a draft context from a prior discussion.", "It needs a dedicated discussion before auto-planning can begin."],
       actions: [
         {
@@ -1190,7 +1190,7 @@ export async function showSmartEntry(
           description: "Leave this milestone as-is and start something new.",
         },
       ],
-      notYetMessage: "Run /gsd when ready to discuss this milestone.",
+      notYetMessage: "Run /hx when ready to discuss this milestone.",
     });
 
     if (choice === "discuss_draft") {
@@ -1263,10 +1263,10 @@ export async function showSmartEntry(
       ];
 
       const choice = await showNextAction(ctx, {
-        title: `GSD — ${milestoneId}: ${milestoneTitle}`,
+        title: `HX — ${milestoneId}: ${milestoneTitle}`,
         summary: [hasContext ? "Context captured. Ready to create roadmap." : "New milestone — no roadmap yet."],
         actions,
-        notYetMessage: "Run /gsd when ready.",
+        notYetMessage: "Run /hx when ready.",
       });
 
       if (choice === "plan") {
@@ -1340,10 +1340,10 @@ export async function showSmartEntry(
       ];
 
       const choice = await showNextAction(ctx, {
-        title: `GSD — ${milestoneId}: ${milestoneTitle}`,
+        title: `HX — ${milestoneId}: ${milestoneTitle}`,
         summary: ["Roadmap exists. Ready to execute."],
         actions,
-        notYetMessage: "Run /gsd status for details.",
+        notYetMessage: "Run /hx status for details.",
       });
 
       if (choice === "auto") {
@@ -1406,10 +1406,10 @@ export async function showSmartEntry(
       : `${sliceId}: ${sliceTitle} — ready for planning.`;
 
     const choice = await showNextAction(ctx, {
-      title: `GSD — ${milestoneId} / ${sliceId}: ${sliceTitle}`,
+      title: `HX — ${milestoneId} / ${sliceId}: ${sliceTitle}`,
       summary: [summaryLine],
       actions,
-      notYetMessage: "Run /gsd when ready.",
+      notYetMessage: "Run /hx when ready.",
     });
 
     if (choice === "plan") {
@@ -1460,7 +1460,7 @@ export async function showSmartEntry(
   // ── All tasks done → Complete slice ──────────────────────────────────
   if (state.phase === "summarizing") {
     const choice = await showNextAction(ctx, {
-      title: `GSD — ${milestoneId} / ${sliceId}: ${sliceTitle}`,
+      title: `HX — ${milestoneId} / ${sliceId}: ${sliceTitle}`,
       summary: ["All tasks complete. Ready for slice summary."],
       actions: [
         {
@@ -1480,7 +1480,7 @@ export async function showSmartEntry(
           description: "Park, discard, or skip this milestone.",
         },
       ],
-      notYetMessage: "Run /gsd when ready.",
+      notYetMessage: "Run /hx when ready.",
     });
 
     if (choice === "complete") {
@@ -1523,7 +1523,7 @@ export async function showSmartEntry(
       !!(sDir && await loadFile(join(sDir, "continue.md")));
 
     const choice = await showNextAction(ctx, {
-      title: `GSD — ${milestoneId} / ${sliceId}: ${sliceTitle}`,
+      title: `HX — ${milestoneId} / ${sliceId}: ${sliceTitle}`,
       summary: [
         hasInterrupted
           ? `Resuming: ${taskId} — ${taskTitle}`
@@ -1554,7 +1554,7 @@ export async function showSmartEntry(
           description: "Park, discard, or skip this milestone.",
         },
       ],
-      notYetMessage: "Run /gsd when ready.",
+      notYetMessage: "Run /hx when ready.",
     });
 
     if (choice === "auto") {

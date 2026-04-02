@@ -58,7 +58,7 @@ import { initRoutingHistory } from "./routing-history.js";
 import { restoreHookState, resetHookState } from "./post-unit-hooks.js";
 import { resetProactiveHealing, setLevelChangeCallback } from "./doctor-proactive.js";
 import { snapshotSkills } from "./skill-discovery.js";
-import { isDbAvailable, getMilestone, openDatabase } from "./gsd-db.js";
+import { isDbAvailable, getMilestone, openDatabase } from "./hx-db.js";
 import { hideFooter } from "./auto-dashboard.js";
 import { resolveProjectRootDbPath } from "./bootstrap/dynamic-tools.js";
 import {
@@ -349,7 +349,7 @@ export async function bootstrapAutoSession(
         hasSurvivorBranch = false;
       } else {
         ctx.ui.notify(
-          "Discussion completed but milestone draft was not promoted. Run /gsd to try again.",
+          "Discussion completed but milestone draft was not promoted. Run /hx to try again.",
           "warning",
         );
         return releaseLockAndReturn();
@@ -387,7 +387,7 @@ export async function bootstrapAutoSession(
           _consecutiveCompleteBootstraps = 0;
           ctx.ui.notify(
             "All milestones are complete and the discussion didn't produce a new one. " +
-            "Run /gsd to start a new milestone manually.",
+            "Run /hx to start a new milestone manually.",
             "warning",
           );
           return releaseLockAndReturn();
@@ -419,7 +419,7 @@ export async function bootstrapAutoSession(
             state = postState;
           } else {
             ctx.ui.notify(
-              "Discussion completed but no milestone context was written. Run /gsd to try the discussion again, or /gsd auto after creating the milestone manually.",
+              "Discussion completed but no milestone context was written. Run /hx to try the discussion again, or /hx auto after creating the milestone manually.",
               "warning",
             );
             return releaseLockAndReturn();
@@ -444,7 +444,7 @@ export async function bootstrapAutoSession(
             state = postState;
           } else {
             ctx.ui.notify(
-              "Discussion completed but milestone context is still missing. Run /gsd to try again.",
+              "Discussion completed but milestone context is still missing. Run /hx to try again.",
               "warning",
             );
             return releaseLockAndReturn();
@@ -466,7 +466,7 @@ export async function bootstrapAutoSession(
           state = postState;
         } else {
           ctx.ui.notify(
-            "Discussion completed but milestone draft was not promoted. Run /gsd to try again.",
+            "Discussion completed but milestone draft was not promoted. Run /hx to try again.",
             "warning",
           );
           return releaseLockAndReturn();

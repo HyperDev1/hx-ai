@@ -48,7 +48,7 @@ test('QUICK_BRANCH_RE: matches quick-task branches', () => {
   assert.ok(!QUICK_BRANCH_RE.test("main"), "rejects main");
   assert.ok(!QUICK_BRANCH_RE.test("gsd/M001/S01"), "rejects slice branch");
   assert.ok(!QUICK_BRANCH_RE.test("gsd/quickly-something"), "rejects non-quick prefix");
-  assert.ok(!QUICK_BRANCH_RE.test("feature/gsd/quick/1"), "rejects nested prefix");
+  assert.ok(!QUICK_BRANCH_RE.test("feature/hx/quick/1"), "rejects nested prefix");
   // ═══════════════════════════════════════════════════════════════════════
   // captureIntegrationBranch: guard against quick-task branches
   // ═══════════════════════════════════════════════════════════════════════

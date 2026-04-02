@@ -77,7 +77,7 @@ const ALLOW_HARDCODED_TMP: Array<[string, string]> = [
 
 /** Pattern 4 — shell commands with interpolated variables */
 const ALLOW_SHELL_INTERPOLATION: Array<[string, string]> = [
-  // NPM_PACKAGE is a compile-time constant ('gsd-pi'), not user input.
+  // NPM_PACKAGE is a compile-time constant ('@hyperlab/hx'), not user input.
   ["update-cmd.ts", "npm view ${NPM_PACKAGE}"],
   ["update-cmd.ts", "npm install -g ${NPM_PACKAGE}"],
   ["update-check.ts", "npm install -g ${NPM_PACKAGE_NAME}"],

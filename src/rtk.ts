@@ -135,7 +135,7 @@ function sha256File(path: string): string {
 
 async function downloadToFile(url: string, destination: string): Promise<void> {
   const response = await fetch(url, {
-    headers: { "User-Agent": "gsd-pi-rtk" },
+    headers: { "User-Agent": "hx-rtk" },
   });
 
   if (!response.ok) {
@@ -358,7 +358,7 @@ export async function ensureRtkAvailable(options: EnsureRtkOptions = {}): Promis
 
   try {
     const checksumsUrl = getChecksumsUrl(version);
-    const checksumsResponse = await fetch(checksumsUrl, { headers: { "User-Agent": "gsd-pi-rtk" } });
+    const checksumsResponse = await fetch(checksumsUrl, { headers: { "User-Agent": "hx-rtk" } });
     if (!checksumsResponse.ok) {
       throw new Error(`failed to fetch RTK checksums (${checksumsResponse.status})`);
     }

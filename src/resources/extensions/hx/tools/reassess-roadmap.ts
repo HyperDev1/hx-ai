@@ -11,7 +11,7 @@ import {
   updateSliceFields,
   insertAssessment,
   deleteSlice,
-} from "../gsd-db.js";
+} from "../hx-db.js";
 import { invalidateStateCache } from "../state.js";
 import { renderRoadmapFromDb, renderAssessmentFromDb } from "../markdown-renderer.js";
 import { renderAllProjections } from "../workflow-projections.js";

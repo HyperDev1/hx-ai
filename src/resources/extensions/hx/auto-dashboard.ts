@@ -15,7 +15,7 @@ import {
   resolveMilestoneFile,
   resolveSliceFile,
 } from "./paths.js";
-import { isDbAvailable, getMilestoneSlices, getSliceTasks } from "./gsd-db.js";
+import { isDbAvailable, getMilestoneSlices, getSliceTasks } from "./hx-db.js";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { truncateToWidth, visibleWidth } from "@hyperlab/hx-tui";

@@ -208,7 +208,7 @@ export function generateRequirementsMd(requirements: Requirement[]): string {
  */
 export async function nextDecisionId(): Promise<string> {
   try {
-    const db = await import('./gsd-db.js');
+    const db = await import('./hx-db.js');
     const adapter = db._getAdapter();
     if (!adapter) return 'D001';
 
@@ -249,7 +249,7 @@ export async function saveDecisionToDb(
   basePath: string,
 ): Promise<{ id: string }> {
   try {
-    const db = await import('./gsd-db.js');
+    const db = await import('./hx-db.js');
 
     const id = await nextDecisionId();
 
@@ -341,7 +341,7 @@ export async function updateRequirementInDb(
   basePath: string,
 ): Promise<void> {
   try {
-    const db = await import('./gsd-db.js');
+    const db = await import('./hx-db.js');
 
     const existing = db.getRequirementById(id);
     if (!existing) {
@@ -423,7 +423,7 @@ export async function saveArtifactToDb(
   basePath: string,
 ): Promise<void> {
   try {
-    const db = await import('./gsd-db.js');
+    const db = await import('./hx-db.js');
 
     // Guard against path traversal before any reads/writes
     const gsdDir = resolve(basePath, '.hx');

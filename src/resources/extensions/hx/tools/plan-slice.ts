@@ -9,7 +9,7 @@ import {
   upsertSlicePlanning,
   upsertTaskPlanning,
   insertGateRow,
-} from "../gsd-db.js";
+} from "../hx-db.js";
 import type { GateId } from "../types.js";
 import { invalidateStateCache } from "../state.js";
 import { renderPlanFromDb } from "../markdown-renderer.js";

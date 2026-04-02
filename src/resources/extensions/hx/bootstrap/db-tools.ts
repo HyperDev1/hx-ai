@@ -121,7 +121,7 @@ export function registerDbTools(pi: ExtensionAPI): void {
       };
     }
     try {
-      const db = await import("../gsd-db.js");
+      const db = await import("../hx-db.js");
       const existing = db.getRequirementById(params.id);
       if (!existing) {
         return {
@@ -334,7 +334,7 @@ export function registerDbTools(pi: ExtensionAPI): void {
     const dbAvailable = await ensureDbOpen();
     if (!dbAvailable) return;
     try {
-      const { insertMilestone } = await import("../gsd-db.js");
+      const { insertMilestone } = await import("../hx-db.js");
       insertMilestone({ id: milestoneId, status: "queued" });
     } catch {
       // Non-fatal — the safety-net in deriveStateFromDb will catch this
@@ -1139,7 +1139,7 @@ export function registerDbTools(pi: ExtensionAPI): void {
       };
     }
     try {
-      const { saveGateResult } = await import("../gsd-db.js");
+      const { saveGateResult } = await import("../hx-db.js");
       const { invalidateStateCache } = await import("../state.js");
       saveGateResult({
         milestoneId: params.milestoneId,

@@ -29,9 +29,9 @@ test("workspace index: indexes active milestone/slice/task and suggests commands
     assert.ok(suggestions.some(item => item.value === "M001/S01/T01"));
 
     const commands = await getSuggestedNextCommands(base);
-    assert.ok(commands.includes("/gsd auto"));
-    assert.ok(commands.includes("/gsd doctor M001/S01"));
-    assert.ok(commands.includes("/gsd status"));
+    assert.ok(commands.includes("/hx auto"));
+    assert.ok(commands.includes("/hx doctor M001/S01"));
+    assert.ok(commands.includes("/hx status"));
   } finally {
     rmSync(base, { recursive: true, force: true });
   }

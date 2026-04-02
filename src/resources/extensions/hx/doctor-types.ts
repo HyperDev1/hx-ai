@@ -109,7 +109,7 @@ export interface DoctorReport {
   basePath: string;
   issues: DoctorIssue[];
   fixesApplied: string[];
-  /** Per-domain check durations in milliseconds. Present on explicit /gsd doctor runs. */
+  /** Per-domain check durations in milliseconds. Present on explicit /hx doctor runs. */
   timing?: { git: number; runtime: number; environment: number; gsdState: number };
 }
 

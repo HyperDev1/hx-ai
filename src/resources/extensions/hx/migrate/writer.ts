@@ -390,7 +390,7 @@ export function formatContext(milestoneId: string): string {
 /**
  * Format STATE.md.
  * deriveState() does not read STATE.md — it recomputes from scratch.
- * Write a minimal stub that will be overwritten on first /gsd status.
+ * Write a minimal stub that will be overwritten on first /hx status.
  */
 export function formatState(milestones: GSDMilestone[]): string {
   const lines: string[] = [];

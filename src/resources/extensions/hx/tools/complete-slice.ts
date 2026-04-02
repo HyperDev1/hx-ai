@@ -21,7 +21,7 @@ import {
   getMilestone,
   updateSliceStatus,
   setSliceSummaryMd,
-} from "../gsd-db.js";
+} from "../hx-db.js";
 import { resolveSliceFile, resolveSlicePath, clearPathCache } from "../paths.js";
 import { checkOwnership, sliceUnitKey } from "../unit-ownership.js";
 import { saveFile, clearParseCache } from "../files.js";
