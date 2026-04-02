@@ -19,7 +19,7 @@ import { readCrashLock, clearLock, formatCrashInfo } from "./crash-recovery.js";
 import { listUnitRuntimeRecords, clearUnitRuntimeRecord } from "./unit-runtime.js";
 import { resolveExpectedArtifactPath } from "./auto.js";
 import {
-  hxRoot, _clearHxRootCache, milestonesDir, resolveMilestoneFile, resolveMilestonePath,
+  hxRoot, milestonesDir, resolveMilestoneFile, resolveMilestonePath,
   resolveSliceFile, resolveSlicePath, resolveHxRootFile, relHxRootFile,
   relMilestoneFile, relSliceFile,
 } from "./paths.js";
@@ -980,18 +980,6 @@ export async function showSmartEntry(
       declineLabel: "Cancel",
     });
     if (!proceed) return;
-  }
-
-  // ── GSD → HX migration — rename .gsd/ to .hx/ if needed ────────────
-  {
-    const { migrateProjectGsdToHx } = await import("./migrate-gsd-to-hx.js");
-    const gsdMigration = migrateProjectGsdToHx(basePath);
-    if (gsdMigration.migrated) {
-      _clearHxRootCache();
-      ctx.ui.notify("Migrated .gsd/ → .hx/ for this project.", "info");
-    } else if (gsdMigration.error) {
-      ctx.ui.notify(`GSD → HX migration warning: ${gsdMigration.error}`, "warning");
-    }
   }
 
   // ── Detection preamble — run before any bootstrap ────────────────────

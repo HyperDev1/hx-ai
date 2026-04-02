@@ -169,6 +169,11 @@ Examples:
     await handleMigrate(trimmed.replace(/^migrate\s*/, "").trim(), ctx, pi);
     return true;
   }
+  if (trimmed === "gsd-to-hx") {
+    const { handleGsdToHxMigration } = await import("../../migrate-gsd-to-hx.js");
+    await handleGsdToHxMigration(ctx);
+    return true;
+  }
   if (trimmed === "remote" || trimmed.startsWith("remote ")) {
     await handleRemote(trimmed.replace(/^remote\s*/, "").trim(), ctx, pi);
     return true;

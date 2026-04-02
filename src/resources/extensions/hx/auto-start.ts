@@ -23,7 +23,7 @@ import {
 import { ensureHxSymlink, isInheritedRepo, validateProjectId } from "./repo-identity.js";
 import { migrateToExternalState, recoverFailedMigration } from "./migrate-external.js";
 import { collectSecretsFromManifest } from "../get-secrets-from-user.js";
-import { hxRoot, _clearHxRootCache, resolveMilestoneFile, milestonesDir } from "./paths.js";
+import { hxRoot, resolveMilestoneFile, milestonesDir } from "./paths.js";
 import { invalidateAllCaches } from "./cache.js";
 import { synthesizeCrashRecovery } from "./session-forensics.js";
 import {
@@ -156,12 +156,6 @@ export async function bootstrapAutoSession(
     : null;
 
   try {
-    // ── Global GSD → HX migration — sync auth/settings on first launch ──
-    {
-      const { migrateGlobalGsdToHx } = await import("./migrate-gsd-to-hx.js");
-      migrateGlobalGsdToHx();
-    }
-
     // Validate HX_PROJECT_ID early so the user gets immediate feedback
     const customProjectId = process.env.HX_PROJECT_ID;
     if (customProjectId && !validateProjectId(customProjectId)) {
@@ -183,16 +177,6 @@ export async function bootstrapAutoSession(
       const mainBranch =
         loadEffectiveHXPreferences()?.preferences?.git?.main_branch || "main";
       nativeInit(base, mainBranch);
-    }
-
-    // ── GSD → HX migration — rename .gsd/ to .hx/ if needed ──────────
-    {
-      const { migrateProjectGsdToHx } = await import("./migrate-gsd-to-hx.js");
-      const gsdMigration = migrateProjectGsdToHx(base);
-      if (gsdMigration.migrated) {
-        _clearHxRootCache();
-        ctx.ui.notify("Migrated .gsd/ → .hx/ for this project.", "info");
-      }
     }
 
     // Migrate legacy in-project .hx/ to external state directory.

@@ -134,3 +134,40 @@ export function migrateGlobalGsdToHx(): GsdToHxMigrationResult {
     return { migrated: false, error: getErrorMessage(err) };
   }
 }
+
+// ─── Command Handler ──────────────────────────────────────────────────────────
+
+/**
+ * `/hx gsd-to-hx` command handler.
+ * Migrates both the current project's `.gsd/` → `.hx/` and
+ * global `~/.gsd/agent/` → `~/.hx/agent/` state.
+ */
+export async function handleGsdToHxMigration(ctx: import("@hyperlab/hx-coding-agent").ExtensionCommandContext): Promise<void> {
+  const basePath = process.cwd();
+  const gsdPath = join(basePath, ".gsd");
+  const hxPath = join(basePath, ".hx");
+
+  // ── Project migration ──
+  if (existsSync(hxPath)) {
+    ctx.ui.notify("Project already has .hx/ — no project migration needed.", "info");
+  } else if (!existsSync(gsdPath)) {
+    ctx.ui.notify("No .gsd/ directory found in this project.", "info");
+  } else {
+    const projectResult = migrateProjectGsdToHx(basePath);
+    if (projectResult.migrated) {
+      ctx.ui.notify("✓ Migrated project .gsd/ → .hx/", "info");
+    } else if (projectResult.error) {
+      ctx.ui.notify(`✗ Project migration failed: ${projectResult.error}`, "error");
+    }
+  }
+
+  // ── Global migration ──
+  const globalResult = migrateGlobalGsdToHx();
+  if (globalResult.migrated) {
+    ctx.ui.notify("✓ Synced global credentials from ~/.gsd/ → ~/.hx/", "info");
+  } else if (globalResult.error) {
+    ctx.ui.notify(`✗ Global migration failed: ${globalResult.error}`, "error");
+  } else {
+    ctx.ui.notify("Global ~/.hx/ state is up to date.", "info");
+  }
+}
