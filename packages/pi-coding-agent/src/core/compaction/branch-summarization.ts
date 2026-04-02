@@ -6,8 +6,8 @@
  */
 
 import type { AgentMessage } from "@gsd/pi-agent-core";
-import type { Model } from "@gsd/pi-ai";
-import { completeSimple } from "@gsd/pi-ai";
+import type { Model } from "@hyperlab/hx-ai";
+import { completeSimple } from "@hyperlab/hx-ai";
 import { COMPACTION_RESERVE_TOKENS } from "../constants.js";
 import { convertToLlm } from "../messages.js";
 import type { ReadonlySessionManager, SessionEntry } from "../session-manager.js";

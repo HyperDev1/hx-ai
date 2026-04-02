@@ -10,8 +10,8 @@
  */
 
 import type { Agent } from "@gsd/pi-agent-core";
-import type { AssistantMessage, Model } from "@gsd/pi-ai";
-import { isContextOverflow } from "@gsd/pi-ai";
+import type { AssistantMessage, Model } from "@hyperlab/hx-ai";
+import { isContextOverflow } from "@hyperlab/hx-ai";
 import {
 	type CompactionResult,
 	calculateContextTokens,

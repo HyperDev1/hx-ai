@@ -1,4 +1,4 @@
-import { DefaultResourceLoader } from '@gsd/pi-coding-agent'
+import { DefaultResourceLoader } from '@hyperlab/hx-coding-agent'
 import { createHash } from 'node:crypto'
 import { homedir } from 'node:os'
 import { chmodSync, copyFileSync, cpSync, existsSync, lstatSync, mkdirSync, openSync, closeSync, readFileSync, readlinkSync, readdirSync, rmSync, statSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs'
@@ -29,7 +29,7 @@ const bundledExtensionsDir = join(resourcesDir, 'extensions')
 const resourceVersionManifestName = 'managed-resources.json'
 
 interface ManagedResourceManifest {
-  gsdVersion: string
+  hxVersion: string
   syncedAt?: number
   /** Content fingerprint of bundled resources — detects same-version content changes. */
   contentHash?: string
@@ -59,10 +59,10 @@ function getManagedResourceManifestPath(agentDir: string): string {
   return join(agentDir, resourceVersionManifestName)
 }
 
-function getBundledGsdVersion(): string {
-  // Prefer GSD_VERSION env var (set once by loader.ts) to avoid re-reading package.json
-  if (process.env.GSD_VERSION && process.env.GSD_VERSION !== '0.0.0') {
-    return process.env.GSD_VERSION
+function getBundledHxVersion(): string {
+  // Prefer HX_VERSION env var (set once by loader.ts) to avoid re-reading package.json
+  if (process.env.HX_VERSION && process.env.HX_VERSION !== '0.0.0') {
+    return process.env.HX_VERSION
   }
   try {
     const pkg = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf-8'))
@@ -96,7 +96,7 @@ function writeManagedResourceManifest(agentDir: string): void {
   } catch { /* non-fatal */ }
 
   const manifest: ManagedResourceManifest = {
-    gsdVersion: getBundledGsdVersion(),
+    hxVersion: getBundledHxVersion(),
     syncedAt: Date.now(),
     contentHash: computeResourceFingerprint(),
     installedExtensionRootFiles,
@@ -108,7 +108,7 @@ function writeManagedResourceManifest(agentDir: string): void {
 export function readManagedResourceVersion(agentDir: string): string | null {
   try {
     const manifest = JSON.parse(readFileSync(getManagedResourceManifestPath(agentDir), 'utf-8')) as ManagedResourceManifest
-    return typeof manifest?.gsdVersion === 'string' ? manifest.gsdVersion : null
+    return typeof manifest?.hxVersion === 'string' ? manifest.hxVersion : null
   } catch {
     return null
   }
@@ -281,7 +281,7 @@ function copyDirRecursive(src: string, dest: string): void {
  * Native ESM `import()` ignores NODE_PATH — it resolves packages by walking
  * up the directory tree from the importing file. Extension files synced to
  * ~/.gsd/agent/extensions/ have no ancestor node_modules, so imports of
- * @gsd/* packages fail. The symlink makes Node's standard resolution find
+ * @hyperlab/* packages fail. The symlink makes Node's standard resolution find
  * them without requiring every call site to use jiti.
  */
 function ensureNodeModulesSymlink(agentDir: string): void {
@@ -308,8 +308,8 @@ function ensureNodeModulesSymlink(agentDir: string): void {
   try {
     symlinkSync(gsdNodeModules, agentNodeModules, 'junction')
   } catch (err) {
-    // This failure makes GSD non-functional — extensions can't resolve @gsd/* packages
-    console.error(`[gsd] WARN: Failed to symlink ${agentNodeModules} → ${gsdNodeModules}: ${err instanceof Error ? err.message : err}`)
+    // This failure makes GSD non-functional — extensions can't resolve @hyperlab/* packages
+    console.error(`[hx] WARN: Failed to symlink ${agentNodeModules} → ${gsdNodeModules}: ${err instanceof Error ? err.message : err}`)
   }
 }
 
@@ -381,7 +381,7 @@ function pruneRemovedBundledExtensions(
  *
  * - extensions/ → ~/.gsd/agent/extensions/   (overwrite when version changes)
  * - agents/     → ~/.gsd/agent/agents/        (overwrite when version changes)
- * - GSD-WORKFLOW.md → ~/.gsd/agent/GSD-WORKFLOW.md (fallback for env var miss)
+ * - HX-WORKFLOW.md → ~/.gsd/agent/HX-WORKFLOW.md (fallback for env var miss)
  *
  * Skills are NOT synced here. They are installed by the user via the
  * skills.sh CLI (`npx skills add <repo>`) into ~/.agents/skills/ — the
@@ -389,7 +389,7 @@ function pruneRemovedBundledExtensions(
  *
  * Skips the copy when the managed-resources.json version matches the current
  * GSD version, avoiding ~128ms of synchronous cpSync on every startup.
- * After `npm update -g @glittercowboy/gsd`, versions will differ and the
+ * After `npm update -g @glittercowboy/hx`, versions will differ and the
  * copy runs once to land the new resources.
  *
  * Inspectable: `ls ~/.gsd/agent/extensions/`
@@ -397,7 +397,7 @@ function pruneRemovedBundledExtensions(
 export function initResources(agentDir: string): void {
   mkdirSync(agentDir, { recursive: true })
 
-  const currentVersion = getBundledGsdVersion()
+  const currentVersion = getBundledHxVersion()
   const manifest = readManagedResourceManifest(agentDir)
 
   // Always prune root-level extension files that were removed from the bundle.
@@ -408,7 +408,7 @@ export function initResources(agentDir: string): void {
 
   // Ensure ~/.gsd/agent/node_modules symlinks to GSD's node_modules on EVERY
   // launch, not just during resource syncs. A stale/broken symlink makes ALL
-  // extensions fail to resolve @gsd/* packages, rendering GSD non-functional.
+  // extensions fail to resolve @hyperlab/* packages, rendering GSD non-functional.
   ensureNodeModulesSymlink(agentDir)
 
   // Migrate legacy skills on every launch (not gated by manifest) so that
@@ -418,7 +418,7 @@ export function initResources(agentDir: string): void {
   // Skip the full copy when both version AND content fingerprint match.
   // Version-only checks miss same-version content changes (npm link dev workflow,
   // hotfixes within a release). The content hash catches those at ~1ms cost.
-  if (manifest && manifest.gsdVersion === currentVersion) {
+  if (manifest && manifest.hxVersion === currentVersion) {
     // Version matches — check content fingerprint for same-version staleness.
     const currentHash = computeResourceFingerprint()
     const hasStaleExtensionFiles = hasStaleCompiledExtensionSiblings(join(agentDir, 'extensions'))
@@ -439,11 +439,11 @@ export function initResources(agentDir: string): void {
   // above the manifest check so it runs on every launch (including retries
   // after partial copy failures).
 
-  // Sync GSD-WORKFLOW.md to agentDir as a fallback for when GSD_WORKFLOW_PATH
+  // Sync HX-WORKFLOW.md to agentDir as a fallback for when HX_WORKFLOW_PATH
   // env var is not set (e.g. fork/dev builds, alternative entry points).
-  const workflowSrc = join(resourcesDir, 'GSD-WORKFLOW.md')
+  const workflowSrc = join(resourcesDir, 'HX-WORKFLOW.md')
   if (existsSync(workflowSrc)) {
-    try { copyFileSync(workflowSrc, join(agentDir, 'GSD-WORKFLOW.md')) } catch { /* non-fatal */ }
+    try { copyFileSync(workflowSrc, join(agentDir, 'HX-WORKFLOW.md')) } catch { /* non-fatal */ }
   }
 
   // Ensure all newly copied files are owner-writable so the next run can

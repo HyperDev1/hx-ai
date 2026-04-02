@@ -1,5 +1,5 @@
-import type { AssistantMessage } from "@gsd/pi-ai";
-import { Container, Markdown, type MarkdownTheme, Spacer, Text } from "@gsd/pi-tui";
+import type { AssistantMessage } from "@hyperlab/hx-ai";
+import { Container, Markdown, type MarkdownTheme, Spacer, Text } from "@hyperlab/hx-tui";
 import { getMarkdownTheme, theme } from "../theme/theme.js";
 import { formatTimestamp, type TimestampFormat } from "./timestamp.js";
 

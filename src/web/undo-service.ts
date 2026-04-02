@@ -8,11 +8,11 @@ import { resolveTypeStrippingFlag, resolveSubprocessModule, buildSubprocessPrefi
 import type { UndoInfo, UndoResult } from "../../web/lib/remaining-command-types.ts"
 
 const UNDO_MAX_BUFFER = 2 * 1024 * 1024
-const UNDO_MODULE_ENV = "GSD_UNDO_MODULE"
-const PATHS_MODULE_ENV = "GSD_PATHS_MODULE"
+const UNDO_MODULE_ENV = "HX_UNDO_MODULE"
+const PATHS_MODULE_ENV = "HX_PATHS_MODULE"
 
 function resolveTsLoaderPath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs")
+  return join(packageRoot, "src", "resources", "extensions", "hx", "tests", "resolve-ts.mjs")
 }
 
 /**
@@ -24,8 +24,8 @@ export async function collectUndoInfo(projectCwdOverride?: string): Promise<Undo
   const config = resolveBridgeRuntimeConfig(undefined, projectCwdOverride)
   const { projectCwd } = config
 
-  const gsdDir = join(projectCwd, ".gsd")
-  const completedPath = join(gsdDir, "completed-units.json")
+  const hxDir = join(projectCwd, ".hx")
+  const completedPath = join(hxDir, "completed-units.json")
 
   const empty: UndoInfo = {
     lastUnitType: null,
@@ -52,7 +52,7 @@ export async function collectUndoInfo(projectCwdOverride?: string): Promise<Undo
   const unitKey = last.key ?? (unitType && unitId ? `${unitType}:${unitId}` : null)
 
   // Scan activity log for associated commits
-  const activityDir = join(gsdDir, "activity")
+  const activityDir = join(hxDir, "activity")
   let commits: string[] = []
   if (unitType && unitId && existsSync(activityDir)) {
     try {
@@ -121,8 +121,8 @@ export async function executeUndo(projectCwdOverride?: string): Promise<UndoResu
   const { packageRoot, projectCwd } = config
 
   const resolveTsLoader = resolveTsLoaderPath(packageRoot)
-  const undoResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/undo.ts")
-  const pathsResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/paths.ts")
+  const undoResolution = resolveSubprocessModule(packageRoot, "resources/extensions/hx/undo.ts")
+  const pathsResolution = resolveSubprocessModule(packageRoot, "resources/extensions/hx/paths.ts")
   const undoModulePath = undoResolution.modulePath
   const pathsModulePath = pathsResolution.modulePath
 
@@ -142,9 +142,9 @@ export async function executeUndo(projectCwdOverride?: string): Promise<UndoResu
     'const { join } = await import("node:path");',
     `const undoMod = await import(pathToFileURL(process.env.${UNDO_MODULE_ENV}).href);`,
     `const pathsMod = await import(pathToFileURL(process.env.${PATHS_MODULE_ENV}).href);`,
-    'const basePath = process.env.GSD_UNDO_BASE;',
-    'const gsdDir = pathsMod.gsdRoot(basePath);',
-    'const completedPath = join(gsdDir, "completed-units.json");',
+    'const basePath = process.env.HX_UNDO_BASE;',
+    'const hxDir = pathsMod.hxRoot(basePath);',
+    'const completedPath = join(hxDir, "completed-units.json");',
     'if (!existsSync(completedPath)) { process.stdout.write(JSON.stringify({ success: false, message: "No completed units to undo" })); process.exit(0); }',
     'let entries;',
     'try { entries = JSON.parse(readFileSync(completedPath, "utf-8")); } catch { process.stdout.write(JSON.stringify({ success: false, message: "Could not parse completed-units.json" })); process.exit(0); }',
@@ -156,7 +156,7 @@ export async function executeUndo(projectCwdOverride?: string): Promise<UndoResu
     'let planUpdated = false;',
     'if (unitType === "execute-task" && parts.length === 3) { const [mid, sid, tid] = parts; planUpdated = undoMod.uncheckTaskInPlan(basePath, mid, sid, tid); }',
     'let commitsReverted = 0;',
-    'const activityDir = join(gsdDir, "activity");',
+    'const activityDir = join(hxDir, "activity");',
     'if (existsSync(activityDir)) {',
     '  const commits = undoMod.findCommitsForUnit(activityDir, unitType, unitId);',
     '  if (commits.length > 0) {',
@@ -192,7 +192,7 @@ export async function executeUndo(projectCwdOverride?: string): Promise<UndoResu
           ...process.env,
           [UNDO_MODULE_ENV]: undoModulePath,
           [PATHS_MODULE_ENV]: pathsModulePath,
-          GSD_UNDO_BASE: projectCwd,
+          HX_UNDO_BASE: projectCwd,
         },
         maxBuffer: UNDO_MAX_BUFFER,
       },

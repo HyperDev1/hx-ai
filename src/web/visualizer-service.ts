@@ -7,7 +7,7 @@ import { resolveBridgeRuntimeConfig } from "./bridge-service.ts"
 import { resolveTypeStrippingFlag, resolveSubprocessModule, buildSubprocessPrefixArgs } from "./ts-subprocess-flags.ts"
 
 const VISUALIZER_MAX_BUFFER = 2 * 1024 * 1024
-const VISUALIZER_MODULE_ENV = "GSD_VISUALIZER_MODULE"
+const VISUALIZER_MODULE_ENV = "HX_VISUALIZER_MODULE"
 
 /**
  * Browser-safe version of VisualizerData where Map fields are converted to
@@ -36,7 +36,7 @@ export interface SerializedVisualizerData {
 }
 
 function resolveTsLoaderPath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs")
+  return join(packageRoot, "src", "resources", "extensions", "hx", "tests", "resolve-ts.mjs")
 }
 
 /**
@@ -50,7 +50,7 @@ export async function collectVisualizerData(projectCwdOverride?: string): Promis
   const { packageRoot, projectCwd } = config
 
   const resolveTsLoader = resolveTsLoaderPath(packageRoot)
-  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/visualizer-data.ts")
+  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/hx/visualizer-data.ts")
   const visualizerModulePath = moduleResolution.modulePath
 
   if (!moduleResolution.useCompiledJs && (!existsSync(resolveTsLoader) || !existsSync(visualizerModulePath))) {
@@ -67,7 +67,7 @@ export async function collectVisualizerData(projectCwdOverride?: string): Promis
   const script = [
     'const { pathToFileURL } = await import("node:url");',
     `const mod = await import(pathToFileURL(process.env.${VISUALIZER_MODULE_ENV}).href);`,
-    `const data = await mod.loadVisualizerData(process.env.GSD_VISUALIZER_BASE);`,
+    `const data = await mod.loadVisualizerData(process.env.HX_VISUALIZER_BASE);`,
     'const result = {',
     '  ...data,',
     '  criticalPath: {',
@@ -95,7 +95,7 @@ export async function collectVisualizerData(projectCwdOverride?: string): Promis
         env: {
           ...process.env,
           [VISUALIZER_MODULE_ENV]: visualizerModulePath,
-          GSD_VISUALIZER_BASE: projectCwd,
+          HX_VISUALIZER_BASE: projectCwd,
         },
         maxBuffer: VISUALIZER_MAX_BUFFER,
       },

@@ -1,5 +1,5 @@
 /**
- * @gsd-build/rpc-client — standalone RPC client SDK for GSD.
+ * @hyperlab/hx-rpc-client — standalone RPC client SDK for HX.
  *
  * Re-exports all types, JSONL utilities, and the RpcClient class.
  */

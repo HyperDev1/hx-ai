@@ -23,7 +23,7 @@ const onboarding = await import("../../web/onboarding-service.ts");
 const bootRoute = await import("../../../web/app/api/boot/route.ts");
 const onboardingRoute = await import("../../../web/app/api/onboarding/route.ts");
 const commandRoute = await import("../../../web/app/api/session/command/route.ts");
-const { AuthStorage } = await import("@gsd/pi-coding-agent");
+const { AuthStorage } = await import("@hyperlab/hx-coding-agent");
 
 class FakeRpcChild extends EventEmitter {
   stdin = new PassThrough();
@@ -193,9 +193,9 @@ function configureBridgeRuntime(
   bridge.configureBridgeServiceForTests({
     env: {
       ...process.env,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
-      GSD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
-      GSD_WEB_PACKAGE_ROOT: repoRoot,
+      HX_WEB_PROJECT_CWD: fixture.projectCwd,
+      HX_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
+      HX_WEB_PACKAGE_ROOT: repoRoot,
     },
     spawn(command: string, args: readonly string[], optionsArg: Record<string, unknown>) {
       void command;
@@ -446,7 +446,7 @@ test("fresh gsd --web browser onboarding stays locked on failed validation and u
     tempHome,
     browserLogPath,
     env: {
-      GSD_WEB_TEST_FAKE_API_KEY_VALIDATION: "1",
+      HX_WEB_TEST_FAKE_API_KEY_VALIDATION: "1",
       ANTHROPIC_API_KEY: "",
       OPENAI_API_KEY: "",
       GOOGLE_API_KEY: "",

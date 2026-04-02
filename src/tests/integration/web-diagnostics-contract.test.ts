@@ -36,7 +36,7 @@ const {
   dispatchBrowserSlashCommand,
 } = await import("../../../web/lib/browser-slash-command-dispatch.ts")
 
-const { GSDWorkspaceStore } = await import("../../../web/lib/gsd-workspace-store.tsx")
+const { GSDWorkspaceStore } = await import("../../../web/lib/hx-workspace-store.tsx")
 
 // ─── Block 1: Type exports (R103, R104, R105) ───────────────────────────────
 
@@ -253,32 +253,32 @@ describe("diagnostics contract state", () => {
 // ─── Block 3: Dispatch→surface pipeline (R103, R104, R105) ──────────────────
 
 describe("diagnostics dispatch→surface pipeline", () => {
-  it("/gsd forensics dispatches to gsd-forensics surface", () => {
-    const outcome = dispatchBrowserSlashCommand("/gsd forensics", {})
+  it("/hx forensics dispatches to gsd-forensics surface", () => {
+    const outcome = dispatchBrowserSlashCommand("/hx forensics", {})
     assert.equal(outcome.kind, "surface")
     if (outcome.kind === "surface") {
       assert.equal(outcome.surface, "gsd-forensics")
     }
   })
 
-  it("/gsd doctor dispatches to gsd-doctor surface", () => {
-    const outcome = dispatchBrowserSlashCommand("/gsd doctor", {})
+  it("/hx doctor dispatches to gsd-doctor surface", () => {
+    const outcome = dispatchBrowserSlashCommand("/hx doctor", {})
     assert.equal(outcome.kind, "surface")
     if (outcome.kind === "surface") {
       assert.equal(outcome.surface, "gsd-doctor")
     }
   })
 
-  it("/gsd skill-health dispatches to gsd-skill-health surface", () => {
-    const outcome = dispatchBrowserSlashCommand("/gsd skill-health", {})
+  it("/hx skill-health dispatches to gsd-skill-health surface", () => {
+    const outcome = dispatchBrowserSlashCommand("/hx skill-health", {})
     assert.equal(outcome.kind, "surface")
     if (outcome.kind === "surface") {
       assert.equal(outcome.surface, "gsd-skill-health")
     }
   })
 
-  it("/gsd doctor fix dispatches to gsd-doctor surface with args", () => {
-    const outcome = dispatchBrowserSlashCommand("/gsd doctor fix", {})
+  it("/hx doctor fix dispatches to gsd-doctor surface with args", () => {
+    const outcome = dispatchBrowserSlashCommand("/hx doctor fix", {})
     assert.equal(outcome.kind, "surface")
     if (outcome.kind === "surface") {
       assert.equal(outcome.surface, "gsd-doctor")

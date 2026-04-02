@@ -16,8 +16,8 @@
 import { execSync } from 'node:child_process';
 import { basename, resolve } from 'node:path';
 import { EventEmitter } from 'node:events';
-import { RpcClient } from '@gsd-build/rpc-client';
-import type { SdkAgentEvent, RpcInitResult, RpcCostUpdateEvent, RpcExtensionUIRequest } from '@gsd-build/rpc-client';
+import { RpcClient } from '@hyperlab/hx-rpc-client';
+import type { SdkAgentEvent, RpcInitResult, RpcCostUpdateEvent, RpcExtensionUIRequest } from '@hyperlab/hx-rpc-client';
 import type {
   ManagedSession,
   StartSessionOptions,
@@ -140,7 +140,7 @@ export class SessionManager extends EventEmitter {
       });
 
       // Kick off auto-mode
-      const command = options.command ?? '/gsd auto';
+      const command = options.command ?? '/hx auto';
       await client.prompt(command);
 
       this.logger.info('session started', { sessionId: session.sessionId, projectDir: resolvedDir });
@@ -281,18 +281,18 @@ export class SessionManager extends EventEmitter {
    * 2. `which gsd` → resolve to the actual dist/cli.js
    */
   static resolveCLIPath(): string {
-    const envPath = process.env['GSD_CLI_PATH'];
+    const envPath = process.env['HX_CLI_PATH'];
     if (envPath) return resolve(envPath);
 
     try {
-      const gsdBin = execSync('which gsd', { encoding: 'utf-8' }).trim();
-      if (gsdBin) return resolve(gsdBin);
+      const hxBin = execSync('which hx', { encoding: 'utf-8' }).trim();
+      if (hxBin) return resolve(hxBin);
     } catch {
       // which failed
     }
 
     throw new Error(
-      'Cannot find GSD CLI. Set GSD_CLI_PATH environment variable or ensure `gsd` is in PATH.'
+      'Cannot find HX CLI. Set HX_CLI_PATH environment variable or ensure `hx` is in PATH.'
     );
   }
 

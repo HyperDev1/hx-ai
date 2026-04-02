@@ -1,5 +1,5 @@
 {
-  "name": "@gsd/pi-ai",
+  "name": "@hyperlab/hx-ai",
   "version": "0.57.1",
   "description": "Unified LLM API (vendored from pi-mono)",
   "type": "module",

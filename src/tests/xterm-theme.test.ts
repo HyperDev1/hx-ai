@@ -42,11 +42,11 @@ test("light xterm palette keeps warning and ANSI white entries readable", () => 
 
 test("terminal components share the central xterm theme helper", () => {
   const shellSource = readFileSync(
-    resolve(import.meta.dirname, "../../web/components/gsd/shell-terminal.tsx"),
+    resolve(import.meta.dirname, "../../web/components/hx/shell-terminal.tsx"),
     "utf8",
   );
   const mainSource = readFileSync(
-    resolve(import.meta.dirname, "../../web/components/gsd/main-session-terminal.tsx"),
+    resolve(import.meta.dirname, "../../web/components/hx/main-session-terminal.tsx"),
     "utf8",
   );
 

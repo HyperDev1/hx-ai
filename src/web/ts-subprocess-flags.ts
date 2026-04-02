@@ -6,7 +6,7 @@ import { join } from "node:path"
  *
  * Node v24 enforces ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING for files
  * resolved under `node_modules/`. When GSD is installed globally via npm,
- * all source files live under `node_modules/gsd-pi/src/...`, so
+ * all source files live under `node_modules/@hyperlab/hx/src/...`, so
  * `--experimental-strip-types` fails deterministically.
  *
  * `--experimental-transform-types` applies a full TypeScript transform that
@@ -53,7 +53,7 @@ export interface SubprocessModuleResolution {
  *
  * @param packageRoot  Absolute path to the GSD package root.
  * @param relPath      Path relative to `src/`, e.g.
- *                     `"resources/extensions/gsd/workspace-index.ts"`.
+ *                     `"resources/extensions/hx/workspace-index.ts"`.
  * @param checkExists  Optional `existsSync` override (for testing).
  */
 export function resolveSubprocessModule(

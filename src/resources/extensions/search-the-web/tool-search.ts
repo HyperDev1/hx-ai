@@ -10,11 +10,11 @@
  * - Rate limit info in details
  */
 
-import type { ExtensionAPI } from "@gsd/pi-coding-agent";
-import { truncateHead, formatSize, DEFAULT_MAX_BYTES, DEFAULT_MAX_LINES } from "@gsd/pi-coding-agent";
-import { Text } from "@gsd/pi-tui";
+import type { ExtensionAPI } from "@hyperlab/hx-coding-agent";
+import { truncateHead, formatSize, DEFAULT_MAX_BYTES, DEFAULT_MAX_LINES } from "@hyperlab/hx-coding-agent";
+import { Text } from "@hyperlab/hx-tui";
 import { Type } from "@sinclair/typebox";
-import { StringEnum } from "@gsd/pi-ai";
+import { StringEnum } from "@hyperlab/hx-ai";
 
 import { LRUTTLCache } from "./cache.js";
 import { fetchWithRetryTimed, fetchWithRetry, classifyError, type RateLimitInfo } from "./http.js";

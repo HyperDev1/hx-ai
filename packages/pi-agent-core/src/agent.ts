@@ -13,7 +13,7 @@ import {
 	type TextContent,
 	type ThinkingBudgets,
 	type Transport,
-} from "@gsd/pi-ai";
+} from "@hyperlab/hx-ai";
 import { agentLoop, agentLoopContinue, ZERO_USAGE } from "./agent-loop.js";
 import type {
 	AgentContext,

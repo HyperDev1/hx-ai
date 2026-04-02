@@ -15,7 +15,7 @@ import type {
 	ToolCall,
 	Usage,
 	WebSearchResultContent,
-} from "@gsd/pi-ai";
+} from "@hyperlab/hx-ai";
 import type { BetaContentBlock, BetaRawMessageStreamEvent, NonNullableUsage } from "./sdk-types.js";
 
 // ---------------------------------------------------------------------------

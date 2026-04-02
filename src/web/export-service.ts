@@ -8,10 +8,10 @@ import { resolveTypeStrippingFlag, resolveSubprocessModule, buildSubprocessPrefi
 import type { ExportResult } from "../../web/lib/remaining-command-types.ts"
 
 const EXPORT_MAX_BUFFER = 4 * 1024 * 1024
-const EXPORT_MODULE_ENV = "GSD_EXPORT_MODULE"
+const EXPORT_MODULE_ENV = "HX_EXPORT_MODULE"
 
 function resolveTsLoaderPath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs")
+  return join(packageRoot, "src", "resources", "extensions", "hx", "tests", "resolve-ts.mjs")
 }
 
 /**
@@ -27,7 +27,7 @@ export async function collectExportData(
   const { packageRoot, projectCwd } = config
 
   const resolveTsLoader = resolveTsLoaderPath(packageRoot)
-  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/export.ts")
+  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/hx/export.ts")
   const exportModulePath = moduleResolution.modulePath
 
   if (!moduleResolution.useCompiledJs && (!existsSync(resolveTsLoader) || !existsSync(exportModulePath))) {
@@ -42,8 +42,8 @@ export async function collectExportData(
   const script = [
     'const { pathToFileURL } = await import("node:url");',
     `const mod = await import(pathToFileURL(process.env.${EXPORT_MODULE_ENV}).href);`,
-    'const format = process.env.GSD_EXPORT_FORMAT || "markdown";',
-    'const basePath = process.env.GSD_EXPORT_BASE;',
+    'const format = process.env.HX_EXPORT_FORMAT || "markdown";',
+    'const basePath = process.env.HX_EXPORT_BASE;',
     'const filePath = mod.writeExportFile(basePath, format);',
     'if (filePath) {',
     '  const { readFileSync } = await import("node:fs");',
@@ -70,8 +70,8 @@ export async function collectExportData(
         env: {
           ...process.env,
           [EXPORT_MODULE_ENV]: exportModulePath,
-          GSD_EXPORT_BASE: projectCwd,
-          GSD_EXPORT_FORMAT: format,
+          HX_EXPORT_BASE: projectCwd,
+          HX_EXPORT_FORMAT: format,
         },
         maxBuffer: EXPORT_MAX_BUFFER,
       },

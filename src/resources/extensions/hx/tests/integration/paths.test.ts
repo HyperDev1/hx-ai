@@ -1,0 +1,98 @@
+import { describe, test } from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtempSync, mkdirSync, rmSync, realpathSync } from "node:fs";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
+import { spawnSync } from "node:child_process";
+
+import { hxRoot, _clearHxRootCache } from "../../paths.ts";
+/** Create a tmp dir and resolve symlinks + 8.3 short names (macOS /var→/private/var, Windows RUNNER~1→runneradmin). */
+function tmp(): string {
+  const p = mkdtempSync(join(tmpdir(), "gsd-paths-test-"));
+  try { return realpathSync.native(p); } catch { return p; }
+}
+
+function cleanup(dir: string): void {
+  try { rmSync(dir, { recursive: true, force: true }); } catch { /* ignore */ }
+}
+
+function initGit(dir: string): void {
+  spawnSync("git", ["init"], { cwd: dir });
+  spawnSync("git", ["commit", "--allow-empty", "-m", "init"], { cwd: dir });
+}
+
+describe('paths', () => {
+  test('Case 1: .hx exists at basePath — fast path', () => {
+    const root = tmp();
+    try {
+      mkdirSync(join(root, ".hx"));
+      _clearHxRootCache();
+      const result = hxRoot(root);
+      assert.deepStrictEqual(result, join(root, ".hx"), "fast path: returns basePath/.hx");
+    } finally { cleanup(root); }
+  });
+
+  test('Case 2: .hx exists at git root, cwd is a subdirectory', () => {
+    const root = tmp();
+    try {
+      initGit(root);
+      mkdirSync(join(root, ".hx"));
+      const sub = join(root, "src", "deep");
+      mkdirSync(sub, { recursive: true });
+      _clearHxRootCache();
+      const result = hxRoot(sub);
+      assert.deepStrictEqual(result, join(root, ".hx"), "git-root probe: finds .hx at git root from subdirectory");
+    } finally { cleanup(root); }
+  });
+
+  test('Case 3: .hx in an ancestor — walk-up finds it', () => {
+    const root = tmp();
+    try {
+      initGit(root);
+      const project = join(root, "project");
+      mkdirSync(join(project, ".hx"), { recursive: true });
+      const deep = join(project, "src", "deep");
+      mkdirSync(deep, { recursive: true });
+      _clearHxRootCache();
+      const result = hxRoot(deep);
+      assert.deepStrictEqual(result, join(project, ".hx"), "walk-up: finds .hx in ancestor when git root has none");
+    } finally { cleanup(root); }
+  });
+
+  test('Case 4: .hx nowhere — fallback returns original basePath/.hx', () => {
+    const root = tmp();
+    try {
+      initGit(root);
+      const sub = join(root, "src");
+      mkdirSync(sub, { recursive: true });
+      _clearHxRootCache();
+      const result = hxRoot(sub);
+      assert.deepStrictEqual(result, join(sub, ".hx"), "fallback: returns basePath/.hx when .hx not found anywhere");
+    } finally { cleanup(root); }
+  });
+
+  test('Case 5: cache — second call returns same value without re-probing', () => {
+    const root = tmp();
+    try {
+      mkdirSync(join(root, ".hx"));
+      _clearHxRootCache();
+      const first = hxRoot(root);
+      const second = hxRoot(root);
+      assert.deepStrictEqual(first, second, "cache: same result returned on second call");
+      assert.ok(first === second, "cache: identity check (same string)");
+    } finally { cleanup(root); }
+  });
+
+  test('Case 6: .hx at basePath takes precedence over ancestor .hx', () => {
+    const outer = tmp();
+    try {
+      initGit(outer);
+      mkdirSync(join(outer, ".hx"));
+      const inner = join(outer, "nested");
+      mkdirSync(join(inner, ".hx"), { recursive: true });
+      _clearHxRootCache();
+      const result = hxRoot(inner);
+      assert.deepStrictEqual(result, join(inner, ".hx"), "precedence: nearest .hx wins over ancestor");
+    } finally { cleanup(outer); }
+  });
+});

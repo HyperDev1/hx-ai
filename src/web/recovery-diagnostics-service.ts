@@ -206,12 +206,12 @@ function buildCommandSuggestions(
     }
   }
 
-  if (phase === "planning") add("/gsd", "Open GSD planning")
-  if (phase === "executing" || phase === "summarizing") add("/gsd auto", "Resume GSD auto mode")
-  if (activeScope) add(`/gsd doctor ${activeScope}`, "Inspect scoped doctor report")
-  if (activeScope) add(`/gsd doctor fix ${activeScope}`, "Apply scoped doctor fixes")
-  if (validationCount > 0 && activeScope) add(`/gsd doctor audit ${activeScope}`, "Audit validation diagnostics")
-  add("/gsd status", "Check current-project status")
+  if (phase === "planning") add("/hx", "Open HX planning")
+  if (phase === "executing" || phase === "summarizing") add("/hx auto", "Resume HX auto mode")
+  if (activeScope) add(`/hx doctor ${activeScope}`, "Inspect scoped doctor report")
+  if (activeScope) add(`/hx doctor fix ${activeScope}`, "Apply scoped doctor fixes")
+  if (validationCount > 0 && activeScope) add(`/hx doctor audit ${activeScope}`, "Audit validation diagnostics")
+  add("/hx status", "Check current-project status")
 
   return [...suggestions.values()]
 }
@@ -357,7 +357,7 @@ function resolveSummary(options: {
 }
 
 function resolveTsLoaderPath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs")
+  return join(packageRoot, "src", "resources", "extensions", "hx", "tests", "resolve-ts.mjs")
 }
 
 async function collectRecoveryDiagnosticsChildPayload(
@@ -371,8 +371,8 @@ async function collectRecoveryDiagnosticsChildPayload(
   const env = options.env ?? process.env
   const checkExists = options.existsSync ?? existsSync
   const resolveTsLoader = resolveTsLoaderPath(packageRoot)
-  const doctorResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/doctor.ts", checkExists)
-  const forensicsResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/session-forensics.ts", checkExists)
+  const doctorResolution = resolveSubprocessModule(packageRoot, "resources/extensions/hx/doctor.ts", checkExists)
+  const forensicsResolution = resolveSubprocessModule(packageRoot, "resources/extensions/hx/session-forensics.ts", checkExists)
   const doctorModulePath = doctorResolution.modulePath
   const sessionForensicsModulePath = forensicsResolution.modulePath
 
@@ -389,14 +389,14 @@ async function collectRecoveryDiagnosticsChildPayload(
 
   const script = [
     'const { pathToFileURL } = await import("node:url");',
-    'const doctor = await import(pathToFileURL(process.env.GSD_RECOVERY_DOCTOR_MODULE).href);',
-    'const forensics = await import(pathToFileURL(process.env.GSD_RECOVERY_FORENSICS_MODULE).href);',
-    'const basePath = process.env.GSD_RECOVERY_BASE;',
-    'const scope = process.env.GSD_RECOVERY_SCOPE || undefined;',
-    'const unitType = process.env.GSD_RECOVERY_UNIT_TYPE || "execute-project";',
-    'const unitId = process.env.GSD_RECOVERY_UNIT_ID || "project";',
-    'const sessionFile = process.env.GSD_RECOVERY_SESSION_FILE || undefined;',
-    'const activityDir = process.env.GSD_RECOVERY_ACTIVITY_DIR || undefined;',
+    'const doctor = await import(pathToFileURL(process.env.HX_RECOVERY_DOCTOR_MODULE).href);',
+    'const forensics = await import(pathToFileURL(process.env.HX_RECOVERY_FORENSICS_MODULE).href);',
+    'const basePath = process.env.HX_RECOVERY_BASE;',
+    'const scope = process.env.HX_RECOVERY_SCOPE || undefined;',
+    'const unitType = process.env.HX_RECOVERY_UNIT_TYPE || "execute-project";',
+    'const unitId = process.env.HX_RECOVERY_UNIT_ID || "project";',
+    'const sessionFile = process.env.HX_RECOVERY_SESSION_FILE || undefined;',
+    'const activityDir = process.env.HX_RECOVERY_ACTIVITY_DIR || undefined;',
     'const report = await doctor.runGSDDoctor(basePath, { fix: false, scope, fixLevel: "task" });',
     'const summary = doctor.summarizeDoctorIssues(report.issues);',
     'const briefing = forensics.synthesizeCrashRecovery(basePath, unitType, unitId, sessionFile, activityDir);',
@@ -481,14 +481,14 @@ async function collectRecoveryDiagnosticsChildPayload(
         cwd: packageRoot,
         env: {
           ...env,
-          GSD_RECOVERY_BASE: basePath,
-          GSD_RECOVERY_SCOPE: scope ?? "",
-          GSD_RECOVERY_UNIT_TYPE: unit?.type ?? "execute-project",
-          GSD_RECOVERY_UNIT_ID: unit?.id ?? "project",
-          GSD_RECOVERY_SESSION_FILE: sessionFile ?? "",
-          GSD_RECOVERY_ACTIVITY_DIR: join(basePath, ".gsd", "activity"),
-          GSD_RECOVERY_DOCTOR_MODULE: doctorModulePath,
-          GSD_RECOVERY_FORENSICS_MODULE: sessionForensicsModulePath,
+          HX_RECOVERY_BASE: basePath,
+          HX_RECOVERY_SCOPE: scope ?? "",
+          HX_RECOVERY_UNIT_TYPE: unit?.type ?? "execute-project",
+          HX_RECOVERY_UNIT_ID: unit?.id ?? "project",
+          HX_RECOVERY_SESSION_FILE: sessionFile ?? "",
+          HX_RECOVERY_ACTIVITY_DIR: join(basePath, ".hx", "activity"),
+          HX_RECOVERY_DOCTOR_MODULE: doctorModulePath,
+          HX_RECOVERY_FORENSICS_MODULE: sessionForensicsModulePath,
         },
         maxBuffer: RECOVERY_DIAGNOSTICS_MAX_BUFFER,
       },

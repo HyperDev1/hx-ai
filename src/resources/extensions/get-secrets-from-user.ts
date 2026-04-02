@@ -10,14 +10,14 @@ import { readFile, writeFile } from "node:fs/promises";
 import { existsSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 
-import type { ExtensionAPI, Theme } from "@gsd/pi-coding-agent";
-import { Editor, type EditorTheme, Key, matchesKey, Text, truncateToWidth, wrapTextWithAnsi } from "@gsd/pi-tui";
+import type { ExtensionAPI, Theme } from "@hyperlab/hx-coding-agent";
+import { Editor, type EditorTheme, Key, matchesKey, Text, truncateToWidth, wrapTextWithAnsi } from "@hyperlab/hx-tui";
 import { Type } from "@sinclair/typebox";
 import { makeUI } from "./shared/tui.js";
 import { maskEditorLine, type ProgressStatus } from "./shared/mod.js";
-import { parseSecretsManifest, formatSecretsManifest } from "./gsd/files.js";
-import { resolveMilestoneFile } from "./gsd/paths.js";
-import type { SecretsManifestEntry } from "./gsd/types.js";
+import { parseSecretsManifest, formatSecretsManifest } from "./hx/files.js";
+import { resolveMilestoneFile } from "./hx/paths.js";
+import type { SecretsManifestEntry } from "./hx/types.js";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -75,9 +75,9 @@ async function writeEnvKey(filePath: string, key: string, value: string): Promis
 // ─── Exported utilities ───────────────────────────────────────────────────────
 
 // Re-export from env-utils.ts so existing consumers still work.
-// The implementation lives in env-utils.ts to avoid pulling @gsd/pi-tui
+// The implementation lives in env-utils.ts to avoid pulling @hyperlab/hx-tui
 // into modules that only need env-checking (e.g. files.ts during reports).
-import { checkExistingEnvKeys } from "./gsd/env-utils.js";
+import { checkExistingEnvKeys } from "./hx/env-utils.js";
 export { checkExistingEnvKeys };
 
 /**

@@ -8,13 +8,13 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { atomicWriteSync } from "../gsd/atomic-write.js";
+import { atomicWriteSync } from "../hx/atomic-write.js";
 import type { SyncMapping, MilestoneSyncRecord, SliceSyncRecord, SyncEntityRecord } from "./types.js";
 
 const MAPPING_FILENAME = "github-sync.json";
 
 function mappingPath(basePath: string): string {
-  return join(basePath, ".gsd", MAPPING_FILENAME);
+  return join(basePath, ".hx", MAPPING_FILENAME);
 }
 
 // ─── Load / Save ────────────────────────────────────────────────────────────

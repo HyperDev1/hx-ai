@@ -3,7 +3,7 @@
  */
 
 import type { AgentMessage } from "@gsd/pi-agent-core";
-import type { Message } from "@gsd/pi-ai";
+import type { Message } from "@hyperlab/hx-ai";
 import { TOOL_RESULT_MAX_CHARS } from "../constants.js";
 import {
 	createBranchSummaryMessage,

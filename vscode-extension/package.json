@@ -1,24 +1,24 @@
 {
-  "name": "gsd-2",
-  "displayName": "GSD-2",
-  "description": "VS Code integration for the GSD-2 coding agent — sidebar dashboard, @gsd chat participant, activity feed, conversation history, code lens, session forking, slash command completion, workflow controls, and 33 commands",
+  "name": "hx",
+  "displayName": "HX",
+  "description": "VS Code integration for the HX coding agent — sidebar dashboard, @gsd chat participant, activity feed, conversation history, code lens, session forking, slash command completion, workflow controls, and 33 commands",
   "publisher": "FluxLabs",
   "version": "0.2.0",
   "icon": "logo.jpg",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/gsd-build/gsd-2"
+    "url": "https://github.com/hyperlab/hx"
   },
-  "homepage": "https://github.com/gsd-build/gsd-2/blob/main/vscode-extension/README.md",
+  "homepage": "https://github.com/hyperlab/hx/blob/main/vscode-extension/README.md",
   "bugs": {
-    "url": "https://github.com/gsd-build/gsd-2/issues"
+    "url": "https://github.com/hyperlab/hx/issues"
   },
   "keywords": [
     "ai",
     "agent",
     "coding",
-    "gsd",
+    "hx",
     "chat",
     "automation",
     "claude",
@@ -44,160 +44,160 @@
   "contributes": {
     "commands": [
       {
-        "command": "gsd.start",
-        "title": "GSD: Start Agent"
+        "command": "hx.start",
+        "title": "HX: Start Agent"
       },
       {
-        "command": "gsd.stop",
-        "title": "GSD: Stop Agent"
+        "command": "hx.stop",
+        "title": "HX: Stop Agent"
       },
       {
-        "command": "gsd.newSession",
-        "title": "GSD: New Session"
+        "command": "hx.newSession",
+        "title": "HX: New Session"
       },
       {
-        "command": "gsd.sendMessage",
-        "title": "GSD: Send Message"
+        "command": "hx.sendMessage",
+        "title": "HX: Send Message"
       },
       {
-        "command": "gsd.cycleModel",
-        "title": "GSD: Cycle Model"
+        "command": "hx.cycleModel",
+        "title": "HX: Cycle Model"
       },
       {
-        "command": "gsd.cycleThinking",
-        "title": "GSD: Cycle Thinking Level"
+        "command": "hx.cycleThinking",
+        "title": "HX: Cycle Thinking Level"
       },
       {
-        "command": "gsd.compact",
-        "title": "GSD: Compact Context"
+        "command": "hx.compact",
+        "title": "HX: Compact Context"
       },
       {
-        "command": "gsd.abort",
-        "title": "GSD: Abort Current Operation"
+        "command": "hx.abort",
+        "title": "HX: Abort Current Operation"
       },
       {
-        "command": "gsd.exportHtml",
-        "title": "GSD: Export Conversation as HTML"
+        "command": "hx.exportHtml",
+        "title": "HX: Export Conversation as HTML"
       },
       {
-        "command": "gsd.sessionStats",
-        "title": "GSD: Show Session Stats"
+        "command": "hx.sessionStats",
+        "title": "HX: Show Session Stats"
       },
       {
-        "command": "gsd.runBash",
-        "title": "GSD: Run Bash Command"
+        "command": "hx.runBash",
+        "title": "HX: Run Bash Command"
       },
       {
-        "command": "gsd.switchModel",
-        "title": "GSD: Switch Model"
+        "command": "hx.switchModel",
+        "title": "HX: Switch Model"
       },
       {
-        "command": "gsd.setThinking",
-        "title": "GSD: Set Thinking Level"
+        "command": "hx.setThinking",
+        "title": "HX: Set Thinking Level"
       },
       {
-        "command": "gsd.steer",
-        "title": "GSD: Steer Agent"
+        "command": "hx.steer",
+        "title": "HX: Steer Agent"
       },
       {
-        "command": "gsd.listCommands",
-        "title": "GSD: List Available Commands"
+        "command": "hx.listCommands",
+        "title": "HX: List Available Commands"
       },
       {
-        "command": "gsd.toggleAutoRetry",
-        "title": "GSD: Toggle Auto-Retry"
+        "command": "hx.toggleAutoRetry",
+        "title": "HX: Toggle Auto-Retry"
       },
       {
-        "command": "gsd.abortRetry",
-        "title": "GSD: Abort Retry"
+        "command": "hx.abortRetry",
+        "title": "HX: Abort Retry"
       },
       {
-        "command": "gsd.setSessionName",
-        "title": "GSD: Set Session Name"
+        "command": "hx.setSessionName",
+        "title": "HX: Set Session Name"
       },
       {
-        "command": "gsd.copyLastResponse",
-        "title": "GSD: Copy Last Response"
+        "command": "hx.copyLastResponse",
+        "title": "HX: Copy Last Response"
       },
       {
-        "command": "gsd.switchSession",
-        "title": "GSD: Switch Session"
+        "command": "hx.switchSession",
+        "title": "HX: Switch Session"
       },
       {
-        "command": "gsd.refreshSessions",
-        "title": "GSD: Refresh Sessions",
+        "command": "hx.refreshSessions",
+        "title": "HX: Refresh Sessions",
         "icon": "$(refresh)"
       },
       {
-        "command": "gsd.clearFileDecorations",
-        "title": "GSD: Clear File Decorations"
+        "command": "hx.clearFileDecorations",
+        "title": "HX: Clear File Decorations"
       },
       {
-        "command": "gsd.showHistory",
-        "title": "GSD: Show Conversation History"
+        "command": "hx.showHistory",
+        "title": "HX: Show Conversation History"
       },
       {
-        "command": "gsd.askAboutSymbol",
-        "title": "GSD: Ask About Symbol"
+        "command": "hx.askAboutSymbol",
+        "title": "HX: Ask About Symbol"
       },
       {
-        "command": "gsd.clearActivity",
-        "title": "GSD: Clear Activity Feed",
+        "command": "hx.clearActivity",
+        "title": "HX: Clear Activity Feed",
         "icon": "$(clear-all)"
       },
       {
-        "command": "gsd.forkSession",
-        "title": "GSD: Fork Session"
+        "command": "hx.forkSession",
+        "title": "HX: Fork Session"
       },
       {
-        "command": "gsd.toggleSteeringMode",
-        "title": "GSD: Toggle Steering Mode"
+        "command": "hx.toggleSteeringMode",
+        "title": "HX: Toggle Steering Mode"
       },
       {
-        "command": "gsd.toggleFollowUpMode",
-        "title": "GSD: Toggle Follow-Up Mode"
+        "command": "hx.toggleFollowUpMode",
+        "title": "HX: Toggle Follow-Up Mode"
       },
       {
-        "command": "gsd.refactorSymbol",
-        "title": "GSD: Refactor Symbol"
+        "command": "hx.refactorSymbol",
+        "title": "HX: Refactor Symbol"
       },
       {
-        "command": "gsd.findBugsSymbol",
-        "title": "GSD: Find Bugs in Symbol"
+        "command": "hx.findBugsSymbol",
+        "title": "HX: Find Bugs in Symbol"
       },
       {
-        "command": "gsd.generateTestsSymbol",
-        "title": "GSD: Generate Tests for Symbol"
+        "command": "hx.generateTestsSymbol",
+        "title": "HX: Generate Tests for Symbol"
       }
     ],
     "keybindings": [
       {
-        "command": "gsd.newSession",
+        "command": "hx.newSession",
         "key": "ctrl+shift+g ctrl+shift+n",
         "mac": "cmd+shift+g cmd+shift+n"
       },
       {
-        "command": "gsd.cycleModel",
+        "command": "hx.cycleModel",
         "key": "ctrl+shift+g ctrl+shift+m",
         "mac": "cmd+shift+g cmd+shift+m"
       },
       {
-        "command": "gsd.cycleThinking",
+        "command": "hx.cycleThinking",
         "key": "ctrl+shift+g ctrl+shift+t",
         "mac": "cmd+shift+g cmd+shift+t"
       },
       {
-        "command": "gsd.abort",
+        "command": "hx.abort",
         "key": "ctrl+shift+g ctrl+shift+a",
         "mac": "cmd+shift+g cmd+shift+a"
       },
       {
-        "command": "gsd.steer",
+        "command": "hx.steer",
         "key": "ctrl+shift+g ctrl+shift+i",
         "mac": "cmd+shift+g cmd+shift+i"
       },
       {
-        "command": "gsd.sendMessage",
+        "command": "hx.sendMessage",
         "key": "ctrl+shift+g ctrl+shift+p",
         "mac": "cmd+shift+g cmd+shift+p"
       }
@@ -205,25 +205,25 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "gsd",
-          "title": "GSD",
+          "id": "hx",
+          "title": "HX",
           "icon": "$(hubot)"
         }
       ]
     },
     "views": {
-      "gsd": [
+      "hx": [
         {
           "type": "webview",
-          "id": "gsd-sidebar",
-          "name": "GSD Agent"
+          "id": "hx-sidebar",
+          "name": "HX Agent"
         },
         {
-          "id": "gsd-sessions",
+          "id": "hx-sessions",
           "name": "Sessions"
         },
         {
-          "id": "gsd-activity",
+          "id": "hx-activity",
           "name": "Activity"
         }
       ]
@@ -231,67 +231,67 @@
     "menus": {
       "view/title": [
         {
-          "command": "gsd.refreshSessions",
-          "when": "view == gsd-sessions",
+          "command": "hx.refreshSessions",
+          "when": "view == hx-sessions",
           "group": "navigation"
         },
         {
-          "command": "gsd.clearActivity",
-          "when": "view == gsd-activity",
+          "command": "hx.clearActivity",
+          "when": "view == hx-activity",
           "group": "navigation"
         }
       ]
     },
     "chatParticipants": [
       {
-        "id": "gsd.agent",
-        "name": "gsd",
-        "fullName": "GSD Agent",
-        "description": "GSD-2 coding agent",
+        "id": "hx.agent",
+        "name": "hx",
+        "fullName": "HX Agent",
+        "description": "HX coding agent",
         "isSticky": true
       }
     ],
     "configuration": {
-      "title": "GSD",
+      "title": "HX",
       "properties": {
-        "gsd.binaryPath": {
+        "hx.binaryPath": {
           "type": "string",
-          "default": "gsd",
-          "description": "Path to the GSD binary"
+          "default": "hx",
+          "description": "Path to the HX binary"
         },
-        "gsd.autoStart": {
+        "hx.autoStart": {
           "type": "boolean",
           "default": false,
-          "description": "Automatically start the GSD agent when the extension activates"
+          "description": "Automatically start the HX agent when the extension activates"
         },
-        "gsd.autoCompaction": {
+        "hx.autoCompaction": {
           "type": "boolean",
           "default": true,
           "description": "Enable automatic context compaction"
         },
-        "gsd.codeLens": {
+        "hx.codeLens": {
           "type": "boolean",
           "default": true,
-          "description": "Show 'Ask GSD' code lens above functions and classes"
+          "description": "Show 'Ask HX' code lens above functions and classes"
         },
-        "gsd.showProgressNotifications": {
+        "hx.showProgressNotifications": {
           "type": "boolean",
           "default": true,
           "description": "Show progress notification while the agent is working"
         },
-        "gsd.activityFeedMaxItems": {
+        "hx.activityFeedMaxItems": {
           "type": "number",
           "default": 100,
           "minimum": 10,
           "maximum": 500,
           "description": "Maximum number of items shown in the Activity feed"
         },
-        "gsd.showContextWarning": {
+        "hx.showContextWarning": {
           "type": "boolean",
           "default": true,
           "description": "Warn when context window usage exceeds the threshold"
         },
-        "gsd.contextWarningThreshold": {
+        "hx.contextWarningThreshold": {
           "type": "number",
           "default": 80,
           "minimum": 50,

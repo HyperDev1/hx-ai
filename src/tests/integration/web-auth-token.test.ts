@@ -81,7 +81,7 @@ test('proxy.ts validates bearer token from Authorization header', () => {
   assert.match(proxySource, /Bearer/, 'proxy should check Authorization: Bearer header')
 })
 
-test('proxy.ts skips auth when GSD_WEB_AUTH_TOKEN is not set', () => {
-  assert.match(proxySource, /GSD_WEB_AUTH_TOKEN/, 'proxy should read GSD_WEB_AUTH_TOKEN from env')
+test('proxy.ts skips auth when HX_WEB_AUTH_TOKEN is not set', () => {
+  assert.match(proxySource, /HX_WEB_AUTH_TOKEN/, 'proxy should read HX_WEB_AUTH_TOKEN from env')
   assert.match(proxySource, /NextResponse\.next\(\)/, 'proxy should pass through when no token is configured')
 })

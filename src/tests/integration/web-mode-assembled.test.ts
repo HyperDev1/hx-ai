@@ -20,7 +20,7 @@ const {
   dispatchBrowserSlashCommand,
   getBrowserSlashCommandTerminalNotice,
 } = await import("../../../web/lib/browser-slash-command-dispatch.ts");
-const { AuthStorage } = await import("@gsd/pi-coding-agent");
+const { AuthStorage } = await import("@hyperlab/hx-coding-agent");
 
 // ---------------------------------------------------------------------------
 // Test infrastructure (shared with web-mode-onboarding.test.ts)
@@ -235,9 +235,9 @@ test("assembled lifecycle: boot → onboard → prompt → streaming text → to
   bridge.configureBridgeServiceForTests({
     env: {
       ...process.env,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
-      GSD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
-      GSD_WEB_PACKAGE_ROOT: repoRoot,
+      HX_WEB_PROJECT_CWD: fixture.projectCwd,
+      HX_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
+      HX_WEB_PACKAGE_ROOT: repoRoot,
     },
     spawn(command: string, args: readonly string[], options: Record<string, unknown>) {
       void command;
@@ -590,9 +590,9 @@ test("assembled settings controls keep retry visibility and daily-use mutations 
   bridge.configureBridgeServiceForTests({
     env: {
       ...process.env,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
-      GSD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
-      GSD_WEB_PACKAGE_ROOT: repoRoot,
+      HX_WEB_PROJECT_CWD: fixture.projectCwd,
+      HX_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
+      HX_WEB_PACKAGE_ROOT: repoRoot,
     },
     spawn(command: string, args: readonly string[], options: Record<string, unknown>) {
       void command;
@@ -811,9 +811,9 @@ test("assembled recovery route exposes actionable browser diagnostics without ra
   bridge.configureBridgeServiceForTests({
     env: {
       ...process.env,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
-      GSD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
-      GSD_WEB_PACKAGE_ROOT: repoRoot,
+      HX_WEB_PROJECT_CWD: fixture.projectCwd,
+      HX_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
+      HX_WEB_PACKAGE_ROOT: repoRoot,
     },
     spawn(command: string, args: readonly string[], options: Record<string, unknown>) {
       void command;
@@ -901,9 +901,9 @@ test("assembled slash-command behavior keeps built-ins safe while preserving GSD
   bridge.configureBridgeServiceForTests({
     env: {
       ...process.env,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
-      GSD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
-      GSD_WEB_PACKAGE_ROOT: repoRoot,
+      HX_WEB_PROJECT_CWD: fixture.projectCwd,
+      HX_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
+      HX_WEB_PACKAGE_ROOT: repoRoot,
     },
     spawn(command: string, args: readonly string[], options: Record<string, unknown>) {
       void command;
@@ -1019,14 +1019,14 @@ test("assembled slash-command behavior keeps built-ins safe while preserving GSD
   assert.match(builtInReject.notice ?? "", /blocked instead of falling through to the model/i);
   assert.equal(builtInReject.status, null);
 
-  // /gsd status is now a browser surface (S02), verify that
-  const gsdSurface = await submitBrowserInput("/gsd status");
-  assert.equal(gsdSurface.outcome.kind, "surface");
-  assert.equal(gsdSurface.outcome.surface, "gsd-status");
-  assert.equal(gsdSurface.status, null);
+  // /hx status is now a browser surface (S02), verify that
+  const hxSurface = await submitBrowserInput("/hx status");
+  assert.equal(hxSurface.outcome.kind, "surface");
+  assert.equal(hxSurface.outcome.surface, "hx-status");
+  assert.equal(hxSurface.status, null);
 
-  // /gsd auto is a passthrough subcommand — reaches the bridge as a prompt
-  const gsdPrompt = await submitBrowserInput("/gsd auto");
+  // /hx auto is a passthrough subcommand — reaches the bridge as a prompt
+  const gsdPrompt = await submitBrowserInput("/hx auto");
   assert.equal(gsdPrompt.outcome.kind, "prompt");
   assert.equal(gsdPrompt.status, 200);
   assert.equal(gsdPrompt.body.command, "prompt");
@@ -1038,5 +1038,5 @@ test("assembled slash-command behavior keeps built-ins safe while preserving GSD
     "only browser-executable slash commands should reach the live bridge; built-in surfaces/rejects must stay out of prompt text",
   );
   const promptCommand = bridgeCommands.find((command) => command.type === "prompt");
-  assert.equal(promptCommand?.message, "/gsd auto", "GSD passthrough commands must stay on the extension prompt path");
+  assert.equal(promptCommand?.message, "/hx auto", "GSD passthrough commands must stay on the extension prompt path");
 });

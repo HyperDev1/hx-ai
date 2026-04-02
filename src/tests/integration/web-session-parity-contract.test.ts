@@ -14,7 +14,7 @@ const onboarding = await import("../../web/onboarding-service.ts")
 const browserRoute = await import("../../../web/app/api/session/browser/route.ts")
 const manageRoute = await import("../../../web/app/api/session/manage/route.ts")
 const gitRoute = await import("../../../web/app/api/git/route.ts")
-const { AuthStorage } = await import("@gsd/pi-coding-agent")
+const { AuthStorage } = await import("@hyperlab/hx-coding-agent")
 
 class FakeRpcChild extends EventEmitter {
   stdin = new PassThrough()
@@ -181,15 +181,15 @@ function git(basePath: string, args: string[]): string {
 }
 
 function withProjectGitEnv(projectCwd: string, run: () => Promise<void>): Promise<void> {
-  const previousProjectCwd = process.env.GSD_WEB_PROJECT_CWD
-  process.env.GSD_WEB_PROJECT_CWD = projectCwd
+  const previousProjectCwd = process.env.HX_WEB_PROJECT_CWD
+  process.env.HX_WEB_PROJECT_CWD = projectCwd
 
   return run().finally(() => {
     if (previousProjectCwd === undefined) {
-      delete process.env.GSD_WEB_PROJECT_CWD
+      delete process.env.HX_WEB_PROJECT_CWD
       return
     }
-    process.env.GSD_WEB_PROJECT_CWD = previousProjectCwd
+    process.env.HX_WEB_PROJECT_CWD = previousProjectCwd
   })
 }
 
@@ -226,9 +226,9 @@ function configureBridgeFixture(
   bridge.configureBridgeServiceForTests({
     env: {
       ...process.env,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
-      GSD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
-      GSD_WEB_PACKAGE_ROOT: repoRoot,
+      HX_WEB_PROJECT_CWD: fixture.projectCwd,
+      HX_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
+      HX_WEB_PACKAGE_ROOT: repoRoot,
     },
     spawn: harness.spawn,
   })
@@ -637,9 +637,9 @@ test("/api/git exposes an explicit not-a-repo state instead of failing silently"
 test("browser session, settings, and git surfaces keep inspectable browse/manage/state markers on the shared surface", () => {
   const rpcTypesSource = readFileSync(resolve(import.meta.dirname, "../../../packages/pi-coding-agent/src/modes/rpc/rpc-types.ts"), "utf8")
   const contractSource = readFileSync(resolve(import.meta.dirname, "../../../web/lib/command-surface-contract.ts"), "utf8")
-  const storeSource = readFileSync(resolve(import.meta.dirname, "../../../web/lib/gsd-workspace-store.tsx"), "utf8")
-  const surfaceSource = readFileSync(resolve(import.meta.dirname, "../../../web/components/gsd/command-surface.tsx"), "utf8")
-  const sidebarSource = readFileSync(resolve(import.meta.dirname, "../../../web/components/gsd/sidebar.tsx"), "utf8")
+  const storeSource = readFileSync(resolve(import.meta.dirname, "../../../web/lib/hx-workspace-store.tsx"), "utf8")
+  const surfaceSource = readFileSync(resolve(import.meta.dirname, "../../../web/components/hx/command-surface.tsx"), "utf8")
+  const sidebarSource = readFileSync(resolve(import.meta.dirname, "../../../web/components/hx/sidebar.tsx"), "utf8")
   const gitRouteSource = readFileSync(resolve(import.meta.dirname, "../../../web/app/api/git/route.ts"), "utf8")
 
   assert.match(rpcTypesSource, /autoRetryEnabled: boolean/, "rpc-types.ts must expose retry-enabled state in get_state")

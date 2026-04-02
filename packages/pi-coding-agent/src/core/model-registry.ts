@@ -18,8 +18,8 @@ import {
 	registerApiProvider,
 	resetApiProviders,
 	type SimpleStreamOptions,
-} from "@gsd/pi-ai";
-import { registerOAuthProvider, resetOAuthProviders } from "@gsd/pi-ai/oauth";
+} from "@hyperlab/hx-ai";
+import { registerOAuthProvider, resetOAuthProviders } from "@hyperlab/hx-ai/oauth";
 import { type Static, Type } from "@sinclair/typebox";
 import AjvModule from "ajv";
 import { existsSync, readFileSync } from "fs";

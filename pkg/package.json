@@ -1,8 +1,8 @@
 {
-  "name": "@glittercowboy/gsd",
+  "name": "@hyperlab/hx-pkg",
   "version": "2.58.0",
   "piConfig": {
-    "name": "gsd",
-    "configDir": ".gsd"
+    "name": "hx",
+    "configDir": ".hx"
   }
 }

@@ -1,16 +1,16 @@
 services:
-  gsd:
+  hx:
     build:
       context: .
       dockerfile: Dockerfile.sandbox
       args:
-        GSD_VERSION: latest
-    container_name: gsd-sandbox
+        HX_VERSION: latest
+    container_name: hx-sandbox
     ports:
       - "3000:3000"
     volumes:
       - ../:/workspace
-      - gsd-state:/home/gsd/.gsd
+      - hx-state:/home/hx/.hx
     env_file:
       - .env
     environment:
@@ -19,5 +19,5 @@ services:
     tty: true
 
 volumes:
-  gsd-state:
+  hx-state:
     driver: local

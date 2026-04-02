@@ -1,5 +1,5 @@
 {
-  "name": "@gsd/pi-coding-agent",
+  "name": "@hyperlab/hx-coding-agent",
   "version": "2.58.0",
   "description": "Coding agent CLI (vendored from pi-mono)",
   "type": "module",

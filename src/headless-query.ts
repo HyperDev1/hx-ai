@@ -1,5 +1,5 @@
 /**
- * Headless Query — `gsd headless query`
+ * Headless Query — `hx headless query`
  *
  * Single read-only command that returns the full project snapshot as JSON
  * to stdout, without spawning an LLM session. Instant (~50ms).
@@ -16,12 +16,12 @@
 
 import { createJiti } from '@mariozechner/jiti'
 import { fileURLToPath } from 'node:url'
-import type { GSDState } from './resources/extensions/gsd/types.js'
+import type { GSDState } from './resources/extensions/hx/types.js'
 import { resolveBundledSourceResource } from './bundled-resource-path.js'
 
 const jiti = createJiti(fileURLToPath(import.meta.url), { interopDefault: true, debug: false })
 const gsdExtensionPath = (...segments: string[]) =>
-  resolveBundledSourceResource(import.meta.url, 'extensions', 'gsd', ...segments)
+  resolveBundledSourceResource(import.meta.url, 'extensions', 'hx', ...segments)
 
 async function loadExtensionModules() {
   const stateModule = await jiti.import(gsdExtensionPath('state.ts'), {}) as any
@@ -32,7 +32,7 @@ async function loadExtensionModules() {
     deriveState: stateModule.deriveState as (basePath: string) => Promise<GSDState>,
     resolveDispatch: dispatchModule.resolveDispatch as (opts: any) => Promise<any>,
     readAllSessionStatuses: sessionModule.readAllSessionStatuses as (basePath: string) => any[],
-    loadEffectiveGSDPreferences: prefsModule.loadEffectiveGSDPreferences as () => any,
+    loadEffectiveHXPreferences: prefsModule.loadEffectiveHXPreferences as () => any,
   }
 }
 
@@ -66,7 +66,7 @@ export interface QueryResult {
 // ─── Implementation ─────────────────────────────────────────────────────────
 
 export async function handleQuery(basePath: string): Promise<QueryResult> {
-  const { deriveState, resolveDispatch, readAllSessionStatuses, loadEffectiveGSDPreferences } = await loadExtensionModules()
+  const { deriveState, resolveDispatch, readAllSessionStatuses, loadEffectiveHXPreferences } = await loadExtensionModules()
   const state = await deriveState(basePath)
 
   // Derive next dispatch action
@@ -77,7 +77,7 @@ export async function handleQuery(basePath: string): Promise<QueryResult> {
       reason: state.phase === 'complete' ? 'All milestones complete.' : state.nextAction,
     }
   } else {
-    const loaded = loadEffectiveGSDPreferences()
+    const loaded = loadEffectiveHXPreferences()
     const dispatch = await resolveDispatch({
       basePath,
       mid: state.activeMilestone.id,

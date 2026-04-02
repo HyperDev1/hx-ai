@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { GsdClient, ThinkingLevel } from "./gsd-client.js";
+import { HxClient, ThinkingLevel } from "./hx-client.js";
 import { registerChatParticipant } from "./chat-participant.js";
 import { GsdSidebarProvider } from "./sidebar.js";
 import { GsdFileDecorationProvider } from "./file-decorations.js";
@@ -10,7 +10,7 @@ import { GsdSlashCompletionProvider } from "./slash-completion.js";
 import { GsdCodeLensProvider } from "./code-lens.js";
 import { GsdActivityFeedProvider } from "./activity-feed.js";
 
-let client: GsdClient | undefined;
+let client: HxClient | undefined;
 let sidebarProvider: GsdSidebarProvider | undefined;
 let fileDecorations: GsdFileDecorationProvider | undefined;
 let sessionTreeProvider: GsdSessionTreeProvider | undefined;
@@ -18,7 +18,7 @@ let activityFeedProvider: GsdActivityFeedProvider | undefined;
 
 function requireConnected(): boolean {
 	if (!client?.isConnected) {
-		vscode.window.showWarningMessage("GSD agent is not running.");
+		vscode.window.showWarningMessage("HX agent is not running.");
 		return false;
 	}
 	return true;
@@ -30,15 +30,15 @@ function handleError(err: unknown, context: string): void {
 }
 
 export function activate(context: vscode.ExtensionContext): void {
-	const config = vscode.workspace.getConfiguration("gsd");
-	const binaryPath = config.get<string>("binaryPath", "gsd");
+	const config = vscode.workspace.getConfiguration("hx");
+	const binaryPath = config.get<string>("binaryPath", "hx");
 	const cwd = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? process.cwd();
 
-	client = new GsdClient(binaryPath, cwd);
+	client = new HxClient(binaryPath, cwd);
 	context.subscriptions.push(client);
 
 	// Log stderr to an output channel
-	const outputChannel = vscode.window.createOutputChannel("GSD-2 Agent");
+	const outputChannel = vscode.window.createOutputChannel("HX Agent");
 	context.subscriptions.push(outputChannel);
 
 	client.onError((msg) => {
@@ -48,16 +48,16 @@ export function activate(context: vscode.ExtensionContext): void {
 	// -- Persistent status bar item ----------------------------------------
 
 	const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
-	statusBarItem.command = "workbench.view.extension.gsd";
-	statusBarItem.text = "$(hubot) GSD";
-	statusBarItem.tooltip = "GSD Agent — click to open";
+	statusBarItem.command = "workbench.view.extension.hx";
+	statusBarItem.text = "$(hubot) HX";
+	statusBarItem.tooltip = "HX Agent — click to open";
 	statusBarItem.show();
 	context.subscriptions.push(statusBarItem);
 
 	async function refreshStatusBar(): Promise<void> {
 		if (!client?.isConnected) {
-			statusBarItem.text = "$(hubot) GSD";
-			statusBarItem.tooltip = "GSD: Disconnected";
+			statusBarItem.text = "$(hubot) HX";
+			statusBarItem.tooltip = "HX: Disconnected";
 			return;
 		}
 		try {
@@ -68,10 +68,10 @@ export function activate(context: vscode.ExtensionContext): void {
 			const modelId = state?.model?.id ?? "";
 			const costPart = stats?.totalCost !== undefined ? ` | $${stats.totalCost.toFixed(4)}` : "";
 			const streamPart = state?.isStreaming ? " $(sync~spin)" : "";
-			statusBarItem.text = `$(hubot) GSD${modelId ? ` | ${modelId}` : ""}${costPart}${streamPart}`;
+			statusBarItem.text = `$(hubot) HX${modelId ? ` | ${modelId}` : ""}${costPart}${streamPart}`;
 			statusBarItem.tooltip = state?.model
-				? `GSD: Connected — ${state.model.provider}/${state.model.id}`
-				: "GSD: Connected";
+				? `HX: Connected — ${state.model.provider}/${state.model.id}`
+				: "HX: Connected";
 		} catch {
 			// ignore fetch errors
 		}
@@ -83,9 +83,9 @@ export function activate(context: vscode.ExtensionContext): void {
 	client.onConnectionChange(async (connected) => {
 		await refreshStatusBar();
 		if (connected) {
-			vscode.window.setStatusBarMessage("$(hubot) GSD connected", 3000);
+			vscode.window.setStatusBarMessage("$(hubot) HX connected", 3000);
 		} else {
-			vscode.window.setStatusBarMessage("$(hubot) GSD disconnected", 3000);
+			vscode.window.setStatusBarMessage("$(hubot) HX disconnected", 3000);
 		}
 	});
 
@@ -133,14 +133,14 @@ export function activate(context: vscode.ExtensionContext): void {
 	let currentProgress: { resolve: () => void } | undefined;
 
 	client.onEvent((evt) => {
-		const showProgress = vscode.workspace.getConfiguration("gsd").get<boolean>("showProgressNotifications", true);
+		const showProgress = vscode.workspace.getConfiguration("hx").get<boolean>("showProgressNotifications", true);
 		if (!showProgress) return;
 
 		if (evt.type === "agent_start" && !currentProgress) {
 			vscode.window.withProgress(
 				{
 					location: vscode.ProgressLocation.Notification,
-					title: "GSD Agent",
+					title: "HX Agent",
 					cancellable: true,
 				},
 				(progress, token) => {
@@ -180,7 +180,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	let lastContextWarning = 0;
 	client.onEvent(async (evt) => {
 		if (evt.type !== "message_end") return;
-		const showWarning = vscode.workspace.getConfiguration("gsd").get<boolean>("showContextWarning", true);
+		const showWarning = vscode.workspace.getConfiguration("hx").get<boolean>("showContextWarning", true);
 		if (!showWarning) return;
 
 		// Throttle: at most once per 60 seconds
@@ -195,7 +195,7 @@ export function activate(context: vscode.ExtensionContext): void {
 			const totalTokens = (stats?.inputTokens ?? 0) + (stats?.outputTokens ?? 0);
 			if (contextWindow <= 0) return;
 
-			const threshold = vscode.workspace.getConfiguration("gsd").get<number>("contextWarningThreshold", 80);
+			const threshold = vscode.workspace.getConfiguration("hx").get<number>("contextWarningThreshold", 80);
 			const pct = Math.round((totalTokens / contextWindow) * 100);
 			if (pct >= threshold) {
 				lastContextWarning = Date.now();
@@ -204,7 +204,7 @@ export function activate(context: vscode.ExtensionContext): void {
 					"Compact Now",
 				);
 				if (action === "Compact Now") {
-					await vscode.commands.executeCommand("gsd.compact");
+					await vscode.commands.executeCommand("hx.compact");
 				}
 			}
 		} catch {
@@ -218,7 +218,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// -- Conversation history panel ----------------------------------------
 
-	// (panel is created on demand via gsd.showHistory command)
+	// (panel is created on demand via hx.showHistory command)
 
 	// -- Slash command completion ------------------------------------------
 
@@ -239,7 +239,7 @@ export function activate(context: vscode.ExtensionContext): void {
 		),
 	);
 
-	// -- Code lens "Ask GSD" -----------------------------------------------
+	// -- Code lens "Ask HX" -----------------------------------------------
 
 	const codeLensProvider = new GsdCodeLensProvider(client);
 	context.subscriptions.push(
@@ -262,40 +262,40 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Start
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.start", async () => {
+		vscode.commands.registerCommand("hx.start", async () => {
 			try {
 				await client!.start();
 				// Apply auto-compaction setting
-				const autoCompaction = vscode.workspace.getConfiguration("gsd").get<boolean>("autoCompaction", true);
+				const autoCompaction = vscode.workspace.getConfiguration("hx").get<boolean>("autoCompaction", true);
 				await client!.setAutoCompaction(autoCompaction).catch(() => {});
 				sidebarProvider?.refresh();
 				refreshStatusBar();
-				vscode.window.showInformationMessage("GSD agent started.");
+				vscode.window.showInformationMessage("HX agent started.");
 			} catch (err) {
-				handleError(err, "Failed to start GSD");
+				handleError(err, "Failed to start HX");
 			}
 		}),
 	);
 
 	// Stop
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.stop", async () => {
+		vscode.commands.registerCommand("hx.stop", async () => {
 			await client!.stop();
 			sidebarProvider?.refresh();
-			vscode.window.showInformationMessage("GSD agent stopped.");
+			vscode.window.showInformationMessage("HX agent stopped.");
 		}),
 	);
 
 	// New Session
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.newSession", async () => {
+		vscode.commands.registerCommand("hx.newSession", async () => {
 			if (!requireConnected()) return;
 			try {
 				await client!.newSession();
 				sidebarProvider?.refresh();
 				sessionTreeProvider?.refresh();
 				fileDecorations?.clear();
-				vscode.window.showInformationMessage("New GSD session started.");
+				vscode.window.showInformationMessage("New HX session started.");
 			} catch (err) {
 				handleError(err, "Failed to start new session");
 			}
@@ -304,10 +304,10 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Send Message
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.sendMessage", async () => {
+		vscode.commands.registerCommand("hx.sendMessage", async () => {
 			if (!requireConnected()) return;
 			const message = await vscode.window.showInputBox({
-				prompt: "Enter message for GSD",
+				prompt: "Enter message for HX",
 				placeHolder: "What should I do?",
 			});
 			if (!message) return;
@@ -321,7 +321,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Abort
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.abort", async () => {
+		vscode.commands.registerCommand("hx.abort", async () => {
 			if (!requireConnected()) return;
 			try {
 				await client!.abort();
@@ -334,7 +334,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Cycle Model
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.cycleModel", async () => {
+		vscode.commands.registerCommand("hx.cycleModel", async () => {
 			if (!requireConnected()) return;
 			try {
 				const result = await client!.cycleModel();
@@ -354,7 +354,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Switch Model (QuickPick)
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.switchModel", async () => {
+		vscode.commands.registerCommand("hx.switchModel", async () => {
 			if (!requireConnected()) return;
 			try {
 				const models = await client!.getAvailableModels();
@@ -383,7 +383,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Cycle Thinking Level
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.cycleThinking", async () => {
+		vscode.commands.registerCommand("hx.cycleThinking", async () => {
 			if (!requireConnected()) return;
 			try {
 				const result = await client!.cycleThinkingLevel();
@@ -401,7 +401,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Set Thinking Level (QuickPick)
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.setThinking", async () => {
+		vscode.commands.registerCommand("hx.setThinking", async () => {
 			if (!requireConnected()) return;
 			const levels: ThinkingLevel[] = ["off", "low", "medium", "high"];
 			const selected = await vscode.window.showQuickPick(levels, {
@@ -420,7 +420,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Compact Context
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.compact", async () => {
+		vscode.commands.registerCommand("hx.compact", async () => {
 			if (!requireConnected()) return;
 			try {
 				await client!.compact();
@@ -434,11 +434,11 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Export HTML
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.exportHtml", async () => {
+		vscode.commands.registerCommand("hx.exportHtml", async () => {
 			if (!requireConnected()) return;
 			try {
 				const saveUri = await vscode.window.showSaveDialog({
-					defaultUri: vscode.Uri.file("gsd-conversation.html"),
+					defaultUri: vscode.Uri.file("hx-conversation.html"),
 					filters: { "HTML Files": ["html"] },
 				});
 				const outputPath = saveUri?.fsPath;
@@ -452,7 +452,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Session Stats
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.sessionStats", async () => {
+		vscode.commands.registerCommand("hx.sessionStats", async () => {
 			if (!requireConnected()) return;
 			try {
 				const stats = await client!.getSessionStats();
@@ -477,7 +477,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Run Bash Command
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.runBash", async () => {
+		vscode.commands.registerCommand("hx.runBash", async () => {
 			if (!requireConnected()) return;
 			const command = await vscode.window.showInputBox({
 				prompt: "Enter bash command to execute",
@@ -505,7 +505,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Steer Agent
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.steer", async () => {
+		vscode.commands.registerCommand("hx.steer", async () => {
 			if (!requireConnected()) return;
 			const message = await vscode.window.showInputBox({
 				prompt: "Enter steering message (interrupts current operation)",
@@ -522,7 +522,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// List Available Commands
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.listCommands", async () => {
+		vscode.commands.registerCommand("hx.listCommands", async () => {
 			if (!requireConnected()) return;
 			try {
 				const commands = await client!.getCommands();
@@ -550,7 +550,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Switch Session
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.switchSession", async (sessionFile?: string) => {
+		vscode.commands.registerCommand("hx.switchSession", async (sessionFile?: string) => {
 			if (!requireConnected()) return;
 			const file = sessionFile ?? await (async () => {
 				const input = await vscode.window.showInputBox({
@@ -573,14 +573,14 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Refresh Sessions
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.refreshSessions", () => {
+		vscode.commands.registerCommand("hx.refreshSessions", () => {
 			sessionTreeProvider?.refresh();
 		}),
 	);
 
 	// Show Conversation History
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.showHistory", () => {
+		vscode.commands.registerCommand("hx.showHistory", () => {
 			if (!requireConnected()) return;
 			GsdConversationHistoryPanel.createOrShow(context.extensionUri, client!);
 		}),
@@ -589,14 +589,14 @@ export function activate(context: vscode.ExtensionContext): void {
 	// Ask About Symbol (triggered by code lens)
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
-			"gsd.askAboutSymbol",
+			"hx.askAboutSymbol",
 			async (symbolName: string, fileName: string, lineNumber: number) => {
 				if (!requireConnected()) return;
 				try {
 					const prompt = `Explain the \`${symbolName}\` function/class in ${fileName} (line ${lineNumber}). Be concise.`;
 					await client!.sendPrompt(prompt);
 				} catch (err) {
-					handleError(err, "Failed to send Ask GSD request");
+					handleError(err, "Failed to send Ask HX request");
 				}
 			},
 		),
@@ -604,21 +604,21 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Clear File Decorations
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.clearFileDecorations", () => {
+		vscode.commands.registerCommand("hx.clearFileDecorations", () => {
 			fileDecorations?.clear();
 		}),
 	);
 
 	// Clear Activity Feed
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.clearActivity", () => {
+		vscode.commands.registerCommand("hx.clearActivity", () => {
 			activityFeedProvider?.clear();
 		}),
 	);
 
 	// Fork Session
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.forkSession", async () => {
+		vscode.commands.registerCommand("hx.forkSession", async () => {
 			if (!requireConnected()) return;
 			try {
 				const messages = await client!.getForkMessages();
@@ -649,7 +649,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Toggle Steering Mode
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.toggleSteeringMode", async () => {
+		vscode.commands.registerCommand("hx.toggleSteeringMode", async () => {
 			if (!requireConnected()) return;
 			try {
 				const state = await client!.getState();
@@ -665,7 +665,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Toggle Follow-Up Mode
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.toggleFollowUpMode", async () => {
+		vscode.commands.registerCommand("hx.toggleFollowUpMode", async () => {
 			if (!requireConnected()) return;
 			try {
 				const state = await client!.getState();
@@ -682,7 +682,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	// Refactor Symbol (code lens)
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
-			"gsd.refactorSymbol",
+			"hx.refactorSymbol",
 			async (symbolName: string, fileName: string, lineNumber: number) => {
 				if (!requireConnected()) return;
 				try {
@@ -697,7 +697,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	// Find Bugs in Symbol (code lens)
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
-			"gsd.findBugsSymbol",
+			"hx.findBugsSymbol",
 			async (symbolName: string, fileName: string, lineNumber: number) => {
 				if (!requireConnected()) return;
 				try {
@@ -712,7 +712,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	// Generate Tests for Symbol (code lens)
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
-			"gsd.generateTestsSymbol",
+			"hx.generateTestsSymbol",
 			async (symbolName: string, fileName: string, lineNumber: number) => {
 				if (!requireConnected()) return;
 				try {
@@ -726,7 +726,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Toggle Auto-Retry
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.toggleAutoRetry", async () => {
+		vscode.commands.registerCommand("hx.toggleAutoRetry", async () => {
 			if (!requireConnected()) return;
 			try {
 				const next = !client!.autoRetryEnabled;
@@ -741,7 +741,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Abort Retry
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.abortRetry", async () => {
+		vscode.commands.registerCommand("hx.abortRetry", async () => {
 			if (!requireConnected()) return;
 			try {
 				await client!.abortRetry();
@@ -754,7 +754,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Set Session Name
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.setSessionName", async () => {
+		vscode.commands.registerCommand("hx.setSessionName", async () => {
 			if (!requireConnected()) return;
 			const name = await vscode.window.showInputBox({
 				prompt: "Enter a name for this session",
@@ -773,7 +773,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// Copy Last Response
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gsd.copyLastResponse", async () => {
+		vscode.commands.registerCommand("hx.copyLastResponse", async () => {
 			if (!requireConnected()) return;
 			try {
 				const text = await client!.getLastAssistantText();
@@ -792,7 +792,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	// -- Auto-start ---------------------------------------------------------
 
 	if (config.get<boolean>("autoStart", false)) {
-		vscode.commands.executeCommand("gsd.start");
+		vscode.commands.executeCommand("hx.start");
 	}
 }
 

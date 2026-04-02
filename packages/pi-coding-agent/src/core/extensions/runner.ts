@@ -3,8 +3,8 @@
  */
 
 import type { AgentMessage } from "@gsd/pi-agent-core";
-import type { ImageContent, Model } from "@gsd/pi-ai";
-import type { KeyId } from "@gsd/pi-tui";
+import type { ImageContent, Model } from "@hyperlab/hx-ai";
+import type { KeyId } from "@hyperlab/hx-tui";
 import { type Theme, theme } from "../../modes/interactive/theme/theme.js";
 import type { ResourceDiagnostic } from "../diagnostics.js";
 import type { KeyAction, KeybindingsConfig } from "../keybindings.js";

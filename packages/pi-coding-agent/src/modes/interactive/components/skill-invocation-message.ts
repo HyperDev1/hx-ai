@@ -1,4 +1,4 @@
-import { Box, Markdown, type MarkdownTheme, Text } from "@gsd/pi-tui";
+import { Box, Markdown, type MarkdownTheme, Text } from "@hyperlab/hx-tui";
 import type { ParsedSkillBlock } from "../../../core/agent-session.js";
 import { getMarkdownTheme, theme } from "../theme/theme.js";
 import { editorKey } from "./keybinding-hints.js";

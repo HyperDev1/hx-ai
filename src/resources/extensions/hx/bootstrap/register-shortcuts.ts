@@ -1,0 +1,56 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+
+import type { ExtensionAPI } from "@hyperlab/hx-coding-agent";
+import { Key } from "@hyperlab/hx-tui";
+
+import { GSDDashboardOverlay } from "../dashboard-overlay.js";
+import { ParallelMonitorOverlay } from "../parallel-monitor-overlay.js";
+import { shortcutDesc } from "../../shared/mod.js";
+
+export function registerShortcuts(pi: ExtensionAPI): void {
+  pi.registerShortcut(Key.ctrlAlt("g"), {
+    description: shortcutDesc("Open GSD dashboard", "/hx status"),
+    handler: async (ctx) => {
+      if (!existsSync(join(process.cwd(), ".hx"))) {
+        ctx.ui.notify("No .hx/ directory found. Run /hx to start.", "info");
+        return;
+      }
+      await ctx.ui.custom<void>(
+        (tui, theme, _kb, done) => new GSDDashboardOverlay(tui, theme, () => done()),
+        {
+          overlay: true,
+          overlayOptions: {
+            width: "90%",
+            minWidth: 80,
+            maxHeight: "92%",
+            anchor: "center",
+          },
+        },
+      );
+    },
+  });
+
+  pi.registerShortcut(Key.ctrlAlt("p"), {
+    description: shortcutDesc("Open parallel worker monitor", "/hx parallel watch"),
+    handler: async (ctx) => {
+      const parallelDir = join(process.cwd(), ".hx", "parallel");
+      if (!existsSync(parallelDir)) {
+        ctx.ui.notify("No parallel workers found. Run /hx parallel start first.", "info");
+        return;
+      }
+      await ctx.ui.custom<void>(
+        (tui, theme, _kb, done) => new ParallelMonitorOverlay(tui, theme, () => done()),
+        {
+          overlay: true,
+          overlayOptions: {
+            width: "90%",
+            minWidth: 80,
+            maxHeight: "92%",
+            anchor: "center",
+          },
+        },
+      );
+    },
+  });
+}

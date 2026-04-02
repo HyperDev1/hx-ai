@@ -10,7 +10,7 @@ import type { SettingsData } from "../../web/lib/settings-types.ts"
 const SETTINGS_MAX_BUFFER = 2 * 1024 * 1024
 
 function resolveTsLoaderPath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs")
+  return join(packageRoot, "src", "resources", "extensions", "hx", "tests", "resolve-ts.mjs")
 }
 
 /**
@@ -27,11 +27,11 @@ export async function collectSettingsData(projectCwdOverride?: string): Promise<
   const { packageRoot, projectCwd } = config
 
   const resolveTsLoader = resolveTsLoaderPath(packageRoot)
-  const prefsResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/preferences.ts")
-  const routerResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/model-router.ts")
-  const budgetResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/context-budget.ts")
-  const historyResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/routing-history.ts")
-  const metricsResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/metrics.ts")
+  const prefsResolution = resolveSubprocessModule(packageRoot, "resources/extensions/hx/preferences.ts")
+  const routerResolution = resolveSubprocessModule(packageRoot, "resources/extensions/hx/model-router.ts")
+  const budgetResolution = resolveSubprocessModule(packageRoot, "resources/extensions/hx/context-budget.ts")
+  const historyResolution = resolveSubprocessModule(packageRoot, "resources/extensions/hx/routing-history.ts")
+  const metricsResolution = resolveSubprocessModule(packageRoot, "resources/extensions/hx/metrics.ts")
 
   const prefsPath = prefsResolution.modulePath
   const routerPath = routerResolution.modulePath
@@ -62,14 +62,14 @@ export async function collectSettingsData(projectCwdOverride?: string): Promise<
   // and writes a combined JSON payload to stdout.
   const script = [
     'const { pathToFileURL } = await import("node:url");',
-    'const prefsMod = await import(pathToFileURL(process.env.GSD_SETTINGS_PREFS_MODULE).href);',
-    'const routerMod = await import(pathToFileURL(process.env.GSD_SETTINGS_ROUTER_MODULE).href);',
-    'const budgetMod = await import(pathToFileURL(process.env.GSD_SETTINGS_BUDGET_MODULE).href);',
-    'const historyMod = await import(pathToFileURL(process.env.GSD_SETTINGS_HISTORY_MODULE).href);',
-    'const metricsMod = await import(pathToFileURL(process.env.GSD_SETTINGS_METRICS_MODULE).href);',
+    'const prefsMod = await import(pathToFileURL(process.env.HX_SETTINGS_PREFS_MODULE).href);',
+    'const routerMod = await import(pathToFileURL(process.env.HX_SETTINGS_ROUTER_MODULE).href);',
+    'const budgetMod = await import(pathToFileURL(process.env.HX_SETTINGS_BUDGET_MODULE).href);',
+    'const historyMod = await import(pathToFileURL(process.env.HX_SETTINGS_HISTORY_MODULE).href);',
+    'const metricsMod = await import(pathToFileURL(process.env.HX_SETTINGS_METRICS_MODULE).href);',
 
     // 1. Effective preferences (may be null if no preferences files exist)
-    'const loaded = prefsMod.loadEffectiveGSDPreferences();',
+    'const loaded = prefsMod.loadEffectiveHXPreferences();',
     'let preferences = null;',
     'if (loaded) {',
     '  const p = loaded.preferences;',
@@ -109,11 +109,11 @@ export async function collectSettingsData(projectCwdOverride?: string): Promise<
     'const budgetAllocation = budgetMod.computeBudgets(200000);',
 
     // 4. Routing history (must init before reading)
-    'historyMod.initRoutingHistory(process.env.GSD_SETTINGS_BASE);',
+    'historyMod.initRoutingHistory(process.env.HX_SETTINGS_BASE);',
     'const routingHistory = historyMod.getRoutingHistory();',
 
     // 5. Project totals (null if no metrics ledger exists)
-    'const ledger = metricsMod.loadLedgerFromDisk(process.env.GSD_SETTINGS_BASE);',
+    'const ledger = metricsMod.loadLedgerFromDisk(process.env.HX_SETTINGS_BASE);',
     'const projectTotals = ledger ? metricsMod.getProjectTotals(ledger.units) : null;',
 
     // Write combined payload
@@ -134,12 +134,12 @@ export async function collectSettingsData(projectCwdOverride?: string): Promise<
         cwd: packageRoot,
         env: {
           ...process.env,
-          GSD_SETTINGS_PREFS_MODULE: prefsPath,
-          GSD_SETTINGS_ROUTER_MODULE: routerPath,
-          GSD_SETTINGS_BUDGET_MODULE: budgetPath,
-          GSD_SETTINGS_HISTORY_MODULE: historyPath,
-          GSD_SETTINGS_METRICS_MODULE: metricsPath,
-          GSD_SETTINGS_BASE: projectCwd,
+          HX_SETTINGS_PREFS_MODULE: prefsPath,
+          HX_SETTINGS_ROUTER_MODULE: routerPath,
+          HX_SETTINGS_BUDGET_MODULE: budgetPath,
+          HX_SETTINGS_HISTORY_MODULE: historyPath,
+          HX_SETTINGS_METRICS_MODULE: metricsPath,
+          HX_SETTINGS_BASE: projectCwd,
         },
         maxBuffer: SETTINGS_MAX_BUFFER,
       },

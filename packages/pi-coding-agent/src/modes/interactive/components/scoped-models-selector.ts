@@ -1,4 +1,4 @@
-import type { Model } from "@gsd/pi-ai";
+import type { Model } from "@hyperlab/hx-ai";
 import {
 	Container,
 	type Focusable,
@@ -9,7 +9,7 @@ import {
 	matchesKey,
 	Spacer,
 	Text,
-} from "@gsd/pi-tui";
+} from "@hyperlab/hx-tui";
 import { theme } from "../theme/theme.js";
 import { DynamicBorder } from "./dynamic-border.js";
 

@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import type { GsdClient } from "./gsd-client.js";
+import type { HxClient } from "./hx-client.js";
 
 /**
  * Patterns that identify the start of a named function, class, or method
@@ -46,8 +46,8 @@ const SYMBOL_PATTERNS: { languages: string[]; regex: RegExp }[] = [
 ];
 
 /**
- * CodeLensProvider that adds an "Ask GSD" lens above named function and class
- * declarations. Clicking the lens sends a brief explanation request to the GSD
+ * CodeLensProvider that adds an "Ask HX" lens above named function and class
+ * declarations. Clicking the lens sends a brief explanation request to the HX
  * agent for that specific symbol.
  */
 export class GsdCodeLensProvider implements vscode.CodeLensProvider, vscode.Disposable {
@@ -56,12 +56,12 @@ export class GsdCodeLensProvider implements vscode.CodeLensProvider, vscode.Disp
 
 	private disposables: vscode.Disposable[] = [];
 
-	constructor(private readonly client: GsdClient) {
+	constructor(private readonly client: HxClient) {
 		this.disposables.push(
 			this._onDidChangeCodeLenses,
 			client.onConnectionChange(() => this._onDidChangeCodeLenses.fire()),
 			vscode.workspace.onDidChangeConfiguration((e) => {
-				if (e.affectsConfiguration("gsd.codeLens")) {
+				if (e.affectsConfiguration("hx.codeLens")) {
 					this._onDidChangeCodeLenses.fire();
 				}
 			}),
@@ -74,7 +74,7 @@ export class GsdCodeLensProvider implements vscode.CodeLensProvider, vscode.Disp
 	): vscode.CodeLens[] {
 		const lenses: vscode.CodeLens[] = [];
 
-		if (!vscode.workspace.getConfiguration("gsd").get<boolean>("codeLens", true)) {
+		if (!vscode.workspace.getConfiguration("hx").get<boolean>("codeLens", true)) {
 			return lenses;
 		}
 		const langId = document.languageId;
@@ -100,27 +100,27 @@ export class GsdCodeLensProvider implements vscode.CodeLensProvider, vscode.Disp
 
 					lenses.push(
 						new vscode.CodeLens(range, {
-							title: "$(hubot) Ask GSD",
-							tooltip: `Ask GSD to explain ${symbolName}`,
-							command: "gsd.askAboutSymbol",
+							title: "$(hubot) Ask HX",
+							tooltip: `Ask HX to explain ${symbolName}`,
+							command: "hx.askAboutSymbol",
 							arguments: args,
 						}),
 						new vscode.CodeLens(range, {
 							title: "$(pencil) Refactor",
 							tooltip: `Refactor ${symbolName}`,
-							command: "gsd.refactorSymbol",
+							command: "hx.refactorSymbol",
 							arguments: args,
 						}),
 						new vscode.CodeLens(range, {
 							title: "$(bug) Find Bugs",
 							tooltip: `Review ${symbolName} for bugs`,
-							command: "gsd.findBugsSymbol",
+							command: "hx.findBugsSymbol",
 							arguments: args,
 						}),
 						new vscode.CodeLens(range, {
 							title: "$(beaker) Tests",
 							tooltip: `Generate tests for ${symbolName}`,
-							command: "gsd.generateTestsSymbol",
+							command: "hx.generateTestsSymbol",
 							arguments: args,
 						}),
 					);

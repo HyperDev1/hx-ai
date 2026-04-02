@@ -3,8 +3,8 @@ import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
-import type { GSDPreferences } from "../gsd/preferences.js";
-import type { GSDState, Phase } from "../gsd/types.js";
+import type { GSDPreferences } from "../hx/preferences.js";
+import type { GSDState, Phase } from "../hx/types.js";
 
 const execFileAsync = promisify(execFile);
 const DEFAULT_SOCKET_PATH = "/tmp/cmux.sock";

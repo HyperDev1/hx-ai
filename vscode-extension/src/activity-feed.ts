@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import type { GsdClient, AgentEvent } from "./gsd-client.js";
+import type { HxClient, AgentEvent } from "./hx-client.js";
 
 interface ActivityItem {
 	id: number;
@@ -59,11 +59,11 @@ function toolSummary(toolName: string, toolInput: Record<string, unknown>): { la
 }
 
 /**
- * TreeDataProvider that shows real-time tool executions from the GSD agent.
+ * TreeDataProvider that shows real-time tool executions from the HX agent.
  * Listens to tool_execution_start/end and agent_start/end events.
  */
 export class GsdActivityFeedProvider implements vscode.TreeDataProvider<ActivityItem>, vscode.Disposable {
-	public static readonly viewId = "gsd-activity";
+	public static readonly viewId = "hx-activity";
 
 	private readonly _onDidChangeTreeData = new vscode.EventEmitter<void>();
 	readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
@@ -74,8 +74,8 @@ export class GsdActivityFeedProvider implements vscode.TreeDataProvider<Activity
 	private maxItems: number;
 	private disposables: vscode.Disposable[] = [];
 
-	constructor(private readonly client: GsdClient) {
-		this.maxItems = vscode.workspace.getConfiguration("gsd").get<number>("activityFeedMaxItems", 100);
+	constructor(private readonly client: HxClient) {
+		this.maxItems = vscode.workspace.getConfiguration("hx").get<number>("activityFeedMaxItems", 100);
 
 		this.disposables.push(
 			this._onDidChangeTreeData,
@@ -87,8 +87,8 @@ export class GsdActivityFeedProvider implements vscode.TreeDataProvider<Activity
 				this._onDidChangeTreeData.fire();
 			}),
 			vscode.workspace.onDidChangeConfiguration((e) => {
-				if (e.affectsConfiguration("gsd.activityFeedMaxItems")) {
-					this.maxItems = vscode.workspace.getConfiguration("gsd").get<number>("activityFeedMaxItems", 100);
+				if (e.affectsConfiguration("hx.activityFeedMaxItems")) {
+					this.maxItems = vscode.workspace.getConfiguration("hx").get<number>("activityFeedMaxItems", 100);
 				}
 			}),
 		);

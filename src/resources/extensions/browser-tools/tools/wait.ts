@@ -1,6 +1,6 @@
-import type { ExtensionAPI } from "@gsd/pi-coding-agent";
+import type { ExtensionAPI } from "@hyperlab/hx-coding-agent";
 import { Type } from "@sinclair/typebox";
-import { StringEnum } from "@gsd/pi-ai";
+import { StringEnum } from "@hyperlab/hx-ai";
 import {
 	validateWaitParams,
 	createRegionStableScript,

@@ -7,9 +7,9 @@ import type { AutoDashboardData } from "./bridge-service.ts";
 import { resolveSubprocessModule, buildSubprocessPrefixArgs } from "./ts-subprocess-flags.ts";
 
 const AUTO_DASHBOARD_MAX_BUFFER = 1024 * 1024;
-const TEST_AUTO_DASHBOARD_MODULE_ENV = "GSD_WEB_TEST_AUTO_DASHBOARD_MODULE";
-const TEST_AUTO_DASHBOARD_FALLBACK_ENV = "GSD_WEB_TEST_USE_FALLBACK_AUTO_DASHBOARD";
-const AUTO_DASHBOARD_MODULE_ENV = "GSD_AUTO_DASHBOARD_MODULE";
+const TEST_AUTO_DASHBOARD_MODULE_ENV = "HX_WEB_TEST_AUTO_DASHBOARD_MODULE";
+const TEST_AUTO_DASHBOARD_FALLBACK_ENV = "HX_WEB_TEST_USE_FALLBACK_AUTO_DASHBOARD";
+const AUTO_DASHBOARD_MODULE_ENV = "HX_AUTO_DASHBOARD_MODULE";
 
 export interface AutoDashboardServiceOptions {
   execPath?: string;
@@ -35,7 +35,7 @@ function fallbackAutoDashboardData(): AutoDashboardData {
 }
 
 function resolveTsLoaderPath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs");
+  return join(packageRoot, "src", "resources", "extensions", "hx", "tests", "resolve-ts.mjs");
 }
 
 export function collectTestOnlyFallbackAutoDashboardData(): AutoDashboardData {
@@ -57,7 +57,7 @@ export async function collectAuthoritativeAutoDashboardData(
   const testModulePath = env[TEST_AUTO_DASHBOARD_MODULE_ENV];
   const moduleResolution = testModulePath
     ? { modulePath: testModulePath, useCompiledJs: false }
-    : resolveSubprocessModule(packageRoot, "resources/extensions/gsd/auto.ts", checkExists);
+    : resolveSubprocessModule(packageRoot, "resources/extensions/hx/auto.ts", checkExists);
   const autoModulePath = moduleResolution.modulePath;
 
   if (!moduleResolution.useCompiledJs && (!checkExists(resolveTsLoader) || !checkExists(autoModulePath))) {

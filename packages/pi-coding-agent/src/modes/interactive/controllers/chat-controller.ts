@@ -1,4 +1,4 @@
-import { Loader, Spacer, Text } from "@gsd/pi-tui";
+import { Loader, Spacer, Text } from "@hyperlab/hx-tui";
 
 import type { InteractiveModeEvent, InteractiveModeStateHost } from "../interactive-mode-state.js";
 import { theme } from "../theme/theme.js";

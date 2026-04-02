@@ -11,7 +11,7 @@
  * Prerequisite: npm run build must be run first.
  *
  * Run with:
- *   node --import ./src/resources/extensions/gsd/tests/resolve-ts.mjs \
+ *   node --import ./src/resources/extensions/hx/tests/resolve-ts.mjs \
  *        --experimental-strip-types --test \
  *        src/tests/integration/e2e-headless.test.ts
  */
@@ -125,7 +125,7 @@ function stripAnsi(s: string): string {
 }
 
 /** Bootstrap a temp directory with .gsd/ structure (milestones + runtime). */
-function createTempWithGsd(prefix: string): string {
+function createTempWithHx(prefix: string): string {
   const dir = mkdtempSync(join(tmpdir(), prefix));
   mkdirSync(join(dir, ".gsd", "milestones"), { recursive: true });
   mkdirSync(join(dir, ".gsd", "runtime"), { recursive: true });
@@ -158,7 +158,7 @@ function assertNoCrashMarkers(output: string): void {
 // ===========================================================================
 
 test("headless --output-format json emits a single HeadlessJsonResult on stdout", async (t) => {
-  const tmpDir = createTempWithGsd("gsd-e2e-json-batch-");
+  const tmpDir = createTempWithHx("hx-e2e-json-batch-");
   t.after(() => { rmSync(tmpDir, { recursive: true, force: true }); });
 
   // --max-restarts 0 prevents retry loops which would emit multiple JSON results.
@@ -210,7 +210,7 @@ test("headless --output-format json emits a single HeadlessJsonResult on stdout"
 // ===========================================================================
 
 test("headless exits with code 11 after SIGINT", async (t) => {
-  const tmpDir = createTempWithGsd("gsd-e2e-sigint-");
+  const tmpDir = createTempWithHx("hx-e2e-sigint-");
   t.after(() => { rmSync(tmpDir, { recursive: true, force: true }); });
 
   // Spawn with long timeout and max-restarts 0 so the process stays alive
@@ -275,7 +275,7 @@ test("headless exits with code 11 after SIGINT", async (t) => {
 // ===========================================================================
 
 test("headless --output-format stream-json emits NDJSON on stdout", async (t) => {
-  const tmpDir = createTempWithGsd("gsd-e2e-stream-json-");
+  const tmpDir = createTempWithHx("hx-e2e-stream-json-");
   t.after(() => { rmSync(tmpDir, { recursive: true, force: true }); });
 
   // --max-restarts 0 to prevent retry loops that extend runtime.
@@ -323,7 +323,7 @@ test("headless --output-format stream-json emits NDJSON on stdout", async (t) =>
 // ===========================================================================
 
 test("headless --resume with nonexistent ID exits 1 with descriptive error", async (t) => {
-  const tmpDir = createTempWithGsd("gsd-e2e-resume-bad-");
+  const tmpDir = createTempWithHx("hx-e2e-resume-bad-");
   t.after(() => { rmSync(tmpDir, { recursive: true, force: true }); });
 
   const result = await runGsd(
@@ -353,7 +353,7 @@ test("headless --resume with nonexistent ID exits 1 with descriptive error", asy
 // ===========================================================================
 
 test("headless --output-format with invalid value exits 1", async (t) => {
-  const tmpDir = createTempWithGsd("gsd-e2e-bad-format-");
+  const tmpDir = createTempWithHx("hx-e2e-bad-format-");
   t.after(() => { rmSync(tmpDir, { recursive: true, force: true }); });
 
   const result = await runGsd(

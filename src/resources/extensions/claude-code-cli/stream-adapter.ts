@@ -14,8 +14,8 @@ import type {
 	Context,
 	Model,
 	SimpleStreamOptions,
-} from "@gsd/pi-ai";
-import { EventStream } from "@gsd/pi-ai";
+} from "@hyperlab/hx-ai";
+import { EventStream } from "@hyperlab/hx-ai";
 import { execSync } from "node:child_process";
 import { PartialMessageBuilder, ZERO_USAGE, mapUsage } from "./partial-builder.js";
 import type {
@@ -34,7 +34,7 @@ import type {
 
 /**
  * Construct an AssistantMessageEventStream using EventStream directly.
- * (The class itself is only re-exported as a type from the @gsd/pi-ai barrel.)
+ * (The class itself is only re-exported as a type from the @hyperlab/hx-ai barrel.)
  */
 function createAssistantStream(): AssistantMessageEventStream {
 	return new EventStream<AssistantMessageEvent, AssistantMessage>(

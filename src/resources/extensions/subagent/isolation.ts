@@ -57,7 +57,7 @@ function encodeCwd(cwd: string): string {
 	return cwd.replace(/\//g, "--");
 }
 
-const gsdHome = process.env.GSD_HOME || path.join(os.homedir(), ".gsd");
+const gsdHome = process.env.HX_HOME || path.join(os.homedir(), ".hx");
 
 function getIsolationBaseDir(cwd: string, taskId: string): string {
 	return path.join(gsdHome, "wt", encodeCwd(cwd), taskId);
@@ -160,7 +160,7 @@ async function applyBaseline(
 ): Promise<void> {
 	// Apply staged diff
 	if (baseline.stagedDiff.trim()) {
-		const patchPath = path.join(worktreeDir, ".gsd-staged.patch");
+		const patchPath = path.join(worktreeDir, ".hx-staged.patch");
 		fs.writeFileSync(patchPath, baseline.stagedDiff);
 		try {
 			await git(["apply", "--binary", patchPath], worktreeDir);
@@ -174,7 +174,7 @@ async function applyBaseline(
 
 	// Apply unstaged diff on top
 	if (baseline.unstagedDiff.trim()) {
-		const patchPath = path.join(worktreeDir, ".gsd-unstaged.patch");
+		const patchPath = path.join(worktreeDir, ".hx-unstaged.patch");
 		fs.writeFileSync(patchPath, baseline.unstagedDiff);
 		try {
 			await git(["apply", "--binary", patchPath], worktreeDir);
@@ -489,7 +489,7 @@ export async function mergeDeltaPatches(
 
 export function readIsolationMode(): IsolationMode {
 	try {
-		const { getAgentDir } = require("@gsd/pi-coding-agent");
+		const { getAgentDir } = require("@hyperlab/hx-coding-agent");
 		const settingsPath = path.join(getAgentDir(), "settings.json");
 		if (!fs.existsSync(settingsPath)) return "none";
 		const settings = JSON.parse(fs.readFileSync(settingsPath, "utf-8"));

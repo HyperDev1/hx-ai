@@ -134,7 +134,7 @@ test("npm pack produces tarball with required files", async (t) => {
   assert.ok(files.some(f => f.includes("dist/wizard.js")), "tarball contains dist/wizard.js");
   assert.ok(files.some(f => f.includes("dist/resource-loader.js")), "tarball contains dist/resource-loader.js");
   assert.ok(files.some(f => f.includes("pkg/package.json")), "tarball contains pkg/package.json");
-  assert.ok(files.some(f => f.includes("src/resources/extensions/gsd/index.ts")), "tarball contains bundled gsd extension");
+  assert.ok(files.some(f => f.includes("src/resources/extensions/hx/index.ts")), "tarball contains bundled hx extension");
   assert.ok(files.some(f => f.includes("scripts/postinstall.js")), "tarball contains postinstall script");
 
   // pkg/package.json must have piConfig
@@ -166,24 +166,24 @@ test("tarball installs and gsd binary resolves", async (t) => {
   assert.ok(existsSync(installedBin), `gsd binary exists in node_modules/.bin/ (${binName})`);
 
   // Verify loader.js is executable (has shebang)
-  const installedLoader = join(sandbox.installPrefix, "node_modules", "gsd-pi", "dist", "loader.js");
+  const installedLoader = join(sandbox.installPrefix, "node_modules", "@hyperlab/hx", "dist", "loader.js");
   const loaderContent = readFileSync(installedLoader, "utf-8");
   if (process.platform !== "win32") {
     assert.ok(loaderContent.startsWith("#!/usr/bin/env node"), "loader.js has node shebang");
   }
 
   // Verify bundled resources are present
-  const installedGsdExt = join(
+  const installedHxExt = join(
     sandbox.installPrefix,
     "node_modules",
-    "gsd-pi",
+    "@hyperlab/hx",
     "src",
     "resources",
     "extensions",
     "gsd",
     "index.ts",
   );
-  assert.ok(existsSync(installedGsdExt), "bundled gsd extension present in installed package");
+  assert.ok(existsSync(installedHxExt), "bundled hx extension present in installed package");
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -229,7 +229,7 @@ test("gsd launches and loads extensions without errors", async () => {
 
   // No extension load errors
   assert.ok(
-    !output.includes("[gsd] Extension load error"),
+    !output.includes("[hx] Extension load error"),
     `no extension load errors on stderr (got: ${output.slice(0, 500)})`,
   );
 
@@ -283,6 +283,6 @@ test("gsd exits early with a clear message when synced resources are newer than 
 
   assert.equal(result.code, 1, "startup exits with code 1 on version skew");
   assert.match(result.stderr, /Version mismatch detected/, "prints a friendly skew header");
-  assert.match(result.stderr, /npm install -g gsd-pi@latest|gsd update/, "prints upgrade guidance");
+  assert.match(result.stderr, /npm install -g @hyperlab/hx@latest|gsd update/, "prints upgrade guidance");
   assert.doesNotMatch(result.stderr, /\[gsd\] Extension load error/, "fails before extension loading");
 });

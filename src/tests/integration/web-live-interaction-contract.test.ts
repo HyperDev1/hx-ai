@@ -10,7 +10,7 @@ import { StringDecoder } from "node:string_decoder";
 const repoRoot = process.cwd();
 const bridge = await import("../../web/bridge-service.ts");
 const onboarding = await import("../../web/onboarding-service.ts");
-const { AuthStorage } = await import("@gsd/pi-coding-agent");
+const { AuthStorage } = await import("@hyperlab/hx-coding-agent");
 const commandRoute = await import("../../../web/app/api/session/command/route.ts");
 const eventsRoute = await import("../../../web/app/api/session/events/route.ts");
 
@@ -215,9 +215,9 @@ function setupBridge(harness: ReturnType<typeof createHarness>, fixture: ReturnT
   bridge.configureBridgeServiceForTests({
     env: {
       ...process.env,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
-      GSD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
-      GSD_WEB_PACKAGE_ROOT: repoRoot,
+      HX_WEB_PROJECT_CWD: fixture.projectCwd,
+      HX_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
+      HX_WEB_PACKAGE_ROOT: repoRoot,
     },
     spawn: harness.spawn,
     indexWorkspace: async () => fakeWorkspaceIndex(),

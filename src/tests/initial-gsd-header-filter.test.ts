@@ -1,20 +1,20 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { filterInitialGsdHeader } = await import("../../web/lib/initial-gsd-header-filter.ts");
+const { filterInitialGsdHeader } = await import("../../web/lib/initial-hx-header-filter.ts");
 
-const GSD_LOGO_LINES = [
-  "   ██████╗ ███████╗██████╗ ",
-  "  ██╔════╝ ██╔════╝██╔══██╗",
-  "  ██║  ███╗███████╗██║  ██║",
-  "  ██║   ██║╚════██║██║  ██║",
-  "  ╚██████╔╝███████║██████╔╝",
-  "   ╚═════╝ ╚══════╝╚═════╝ ",
+const HX_LOGO_LINES = [
+  '██╗  ██╗██╗  ██╗',
+  '██║  ██║╚██╗██╔╝',
+  '███████║ ╚███╔╝ ',
+  '██╔══██║ ██╔██╗ ',
+  '██║  ██║██╔╝ ██╗',
+  '╚═╝  ╚═╝╚═╝  ╚═╝',
 ] as const;
 
 test("filterInitialGsdHeader strips a plain startup banner and keeps real terminal content", () => {
   const warning = "Warning: Google Search is not configured.";
-  const raw = [...GSD_LOGO_LINES, "  Get Shit Done v2.33.1", "", warning].join("\n");
+  const raw = [...HX_LOGO_LINES, "  HX — Hyperlab Coding Agent v2.33.1", "", warning].join("\n");
 
   const result = filterInitialGsdHeader(raw);
 
@@ -32,8 +32,8 @@ test("filterInitialGsdHeader strips ANSI-colored startup banner output", () => {
   const warning = "Warning: terminal content starts here.\r\n";
 
   const raw =
-    GSD_LOGO_LINES.map((line) => `${cyan}${line}${reset}\r\n`).join("") +
-    `  ${bold}Get Shit Done${boldReset} ${dim}v2.33.1${dimReset}\r\n\r\n` +
+    HX_LOGO_LINES.map((line) => `${cyan}${line}${reset}\r\n`).join("") +
+    `  ${bold}HX — Hyperlab Coding Agent${boldReset} ${dim}v2.33.1${dimReset}\r\n\r\n` +
     warning;
 
   const result = filterInitialGsdHeader(raw);
@@ -43,7 +43,7 @@ test("filterInitialGsdHeader strips ANSI-colored startup banner output", () => {
 });
 
 test("filterInitialGsdHeader waits for more data when the startup banner is incomplete", () => {
-  const partial = `${GSD_LOGO_LINES[0]}\n${GSD_LOGO_LINES[1]}\n${GSD_LOGO_LINES[2]}`;
+  const partial = `${HX_LOGO_LINES[0]}\n${HX_LOGO_LINES[1]}\n${HX_LOGO_LINES[2]}`;
 
   const result = filterInitialGsdHeader(partial);
 

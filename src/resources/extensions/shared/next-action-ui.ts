@@ -17,7 +17,7 @@
  *        Create PLAN.md files for execution
  *
  *     2. Not yet
- *        Run /gsd-plan-phase 1 when ready.
+ *        Run /hx-plan-phase 1 when ready.
  *   ─────────────────────────────────────────
  *
  * Usage:
@@ -31,7 +31,7 @@
  *       { id: "plan",  label: "Plan phase 1",   description: "Create PLAN.md files for execution", recommended: true },
  *       { id: "later", label: "Discuss first",  description: "Capture constraints before planning" },
  *     ],
- *     notYetMessage: "Run /gsd-plan-phase 1 when ready.",
+ *     notYetMessage: "Run /hx-plan-phase 1 when ready.",
  *   });
  *
  *   // choice is one of the action ids, or "not_yet"
@@ -41,9 +41,9 @@
  * Pressing Escape also resolves as "not_yet".
  */
 
-import type { ExtensionCommandContext } from "@gsd/pi-coding-agent";
-import { type Theme } from "@gsd/pi-coding-agent";
-import { Key, matchesKey, type TUI } from "@gsd/pi-tui";
+import type { ExtensionCommandContext } from "@hyperlab/hx-coding-agent";
+import { type Theme } from "@hyperlab/hx-coding-agent";
+import { Key, matchesKey, type TUI } from "@hyperlab/hx-tui";
 import { makeUI } from "./ui.js";
 
 // ─── Public API ───────────────────────────────────────────────────────────────
@@ -81,7 +81,7 @@ export interface NextActionOptions {
 	actions: NextAction[];
 	/**
 	 * Message shown in the "Not yet" description line.
-	 * e.g. "Run /gsd-plan-phase 1 when ready."
+	 * e.g. "Run /hx-plan-phase 1 when ready."
 	 */
 	notYetMessage?: string;
 	/**

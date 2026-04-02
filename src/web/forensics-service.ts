@@ -8,10 +8,10 @@ import { resolveTypeStrippingFlag, resolveSubprocessModule, buildSubprocessPrefi
 import type { ForensicReport } from "../../web/lib/diagnostics-types.ts"
 
 const FORENSICS_MAX_BUFFER = 2 * 1024 * 1024
-const FORENSICS_MODULE_ENV = "GSD_FORENSICS_MODULE"
+const FORENSICS_MODULE_ENV = "HX_FORENSICS_MODULE"
 
 function resolveTsLoaderPath(packageRoot: string): string {
-  return join(packageRoot, "src", "resources", "extensions", "gsd", "tests", "resolve-ts.mjs")
+  return join(packageRoot, "src", "resources", "extensions", "hx", "tests", "resolve-ts.mjs")
 }
 
 /**
@@ -26,7 +26,7 @@ export async function collectForensicsData(projectCwdOverride?: string): Promise
   const { packageRoot, projectCwd } = config
 
   const resolveTsLoader = resolveTsLoaderPath(packageRoot)
-  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/gsd/forensics.ts")
+  const moduleResolution = resolveSubprocessModule(packageRoot, "resources/extensions/hx/forensics.ts")
   const forensicsModulePath = moduleResolution.modulePath
 
   if (!moduleResolution.useCompiledJs && (!existsSync(resolveTsLoader) || !existsSync(forensicsModulePath))) {
@@ -43,7 +43,7 @@ export async function collectForensicsData(projectCwdOverride?: string): Promise
   const script = [
     'const { pathToFileURL } = await import("node:url");',
     `const mod = await import(pathToFileURL(process.env.${FORENSICS_MODULE_ENV}).href);`,
-    `const report = await mod.buildForensicReport(process.env.GSD_FORENSICS_BASE);`,
+    `const report = await mod.buildForensicReport(process.env.HX_FORENSICS_BASE);`,
     // Simplify unitTraces: strip deep ExecutionTrace, keep file/unitType/unitId/seq/mtime
     'const unitTraces = (report.unitTraces || []).map(t => ({',
     '  file: t.file, unitType: t.unitType, unitId: t.unitId, seq: t.seq, mtime: t.mtime,',
@@ -57,7 +57,7 @@ export async function collectForensicsData(projectCwdOverride?: string): Promise
     '  metrics = { totalUnits: units.length, totalCost, totalDuration };',
     '}',
     'const result = {',
-    '  gsdVersion: report.gsdVersion,',
+    '  hxVersion: report.hxVersion,',
     '  timestamp: report.timestamp,',
     '  basePath: report.basePath,',
     '  activeMilestone: report.activeMilestone,',
@@ -91,7 +91,7 @@ export async function collectForensicsData(projectCwdOverride?: string): Promise
         env: {
           ...process.env,
           [FORENSICS_MODULE_ENV]: forensicsModulePath,
-          GSD_FORENSICS_BASE: projectCwd,
+          HX_FORENSICS_BASE: projectCwd,
         },
         maxBuffer: FORENSICS_MAX_BUFFER,
       },

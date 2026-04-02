@@ -229,9 +229,9 @@ test("/api/recovery returns structured recovery diagnostics and redacts secrets"
   bridge.configureBridgeServiceForTests({
     env: {
       ...process.env,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
-      GSD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
-      GSD_WEB_PACKAGE_ROOT: repoRoot,
+      HX_WEB_PROJECT_CWD: fixture.projectCwd,
+      HX_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
+      HX_WEB_PACKAGE_ROOT: repoRoot,
     },
     spawn: harness.spawn,
     getOnboardingState: async () => readyOnboardingState({
@@ -272,7 +272,7 @@ test("/api/recovery returns structured recovery diagnostics and redacts secrets"
     payload.actions.browser.map((action: { id: string }) => action.id),
     ["refresh_diagnostics", "refresh_workspace", "open_retry_controls", "open_resume_controls", "open_auth_controls"],
   )
-  assert.ok(payload.actions.commands.some((entry: { command: string }) => entry.command.includes("/gsd doctor")))
+  assert.ok(payload.actions.commands.some((entry: { command: string }) => entry.command.includes("/hx doctor")))
 
   const serialized = JSON.stringify(payload)
   assert.doesNotMatch(serialized, /sk-test-recovery-secret-9999|sk-onboarding-secret-1234/)
@@ -300,9 +300,9 @@ test("/api/recovery prefers the current-project resumable session when the live 
   bridge.configureBridgeServiceForTests({
     env: {
       ...process.env,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
-      GSD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
-      GSD_WEB_PACKAGE_ROOT: repoRoot,
+      HX_WEB_PROJECT_CWD: fixture.projectCwd,
+      HX_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
+      HX_WEB_PACKAGE_ROOT: repoRoot,
     },
     spawn: harness.spawn,
     getOnboardingState: async () => readyOnboardingState(),
@@ -351,9 +351,9 @@ test("/api/recovery returns a structured empty-project payload without leaking r
   bridge.configureBridgeServiceForTests({
     env: {
       ...process.env,
-      GSD_WEB_PROJECT_CWD: fixture.projectCwd,
-      GSD_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
-      GSD_WEB_PACKAGE_ROOT: repoRoot,
+      HX_WEB_PROJECT_CWD: fixture.projectCwd,
+      HX_WEB_PROJECT_SESSIONS_DIR: fixture.sessionsDir,
+      HX_WEB_PACKAGE_ROOT: repoRoot,
     },
     spawn: harness.spawn,
     getOnboardingState: async () => readyOnboardingState(),
