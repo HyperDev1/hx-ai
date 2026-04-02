@@ -1259,8 +1259,7 @@ describe('git-service', async () => {
     symlinkSync(externalGsd, join(repo, ".hx"));
 
     // Add .gitignore so git add -A fallback skips .hx/
-    writeFileSync(join(repo, ".gitignore"), ".hx
-");
+    writeFileSync(join(repo, ".gitignore"), ".hx\n");
 
     // Create a real file that should be staged
     createFile(repo, "src/app.ts", "export const x = 1;");
@@ -1432,8 +1431,7 @@ describe('git-service', async () => {
     symlinkSync(externalGsd, join(repo, ".hx"));
 
     // .gitignore blocks .gsd (as ensureGitignore would do for symlink projects)
-    writeFileSync(join(repo, ".gitignore"), ".hx
-");
+    writeFileSync(join(repo, ".gitignore"), ".hx\n");
     run('git add .gitignore', repo);
     run('git commit -m "add gitignore"', repo);
 

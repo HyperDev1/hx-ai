@@ -486,7 +486,7 @@ async function collectRecoveryDiagnosticsChildPayload(
           HX_RECOVERY_UNIT_TYPE: unit?.type ?? "execute-project",
           HX_RECOVERY_UNIT_ID: unit?.id ?? "project",
           HX_RECOVERY_SESSION_FILE: sessionFile ?? "",
-          HX_RECOVERY_ACTIVITY_DIR: join(basePath, ".hx', "activity"),
+          HX_RECOVERY_ACTIVITY_DIR: join(basePath, ".hx", "activity"),
           HX_RECOVERY_DOCTOR_MODULE: doctorModulePath,
           HX_RECOVERY_FORENSICS_MODULE: sessionForensicsModulePath,
         },
