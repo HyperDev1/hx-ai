@@ -8,13 +8,13 @@
 import { execSync, execFileSync } from "node:child_process";
 import { existsSync, readFileSync, unlinkSync, rmSync } from "node:fs";
 import { join } from "node:path";
-import { GSDError, GSD_GIT_ERROR } from "./errors.js";
+import { HXError, HX_GIT_ERROR } from "./errors.js";
 import { GIT_NO_PROMPT_ENV } from "./git-constants.js";
 import { getErrorMessage } from "./error-utils.js";
 
 // Issue #453: keep auto-mode bookkeeping on the stable git CLI path unless a
 // caller explicitly opts into the native helper.
-const NATIVE_GSD_GIT_ENABLED = process.env.GSD_ENABLE_NATIVE_GSD_GIT === "1";
+const NATIVE_HX_GIT_ENABLED = process.env.HX_ENABLE_NATIVE_HX_GIT === "1";
 
 // ─── Native Module Types ──────────────────────────────────────────────────
 
@@ -117,7 +117,7 @@ let loadAttempted = false;
 function loadNative(): typeof nativeModule {
   if (loadAttempted) return nativeModule;
   loadAttempted = true;
-  if (!NATIVE_GSD_GIT_ENABLED) return nativeModule;
+  if (!NATIVE_HX_GIT_ENABLED) return nativeModule;
 
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -145,7 +145,7 @@ function gitExec(basePath: string, args: string[], allowFailure = false): string
     }).trim();
   } catch {
     if (allowFailure) return "";
-    throw new GSDError(GSD_GIT_ERROR, `git ${args.join(" ")} failed in ${basePath}`);
+    throw new HXError(HX_GIT_ERROR, `git ${args.join(" ")} failed in ${basePath}`);
   }
 }
 
@@ -160,7 +160,7 @@ function gitFileExec(basePath: string, args: string[], allowFailure = false): st
     }).trim();
   } catch {
     if (allowFailure) return "";
-    throw new GSDError(GSD_GIT_ERROR, `git ${args.join(" ")} failed in ${basePath}`);
+    throw new HXError(HX_GIT_ERROR, `git ${args.join(" ")} failed in ${basePath}`);
   }
 }
 
@@ -720,7 +720,7 @@ export function nativeAddAllWithExclusions(basePath: string, exclusions: readonl
       nativeAddAll(basePath);
       return;
     }
-    throw new GSDError(GSD_GIT_ERROR, `git add -A with exclusions failed in ${basePath}: ${getErrorMessage(err)}`);
+    throw new HXError(HX_GIT_ERROR, `git add -A with exclusions failed in ${basePath}: ${getErrorMessage(err)}`);
   }
 }
 

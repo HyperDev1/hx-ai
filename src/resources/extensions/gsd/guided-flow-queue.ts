@@ -14,8 +14,8 @@ import { loadPrompt, inlineTemplate } from "./prompt-loader.js";
 import { deriveState } from "./state.js";
 import { invalidateAllCaches } from "./cache.js";
 import {
-  gsdRoot, resolveMilestoneFile, resolveSliceFile,
-  resolveGsdRootFile, relGsdRootFile, relSliceFile,
+  hxRoot, resolveMilestoneFile, resolveSliceFile,
+  resolveHxRootFile, relHxRootFile, relSliceFile,
 } from "./paths.js";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { nativeAddPaths, nativeCommit } from "./native-git-bridge.js";
@@ -46,7 +46,7 @@ export async function showQueue(
   basePath: string,
 ): Promise<void> {
   // ── Ensure .gsd/ exists ─────────────────────────────────────────────
-  const gsd = gsdRoot(basePath);
+  const gsd = hxRoot(basePath);
   if (!existsSync(gsd)) {
     ctx.ui.notify("No GSD project found. Run /gsd to start one first.", "warning");
     return;
@@ -139,9 +139,9 @@ export async function handleQueueReorder(
   syncProjectMdSequence(basePath, state.registry, result.order);
 
   // Commit the change
-  const filesToAdd = [".gsd/QUEUE-ORDER.json", ".gsd/PROJECT.md"];
+  const filesToAdd = [".hx/QUEUE-ORDER.json", ".hx/PROJECT.md"];
   for (const r of result.depsToRemove) {
-    filesToAdd.push(`.gsd/milestones/${r.milestone}/${r.milestone}-CONTEXT.md`);
+    filesToAdd.push(`.hx/milestones/${r.milestone}/${r.milestone}-CONTEXT.md`);
   }
   try {
     nativeAddPaths(basePath, filesToAdd);
@@ -227,20 +227,20 @@ export async function buildExistingMilestonesContext(
   const sections: string[] = [];
 
   // Include PROJECT.md if it exists — it has the milestone sequence and project description
-  const projectPath = resolveGsdRootFile(basePath, "PROJECT");
+  const projectPath = resolveHxRootFile(basePath, "PROJECT");
   if (existsSync(projectPath)) {
     const projectContent = await loadFile(projectPath);
     if (projectContent) {
-      sections.push(`### Project Overview\nSource: \`${relGsdRootFile("PROJECT")}\`\n\n${projectContent.trim()}`);
+      sections.push(`### Project Overview\nSource: \`${relHxRootFile("PROJECT")}\`\n\n${projectContent.trim()}`);
     }
   }
 
   // Include DECISIONS.md if it exists — architectural decisions inform new milestone scoping
-  const decisionsPath = resolveGsdRootFile(basePath, "DECISIONS");
+  const decisionsPath = resolveHxRootFile(basePath, "DECISIONS");
   if (existsSync(decisionsPath)) {
     const decisionsContent = await loadFile(decisionsPath);
     if (decisionsContent) {
-      sections.push(`### Decisions Register\nSource: \`${relGsdRootFile("DECISIONS")}\`\n\n${decisionsContent.trim()}`);
+      sections.push(`### Decisions Register\nSource: \`${relHxRootFile("DECISIONS")}\`\n\n${decisionsContent.trim()}`);
     }
   }
 
@@ -297,11 +297,11 @@ export async function buildExistingMilestonesContext(
   }
 
   // Include queue log if it exists — shows what's been queued before
-  const queuePath = resolveGsdRootFile(basePath, "QUEUE");
+  const queuePath = resolveHxRootFile(basePath, "QUEUE");
   if (existsSync(queuePath)) {
     const queueContent = await loadFile(queuePath);
     if (queueContent) {
-      sections.push(`### Previous Queue Entries\nSource: \`${relGsdRootFile("QUEUE")}\`\n\n${queueContent.trim()}`);
+      sections.push(`### Previous Queue Entries\nSource: \`${relHxRootFile("QUEUE")}\`\n\n${queueContent.trim()}`);
     }
   }
 
@@ -396,7 +396,7 @@ function syncProjectMdSequence(
   registry: Array<{ id: string; title: string; status: string }>,
   newOrder: string[],
 ): void {
-  const projectPath = resolveGsdRootFile(basePath, "PROJECT");
+  const projectPath = resolveHxRootFile(basePath, "PROJECT");
   if (!projectPath || !existsSync(projectPath)) return;
 
   const content = readFileSync(projectPath, "utf-8");

@@ -147,7 +147,7 @@ export async function checkEngineHealth(
   // relative to the event log and re-render them.
   try {
     if (isDbAvailable()) {
-      const eventLogPath = join(basePath, ".gsd", "event-log.jsonl");
+      const eventLogPath = join(basePath, ".hx", "event-log.jsonl");
       const events = readEvents(eventLogPath);
       if (events.length > 0) {
         const lastEventTs = new Date(events[events.length - 1]!.ts).getTime();

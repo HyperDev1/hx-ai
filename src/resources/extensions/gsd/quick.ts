@@ -5,7 +5,7 @@
  * Lightweight task execution with GSD guarantees (atomic commits, state
  * tracking) but without the full milestone/slice ceremony.
  *
- * Quick tasks live in `.gsd/quick/` and are tracked in STATE.md's
+ * Quick tasks live in `.hx/quick/` and are tracked in STATE.md's
  * "Quick Tasks Completed" table.
  */
 
@@ -13,7 +13,7 @@ import type { ExtensionAPI, ExtensionCommandContext } from "@gsd/pi-coding-agent
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { loadPrompt } from "./prompt-loader.js";
-import { gsdRoot } from "./paths.js";
+import { hxRoot } from "./paths.js";
 import { GitServiceImpl, runGit } from "./git-service.js";
 import { loadEffectiveGSDPreferences } from "./preferences.js";
 import { nativeHasStagedChanges } from "./native-git-bridge.js";
@@ -71,19 +71,19 @@ function getNextTaskNum(quickDir: string): number {
  * Returns the task directory path.
  */
 function ensureQuickDir(basePath: string, taskNum: number, slug: string): string {
-  const quickDir = join(gsdRoot(basePath), "quick");
+  const quickDir = join(hxRoot(basePath), "quick");
   const taskDir = join(quickDir, `${taskNum}-${slug}`);
   mkdirSync(taskDir, { recursive: true });
   return taskDir;
 }
 
 function quickReturnStatePath(basePath: string): string {
-  return join(gsdRoot(basePath), "runtime", "quick-return.json");
+  return join(hxRoot(basePath), "runtime", "quick-return.json");
 }
 
 function persistPendingReturn(state: QuickReturnState): void {
   pendingQuickReturn = state;
-  mkdirSync(join(gsdRoot(state.basePath), "runtime"), { recursive: true });
+  mkdirSync(join(hxRoot(state.basePath), "runtime"), { recursive: true });
   writeFileSync(quickReturnStatePath(state.basePath), JSON.stringify(state) + "\n", "utf-8");
 }
 
@@ -163,7 +163,7 @@ export async function handleQuick(
   pi: ExtensionAPI,
 ): Promise<void> {
   const basePath = process.cwd();
-  const root = gsdRoot(basePath);
+  const root = hxRoot(basePath);
 
   // Validate: .gsd/ must exist
   if (!existsSync(root)) {
@@ -189,7 +189,7 @@ export async function handleQuick(
   const taskNum = getNextTaskNum(quickDir);
   const slug = slugify(description);
   const taskDir = ensureQuickDir(basePath, taskNum, slug);
-  const taskDirRel = `.gsd/quick/${taskNum}-${slug}`;
+  const taskDirRel = `.hx/quick/${taskNum}-${slug}`;
   const date = new Date().toISOString().split("T")[0];
 
   // Create git branch for the quick task

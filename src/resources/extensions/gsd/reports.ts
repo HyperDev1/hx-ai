@@ -16,7 +16,7 @@
 
 import { writeFileSync, readFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, basename } from 'node:path';
-import { gsdRoot } from './paths.js';
+import { hxRoot } from './paths.js';
 import { formatCost, formatTokenCount } from './metrics.js';
 import { formatDateShort, formatDuration } from '../shared/format-utils.js';
 
@@ -57,7 +57,7 @@ export interface ReportsIndex {
 // ─── Paths ────────────────────────────────────────────────────────────────────
 
 export function reportsDir(basePath: string): string {
-  return join(gsdRoot(basePath), 'reports');
+  return join(hxRoot(basePath), 'reports');
 }
 
 function reportsIndexPath(basePath: string): string {

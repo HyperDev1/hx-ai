@@ -258,7 +258,7 @@ export async function handlePlanMilestone(
     roadmapPath = renderResult.roadmapPath;
   } catch (renderErr) {
     process.stderr.write(
-      `gsd-db: plan_milestone — render failed (DB rows preserved for debugging): ${(renderErr as Error).message}\n`,
+      `hx-db: plan_milestone — render failed (DB rows preserved for debugging): ${(renderErr as Error).message}\n`,
     );
     invalidateStateCache();
     return { error: `render failed: ${(renderErr as Error).message}` };

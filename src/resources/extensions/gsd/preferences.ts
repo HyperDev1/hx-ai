@@ -14,7 +14,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-import { gsdRoot } from "./paths.js";
+import { hxRoot } from "./paths.js";
 import { parse as parseYaml } from "yaml";
 import type { PostUnitHookConfig, PreDispatchHookConfig, TokenProfile } from "./types.js";
 import type { DynamicRoutingConfig } from "./model-router.js";
@@ -82,12 +82,12 @@ export {
 
 // ─── Path Constants & Getters ───────────────────────────────────────────────
 
-function gsdHome(): string {
-  return process.env.GSD_HOME || join(homedir(), ".gsd");
+function hxHome(): string {
+  return process.env.HX_HOME || join(homedir(), ".hx");
 }
 
 function globalPreferencesPath(): string {
-  return join(gsdHome(), "PREFERENCES.md");
+  return join(hxHome(), "PREFERENCES.md");
 }
 
 function legacyGlobalPreferencesPath(): string {
@@ -95,15 +95,15 @@ function legacyGlobalPreferencesPath(): string {
 }
 
 function projectPreferencesPath(): string {
-  return join(gsdRoot(process.cwd()), "PREFERENCES.md");
+  return join(hxRoot(process.cwd()), "PREFERENCES.md");
 }
 // Legacy: older versions used lowercase preferences.md.
 // Check lowercase as a fallback so those files aren't silently ignored.
 function globalPreferencesPathLegacy(): string {
-  return join(gsdHome(), "preferences.md");
+  return join(hxHome(), "preferences.md");
 }
 function projectPreferencesPathLegacy(): string {
-  return join(gsdRoot(process.cwd()), "preferences.md");
+  return join(hxRoot(process.cwd()), "preferences.md");
 }
 
 export function getGlobalGSDPreferencesPath(): string {

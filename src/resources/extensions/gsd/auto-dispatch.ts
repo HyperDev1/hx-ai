@@ -17,7 +17,7 @@ import { isDbAvailable, getMilestoneSlices, getPendingGates, markAllGatesOmitted
 import { extractVerdict, isAcceptableUatVerdict } from "./verdict-parser.js";
 
 import {
-  gsdRoot,
+  hxRoot,
   resolveMilestoneFile,
   resolveMilestonePath,
   resolveSliceFile,
@@ -111,7 +111,7 @@ const MAX_REWRITE_ATTEMPTS = 3;
 // step-mode). Storing it on the in-memory session object caused the circuit
 // breaker to never trip — see https://github.com/gsd-build/gsd-2/issues/2203
 function rewriteCountPath(basePath: string): string {
-  return join(gsdRoot(basePath), "runtime", "rewrite-count.json");
+  return join(hxRoot(basePath), "runtime", "rewrite-count.json");
 }
 
 export function getRewriteCount(basePath: string): number {
@@ -125,7 +125,7 @@ export function getRewriteCount(basePath: string): number {
 
 export function setRewriteCount(basePath: string, count: number): void {
   const filePath = rewriteCountPath(basePath);
-  mkdirSync(join(gsdRoot(basePath), "runtime"), { recursive: true });
+  mkdirSync(join(hxRoot(basePath), "runtime"), { recursive: true });
   writeFileSync(filePath, JSON.stringify({ count, updatedAt: new Date().toISOString() }) + "\n");
 }
 
@@ -200,7 +200,7 @@ export const DISPATCH_RULES: DispatchRule[] = [
           uatContent ?? "",
           basePath,
         ),
-        pauseAfterDispatch: !process.env.GSD_HEADLESS && uatType !== "artifact-driven" && uatType !== "browser-executable" && uatType !== "runtime-executable",
+        pauseAfterDispatch: !process.env.HX_HEADLESS && uatType !== "artifact-driven" && uatType !== "browser-executable" && uatType !== "runtime-executable",
       };
     },
   },

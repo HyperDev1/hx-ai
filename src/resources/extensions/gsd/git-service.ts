@@ -11,7 +11,7 @@
 import { execFileSync, execSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { gsdRoot } from "./paths.js";
+import { hxRoot } from "./paths.js";
 import { GIT_NO_PROMPT_ENV } from "./git-constants.js";
 import { loadEffectiveGSDPreferences } from "./preferences.js";
 
@@ -33,7 +33,7 @@ import {
   nativeUpdateRef,
   nativeAddPaths,
 } from "./native-git-bridge.js";
-import { GSDError, GSD_MERGE_CONFLICT, GSD_GIT_ERROR } from "./errors.js";
+import { HXError, HX_MERGE_CONFLICT, HX_GIT_ERROR } from "./errors.js";
 import { getErrorMessage } from "./error-utils.js";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
@@ -148,7 +148,7 @@ export function buildTaskCommitMessage(ctx: TaskCommitContext): string {
  * The working tree is left in a conflicted state (no reset) so the
  * caller can dispatch a fix-merge session to resolve it.
  */
-export class MergeConflictError extends GSDError {
+export class MergeConflictError extends HXError {
   readonly conflictedFiles: string[];
   readonly strategy: "squash" | "merge";
   readonly branch: string;
@@ -161,7 +161,7 @@ export class MergeConflictError extends GSDError {
     mainBranch: string,
   ) {
     super(
-      GSD_MERGE_CONFLICT,
+      HX_MERGE_CONFLICT,
       `${strategy === "merge" ? "Merge" : "Squash-merge"} of "${branch}" into "${mainBranch}" ` +
       `failed with conflicts in ${conflictedFiles.length} non-.gsd file(s): ${conflictedFiles.join(", ")}`,
     );
@@ -189,19 +189,19 @@ export interface PreMergeCheckResult {
  * and the first 7 entries in gitignore.ts BASELINE_PATTERNS.
  */
 export const RUNTIME_EXCLUSION_PATHS: readonly string[] = [
-  ".gsd/activity/",
-  ".gsd/runtime/",
-  ".gsd/worktrees/",
-  ".gsd/auto.lock",
-  ".gsd/metrics.json",
-  ".gsd/completed-units.json",
-  ".gsd/STATE.md",
-  ".gsd/gsd.db",
-  ".gsd/gsd.db-shm",   // SQLite WAL sidecar — always created alongside gsd.db (#2296)
-  ".gsd/gsd.db-wal",   // SQLite WAL sidecar — always created alongside gsd.db (#2296)
-  ".gsd/journal/",     // daily-rotated JSONL event journal (#2296)
-  ".gsd/doctor-history.jsonl", // doctor run history (#2296)
-  ".gsd/DISCUSSION-MANIFEST.json",
+  ".hx/activity/",
+  ".hx/runtime/",
+  ".hx/worktrees/",
+  ".hx/auto.lock",
+  ".hx/metrics.json",
+  ".hx/completed-units.json",
+  ".hx/STATE.md",
+  ".hx/gsd.db",
+  ".hx/gsd.db-shm",   // SQLite WAL sidecar — always created alongside gsd.db (#2296)
+  ".hx/gsd.db-wal",   // SQLite WAL sidecar — always created alongside gsd.db (#2296)
+  ".hx/journal/",     // daily-rotated JSONL event journal (#2296)
+  ".hx/doctor-history.jsonl", // doctor run history (#2296)
+  ".hx/DISCUSSION-MANIFEST.json",
 ];
 
 // ─── Integration Branch Metadata ───────────────────────────────────────────
@@ -211,7 +211,7 @@ export const RUNTIME_EXCLUSION_PATHS: readonly string[] = [
  * Format: .gsd/milestones/<MID>/<MID>-META.json
  */
 function milestoneMetaPath(basePath: string, milestoneId: string): string {
-  return join(gsdRoot(basePath), "milestones", milestoneId, `${milestoneId}-META.json`);
+  return join(hxRoot(basePath), "milestones", milestoneId, `${milestoneId}-META.json`);
 }
 
 /**
@@ -270,7 +270,7 @@ export function writeIntegrationBranch(
   if (existingBranch === branch) return;
 
   const metaFile = milestoneMetaPath(basePath, milestoneId);
-  mkdirSync(join(gsdRoot(basePath), "milestones", milestoneId), { recursive: true });
+  mkdirSync(join(hxRoot(basePath), "milestones", milestoneId), { recursive: true });
 
   // Merge with existing metadata if present
   let existing: Record<string, unknown> = {};
@@ -403,7 +403,7 @@ export function runGit(basePath: string, args: string[], options: { allowFailure
   } catch (error) {
     if (options.allowFailure) return "";
     const message = getErrorMessage(error);
-    throw new GSDError(GSD_GIT_ERROR, `git ${args.join(" ")} failed in ${basePath}: ${filterGitSvnNoise(message)}`);
+    throw new HXError(HX_GIT_ERROR, `git ${args.join(" ")} failed in ${basePath}: ${filterGitSvnNoise(message)}`);
   }
 }
 
@@ -518,7 +518,7 @@ export class GitServiceImpl {
    * (e.g. pre-switch commits, stop commits, state rebuild commits).
    *
    * Returns the commit message on success, or null if nothing to commit.
-   * @param extraExclusions Additional paths to exclude from staging (e.g. [".gsd/"] for pre-switch commits).
+   * @param extraExclusions Additional paths to exclude from staging (e.g. [".hx/"] for pre-switch commits).
    */
   autoCommit(
     unitType: string,

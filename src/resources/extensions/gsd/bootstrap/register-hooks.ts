@@ -47,19 +47,19 @@ export function registerHooks(pi: ExtensionAPI): void {
     try {
       const { loadEffectiveGSDPreferences } = await import("../preferences.js");
       const prefs = loadEffectiveGSDPreferences();
-      process.env.GSD_SHOW_TOKEN_COST = prefs?.preferences.show_token_cost ? "1" : "";
+      process.env.HX_SHOW_TOKEN_COST = prefs?.preferences.show_token_cost ? "1" : "";
     } catch { /* non-fatal */ }
     if (isFirstSession) {
       isFirstSession = false;
     } else {
       try {
-        const gsdBinPath = process.env.GSD_BIN_PATH;
+        const gsdBinPath = process.env.HX_BIN_PATH;
         if (gsdBinPath) {
           const { dirname } = await import("node:path");
           const { printWelcomeScreen } = await import(
             join(dirname(gsdBinPath), "welcome-screen.js")
           ) as { printWelcomeScreen: (opts: { version: string; modelName?: string; provider?: string }) => void };
-          printWelcomeScreen({ version: process.env.GSD_VERSION || "0.0.0" });
+          printWelcomeScreen({ version: process.env.HX_VERSION || "0.0.0" });
         }
       } catch { /* non-fatal */ }
     }

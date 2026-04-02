@@ -1,17 +1,17 @@
 /**
  * GSD Captures — Fire-and-forget thought capture with triage classification
  *
- * Append-only capture file at `.gsd/CAPTURES.md`. Each capture is an H3 section
+ * Append-only capture file at `.hx/CAPTURES.md`. Each capture is an H3 section
  * with bold metadata fields, parseable by the same patterns used in files.ts.
  *
  * Worktree-aware: captures always resolve to the original project root's
- * `.gsd/CAPTURES.md`, not the worktree's local `.gsd/`.
+ * `.hx/CAPTURES.md`, not the worktree's local `.hx/`.
  */
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { join, resolve, sep } from "node:path";
 import { randomUUID } from "node:crypto";
-import { gsdRoot } from "./paths.js";
+import { hxRoot } from "./paths.js";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -49,13 +49,13 @@ const VALID_CLASSIFICATIONS: readonly string[] = [
 /**
  * Resolve the path to CAPTURES.md, aware of worktree context.
  *
- * In worktree-isolated mode, basePath is `.gsd/worktrees/<MID>/`.
- * Captures must resolve to the *original* project root's `.gsd/CAPTURES.md`,
- * not the worktree-local `.gsd/`. This ensures all captures go to one file
+ * In worktree-isolated mode, basePath is `.hx/worktrees/<MID>/`.
+ * Captures must resolve to the *original* project root's `.hx/CAPTURES.md`,
+ * not the worktree-local `.hx/`. This ensures all captures go to one file
  * regardless of which worktree the agent is running in.
  *
- * Detection: if basePath contains `/.gsd/worktrees/`, walk up to the
- * directory that contains `.gsd/worktrees/` — that's the project root.
+ * Detection: if basePath contains `/.hx/worktrees/`, walk up to the
+ * directory that contains `.hx/worktrees/` — that's the project root.
  */
 export function resolveCapturesPath(basePath: string): string {
   const resolved = resolve(basePath);
@@ -73,16 +73,16 @@ export function resolveCapturesPath(basePath: string): string {
   if (idx !== -1) {
     // basePath is inside a worktree — resolve to project root
     const projectRoot = resolved.slice(0, idx);
-    return join(projectRoot, ".gsd", CAPTURES_FILENAME);
+    return join(projectRoot, ".hx", CAPTURES_FILENAME);
   }
-  return join(gsdRoot(basePath), CAPTURES_FILENAME);
+  return join(hxRoot(basePath), CAPTURES_FILENAME);
 }
 
 // ─── File I/O ─────────────────────────────────────────────────────────────────
 
 /**
  * Append a new capture entry to CAPTURES.md.
- * Creates `.gsd/` and the file if they don't exist.
+ * Creates `.hx/` and the file if they don't exist.
  * Returns the generated capture ID.
  */
 export function appendCapture(basePath: string, text: string): string {

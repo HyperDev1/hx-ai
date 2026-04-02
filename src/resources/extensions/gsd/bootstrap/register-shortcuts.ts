@@ -12,7 +12,7 @@ export function registerShortcuts(pi: ExtensionAPI): void {
   pi.registerShortcut(Key.ctrlAlt("g"), {
     description: shortcutDesc("Open GSD dashboard", "/gsd status"),
     handler: async (ctx) => {
-      if (!existsSync(join(process.cwd(), ".gsd"))) {
+      if (!existsSync(join(process.cwd(), ".hx"))) {
         ctx.ui.notify("No .gsd/ directory found. Run /gsd to start.", "info");
         return;
       }
@@ -34,7 +34,7 @@ export function registerShortcuts(pi: ExtensionAPI): void {
   pi.registerShortcut(Key.ctrlAlt("p"), {
     description: shortcutDesc("Open parallel worker monitor", "/gsd parallel watch"),
     handler: async (ctx) => {
-      const parallelDir = join(process.cwd(), ".gsd", "parallel");
+      const parallelDir = join(process.cwd(), ".hx", "parallel");
       if (!existsSync(parallelDir)) {
         ctx.ui.notify("No parallel workers found. Run /gsd parallel start first.", "info");
         return;

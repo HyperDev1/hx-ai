@@ -19,8 +19,8 @@ import { readCrashLock, clearLock, formatCrashInfo } from "./crash-recovery.js";
 import { listUnitRuntimeRecords, clearUnitRuntimeRecord } from "./unit-runtime.js";
 import { resolveExpectedArtifactPath } from "./auto.js";
 import {
-  gsdRoot, milestonesDir, resolveMilestoneFile, resolveMilestonePath,
-  resolveSliceFile, resolveSlicePath, resolveGsdRootFile, relGsdRootFile,
+  hxRoot, milestonesDir, resolveMilestoneFile, resolveMilestonePath,
+  resolveSliceFile, resolveSlicePath, resolveHxRootFile, relHxRootFile,
   relMilestoneFile, relSliceFile,
 } from "./paths.js";
 import { join } from "node:path";
@@ -106,13 +106,13 @@ export function checkAutoStartAfterDiscuss(): boolean {
   // (sequential readiness gates for remaining milestones) in multi-milestone
   // discussions, where M001-CONTEXT.md exists but M002/M003 haven't been
   // processed yet.
-  const stateFile = resolveGsdRootFile(basePath, "STATE");
+  const stateFile = resolveHxRootFile(basePath, "STATE");
   if (!stateFile) return false; // discussion not finalized yet
 
   // Gate 3: Multi-milestone completeness warning
   // Parse PROJECT.md for milestone sequence, warn if any are missing context.
   // Don't block — milestones can be intentionally queued without context.
-  const projectFile = resolveGsdRootFile(basePath, "PROJECT");
+  const projectFile = resolveHxRootFile(basePath, "PROJECT");
   if (projectFile) {
     try {
       const projectContent = readFileSync(projectFile, "utf-8");
@@ -121,7 +121,7 @@ export function checkAutoStartAfterDiscuss(): boolean {
         const missing = milestoneIds.filter(id => {
           const hasContext = !!resolveMilestoneFile(basePath, id, "CONTEXT");
           const hasDraft = !!resolveMilestoneFile(basePath, id, "CONTEXT-DRAFT");
-          const hasDir = existsSync(join(gsdRoot(basePath), "milestones", id));
+          const hasDir = existsSync(join(hxRoot(basePath), "milestones", id));
           return !hasContext && !hasDraft && !hasDir;
         });
         if (missing.length > 0) {
@@ -139,7 +139,7 @@ export function checkAutoStartAfterDiscuss(): boolean {
   // The LLM writes DISCUSSION-MANIFEST.json after each Phase 3 gate decision.
   // If the manifest exists but gates_completed < total, the LLM hasn't finished
   // presenting all readiness gates to the user — block auto-start.
-  const manifestPath = join(gsdRoot(basePath), "DISCUSSION-MANIFEST.json");
+  const manifestPath = join(hxRoot(basePath), "DISCUSSION-MANIFEST.json");
   if (existsSync(manifestPath)) {
     try {
       const manifest = JSON.parse(readFileSync(manifestPath, "utf-8"));
@@ -181,7 +181,7 @@ export function checkAutoStartAfterDiscuss(): boolean {
   ctx.ui.notify(`Milestone ${milestoneId} ready.`, "info");
   startAuto(ctx, pi, basePath, false, { step }).catch((err) => {
     ctx.ui.notify(`Auto-start failed: ${getErrorMessage(err)}`, "error");
-    if (process.env.GSD_DEBUG) console.error('[gsd] auto start error:', err);
+    if (process.env.HX_DEBUG) console.error('[gsd] auto start error:', err);
     debugLog("auto-start-failed", { error: getErrorMessage(err) });
   });
   return true;
@@ -244,7 +244,7 @@ async function dispatchWorkflow(
     }
   }
 
-  const workflowPath = process.env.GSD_WORKFLOW_PATH ?? join(process.env.HOME ?? "~", ".gsd", "agent", "GSD-WORKFLOW.md");
+  const workflowPath = process.env.HX_WORKFLOW_PATH ?? join(process.env.HOME ?? "~", ".hx", "agent", "GSD-WORKFLOW.md");
   const workflow = readFileSync(workflowPath, "utf-8");
 
   pi.sendMessage(
@@ -310,7 +310,7 @@ function resolveAvailableModel<T extends { id: string; provider: string }>(
  * Used by all three "new milestone" paths (first ever, no active, all complete).
  */
 function buildDiscussPrompt(nextId: string, preamble: string, _basePath: string): string {
-  const milestoneRel = `.gsd/milestones/${nextId}`;
+  const milestoneRel = `.hx/milestones/${nextId}`;
   const inlinedTemplates = [
     inlineTemplate("project", "Project"),
     inlineTemplate("requirements", "Requirements"),
@@ -334,7 +334,7 @@ function buildDiscussPrompt(nextId: string, preamble: string, _basePath: string)
  * Uses the discuss-headless prompt template with seed context injected.
  */
 function buildHeadlessDiscussPrompt(nextId: string, seedContext: string, _basePath: string): string {
-  const milestoneRel = `.gsd/milestones/${nextId}`;
+  const milestoneRel = `.hx/milestones/${nextId}`;
   const inlinedTemplates = [
     inlineTemplate("project", "Project"),
     inlineTemplate("requirements", "Requirements"),
@@ -363,7 +363,7 @@ function bootstrapGsdProject(basePath: string): void {
     nativeInit(basePath, mainBranch);
   }
 
-  const root = gsdRoot(basePath);
+  const root = hxRoot(basePath);
   mkdirSync(join(root, "milestones"), { recursive: true });
   mkdirSync(join(root, "runtime"), { recursive: true });
 
@@ -395,7 +395,7 @@ export async function showHeadlessMilestoneCreation(
   const nextId = nextMilestoneIdReserved(existingIds, prefs?.preferences?.unique_milestone_ids ?? false);
 
   // Create milestone directory
-  const milestoneDir = join(gsdRoot(basePath), "milestones", nextId, "slices");
+  const milestoneDir = join(hxRoot(basePath), "milestones", nextId, "slices");
   mkdirSync(milestoneDir, { recursive: true });
 
   // Build and dispatch the headless discuss prompt
@@ -451,11 +451,11 @@ async function buildDiscussSlicePrompt(
   }
 
   // Decisions — architectural context that constrains this slice
-  const decisionsPath = resolveGsdRootFile(base, "DECISIONS");
+  const decisionsPath = resolveHxRootFile(base, "DECISIONS");
   if (existsSync(decisionsPath)) {
     const decisionsContent = await loadFile(decisionsPath);
     if (decisionsContent) {
-      inlined.push(`### Decisions Register\nSource: \`${relGsdRootFile("DECISIONS")}\`\n\n${decisionsContent.trim()}`);
+      inlined.push(`### Decisions Register\nSource: \`${relHxRootFile("DECISIONS")}\`\n\n${decisionsContent.trim()}`);
     }
   }
 
@@ -484,7 +484,7 @@ async function buildDiscussSlicePrompt(
     ? `## Inlined Context (preloaded — do not re-read these files)\n\n${inlined.join("\n\n---\n\n")}`
     : `## Inlined Context\n\n_(no context files found yet — go in blind and ask broad questions)_`;
 
-  const sliceDirPath = `.gsd/milestones/${mid}/slices/${sid}`;
+  const sliceDirPath = `.hx/milestones/${mid}/slices/${sid}`;
   const sliceContextPath = `${sliceDirPath}/${sid}-CONTEXT.md`;
 
   // When re-discussing, inject a preamble so the agent treats this as an update interview
@@ -517,7 +517,7 @@ export async function showDiscuss(
   basePath: string,
 ): Promise<void> {
   // Guard: no .gsd/ project
-  if (!existsSync(gsdRoot(basePath))) {
+  if (!existsSync(hxRoot(basePath))) {
     ctx.ui.notify("No GSD project found. Run /gsd to start one first.", "warning");
     return;
   }
@@ -983,7 +983,7 @@ export async function showSmartEntry(
   }
 
   // ── Detection preamble — run before any bootstrap ────────────────────
-  if (!existsSync(gsdRoot(basePath))) {
+  if (!existsSync(hxRoot(basePath))) {
     const detection = detectProjectState(basePath);
 
     // v1 .planning/ detected — offer migration before anything else

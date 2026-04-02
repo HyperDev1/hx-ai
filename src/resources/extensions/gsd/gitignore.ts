@@ -10,7 +10,7 @@ import { join } from "node:path";
 import { execFileSync } from "node:child_process";
 import { existsSync, lstatSync, readFileSync, writeFileSync } from "node:fs";
 import { nativeRmCached, nativeLsFiles } from "./native-git-bridge.js";
-import { gsdRoot } from "./paths.js";
+import { hxRoot } from "./paths.js";
 import { GIT_NO_PROMPT_ENV } from "./git-constants.js";
 
 /**
@@ -18,29 +18,29 @@ import { GIT_NO_PROMPT_ENV } from "./git-constants.js";
  * With external state (symlink), these are a no-op in most cases,
  * but retained for backwards compatibility during migration.
  */
-const GSD_RUNTIME_PATTERNS = [
-  ".gsd/activity/",
-  ".gsd/forensics/",
-  ".gsd/runtime/",
-  ".gsd/worktrees/",
-  ".gsd/parallel/",
-  ".gsd/auto.lock",
-  ".gsd/metrics.json",
-  ".gsd/completed-units.json",
-  ".gsd/STATE.md",
-  ".gsd/gsd.db",
-  ".gsd/gsd.db-shm",   // SQLite WAL sidecar — always created alongside gsd.db (#2296)
-  ".gsd/gsd.db-wal",   // SQLite WAL sidecar — always created alongside gsd.db (#2296)
-  ".gsd/journal/",     // daily-rotated JSONL event journal (#2296)
-  ".gsd/doctor-history.jsonl", // doctor run history (#2296)
-  ".gsd/DISCUSSION-MANIFEST.json",
-  ".gsd/milestones/**/*-CONTINUE.md",
-  ".gsd/milestones/**/continue.md",
+const HX_RUNTIME_PATTERNS = [
+  ".hx/activity/",
+  ".hx/forensics/",
+  ".hx/runtime/",
+  ".hx/worktrees/",
+  ".hx/parallel/",
+  ".hx/auto.lock",
+  ".hx/metrics.json",
+  ".hx/completed-units.json",
+  ".hx/STATE.md",
+  ".hx/gsd.db",
+  ".hx/gsd.db-shm",   // SQLite WAL sidecar — always created alongside hx.db (#2296)
+  ".hx/gsd.db-wal",   // SQLite WAL sidecar — always created alongside hx.db (#2296)
+  ".hx/journal/",     // daily-rotated JSONL event journal (#2296)
+  ".hx/doctor-history.jsonl", // doctor run history (#2296)
+  ".hx/DISCUSSION-MANIFEST.json",
+  ".hx/milestones/**/*-CONTINUE.md",
+  ".hx/milestones/**/continue.md",
 ] as const;
 
 const BASELINE_PATTERNS = [
-  // ── GSD state directory (symlink to external storage) ──
-  ".gsd",
+  // ── HX state directory (symlink to external storage) ──
+  ".hx",
 
   // ── OS junk ──
   ".DS_Store",
@@ -85,21 +85,21 @@ const BASELINE_PATTERNS = [
 ];
 
 /**
- * Check whether `.gsd/` contains files tracked by git.
- * If so, the project intentionally keeps `.gsd/` in version control
- * and we must NOT add `.gsd` to `.gitignore` or attempt migration.
+ * Check whether `.hx/` contains files tracked by git.
+ * If so, the project intentionally keeps `.hx/` in version control
+ * and we must NOT add `.hx` to `.gitignore` or attempt migration.
  *
- * Returns true if git tracks at least one file under `.gsd/`.
+ * Returns true if git tracks at least one file under `.hx/`.
  * Returns false (safe to ignore) if:
  *   - Not a git repo
- *   - `.gsd/` is a symlink (external state, should be ignored)
- *   - `.gsd/` doesn't exist
- *   - No tracked files found under `.gsd/`
+ *   - `.hx/` is a symlink (external state, should be ignored)
+ *   - `.hx/` doesn't exist
+ *   - No tracked files found under `.hx/`
  */
 export function hasGitTrackedGsdFiles(basePath: string): boolean {
-  const localGsd = join(basePath, ".gsd");
+  const localGsd = join(basePath, ".hx");
 
-  // If .gsd doesn't exist or is already a symlink, no tracked files concern
+  // If .hx doesn't exist or is already a symlink, no tracked files concern
   if (!existsSync(localGsd)) return false;
   try {
     if (lstatSync(localGsd).isSymbolicLink()) return false;
@@ -107,9 +107,9 @@ export function hasGitTrackedGsdFiles(basePath: string): boolean {
     return false;
   }
 
-  // Check if git tracks any files under .gsd/
+  // Check if git tracks any files under .hx/
   try {
-    const tracked = nativeLsFiles(basePath, ".gsd");
+    const tracked = nativeLsFiles(basePath, ".hx");
     if (tracked.length > 0) return true;
 
     // nativeLsFiles swallows git failures and returns []. An empty result
@@ -134,9 +134,9 @@ export function hasGitTrackedGsdFiles(basePath: string): boolean {
  * Creates the file if missing; appends missing patterns.
  * Returns true if the file was created or modified, false if already complete.
  *
- * **Safety check:** If `.gsd/` contains git-tracked files (i.e., the project
- * intentionally keeps `.gsd/` in version control), the `.gsd` ignore pattern
- * is excluded to prevent data loss. Only the `.gsd` pattern is affected —
+ * **Safety check:** If `.hx/` contains git-tracked files (i.e., the project
+ * intentionally keeps `.hx/` in version control), the `.hx` ignore pattern
+ * is excluded to prevent data loss. Only the `.hx` pattern is affected —
  * all other baseline patterns are still applied normally.
  */
 export function ensureGitignore(
@@ -161,11 +161,11 @@ export function ensureGitignore(
       .filter((l) => l && !l.startsWith("#")),
   );
 
-  // Determine which patterns to apply. If .gsd/ has tracked files,
-  // exclude the ".gsd" pattern to prevent deleting tracked state.
-  const gsdIsTracked = hasGitTrackedGsdFiles(basePath);
-  const patternsToApply = gsdIsTracked
-    ? BASELINE_PATTERNS.filter((p) => p !== ".gsd")
+  // Determine which patterns to apply. If .hx/ has tracked files,
+  // exclude the ".hx" pattern to prevent deleting tracked state.
+  const hxIsTracked = hasGitTrackedGsdFiles(basePath);
+  const patternsToApply = hxIsTracked
+    ? BASELINE_PATTERNS.filter((p) => p !== ".hx")
     : BASELINE_PATTERNS;
 
   // Find patterns not yet present
@@ -176,7 +176,7 @@ export function ensureGitignore(
   // Build the block to append
   const block = [
     "",
-    "# ── GSD baseline (auto-generated) ──",
+    "# ── HX baseline (auto-generated) ──",
     ...missing,
     "",
   ].join("\n");
@@ -198,11 +198,11 @@ export function ensureGitignore(
  *
  * Note: These are strictly runtime/ephemeral paths (activity logs, lock files,
  * metrics, STATE.md). They are always safe to untrack, even when the project
- * intentionally keeps other `.gsd/` files (like PROJECT.md, milestones/) in
+ * intentionally keeps other `.hx/` files (like PROJECT.md, milestones/) in
  * version control.
  */
 export function untrackRuntimeFiles(basePath: string): void {
-  const runtimePaths = GSD_RUNTIME_PATTERNS;
+  const runtimePaths = HX_RUNTIME_PATTERNS;
 
   for (const pattern of runtimePaths) {
     // Use -r for directory patterns (trailing slash), strip the slash for the command
@@ -216,7 +216,7 @@ export function untrackRuntimeFiles(basePath: string): void {
 }
 
 /**
- * Ensure basePath/.gsd/PREFERENCES.md exists as an empty template.
+ * Ensure basePath/.hx/PREFERENCES.md exists as an empty template.
  * Creates the file with frontmatter only if it doesn't exist.
  * Returns true if created, false if already exists.
  *
@@ -224,8 +224,8 @@ export function untrackRuntimeFiles(basePath: string): void {
  * creating a duplicate when a lowercase file already exists.
  */
 export function ensurePreferences(basePath: string): boolean {
-  const preferencesPath = join(gsdRoot(basePath), "PREFERENCES.md");
-  const legacyPath = join(gsdRoot(basePath), "preferences.md");
+  const preferencesPath = join(hxRoot(basePath), "PREFERENCES.md");
+  const legacyPath = join(hxRoot(basePath), "preferences.md");
 
   if (existsSync(preferencesPath) || existsSync(legacyPath)) {
     return false;
@@ -243,7 +243,7 @@ skill_discovery: {}
 auto_supervisor: {}
 ---
 
-# GSD Skill Preferences
+# HX Skill Preferences
 
 Project-specific guidance for skill selection and execution preferences.
 

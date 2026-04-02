@@ -90,7 +90,7 @@ export async function handleValidateMilestone(
   if (milestoneDir) {
     validationPath = join(milestoneDir, `${params.milestoneId}-VALIDATION.md`);
   } else {
-    const gsdDir = join(basePath, ".gsd");
+    const gsdDir = join(basePath, ".hx");
     const manualDir = join(gsdDir, "milestones", params.milestoneId);
     validationPath = join(manualDir, `${params.milestoneId}-VALIDATION.md`);
   }
@@ -120,7 +120,7 @@ export async function handleValidateMilestone(
     await saveFile(validationPath, validationMd);
   } catch (renderErr) {
     process.stderr.write(
-      `gsd-db: validate_milestone — disk render failed, rolling back DB row: ${(renderErr as Error).message}\n`,
+      `hx-db: validate_milestone — disk render failed, rolling back DB row: ${(renderErr as Error).message}\n`,
     );
     deleteAssessmentByScope(params.milestoneId, 'milestone-validation');
     return { error: `disk render failed: ${(renderErr as Error).message}` };

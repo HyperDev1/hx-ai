@@ -27,12 +27,12 @@ import { parseUnitId } from "./unit-id.js";
 export function resolveHookArtifactPath(basePath: string, unitId: string, artifactName: string): string {
   const { milestone, slice, task } = parseUnitId(unitId);
   if (task !== undefined && slice !== undefined) {
-    return join(basePath, ".gsd", "milestones", milestone, "slices", slice, "tasks", `${task}-${artifactName}`);
+    return join(basePath, ".hx", "milestones", milestone, "slices", slice, "tasks", `${task}-${artifactName}`);
   }
   if (slice !== undefined) {
-    return join(basePath, ".gsd", "milestones", milestone, "slices", slice, artifactName);
+    return join(basePath, ".hx", "milestones", milestone, "slices", slice, artifactName);
   }
-  return join(basePath, ".gsd", "milestones", milestone, artifactName);
+  return join(basePath, ".hx", "milestones", milestone, artifactName);
 }
 
 // ─── Dispatch Rule Conversion ──────────────────────────────────────────────
@@ -374,7 +374,7 @@ export class RuleRegistry {
   // ── Persistence ─────────────────────────────────────────────────────
 
   private _hookStatePath(basePath: string): string {
-    return join(basePath, ".gsd", HOOK_STATE_FILE);
+    return join(basePath, ".hx", HOOK_STATE_FILE);
   }
 
   /** Persist current hook cycle counts to disk. */
@@ -384,7 +384,7 @@ export class RuleRegistry {
       savedAt: new Date().toISOString(),
     };
     try {
-      const dir = join(basePath, ".gsd");
+      const dir = join(basePath, ".hx");
       if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
       writeFileSync(this._hookStatePath(basePath), JSON.stringify(state, null, 2), "utf-8");
     } catch {

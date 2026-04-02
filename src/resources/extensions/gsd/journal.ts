@@ -1,7 +1,7 @@
 /**
  * GSD Event Journal — structured JSONL event log for auto-mode iterations.
  *
- * Writes daily-rotated JSONL files to `.gsd/journal/YYYY-MM-DD.jsonl`.
+ * Writes daily-rotated JSONL files to `.hx/journal/YYYY-MM-DD.jsonl`.
  * Zero imports from `auto/` — depends only on node:fs, node:path, and paths.ts.
  *
  * Observability:
@@ -14,7 +14,7 @@
 
 import { appendFileSync, mkdirSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { gsdRoot } from "./paths.js";
+import { hxRoot } from "./paths.js";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -75,14 +75,14 @@ export interface JournalQueryFilters {
 /**
  * Append a journal event to the daily JSONL file.
  *
- * File path: `<gsdRoot>/journal/<YYYY-MM-DD>.jsonl`
+ * File path: `<hxRoot>/journal/<YYYY-MM-DD>.jsonl`
  * where the date is extracted from `entry.ts.slice(0, 10)`.
  *
  * Never throws — all errors are silently caught.
  */
 export function emitJournalEvent(basePath: string, entry: JournalEntry): void {
   try {
-    const journalDir = join(gsdRoot(basePath), "journal");
+    const journalDir = join(hxRoot(basePath), "journal");
     mkdirSync(journalDir, { recursive: true });
     const dateStr = entry.ts.slice(0, 10);
     const filePath = join(journalDir, `${dateStr}.jsonl`);
@@ -104,7 +104,7 @@ export function queryJournal(
   filters?: JournalQueryFilters,
 ): JournalEntry[] {
   try {
-    const journalDir = join(gsdRoot(basePath), "journal");
+    const journalDir = join(hxRoot(basePath), "journal");
     const files = readdirSync(journalDir).filter(f => f.endsWith(".jsonl")).sort();
 
     const entries: JournalEntry[] = [];

@@ -228,7 +228,7 @@ export async function handleCompleteTask(
     summaryPath = join(tasksDir, `${params.taskId}-SUMMARY.md`);
   } else {
     // Tasks dir doesn't exist on disk yet — build path manually and ensure dirs
-    const gsdDir = join(basePath, ".gsd");
+    const gsdDir = join(basePath, ".hx");
     const manualTasksDir = join(gsdDir, "milestones", params.milestoneId, "slices", params.sliceId, "tasks");
     mkdirSync(manualTasksDir, { recursive: true });
     summaryPath = join(manualTasksDir, `${params.taskId}-SUMMARY.md`);
@@ -243,13 +243,13 @@ export async function handleCompleteTask(
       await renderPlanCheckboxes(basePath, params.milestoneId, params.sliceId);
     } else {
       process.stderr.write(
-        `gsd-db: complete_task — could not find plan file for ${params.sliceId}/${params.milestoneId}, skipping checkbox toggle\n`,
+        `hx-db: complete_task — could not find plan file for ${params.sliceId}/${params.milestoneId}, skipping checkbox toggle\n`,
       );
     }
   } catch (renderErr) {
     // Disk render failed — roll back DB status so state stays consistent
     process.stderr.write(
-      `gsd-db: complete_task — disk render failed, rolling back DB status: ${(renderErr as Error).message}\n`,
+      `hx-db: complete_task — disk render failed, rolling back DB status: ${(renderErr as Error).message}\n`,
     );
     // Delete orphaned verification_evidence rows first (FK constraint
     // references tasks, so evidence must go before status change).

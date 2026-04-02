@@ -10,7 +10,7 @@ import {
   aggregateByModel, formatCost, formatTokenCount, loadLedgerFromDisk,
 } from "./metrics.js";
 import type { UnitMetrics } from "./metrics.js";
-import { gsdRoot } from "./paths.js";
+import { hxRoot } from "./paths.js";
 import { formatDuration, fileLink } from "../shared/format-utils.js";
 import { getErrorMessage } from "./error-utils.js";
 
@@ -53,7 +53,7 @@ export function writeExportFile(
   }
 
   const projectName = basename(basePath);
-  const exportDir = gsdRoot(basePath);
+  const exportDir = hxRoot(basePath);
   mkdirSync(exportDir, { recursive: true });
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
 
@@ -123,7 +123,7 @@ export async function handleExport(args: string, ctx: ExtensionCommandContext, b
       const { basename: bn } = await import("node:path");
       const data = await loadVisualizerData(basePath);
       const projName = basename(basePath);
-      const gsdVersion = process.env.GSD_VERSION ?? "0.0.0";
+      const gsdVersion = process.env.HX_VERSION ?? "0.0.0";
       const doneMilestones = data.milestones.filter(m => m.status === "complete").length;
 
       const htmlOpts = {
@@ -184,7 +184,7 @@ export async function handleExport(args: string, ctx: ExtensionCommandContext, b
           paths.push(bn(outPath));
         }
 
-        const indexPath = join(gsdRoot(basePath), "reports", "index.html");
+        const indexPath = join(hxRoot(basePath), "reports", "index.html");
         ctx.ui.notify(
           `Generated ${paths.length} report snapshot${paths.length !== 1 ? "s" : ""}:\n${paths.map(p => `  ${p}`).join("\n")}\nOpening reports index in browser...`,
           "success",
@@ -245,7 +245,7 @@ export async function handleExport(args: string, ctx: ExtensionCommandContext, b
   }
 
   const projectName = basename(basePath);
-  const exportDir = gsdRoot(basePath);
+  const exportDir = hxRoot(basePath);
   mkdirSync(exportDir, { recursive: true });
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
 

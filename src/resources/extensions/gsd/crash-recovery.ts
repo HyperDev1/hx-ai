@@ -12,7 +12,7 @@
 
 import { readFileSync, unlinkSync, existsSync } from "node:fs";
 import { join } from "node:path";
-import { gsdRoot } from "./paths.js";
+import { hxRoot } from "./paths.js";
 import { atomicWriteSync } from "./atomic-write.js";
 import { effectiveLockFile } from "./session-lock.js";
 
@@ -27,7 +27,7 @@ export interface LockData {
 }
 
 function lockPath(basePath: string): string {
-  return join(gsdRoot(basePath), effectiveLockFile());
+  return join(hxRoot(basePath), effectiveLockFile());
 }
 
 /** Write or update the lock file with current auto-mode state. */

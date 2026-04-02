@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { loadRegistry } from "../workflow-templates.js";
 import { resolveProjectRoot } from "../worktree.js";
 
-const gsdHome = process.env.GSD_HOME || join(homedir(), ".gsd");
+const hxHome = process.env.HX_HOME || join(homedir(), ".hx");
 
 export interface GsdCommandDefinition {
   cmd: string;
@@ -14,7 +14,7 @@ export interface GsdCommandDefinition {
 
 type CompletionMap = Record<string, readonly GsdCommandDefinition[]>;
 
-export const GSD_COMMAND_DESCRIPTION =
+export const HX_COMMAND_DESCRIPTION =
   "GSD — Get Shit Done: /gsd help|start|templates|next|auto|stop|pause|status|widget|visualize|queue|quick|discuss|capture|triage|dispatch|history|undo|undo-task|reset-slice|rate|skip|export|cleanup|mode|prefs|config|keys|hooks|run-hook|skill-health|doctor|logs|forensics|changelog|migrate|remote|steer|knowledge|new-milestone|parallel|cmux|park|unpark|init|setup|inspect|extensions|update|fast|mcp|rethink";
 
 export const TOP_LEVEL_SUBCOMMANDS: readonly GsdCommandDefinition[] = [
@@ -246,7 +246,7 @@ function filterOptions(
 
 function getExtensionCompletions(prefix: string, action: string) {
   try {
-    const extDir = join(gsdHome, "agent", "extensions");
+    const extDir = join(hxHome, "agent", "extensions");
     const ids: Array<{ id: string; name: string }> = [];
     for (const entry of readdirSync(extDir, { withFileTypes: true })) {
       if (!entry.isDirectory()) continue;
@@ -333,7 +333,7 @@ export function getGsdArgumentCompletions(prefix: string) {
   // Workflow definition-name completion for `workflow run <name>` and `workflow validate <name>`
   if (command === "workflow" && (subcommand === "run" || subcommand === "validate") && parts.length <= 3) {
     try {
-      const defsDir = join(resolveProjectRoot(process.cwd()), ".gsd", "workflow-defs");
+      const defsDir = join(resolveProjectRoot(process.cwd()), ".hx", "workflow-defs");
       if (existsSync(defsDir)) {
         return readdirSync(defsDir)
           .filter((f) => f.endsWith(".yaml") && f.startsWith(third))

@@ -1,5 +1,5 @@
 /**
- * GSD Detection — Project state and ecosystem detection.
+ * HX Detection — Project state and ecosystem detection.
  *
  * Pure functions, zero UI dependencies, zero side effects.
  * Used by init-wizard.ts and guided-flow.ts to determine what onboarding
@@ -9,15 +9,15 @@
 import { existsSync, openSync, readSync, closeSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
-import { gsdRoot } from "./paths.js";
+import { hxRoot } from "./paths.js";
 
-const gsdHome = process.env.GSD_HOME || join(homedir(), ".gsd");
+const hxHome = process.env.HX_HOME || join(homedir(), ".hx");
 
 // ─── Types ──────────────────────────────────────────────────────────────────────
 
 export interface ProjectDetection {
-  /** What kind of GSD state exists in this directory */
-  state: "none" | "v1-planning" | "v2-gsd" | "v2-gsd-empty";
+  /** What kind of HX state exists in this directory */
+  state: "none" | "v1-planning" | "v2-hx" | "v2-hx-empty";
 
   /** Is this the first time GSD has been used on this machine? */
   isFirstEverLaunch: boolean;
@@ -28,7 +28,7 @@ export interface ProjectDetection {
   /** v1 details (only when state === 'v1-planning') */
   v1?: V1Detection;
 
-  /** v2 details (only when state === 'v2-gsd' or 'v2-gsd-empty') */
+  /** v2 details (only when state === 'v2-hx' or 'v2-hx-empty') */
   v2?: V2Detection;
 
   /** Detected project ecosystem signals */
@@ -292,9 +292,9 @@ export function detectProjectState(basePath: string): ProjectDetection {
 
   let state: ProjectDetection["state"];
   if (v2 && v2.milestoneCount > 0) {
-    state = "v2-gsd";
+    state = "v2-hx";
   } else if (v2 && v2.milestoneCount === 0) {
-    state = "v2-gsd-empty";
+    state = "v2-hx-empty";
   } else if (v1) {
     state = "v1-planning";
   } else {
@@ -354,7 +354,7 @@ export function detectV1Planning(basePath: string): V1Detection | null {
 // ─── V2 GSD Detection ──────────────────────────────────────────────────────────
 
 function detectV2Gsd(basePath: string): V2Detection | null {
-  const gsdPath = gsdRoot(basePath);
+  const gsdPath = hxRoot(basePath);
 
   if (!existsSync(gsdPath)) return null;
 
@@ -714,8 +714,8 @@ function detectVerificationCommands(
  */
 export function hasGlobalSetup(): boolean {
   return (
-    existsSync(join(gsdHome, "PREFERENCES.md")) ||
-    existsSync(join(gsdHome, "preferences.md"))
+    existsSync(join(hxHome, "PREFERENCES.md")) ||
+    existsSync(join(hxHome, "preferences.md"))
   );
 }
 
@@ -724,21 +724,21 @@ export function hasGlobalSetup(): boolean {
  * Returns true if ~/.gsd/ doesn't exist or has no preferences or auth.
  */
 export function isFirstEverLaunch(): boolean {
-  if (!existsSync(gsdHome)) return true;
+  if (!existsSync(hxHome)) return true;
 
   // If we have preferences, not first launch
   if (
-    existsSync(join(gsdHome, "PREFERENCES.md")) ||
-    existsSync(join(gsdHome, "preferences.md"))
+    existsSync(join(hxHome, "PREFERENCES.md")) ||
+    existsSync(join(hxHome, "preferences.md"))
   ) {
     return false;
   }
 
   // If we have auth.json, not first launch (onboarding.ts already ran)
-  if (existsSync(join(gsdHome, "agent", "auth.json"))) return false;
+  if (existsSync(join(hxHome, "agent", "auth.json"))) return false;
 
   // Check legacy path too
-  const legacyPath = join(homedir(), ".pi", "agent", "gsd-preferences.md");
+  const legacyPath = join(homedir(), ".pi", "agent", "hx-preferences.md");
   if (existsSync(legacyPath)) return false;
 
   return true;

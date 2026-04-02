@@ -181,7 +181,7 @@ export async function handleCompleteMilestone(
   if (milestoneDir) {
     summaryPath = join(milestoneDir, `${params.milestoneId}-SUMMARY.md`);
   } else {
-    const gsdDir = join(basePath, ".gsd");
+    const gsdDir = join(basePath, ".hx");
     const manualDir = join(gsdDir, "milestones", params.milestoneId);
     mkdirSync(manualDir, { recursive: true });
     summaryPath = join(manualDir, `${params.milestoneId}-SUMMARY.md`);
@@ -192,7 +192,7 @@ export async function handleCompleteMilestone(
   } catch (renderErr) {
     // Disk render failed — roll back DB status so state stays consistent
     process.stderr.write(
-      `gsd-db: complete_milestone — disk render failed, rolling back DB status: ${(renderErr as Error).message}\n`,
+      `hx-db: complete_milestone — disk render failed, rolling back DB status: ${(renderErr as Error).message}\n`,
     );
     updateMilestoneStatus(params.milestoneId, 'active', null);
     invalidateStateCache();

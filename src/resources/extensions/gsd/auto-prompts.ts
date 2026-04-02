@@ -14,7 +14,7 @@ import {
   resolveMilestoneFile, resolveSliceFile, resolveSlicePath,
   resolveTasksDir, resolveTaskFiles, resolveTaskFile,
   relMilestoneFile, relSliceFile, relSlicePath, relMilestonePath,
-  resolveGsdRootFile, relGsdRootFile, resolveRuntimeFile,
+  resolveHxRootFile, relHxRootFile, resolveRuntimeFile,
 } from "./paths.js";
 import { resolveSkillDiscoveryMode, resolveInlineLevel, loadEffectiveGSDPreferences, resolveAllSkillReferences } from "./preferences.js";
 import { parseRoadmap } from "./parsers-legacy.js";
@@ -72,24 +72,24 @@ function buildSourceFilePaths(
 ): string {
   const paths: string[] = [];
 
-  const projectPath = resolveGsdRootFile(base, "PROJECT");
+  const projectPath = resolveHxRootFile(base, "PROJECT");
   if (existsSync(projectPath)) {
-    paths.push(`- **Project**: \`${relGsdRootFile("PROJECT")}\``);
+    paths.push(`- **Project**: \`${relHxRootFile("PROJECT")}\``);
   }
 
-  const requirementsPath = resolveGsdRootFile(base, "REQUIREMENTS");
+  const requirementsPath = resolveHxRootFile(base, "REQUIREMENTS");
   if (existsSync(requirementsPath)) {
-    paths.push(`- **Requirements**: \`${relGsdRootFile("REQUIREMENTS")}\``);
+    paths.push(`- **Requirements**: \`${relHxRootFile("REQUIREMENTS")}\``);
   }
 
-  const decisionsPath = resolveGsdRootFile(base, "DECISIONS");
+  const decisionsPath = resolveHxRootFile(base, "DECISIONS");
   if (existsSync(decisionsPath)) {
-    paths.push(`- **Decisions**: \`${relGsdRootFile("DECISIONS")}\``);
+    paths.push(`- **Decisions**: \`${relHxRootFile("DECISIONS")}\``);
   }
 
-  const queuePath = resolveGsdRootFile(base, "QUEUE");
+  const queuePath = resolveHxRootFile(base, "QUEUE");
   if (existsSync(queuePath)) {
-    paths.push(`- **Queue**: \`${relGsdRootFile("QUEUE")}\``);
+    paths.push(`- **Queue**: \`${relHxRootFile("QUEUE")}\``);
   }
 
   const contextPath = resolveMilestoneFile(base, mid, "CONTEXT");
@@ -247,9 +247,9 @@ export async function inlineGsdRootFile(
   base: string, filename: string, label: string,
 ): Promise<string | null> {
   const key = filename.replace(/\.md$/i, "").toUpperCase() as "PROJECT" | "DECISIONS" | "QUEUE" | "STATE" | "REQUIREMENTS" | "KNOWLEDGE";
-  const absPath = resolveGsdRootFile(base, key);
+  const absPath = resolveHxRootFile(base, key);
   if (!existsSync(absPath)) return null;
-  return inlineFileOptional(absPath, relGsdRootFile(key), label);
+  return inlineFileOptional(absPath, relHxRootFile(key), label);
 }
 
 // ─── DB-Aware Inline Helpers ──────────────────────────────────────────────
@@ -272,7 +272,7 @@ export async function inlineDecisionsFromDb(
         const formatted = inlineLevel !== "full"
           ? formatDecisionsCompact(decisions)
           : formatDecisionsForPrompt(decisions);
-        return `### Decisions\nSource: \`.gsd/DECISIONS.md\`\n\n${formatted}`;
+        return `### Decisions\nSource: \`.hx/DECISIONS.md\`\n\n${formatted}`;
       }
     }
   } catch {
@@ -299,7 +299,7 @@ export async function inlineRequirementsFromDb(
         const formatted = inlineLevel !== "full"
           ? formatRequirementsCompact(requirements)
           : formatRequirementsForPrompt(requirements);
-        return `### Requirements\nSource: \`.gsd/REQUIREMENTS.md\`\n\n${formatted}`;
+        return `### Requirements\nSource: \`.hx/REQUIREMENTS.md\`\n\n${formatted}`;
       }
     }
   } catch {
@@ -321,7 +321,7 @@ export async function inlineProjectFromDb(
       const { queryProject } = await import("./context-store.js");
       const content = queryProject();
       if (content) {
-        return `### Project\nSource: \`.gsd/PROJECT.md\`\n\n${content}`;
+        return `### Project\nSource: \`.hx/PROJECT.md\`\n\n${content}`;
       }
     }
   } catch {
@@ -920,11 +920,11 @@ export async function buildPlanMilestonePrompt(mid: string, midTitle: string, ba
     const decisionsInline = await inlineDecisionsFromDb(base, mid, undefined, inlineLevel);
     if (decisionsInline) inlined.push(decisionsInline);
   }
-  const queuePath = resolveGsdRootFile(base, "QUEUE");
+  const queuePath = resolveHxRootFile(base, "QUEUE");
   if (existsSync(queuePath)) {
     const queueInline = await inlineFileSmart(
       queuePath,
-      relGsdRootFile("QUEUE"),
+      relHxRootFile("QUEUE"),
       "Project Queue",
       `${mid} ${midTitle}`,
     );
@@ -1155,11 +1155,11 @@ export async function buildExecuteTaskPrompt(
   const carryForwardSection = await buildCarryForwardSection(effectivePriorSummaries, base);
 
   // Inline project knowledge if available (smart-chunked for relevance)
-  const knowledgeAbsPath = resolveGsdRootFile(base, "KNOWLEDGE");
+  const knowledgeAbsPath = resolveHxRootFile(base, "KNOWLEDGE");
   const knowledgeInlineET = existsSync(knowledgeAbsPath)
     ? await inlineFileSmart(
         knowledgeAbsPath,
-        relGsdRootFile("KNOWLEDGE"),
+        relHxRootFile("KNOWLEDGE"),
         "Project Knowledge",
         `${tTitle} ${sTitle}`,  // use task + slice title as relevance query
       )
@@ -1197,7 +1197,7 @@ export async function buildExecuteTaskPrompt(
   const runtimePath = resolveRuntimeFile(base);
   const runtimeContent = existsSync(runtimePath) ? await loadFile(runtimePath) : null;
   const runtimeContext = runtimeContent
-    ? `### Runtime Context\nSource: \`.gsd/RUNTIME.md\`\n\n${runtimeContent.trim()}`
+    ? `### Runtime Context\nSource: \`.hx/RUNTIME.md\`\n\n${runtimeContent.trim()}`
     : "";
 
   return loadPrompt("execute-task", {
@@ -1872,12 +1872,12 @@ export async function buildRewriteDocsPrompt(
     }
   }
 
-  const decisionsPath = resolveGsdRootFile(base, "DECISIONS");
-  if (existsSync(decisionsPath)) docList.push(`- Decisions: \`${relGsdRootFile("DECISIONS")}\``);
-  const requirementsPath = resolveGsdRootFile(base, "REQUIREMENTS");
-  if (existsSync(requirementsPath)) docList.push(`- Requirements: \`${relGsdRootFile("REQUIREMENTS")}\``);
-  const projectPath = resolveGsdRootFile(base, "PROJECT");
-  if (existsSync(projectPath)) docList.push(`- Project: \`${relGsdRootFile("PROJECT")}\``);
+  const decisionsPath = resolveHxRootFile(base, "DECISIONS");
+  if (existsSync(decisionsPath)) docList.push(`- Decisions: \`${relHxRootFile("DECISIONS")}\``);
+  const requirementsPath = resolveHxRootFile(base, "REQUIREMENTS");
+  if (existsSync(requirementsPath)) docList.push(`- Requirements: \`${relHxRootFile("REQUIREMENTS")}\``);
+  const projectPath = resolveHxRootFile(base, "PROJECT");
+  if (existsSync(projectPath)) docList.push(`- Project: \`${relHxRootFile("PROJECT")}\``);
   const contextPath = resolveMilestoneFile(base, mid, "CONTEXT");
   const contextRel = relMilestoneFile(base, mid, "CONTEXT");
   if (contextPath) docList.push(`- Milestone context (reference only): \`${contextRel}\``);
@@ -1901,6 +1901,6 @@ export async function buildRewriteDocsPrompt(
     sliceTitle: sTitle,
     overrideContent,
     documentList,
-    overridesPath: relGsdRootFile("OVERRIDES"),
+    overridesPath: relHxRootFile("OVERRIDES"),
   });
 }

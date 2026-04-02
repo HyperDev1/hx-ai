@@ -15,7 +15,7 @@ import { loadPrompt } from "./prompt-loader.js";
 import { autoCommitCurrentBranch, getMainBranch, resolveGitHeadPath, nudgeGitBranchCache } from "./worktree.js";
 import { runWorktreePostCreateHook } from "./auto-worktree.js";
 import { showConfirm } from "../shared/tui.js";
-import { gsdRoot, milestonesDir } from "./paths.js";
+import { hxRoot, milestonesDir } from "./paths.js";
 import {
   createWorktree,
   listWorktrees,
@@ -50,7 +50,7 @@ export function getWorktreeOriginalCwd(): string | null {
 export function getActiveWorktreeName(): string | null {
   if (!originalCwd) return null;
   const cwd = process.cwd();
-  const wtDir = join(originalCwd, ".gsd", "worktrees");
+  const wtDir = join(originalCwd, ".hx", "worktrees");
   if (!cwd.startsWith(wtDir)) return null;
   const rel = cwd.slice(wtDir.length + 1);
   const name = rel.split("/")[0] ?? rel.split("\\")[0];
@@ -299,7 +299,7 @@ function clearGSDPlans(wtPath: string): void {
 
   // Remove root planning files — PROJECT.md, DECISIONS.md, QUEUE.md, REQUIREMENTS.md
   // Keep STATE.md (gitignored, will be rebuilt) and other runtime files
-  const root = gsdRoot(wtPath);
+  const root = hxRoot(wtPath);
   const planningFiles = ["PROJECT.md", "DECISIONS.md", "QUEUE.md", "REQUIREMENTS.md"];
   for (const file of planningFiles) {
     const filePath = join(root, file);
@@ -605,7 +605,7 @@ async function handleMerge(
     for (const s of numstat) { totalAdded += s.added; totalRemoved += s.removed; }
 
     // Split files into code vs GSD for the preview
-    const isGSD = (f: string) => f.startsWith(".gsd/");
+    const isGSD = (f: string) => f.startsWith(".hx/");
     const codeChanges = diffSummary.added.filter(f => !isGSD(f)).length
       + diffSummary.modified.filter(f => !isGSD(f)).length
       + diffSummary.removed.filter(f => !isGSD(f)).length;
@@ -664,8 +664,8 @@ async function handleMerge(
     const commitMessage = `${commitType}: merge worktree ${name}\n\nGSD-Worktree: ${name}`;
 
     // Reconcile worktree DB into main DB before squash merge
-    const wtDbPath = join(worktreePath(basePath, name), ".gsd", "gsd.db");
-    const mainDbPath = join(basePath, ".gsd", "gsd.db");
+    const wtDbPath = join(worktreePath(basePath, name), ".hx", "hx.db");
+    const mainDbPath = join(basePath, ".hx", "hx.db");
     if (existsSync(wtDbPath) && existsSync(mainDbPath)) {
       try {
         const { reconcileWorktreeDb } = await import("./gsd-db.js");

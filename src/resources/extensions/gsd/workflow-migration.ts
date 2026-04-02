@@ -29,7 +29,7 @@ export function needsAutoMigration(basePath: string): boolean {
   }
 
   // Check if .gsd/milestones/ directory exists
-  const milestonesDir = join(basePath, ".gsd", "milestones");
+  const milestonesDir = join(basePath, ".hx", "milestones");
   if (!existsSync(milestonesDir)) return false;
 
   return true;
@@ -58,7 +58,7 @@ export function migrateFromMarkdown(basePath: string): void {
     return;
   }
 
-  const milestonesDir = join(basePath, ".gsd", "milestones");
+  const milestonesDir = join(basePath, ".hx", "milestones");
   if (!existsSync(milestonesDir)) {
     process.stderr.write("workflow-migration: no .gsd/milestones/ directory found, nothing to migrate\n");
     return;
@@ -275,7 +275,7 @@ export function validateMigration(basePath: string): { discrepancies: string[] }
   const engineTaskCount = engTasks ? (engTasks["cnt"] as number) : 0;
 
   // Count from markdown
-  const milestonesDir = join(basePath, ".gsd", "milestones");
+  const milestonesDir = join(basePath, ".hx", "milestones");
   if (!existsSync(milestonesDir)) {
     return { discrepancies };
   }

@@ -18,7 +18,7 @@
  */
 
 import { readFileSync, readdirSync, existsSync } from "node:fs";
-import { GSDError, GSD_PARSE_ERROR } from "./errors.js";
+import { HXError, HX_PARSE_ERROR } from "./errors.js";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { homedir } from "node:os";
@@ -38,8 +38,8 @@ function resolveExtensionDir(): string {
   if (existsSync(join(moduleDir, "prompts"))) return moduleDir;
 
   // Fallback: user-local agent directory
-  const gsdHome = process.env.GSD_HOME || join(homedir(), ".gsd");
-  const agentGsdDir = join(gsdHome, "agent", "extensions", "gsd");
+  const hxHome = process.env.HX_HOME || join(homedir(), ".hx");
+  const agentGsdDir = join(hxHome, "agent", "extensions", "gsd");
   if (existsSync(join(agentGsdDir, "prompts"))) return agentGsdDir;
 
   // Last resort: return the module dir (warmCache will silently handle the miss)
@@ -124,8 +124,8 @@ export function loadPrompt(name: string, vars: Record<string, string> = {}): str
       .map(m => m.slice(2, -2))
       .filter(key => !(key in effectiveVars));
     if (missing.length > 0) {
-      throw new GSDError(
-        GSD_PARSE_ERROR,
+      throw new HXError(
+        HX_PARSE_ERROR,
         `loadPrompt("${name}"): template declares {{${missing.join("}}, {{")}}}} but no value was provided. ` +
         `This usually means the extension code in memory is older than the template on disk. ` +
         `Restart pi to reload the extension.`,

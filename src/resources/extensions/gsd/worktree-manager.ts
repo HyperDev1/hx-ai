@@ -18,7 +18,7 @@
 import { existsSync, mkdirSync, readFileSync, realpathSync, rmSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { join, resolve, sep } from "node:path";
-import { GSDError, GSD_PARSE_ERROR, GSD_STALE_STATE, GSD_LOCK_HELD, GSD_GIT_ERROR, GSD_MERGE_CONFLICT } from "./errors.js";
+import { HXError, HX_PARSE_ERROR, HX_STALE_STATE, HX_LOCK_HELD, HX_GIT_ERROR, HX_MERGE_CONFLICT } from "./errors.js";
 import { logWarning } from "./workflow-logger.js";
 import {
   nativeBranchDelete,
@@ -102,7 +102,7 @@ export function resolveGitDir(basePath: string): string {
 }
 
 export function worktreesDir(basePath: string): string {
-  return join(basePath, ".gsd", "worktrees");
+  return join(basePath, ".hx", "worktrees");
 }
 
 export function worktreePath(basePath: string, name: string): string {
@@ -124,7 +124,7 @@ export function worktreeBranchName(name: string): string {
 export function createWorktree(basePath: string, name: string, opts: { branch?: string; startPoint?: string; reuseExistingBranch?: boolean } = {}): WorktreeInfo {
   // Validate name: alphanumeric, hyphens, underscores only
   if (!/^[a-zA-Z0-9_-]+$/.test(name)) {
-    throw new GSDError(GSD_PARSE_ERROR, `Invalid worktree name "${name}". Use only letters, numbers, hyphens, and underscores.`);
+    throw new HXError(HX_PARSE_ERROR, `Invalid worktree name "${name}". Use only letters, numbers, hyphens, and underscores.`);
   }
 
   const wtPath = worktreePath(basePath, name);
@@ -140,7 +140,7 @@ export function createWorktree(basePath: string, name: string, opts: { branch?: 
       logWarning("reconcile", `Removing stale worktree directory (no .git file): ${wtPath}`, { worktree: name });
       rmSync(wtPath, { recursive: true, force: true });
     } else {
-      throw new GSDError(GSD_STALE_STATE, `Worktree "${name}" already exists at ${wtPath}`);
+      throw new HXError(HX_STALE_STATE, `Worktree "${name}" already exists at ${wtPath}`);
     }
   }
 
@@ -164,8 +164,8 @@ export function createWorktree(basePath: string, name: string, opts: { branch?: 
     const branchInUse = worktreeEntries.some(entry => entry.branch === branch);
 
     if (branchInUse) {
-      throw new GSDError(
-        GSD_LOCK_HELD,
+      throw new HXError(
+        HX_LOCK_HELD,
         `Branch "${branch}" is already in use by another worktree. ` +
         `Remove the existing worktree first with /worktree remove ${name}.`,
       );
@@ -205,7 +205,7 @@ export function listWorktrees(basePath: string): WorktreeInfo[] {
   const seenRoots = new Set<string>();
   const worktreeRoots = baseVariants
     .map(baseVariant => {
-      const path = join(baseVariant, ".gsd", "worktrees");
+      const path = join(baseVariant, ".hx", "worktrees");
       return {
         normalized: normalizePathForComparison(path),
       };
@@ -374,8 +374,8 @@ export function removeWorktree(
 }
 
 /** Paths to skip in all worktree diffs (internal/runtime artifacts). */
-const SKIP_PATHS = [".gsd/worktrees/", ".gsd/runtime/", ".gsd/activity/"];
-const SKIP_EXACT = [".gsd/STATE.md", ".gsd/auto.lock", ".gsd/metrics.json"];
+const SKIP_PATHS = [".hx/worktrees/", ".hx/runtime/", ".hx/activity/"];
+const SKIP_EXACT = [".hx/STATE.md", ".hx/auto.lock", ".hx/metrics.json"];
 
 function shouldSkipPath(filePath: string): boolean {
   if (SKIP_PATHS.some(p => filePath.startsWith(p))) return true;
@@ -414,7 +414,7 @@ export function diffWorktreeGSD(basePath: string, name: string): WorktreeDiffSum
   const branch = worktreeBranchName(name);
   const mainBranch = nativeDetectMainBranch(basePath);
 
-  const entries = nativeDiffNameStatus(basePath, mainBranch, branch, ".gsd/", true);
+  const entries = nativeDiffNameStatus(basePath, mainBranch, branch, ".hx/", true);
 
   return parseDiffNameStatus(entries);
 }
@@ -460,7 +460,7 @@ export function getWorktreeGSDDiff(basePath: string, name: string): string {
   const branch = worktreeBranchName(name);
   const mainBranch = nativeDetectMainBranch(basePath);
 
-  return nativeDiffContent(basePath, mainBranch, branch, ".gsd/", undefined, true);
+  return nativeDiffContent(basePath, mainBranch, branch, ".hx/", undefined, true);
 }
 
 /**
@@ -471,7 +471,7 @@ export function getWorktreeCodeDiff(basePath: string, name: string): string {
   const branch = worktreeBranchName(name);
   const mainBranch = nativeDetectMainBranch(basePath);
 
-  return nativeDiffContent(basePath, mainBranch, branch, undefined, ".gsd/", true);
+  return nativeDiffContent(basePath, mainBranch, branch, undefined, ".hx/", true);
 }
 
 /**
@@ -497,12 +497,12 @@ export function mergeWorktreeToMain(basePath: string, name: string, commitMessag
   const current = nativeGetCurrentBranch(basePath);
 
   if (current !== mainBranch) {
-    throw new GSDError(GSD_GIT_ERROR, `Must be on ${mainBranch} to merge. Currently on ${current}.`);
+    throw new HXError(HX_GIT_ERROR, `Must be on ${mainBranch} to merge. Currently on ${current}.`);
   }
 
   const result = nativeMergeSquash(basePath, branch);
   if (!result.success) {
-    throw new GSDError(GSD_MERGE_CONFLICT, `Merge conflicts detected in: ${result.conflicts.join(", ")}`);
+    throw new HXError(HX_MERGE_CONFLICT, `Merge conflicts detected in: ${result.conflicts.join(", ")}`);
   }
 
   nativeCommit(basePath, commitMessage);

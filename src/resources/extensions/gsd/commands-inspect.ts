@@ -7,7 +7,7 @@
 import type { ExtensionCommandContext } from "@gsd/pi-coding-agent";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { gsdRoot } from "./paths.js";
+import { hxRoot } from "./paths.js";
 import { getErrorMessage } from "./error-utils.js";
 
 export interface InspectData {
@@ -50,8 +50,8 @@ export async function handleInspect(ctx: ExtensionCommandContext): Promise<void>
     const { isDbAvailable, _getAdapter, openDatabase } = await import("./gsd-db.js");
 
     if (!isDbAvailable()) {
-      const gsdDir = gsdRoot(process.cwd());
-      const dbPath = join(gsdDir, "gsd.db");
+      const gsdDir = hxRoot(process.cwd());
+      const dbPath = join(gsdDir, "hx.db");
       if (!existsSync(gsdDir) || !existsSync(dbPath) || !openDatabase(dbPath)) {
         ctx.ui.notify("No GSD database available. Run /gsd auto to create one.", "info");
         return;
@@ -92,7 +92,7 @@ export async function handleInspect(ctx: ExtensionCommandContext): Promise<void>
 
     ctx.ui.notify(formatInspectOutput(data), "info");
   } catch (err) {
-    process.stderr.write(`gsd-db: /gsd inspect failed: ${getErrorMessage(err)}\n`);
+    process.stderr.write(`hx-db: /gsd inspect failed: ${getErrorMessage(err)}\n`);
     ctx.ui.notify("Failed to inspect GSD database. Check stderr for details.", "error");
   }
 }

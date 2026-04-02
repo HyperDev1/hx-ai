@@ -138,7 +138,7 @@ export async function handleChangelog(
   }
 
   // ── Determine version filter ────────────────────────────────────────────
-  const currentVersion = process.env.GSD_VERSION || "";
+  const currentVersion = process.env.HX_VERSION || "";
   let sinceVersion: string | undefined;
   let showCurrentOnly = false;
 
@@ -167,7 +167,7 @@ export async function handleChangelog(
   if (showCurrentOnly) {
     if (!currentVersion) {
       ctx.ui.notify(
-        "GSD_VERSION is not set — cannot determine current release. Provide a version instead.",
+        "HX_VERSION is not set — cannot determine current release. Provide a version instead.",
         "warning",
       );
       return;

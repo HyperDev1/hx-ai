@@ -1,8 +1,8 @@
 /**
- * GSD Repo Identity — external state directory primitives.
+ * HX Repo Identity — external state directory primitives.
  *
  * Computes a stable per-repo identity hash, resolves the external
- * `~/.gsd/projects/<hash>/` state directory, and manages the
+ * `~/.hx/projects/<hash>/` state directory, and manages the
  * `<project>/.gsd → external` symlink.
  */
 
@@ -12,7 +12,7 @@ import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, realpathSy
 import { homedir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 
-const gsdHome = process.env.GSD_HOME || join(homedir(), ".gsd");
+const hxHome = process.env.HX_HOME || join(homedir(), ".hx");
 
 // ─── Repo Metadata ───────────────────────────────────────────────────────────
 
@@ -125,7 +125,7 @@ export function isInheritedRepo(basePath: string): boolean {
 
     // The git root is a proper ancestor. Check whether it already has .gsd
     // (i.e. the parent project was initialised with GSD).
-    if (isProjectGsd(join(root, ".gsd"))) return false;
+    if (isProjectGsd(join(root, ".hx"))) return false;
 
     // Walk up from basePath's parent to the git root checking for .gsd.
     // Start at dirname(normalizedBase), NOT normalizedBase itself — finding
@@ -133,7 +133,7 @@ export function isInheritedRepo(basePath: string): boolean {
     // says nothing about whether the git repo is inherited from an ancestor.
     let dir = dirname(normalizedBase);
     while (dir !== normalizedRoot && dir !== dirname(dir)) {
-      if (isProjectGsd(join(dir, ".gsd"))) return false;
+      if (isProjectGsd(join(dir, ".hx"))) return false;
       dir = dirname(dir);
     }
 
@@ -168,7 +168,7 @@ function isProjectGsd(gsdPath: string): boolean {
     // Recompute gsdHome dynamically so env overrides (GSD_HOME) are
     // picked up at call time, not just at module load time.
     if (stat.isDirectory()) {
-      const currentGsdHome = process.env.GSD_HOME || join(homedir(), ".gsd");
+      const currentGsdHome = process.env.HX_HOME || join(homedir(), ".hx");
       const normalizedGsdPath = canonicalizeExistingPath(gsdPath);
       const normalizedGsdHome = canonicalizeExistingPath(currentGsdHome);
       if (normalizedGsdPath === normalizedGsdHome) return false;
@@ -273,7 +273,7 @@ export function validateProjectId(id: string): boolean {
 /**
  * Compute a stable identity for a repository.
  *
- * If `GSD_PROJECT_ID` is set, returns it directly (validation is expected
+ * If `HX_PROJECT_ID` is set, returns it directly (validation is expected
  * to have already happened at startup via `validateProjectId`).
  *
  * Otherwise returns SHA-256 of `${remoteUrl}\n${resolvedRoot}`, truncated
@@ -281,7 +281,7 @@ export function validateProjectId(id: string): boolean {
  * regardless of which worktree the caller is inside.
  */
 export function repoIdentity(basePath: string): string {
-  const projectId = process.env.GSD_PROJECT_ID;
+  const projectId = process.env.HX_PROJECT_ID;
   if (projectId) {
     return projectId;
   }
@@ -296,46 +296,46 @@ export function repoIdentity(basePath: string): string {
 /**
  * Compute the external GSD state directory for a repository.
  *
- * Returns `$GSD_STATE_DIR/projects/<hash>` if `GSD_STATE_DIR` is set,
- * otherwise `~/.gsd/projects/<hash>`.
+ * Returns `$HX_STATE_DIR/projects/<hash>` if `HX_STATE_DIR` is set,
+ * otherwise `~/.hx/projects/<hash>`.
  */
-export function externalGsdRoot(basePath: string): string {
-  const base = process.env.GSD_STATE_DIR || gsdHome;
+export function externalHxRoot(basePath: string): string {
+  const base = process.env.HX_STATE_DIR || hxHome;
   return join(base, "projects", repoIdentity(basePath));
 }
 
 /**
  * Resolve the root directory that stores project-scoped external state.
- * Honors GSD_STATE_DIR override before falling back to GSD_HOME.
+ * Honors HX_STATE_DIR override before falling back to HX_HOME.
  */
 export function externalProjectsRoot(): string {
-  const base = process.env.GSD_STATE_DIR || gsdHome;
+  const base = process.env.HX_STATE_DIR || hxHome;
   return join(base, "projects");
 }
 
 // ─── Numbered Variant Cleanup ────────────────────────────────────────────────
 
 /**
- * macOS collision pattern: `.gsd 2`, `.gsd 3`, `.gsd 4`, etc.
+ * macOS collision pattern: `.hx 2`, `.hx 3`, `.hx 4`, etc.
  *
  * When `symlinkSync` (or Finder) tries to create `.gsd` but a real directory
  * already exists at that path, macOS APFS silently renames the new entry to
- * `.gsd 2`, then `.gsd 3`, and so on. These numbered variants confuse GSD
+ * `.hx 2`, then `.hx 3`, and so on. These numbered variants confuse GSD
  * because the canonical `.gsd` path no longer resolves to the external state
  * directory, making tracked planning files appear deleted.
  *
  * This helper scans the project root for entries matching `.gsd <digits>` and
  * removes them. It is called early in `ensureGsdSymlink()` so that the
- * canonical `.gsd` path is always the one in use.
+ * canonical `.hx` path is always the one in use.
  */
-const GSD_NUMBERED_VARIANT_RE = /^\.gsd \d+$/;
+const HX_NUMBERED_VARIANT_RE = /^\.hx \d+$/;
 
-export function cleanNumberedGsdVariants(projectPath: string): string[] {
+export function cleanNumberedHxVariants(projectPath: string): string[] {
   const removed: string[] = [];
   try {
     const entries = readdirSync(projectPath);
     for (const entry of entries) {
-      if (GSD_NUMBERED_VARIANT_RE.test(entry)) {
+      if (HX_NUMBERED_VARIANT_RE.test(entry)) {
         const fullPath = join(projectPath, entry);
         try {
           rmSync(fullPath, { recursive: true, force: true });
@@ -354,7 +354,7 @@ export function cleanNumberedGsdVariants(projectPath: string): string[] {
 // ─── Symlink Management ─────────────────────────────────────────────────────
 
 /**
- * Ensure the `<project>/.gsd` symlink points to the external state directory.
+ * Ensure the `<project>/.hx` symlink points to the external state directory.
  *
  * 1. Clean up any macOS numbered collision variants (`.gsd 2`, `.gsd 3`, etc.)
  * 2. mkdir -p the external dir
@@ -364,18 +364,18 @@ export function cleanNumberedGsdVariants(projectPath: string): string[] {
  *
  * Returns the resolved external path.
  */
-export function ensureGsdSymlink(projectPath: string): string {
-  const externalPath = externalGsdRoot(projectPath);
-  const localGsd = join(projectPath, ".gsd");
+export function ensureHxSymlink(projectPath: string): string {
+  const externalPath = externalHxRoot(projectPath);
+  const localGsd = join(projectPath, ".hx");
   const inWorktree = isInsideWorktree(projectPath);
 
-  // Guard: Never create a symlink at ~/.gsd — that's the user-level GSD home,
+  // Guard: Never create a symlink at ~/.hx — that's the user-level HX home,
   // not a project .gsd. This can happen if resolveProjectRoot() or
   // escapeStaleWorktree() returned ~ as the project root (#1676).
-  const localGsdNormalized = localGsd.replaceAll("\\", "/");
-  const gsdHomePath = gsdHome.replaceAll("\\", "/");
-  if (localGsdNormalized === gsdHomePath) {
-    return localGsd;
+  const localHxNormalized = localHx.replaceAll("\\", "/");
+  const hxHomePath = hxHome.replaceAll("\\", "/");
+  if (localHxNormalized === hxHomePath) {
+    return localHx;
   }
 
   // Guard: If projectPath is a plain subdirectory (not a worktree) of a git
@@ -389,7 +389,7 @@ export function ensureGsdSymlink(projectPath: string): string {
       const normalizedProject = canonicalizeExistingPath(projectPath);
       const normalizedRoot = canonicalizeExistingPath(gitRoot);
       if (normalizedProject !== normalizedRoot) {
-        const rootGsd = join(gitRoot, ".gsd");
+        const rootGsd = join(gitRoot, ".hx");
         if (existsSync(rootGsd)) {
           try {
             const rootStat = lstatSync(rootGsd);
@@ -408,7 +408,7 @@ export function ensureGsdSymlink(projectPath: string): string {
 
   // Clean up macOS numbered collision variants (.gsd 2, .gsd 3, etc.) before
   // any existence checks — otherwise they accumulate and confuse state (#2205).
-  cleanNumberedGsdVariants(projectPath);
+  cleanNumberedHxVariants(projectPath);
 
   // Ensure external directory exists
   mkdirSync(externalPath, { recursive: true });
@@ -417,19 +417,19 @@ export function ensureGsdSymlink(projectPath: string): string {
   writeRepoMeta(externalPath, getRemoteUrl(projectPath), resolveGitRoot(projectPath));
 
   const replaceWithSymlink = (): string => {
-    rmSync(localGsd, { recursive: true, force: true });
+    rmSync(localHx, { recursive: true, force: true });
     symlinkSync(externalPath, localGsd, "junction");
     return externalPath;
   };
 
-  if (!existsSync(localGsd)) {
+  if (!existsSync(localHx)) {
     // Nothing exists yet — create symlink
     symlinkSync(externalPath, localGsd, "junction");
     return externalPath;
   }
 
   try {
-    const stat = lstatSync(localGsd);
+    const stat = lstatSync(localHx);
 
     if (stat.isSymbolicLink()) {
       // Already a symlink — verify it points to the right place
@@ -451,7 +451,7 @@ export function ensureGsdSymlink(projectPath: string): string {
       // In worktrees, keep the directory in place and let syncGsdStateToWorktree
       // refresh its contents. Replacing a git-tracked .gsd directory with a
       // symlink makes git think tracked planning files were deleted.
-      return localGsd;
+      return localHx;
     }
   } catch {
     // lstat failed — path exists but we can't stat it

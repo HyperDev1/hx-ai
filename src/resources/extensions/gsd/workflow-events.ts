@@ -49,7 +49,7 @@ export function appendEvent(
     hash,
     session_id: ENGINE_SESSION_ID,
   };
-  const dir = join(basePath, ".gsd");
+  const dir = join(basePath, ".hx");
   mkdirSync(dir, { recursive: true });
   appendFileSync(join(dir, "event-log.jsonl"), JSON.stringify(fullEvent) + "\n", "utf-8");
 }
@@ -121,8 +121,8 @@ export function compactMilestoneEvents(
   basePath: string,
   milestoneId: string,
 ): { archived: number } {
-  const logPath = join(basePath, ".gsd", "event-log.jsonl");
-  const archivePath = join(basePath, ".gsd", `event-log-${milestoneId}.jsonl.archived`);
+  const logPath = join(basePath, ".hx", "event-log.jsonl");
+  const archivePath = join(basePath, ".hx", `event-log-${milestoneId}.jsonl.archived`);
 
   const allEvents = readEvents(logPath);
   const toArchive = allEvents.filter(

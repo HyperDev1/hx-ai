@@ -1,4 +1,4 @@
-// GSD Database Abstraction Layer
+// HX Database Abstraction Layer
 // Provides a SQLite database with provider fallback chain:
 //   node:sqlite (built-in) → better-sqlite3 (npm) → null (unavailable)
 //
@@ -9,7 +9,7 @@ import { createRequire } from "node:module";
 import { existsSync, copyFileSync, mkdirSync, realpathSync } from "node:fs";
 import { dirname } from "node:path";
 import type { Decision, Requirement, GateRow, GateId, GateScope, GateStatus, GateVerdict } from "./types.js";
-import { GSDError, GSD_STALE_STATE } from "./errors.js";
+import { HXError, HX_STALE_STATE } from "./errors.js";
 
 const _require = createRequire(import.meta.url);
 
@@ -825,7 +825,7 @@ export function vacuumDatabase(): void {
 let _txDepth = 0;
 
 export function transaction<T>(fn: () => T): T {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
 
   // Re-entrant: if already inside a transaction, just run fn() without
   // starting a new one. SQLite does not support nested BEGIN/COMMIT.
@@ -853,7 +853,7 @@ export function transaction<T>(fn: () => T): T {
 }
 
 export function insertDecision(d: Omit<Decision, "seq">): void {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   currentDb.prepare(
     `INSERT INTO decisions (id, when_context, scope, decision, choice, rationale, revisable, made_by, superseded_by)
      VALUES (:id, :when_context, :scope, :decision, :choice, :rationale, :revisable, :made_by, :superseded_by)`,
@@ -906,7 +906,7 @@ export function getActiveDecisions(): Decision[] {
 }
 
 export function insertRequirement(r: Requirement): void {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   currentDb.prepare(
     `INSERT INTO requirements (id, class, status, description, why, source, primary_owner, supporting_slices, validation, notes, full_content, superseded_by)
      VALUES (:id, :class, :status, :description, :why, :source, :primary_owner, :supporting_slices, :validation, :notes, :full_content, :superseded_by)`,
@@ -984,7 +984,7 @@ export function _resetProvider(): void {
 }
 
 export function upsertDecision(d: Omit<Decision, "seq">): void {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   currentDb.prepare(
     `INSERT OR REPLACE INTO decisions (id, when_context, scope, decision, choice, rationale, revisable, made_by, superseded_by)
      VALUES (:id, :when_context, :scope, :decision, :choice, :rationale, :revisable, :made_by, :superseded_by)`,
@@ -1002,7 +1002,7 @@ export function upsertDecision(d: Omit<Decision, "seq">): void {
 }
 
 export function upsertRequirement(r: Requirement): void {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   currentDb.prepare(
     `INSERT OR REPLACE INTO requirements (id, class, status, description, why, source, primary_owner, supporting_slices, validation, notes, full_content, superseded_by)
      VALUES (:id, :class, :status, :description, :why, :source, :primary_owner, :supporting_slices, :validation, :notes, :full_content, :superseded_by)`,
@@ -1035,7 +1035,7 @@ export function insertArtifact(a: {
   task_id: string | null;
   full_content: string;
 }): void {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   currentDb.prepare(
     `INSERT OR REPLACE INTO artifacts (path, artifact_type, milestone_id, slice_id, task_id, full_content, imported_at)
      VALUES (:path, :artifact_type, :milestone_id, :slice_id, :task_id, :full_content, :imported_at)`,
@@ -1091,7 +1091,7 @@ export function insertMilestone(m: {
   depends_on?: string[];
   planning?: Partial<MilestonePlanningRecord>;
 }): void {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   currentDb.prepare(
     `INSERT OR IGNORE INTO milestones (
       id, title, status, depends_on, created_at,
@@ -1125,7 +1125,7 @@ export function insertMilestone(m: {
 }
 
 export function upsertMilestonePlanning(milestoneId: string, planning: Partial<MilestonePlanningRecord>): void {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   currentDb.prepare(
     `UPDATE milestones SET
       vision = COALESCE(:vision, vision),
@@ -1167,7 +1167,7 @@ export function insertSlice(s: {
   sequence?: number;
   planning?: Partial<SlicePlanningRecord>;
 }): void {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   currentDb.prepare(
     `INSERT OR IGNORE INTO slices (
       milestone_id, id, title, status, risk, depends, demo, created_at,
@@ -1195,7 +1195,7 @@ export function insertSlice(s: {
 }
 
 export function upsertSlicePlanning(milestoneId: string, sliceId: string, planning: Partial<SlicePlanningRecord>): void {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   currentDb.prepare(
     `UPDATE slices SET
       goal = COALESCE(:goal, goal),
@@ -1234,7 +1234,7 @@ export function insertTask(t: {
   sequence?: number;
   planning?: Partial<TaskPlanningRecord>;
 }): void {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   currentDb.prepare(
     `INSERT INTO tasks (
       milestone_id, slice_id, id, title, status, one_liner, narrative,
@@ -1298,7 +1298,7 @@ export function insertTask(t: {
 }
 
 export function updateTaskStatus(milestoneId: string, sliceId: string, taskId: string, status: string, completedAt?: string): void {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   currentDb.prepare(
     `UPDATE tasks SET status = :status, completed_at = :completed_at
      WHERE milestone_id = :milestone_id AND slice_id = :slice_id AND id = :id`,
@@ -1312,7 +1312,7 @@ export function updateTaskStatus(milestoneId: string, sliceId: string, taskId: s
 }
 
 export function upsertTaskPlanning(milestoneId: string, sliceId: string, taskId: string, planning: Partial<TaskPlanningRecord>): void {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   currentDb.prepare(
     `UPDATE tasks SET
       title = COALESCE(:title, title),
@@ -1393,7 +1393,7 @@ export function getSlice(milestoneId: string, sliceId: string): SliceRow | null 
 }
 
 export function updateSliceStatus(milestoneId: string, sliceId: string, status: string, completedAt?: string): void {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   currentDb.prepare(
     `UPDATE slices SET status = :status, completed_at = :completed_at
      WHERE milestone_id = :milestone_id AND id = :id`,
@@ -1406,14 +1406,14 @@ export function updateSliceStatus(milestoneId: string, sliceId: string, status: 
 }
 
 export function setTaskSummaryMd(milestoneId: string, sliceId: string, taskId: string, md: string): void {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   currentDb.prepare(
     `UPDATE tasks SET full_summary_md = :md WHERE milestone_id = :mid AND slice_id = :sid AND id = :tid`,
   ).run({ ":mid": milestoneId, ":sid": sliceId, ":tid": taskId, ":md": md });
 }
 
 export function setSliceSummaryMd(milestoneId: string, sliceId: string, summaryMd: string, uatMd: string): void {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   currentDb.prepare(
     `UPDATE slices SET full_summary_md = :summary_md, full_uat_md = :uat_md WHERE milestone_id = :mid AND id = :sid`,
   ).run({ ":mid": milestoneId, ":sid": sliceId, ":summary_md": summaryMd, ":uat_md": uatMd });
@@ -1503,7 +1503,7 @@ export function insertVerificationEvidence(e: {
   verdict: string;
   durationMs: number;
 }): void {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   currentDb.prepare(
     `INSERT INTO verification_evidence (task_id, slice_id, milestone_id, command, exit_code, verdict, duration_ms, created_at)
      VALUES (:task_id, :slice_id, :milestone_id, :command, :exit_code, :verdict, :duration_ms, :created_at)`,
@@ -1602,7 +1602,7 @@ export function getMilestone(id: string): MilestoneRow | null {
  * See: https://github.com/gsd-build/gsd-2/issues/2694
  */
 export function updateMilestoneStatus(milestoneId: string, status: string, completedAt?: string | null): void {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   currentDb.prepare(
     `UPDATE milestones SET status = :status, completed_at = :completed_at WHERE id = :id`,
   ).run({ ":status": status, ":completed_at": completedAt ?? null, ":id": milestoneId });
@@ -1925,7 +1925,7 @@ export function insertReplanHistory(entry: {
   previousArtifactPath?: string | null;
   replacementArtifactPath?: string | null;
 }): void {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   // INSERT OR REPLACE: idempotent on (milestone_id, slice_id, task_id) via schema v11 unique index.
   // Retrying the same replan silently updates summary instead of accumulating duplicate rows.
   currentDb.prepare(
@@ -1951,7 +1951,7 @@ export function insertAssessment(entry: {
   scope: string;
   fullContent: string;
 }): void {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   currentDb.prepare(
     `INSERT OR REPLACE INTO assessments (path, milestone_id, slice_id, task_id, status, scope, full_content, created_at)
      VALUES (:path, :milestone_id, :slice_id, :task_id, :status, :scope, :full_content, :created_at)`,
@@ -1968,21 +1968,21 @@ export function insertAssessment(entry: {
 }
 
 export function deleteAssessmentByScope(milestoneId: string, scope: string): void {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   currentDb.prepare(
     `DELETE FROM assessments WHERE milestone_id = :mid AND scope = :scope`,
   ).run({ ":mid": milestoneId, ":scope": scope });
 }
 
 export function deleteVerificationEvidence(milestoneId: string, sliceId: string, taskId: string): void {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   currentDb.prepare(
     `DELETE FROM verification_evidence WHERE milestone_id = :mid AND slice_id = :sid AND task_id = :tid`,
   ).run({ ":mid": milestoneId, ":sid": sliceId, ":tid": taskId });
 }
 
 export function deleteTask(milestoneId: string, sliceId: string, taskId: string): void {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   transaction(() => {
     // Must delete verification_evidence first (FK constraint)
     currentDb!.prepare(
@@ -1995,7 +1995,7 @@ export function deleteTask(milestoneId: string, sliceId: string, taskId: string)
 }
 
 export function deleteSlice(milestoneId: string, sliceId: string): void {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   transaction(() => {
     // Cascade-style manual deletion: evidence → tasks → dependencies → slice
     currentDb!.prepare(
@@ -2022,7 +2022,7 @@ export function updateSliceFields(milestoneId: string, sliceId: string, fields: 
   depends?: string[];
   demo?: string;
 }): void {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   currentDb.prepare(
     `UPDATE slices SET
       title = COALESCE(:title, title),
@@ -2085,7 +2085,7 @@ export function insertGateRow(g: {
   taskId?: string | null;
   status?: GateStatus;
 }): void {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   currentDb.prepare(
     `INSERT OR IGNORE INTO quality_gates (milestone_id, slice_id, gate_id, scope, task_id, status)
      VALUES (:mid, :sid, :gid, :scope, :tid, :status)`,
@@ -2108,7 +2108,7 @@ export function saveGateResult(g: {
   rationale: string;
   findings: string;
 }): void {
-  if (!currentDb) throw new GSDError(GSD_STALE_STATE, "gsd-db: No database open");
+  if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   currentDb.prepare(
     `UPDATE quality_gates
      SET status = 'complete', verdict = :verdict, rationale = :rationale,

@@ -11,9 +11,9 @@
 import { join, resolve } from 'node:path';
 import { readFileSync, existsSync, statSync } from 'node:fs';
 import type { Decision, Requirement } from './types.js';
-import { resolveGsdRootFile } from './paths.js';
+import { resolveHxRootFile } from './paths.js';
 import { saveFile } from './files.js';
-import { GSDError, GSD_STALE_STATE, GSD_IO_ERROR } from './errors.js';
+import { HXError, HX_STALE_STATE, HX_IO_ERROR } from './errors.js';
 import { logWarning, logError } from './workflow-logger.js';
 import { invalidateStateCache } from './state.js';
 import { clearPathCache } from './paths.js';
@@ -284,7 +284,7 @@ export async function saveDecisionToDb(
       }));
     }
 
-    const filePath = resolveGsdRootFile(basePath, 'DECISIONS');
+    const filePath = resolveHxRootFile(basePath, 'DECISIONS');
 
     // Check if existing DECISIONS.md has freeform (non-table) content.
     // If so, preserve that content and append/update the decisions table
@@ -345,7 +345,7 @@ export async function updateRequirementInDb(
 
     const existing = db.getRequirementById(id);
     if (!existing) {
-      throw new GSDError(GSD_STALE_STATE, `Requirement ${id} not found`);
+      throw new HXError(HX_STALE_STATE, `Requirement ${id} not found`);
     }
 
     // Merge updates into existing
@@ -383,7 +383,7 @@ export async function updateRequirementInDb(
     const nonSuperseded = allRequirements.filter(r => r.superseded_by == null);
 
     const md = generateRequirementsMd(nonSuperseded);
-    const filePath = resolveGsdRootFile(basePath, 'REQUIREMENTS');
+    const filePath = resolveHxRootFile(basePath, 'REQUIREMENTS');
     try {
       await saveFile(filePath, md);
     } catch (diskErr) {
@@ -416,7 +416,7 @@ export interface SaveArtifactOpts {
 /**
  * Save an artifact to DB and write the corresponding markdown file to disk.
  * The path is relative to .gsd/ (e.g. "milestones/M001/slices/S06/tasks/T01-SUMMARY.md").
- * The full file path is computed as basePath + '.gsd/' + path.
+ * The full file path is computed as basePath + '.hx/' + path.
  */
 export async function saveArtifactToDb(
   opts: SaveArtifactOpts,
@@ -426,10 +426,10 @@ export async function saveArtifactToDb(
     const db = await import('./gsd-db.js');
 
     // Guard against path traversal before any reads/writes
-    const gsdDir = resolve(basePath, '.gsd');
-    const fullPath = resolve(basePath, '.gsd', opts.path);
+    const gsdDir = resolve(basePath, '.hx');
+    const fullPath = resolve(basePath, '.hx', opts.path);
     if (!fullPath.startsWith(gsdDir)) {
-      throw new GSDError(GSD_IO_ERROR, `saveArtifactToDb: path escapes .gsd/ directory: ${opts.path}`);
+      throw new HXError(HX_IO_ERROR, `saveArtifactToDb: path escapes .gsd/ directory: ${opts.path}`);
     }
 
     // Shrinkage guard: if the file already exists and the new content is

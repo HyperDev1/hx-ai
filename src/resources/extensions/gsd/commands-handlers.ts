@@ -9,7 +9,7 @@ import type { ExtensionAPI, ExtensionCommandContext } from "@gsd/pi-coding-agent
 import { existsSync, readFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { deriveState } from "./state.js";
-import { gsdRoot } from "./paths.js";
+import { hxRoot } from "./paths.js";
 import { appendCapture, hasPendingCaptures, loadPendingCaptures } from "./captures.js";
 import { appendOverride, appendKnowledge, findSimilarKnowledge, searchKnowledge } from "./files.js";
 import {
@@ -26,7 +26,7 @@ import { loadPrompt } from "./prompt-loader.js";
 import { loadEffectiveGSDPreferences } from "./preferences.js";
 
 export function dispatchDoctorHeal(pi: ExtensionAPI, scope: string | undefined, reportText: string, structuredIssues: string): void {
-  const workflowPath = process.env.GSD_WORKFLOW_PATH ?? join(process.env.HOME ?? "~", ".gsd", "agent", "GSD-WORKFLOW.md");
+  const workflowPath = process.env.HX_WORKFLOW_PATH ?? join(process.env.HOME ?? "~", ".hx", "agent", "GSD-WORKFLOW.md");
   const workflow = readFileSync(workflowPath, "utf-8");
   const prompt = loadPrompt("doctor-heal", {
     doctorSummary: reportText,
@@ -153,7 +153,7 @@ export async function handleCapture(args: string, ctx: ExtensionCommandContext):
   const basePath = process.cwd();
 
   // Ensure .gsd/ exists — capture should work even without a milestone
-  const gsdDir = gsdRoot(basePath);
+  const gsdDir = hxRoot(basePath);
   if (!existsSync(gsdDir)) {
     mkdirSync(gsdDir, { recursive: true });
   }
@@ -203,7 +203,7 @@ export async function handleTriage(ctx: ExtensionCommandContext, pi: ExtensionAP
     roadmapContext: roadmapContext || "(no active roadmap)",
   });
 
-  const workflowPath = process.env.GSD_WORKFLOW_PATH ?? join(process.env.HOME ?? "~", ".gsd", "agent", "GSD-WORKFLOW.md");
+  const workflowPath = process.env.HX_WORKFLOW_PATH ?? join(process.env.HOME ?? "~", ".hx", "agent", "GSD-WORKFLOW.md");
   const workflow = readFileSync(workflowPath, "utf-8");
 
   pi.sendMessage(
@@ -233,7 +233,7 @@ export async function handleSteer(change: string, ctx: ExtensionCommandContext, 
         "",
         `**Override:** ${change}`,
         "",
-        "This override has been saved to `.gsd/OVERRIDES.md` and will be injected into all future task prompts.",
+        "This override has been saved to `.hx/OVERRIDES.md` and will be injected into all future task prompts.",
         "A document rewrite unit will run before the next task to propagate this change across all active plan documents.",
         "",
         "If you are mid-task, finish your current work respecting this override. The next dispatched unit will be a document rewrite.",
@@ -249,8 +249,8 @@ export async function handleSteer(change: string, ctx: ExtensionCommandContext, 
         "",
         `**Override:** ${change}`,
         "",
-        "This override has been saved to `.gsd/OVERRIDES.md`.",
-        "Before continuing, read `.gsd/OVERRIDES.md` and update the current plan documents to reflect this change.",
+        "This override has been saved to `.hx/OVERRIDES.md`.",
+        "Before continuing, read `.hx/OVERRIDES.md` and update the current plan documents to reflect this change.",
         "Focus on: active slice plan, incomplete task plans, and DECISIONS.md.",
       ].join("\n"),
       display: false,
@@ -408,9 +408,9 @@ export async function handleKnowledgeSearch(query: string, ctx: ExtensionCommand
   }
 
   const basePath = process.cwd();
-  const { resolveGsdRootFile } = await import("./paths.js");
+  const { resolveHxRootFile } = await import("./paths.js");
   const { loadFile } = await import("./files.js");
-  const knowledgePath = resolveGsdRootFile(basePath, "KNOWLEDGE");
+  const knowledgePath = resolveHxRootFile(basePath, "KNOWLEDGE");
   const existing = await loadFile(knowledgePath);
 
   if (!existing) {
@@ -516,7 +516,7 @@ export async function handleUpdate(ctx: ExtensionCommandContext): Promise<void> 
   const { execSync } = await import("node:child_process");
 
   const NPM_PACKAGE = "gsd-pi";
-  const current = process.env.GSD_VERSION || "0.0.0";
+  const current = process.env.HX_VERSION || "0.0.0";
 
   ctx.ui.notify(`Current version: v${current}\nChecking npm registry...`, "info");
 

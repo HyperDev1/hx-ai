@@ -19,7 +19,7 @@ import {
 } from "node:fs";
 import { isAbsolute, join, sep as pathSep } from "node:path";
 import { homedir } from "node:os";
-import { GSDError, GSD_IO_ERROR, GSD_GIT_ERROR } from "./errors.js";
+import { HXError, HX_IO_ERROR, HX_GIT_ERROR } from "./errors.js";
 import {
   reconcileWorktreeDb,
   isDbAvailable,
@@ -29,7 +29,7 @@ import {
 import { atomicWriteSync } from "./atomic-write.js";
 import { execFileSync } from "node:child_process";
 import { safeCopy, safeCopyRecursive } from "./safe-fs.js";
-import { gsdRoot } from "./paths.js";
+import { hxRoot } from "./paths.js";
 import {
   createWorktree,
   removeWorktree,
@@ -64,7 +64,7 @@ import {
   nativeIsAncestor,
 } from "./native-git-bridge.js";
 
-const gsdHome = process.env.GSD_HOME || join(homedir(), ".gsd");
+const hxHome = process.env.HX_HOME || join(homedir(), ".hx");
 const PROJECT_PREFERENCES_FILE = "PREFERENCES.md";
 const LEGACY_PROJECT_PREFERENCES_FILE = "preferences.md";
 
@@ -108,7 +108,7 @@ function isSamePath(a: string, b: string): boolean {
 let originalBase: string | null = null;
 
 function clearProjectRootStateFiles(basePath: string, milestoneId: string): void {
-  const gsdDir = gsdRoot(basePath);
+  const gsdDir = hxRoot(basePath);
   const transientFiles = [
     join(gsdDir, "STATE.md"),
     join(gsdDir, "auto.lock"),
@@ -173,9 +173,9 @@ export const SAFE_AUTO_RESOLVE_PATTERNS: RegExp[] = [
 ];
 
 /** Returns true if the file path is safe to auto-resolve during merge.
- * Covers `.gsd/` state files and common build artifacts. */
+ * Covers `.hx/` state files and common build artifacts. */
 export const isSafeToAutoResolve = (filePath: string): boolean =>
-  filePath.startsWith(".gsd/") ||
+  filePath.startsWith(".hx/") ||
   SAFE_AUTO_RESOLVE_PATTERNS.some((re) => re.test(filePath));
 
 // ─── Dispatch-Level Sync (project root ↔ worktree) ──────────────────────────
@@ -195,8 +195,8 @@ export function syncProjectRootToWorktree(
   if (!worktreePath_ || !projectRoot || worktreePath_ === projectRoot) return;
   if (!milestoneId) return;
 
-  const prGsd = join(projectRoot, ".gsd");
-  const wtGsd = join(worktreePath_, ".gsd");
+  const prGsd = join(projectRoot, ".hx");
+  const wtGsd = join(worktreePath_, ".hx");
 
   // When .gsd is a symlink to the same external directory in both locations,
   // cpSync rejects the copy because source === destination (ERR_FS_CP_EINVAL).
@@ -226,7 +226,7 @@ export function syncProjectRootToWorktree(
   // Delete worktree gsd.db so it rebuilds from the freshly synced files.
   // Stale DB rows are the root cause of the infinite skip loop (#853).
   try {
-    const wtDb = join(wtGsd, "gsd.db");
+    const wtDb = join(wtGsd, "hx.db");
     if (existsSync(wtDb)) {
       unlinkSync(wtDb);
     }
@@ -249,8 +249,8 @@ export function syncStateToProjectRoot(
   if (!worktreePath_ || !projectRoot || worktreePath_ === projectRoot) return;
   if (!milestoneId) return;
 
-  const wtGsd = join(worktreePath_, ".gsd");
-  const prGsd = join(projectRoot, ".gsd");
+  const wtGsd = join(worktreePath_, ".hx");
+  const prGsd = join(projectRoot, ".hx");
 
   // When .gsd is a symlink to the same external directory in both locations,
   // cpSync rejects the copy because source === destination (ERR_FS_CP_EINVAL).
@@ -293,7 +293,7 @@ export function syncStateToProjectRoot(
  */
 export function readResourceVersion(): string | null {
   const agentDir =
-    process.env.GSD_CODING_AGENT_DIR || join(gsdHome, "agent");
+    process.env.HX_CODING_AGENT_DIR || join(hxHome, "agent");
   const manifestPath = join(agentDir, "managed-resources.json");
   try {
     const manifest = JSON.parse(readFileSync(manifestPath, "utf-8"));
@@ -327,7 +327,7 @@ export function checkResourcesStale(
  * Detect and escape a stale worktree cwd (#608).
  *
  * After milestone completion + merge, the worktree directory is removed but
- * the process cwd may still point inside `.gsd/worktrees/<MID>/`.
+ * the process cwd may still point inside `.hx/worktrees/<MID>/`.
  * When a new session starts, `process.cwd()` is passed as `base` to startAuto
  * and all subsequent writes land in the wrong directory. This function detects
  * that scenario and chdir back to the project root.
@@ -355,9 +355,9 @@ export function escapeStaleWorktree(base: string): string {
   // the string-slice heuristic matched the wrong /.gsd/ boundary. This happens
   // when .gsd is a symlink into ~/.gsd/projects/<hash> and process.cwd()
   // resolved through the symlink. Returning ~ would be catastrophic (#1676).
-  const candidateGsd = join(projectRoot, ".gsd").replaceAll("\\", "/");
-  const gsdHomePath = gsdHome.replaceAll("\\", "/");
-  if (candidateGsd === gsdHomePath || candidateGsd.startsWith(gsdHomePath + "/")) {
+  const candidateGsd = join(projectRoot, ".hx").replaceAll("\\", "/");
+  const hxHomePath = hxHome.replaceAll("\\", "/");
+  if (candidateGsd === hxHomePath || candidateGsd.startsWith(hxHomePath + "/")) {
     // Don't chdir to home — return base unchanged.
     // resolveProjectRoot() in worktree.ts has the full git-file-based recovery
     // and will be called by the caller (startAuto → projectRoot()).
@@ -381,10 +381,10 @@ export function escapeStaleWorktree(base: string): string {
  * for milestones that have a SUMMARY (fully complete).
  */
 export function cleanStaleRuntimeUnits(
-  gsdRootPath: string,
+  hxRootPath: string,
   hasMilestoneSummary: (mid: string) => boolean,
 ): number {
-  const runtimeUnitsDir = join(gsdRootPath, "runtime", "units");
+  const runtimeUnitsDir = join(hxRootPath, "runtime", "units");
   if (!existsSync(runtimeUnitsDir)) return 0;
 
   let cleaned = 0;
@@ -428,8 +428,8 @@ export function syncGsdStateToWorktree(
   mainBasePath: string,
   worktreePath_: string,
 ): { synced: string[] } {
-  const mainGsd = gsdRoot(mainBasePath);
-  const wtGsd = gsdRoot(worktreePath_);
+  const mainGsd = hxRoot(mainBasePath);
+  const wtGsd = hxRoot(worktreePath_);
   const synced: string[] = [];
 
   // If both resolve to the same directory (symlink), no sync needed
@@ -589,8 +589,8 @@ export function syncWorktreeStateBack(
   worktreePath: string,
   milestoneId: string,
 ): { synced: string[] } {
-  const mainGsd = gsdRoot(mainBasePath);
-  const wtGsd = gsdRoot(worktreePath);
+  const mainGsd = hxRoot(mainBasePath);
+  const wtGsd = hxRoot(worktreePath);
   const synced: string[] = [];
 
   // If both resolve to the same directory (symlink), no sync needed
@@ -603,8 +603,8 @@ export function syncWorktreeStateBack(
   // reconcile its hierarchy data into the project root DB before syncing
   // files. This handles in-flight worktrees that were created before the
   // upgrade to shared WAL mode.
-  const wtLocalDb = join(wtGsd, "gsd.db");
-  const mainDb = join(mainGsd, "gsd.db");
+  const wtLocalDb = join(wtGsd, "hx.db");
+  const mainDb = join(mainGsd, "hx.db");
   if (existsSync(wtLocalDb) && existsSync(mainDb)) {
     try {
       reconcileWorktreeDb(mainDb, wtLocalDb);
@@ -822,8 +822,8 @@ function reconcilePlanCheckboxes(
   wtPath: string,
   milestoneId: string,
 ): void {
-  const srcMilestone = join(projectRoot, ".gsd", "milestones", milestoneId);
-  const dstMilestone = join(wtPath, ".gsd", "milestones", milestoneId);
+  const srcMilestone = join(projectRoot, ".hx", "milestones", milestoneId);
+  const dstMilestone = join(wtPath, ".hx", "milestones", milestoneId);
   if (!existsSync(srcMilestone) || !existsSync(dstMilestone)) return;
 
   // Walk all markdown files in the milestone directory (plans, summaries, etc.)
@@ -967,8 +967,8 @@ export function createAutoWorktree(
   } catch (err) {
     // If chdir fails, the worktree was created but we couldn't enter it.
     // Don't store originalBase -- caller can retry or clean up.
-    throw new GSDError(
-      GSD_IO_ERROR,
+    throw new HXError(
+      HX_IO_ERROR,
       `Auto-worktree created at ${info.path} but chdir failed: ${err instanceof Error ? err.message : String(err)}`,
     );
   }
@@ -985,8 +985,8 @@ export function createAutoWorktree(
  * Best-effort — failures are non-fatal since auto-mode can recreate artifacts.
  */
 function copyPlanningArtifacts(srcBase: string, wtPath: string): void {
-  const srcGsd = join(srcBase, ".gsd");
-  const dstGsd = join(wtPath, ".gsd");
+  const srcGsd = join(srcBase, ".hx");
+  const dstGsd = join(wtPath, ".hx");
   if (!existsSync(srcGsd)) return;
 
   // Copy milestones/ directory (planning files, roadmaps, plans, research)
@@ -1047,8 +1047,8 @@ export function teardownAutoWorktree(
     process.chdir(originalBasePath);
     originalBase = null;
   } catch (err) {
-    throw new GSDError(
-      GSD_IO_ERROR,
+    throw new HXError(
+      HX_IO_ERROR,
       `Failed to chdir back to ${originalBasePath} during teardown: ${err instanceof Error ? err.message : String(err)}`,
     );
   }
@@ -1088,7 +1088,7 @@ export function isInAutoWorktree(basePath: string): boolean {
   if (!originalBase) return false;
   const cwd = process.cwd();
   const resolvedBase = existsSync(basePath) ? realpathSync(basePath) : basePath;
-  const wtDir = join(resolvedBase, ".gsd", "worktrees");
+  const wtDir = join(resolvedBase, ".hx", "worktrees");
   if (!cwd.startsWith(wtDir)) return false;
   const branch = nativeGetCurrentBranch(cwd);
   return branch.startsWith("milestone/");
@@ -1135,8 +1135,8 @@ export function enterAutoWorktree(
 ): string {
   const p = worktreePath(basePath, milestoneId);
   if (!existsSync(p)) {
-    throw new GSDError(
-      GSD_IO_ERROR,
+    throw new HXError(
+      HX_IO_ERROR,
       `Auto-worktree for ${milestoneId} does not exist at ${p}`,
     );
   }
@@ -1144,23 +1144,23 @@ export function enterAutoWorktree(
   // Validate this is a real git worktree, not a stray directory (#695)
   const gitPath = join(p, ".git");
   if (!existsSync(gitPath)) {
-    throw new GSDError(
-      GSD_GIT_ERROR,
+    throw new HXError(
+      HX_GIT_ERROR,
       `Auto-worktree path ${p} exists but is not a git worktree (no .git)`,
     );
   }
   try {
     const content = readFileSync(gitPath, "utf8").trim();
     if (!content.startsWith("gitdir: ")) {
-      throw new GSDError(
-        GSD_GIT_ERROR,
+      throw new HXError(
+        HX_GIT_ERROR,
         `Auto-worktree path ${p} has a .git but it is not a worktree gitdir pointer`,
       );
     }
   } catch (err) {
     if (err instanceof Error && err.message.includes("worktree")) throw err;
-    throw new GSDError(
-      GSD_IO_ERROR,
+    throw new HXError(
+      HX_IO_ERROR,
       `Auto-worktree path ${p} exists but .git is unreadable`,
     );
   }
@@ -1171,8 +1171,8 @@ export function enterAutoWorktree(
     process.chdir(p);
     originalBase = basePath;
   } catch (err) {
-    throw new GSDError(
-      GSD_IO_ERROR,
+    throw new HXError(
+      HX_IO_ERROR,
       `Failed to enter auto-worktree at ${p}: ${err instanceof Error ? err.message : String(err)}`,
     );
   }
@@ -1199,7 +1199,7 @@ export function getActiveAutoWorktreeContext(): {
   const resolvedBase = existsSync(originalBase)
     ? realpathSync(originalBase)
     : originalBase;
-  const wtDir = join(resolvedBase, ".gsd", "worktrees");
+  const wtDir = join(resolvedBase, ".hx", "worktrees");
   if (!cwd.startsWith(wtDir)) return null;
   const worktreeName = detectWorktreeName(cwd);
   if (!worktreeName) return null;
@@ -1270,8 +1270,8 @@ export function mergeMilestoneToMain(
   // database (#2823).
   if (isDbAvailable()) {
     try {
-      const worktreeDbPath = join(worktreeCwd, ".gsd", "gsd.db");
-      const mainDbPath = join(originalBasePath_, ".gsd", "gsd.db");
+      const worktreeDbPath = join(worktreeCwd, ".hx", "hx.db");
+      const mainDbPath = join(originalBasePath_, ".hx", "hx.db");
       if (!isSamePath(worktreeDbPath, mainDbPath)) {
         reconcileWorktreeDb(mainDbPath, worktreeDbPath);
       }
@@ -1382,8 +1382,8 @@ export function mergeMilestoneToMain(
         } else {
           // Diverged — fail loudly rather than silently losing commits
           process.chdir(previousCwd);
-          throw new GSDError(
-            GSD_GIT_ERROR,
+          throw new HXError(
+            HX_GIT_ERROR,
             `Worktree HEAD (${worktreeHead.slice(0, 8)}) diverged from ` +
               `${milestoneBranch} (${branchHead.slice(0, 8)}). ` +
               `Manual reconciliation required before merge.`,
@@ -1391,9 +1391,9 @@ export function mergeMilestoneToMain(
         }
       }
     } catch (err) {
-      // Re-throw GSDError (divergence); swallow rev-parse failures
+      // Re-throw HXError (divergence); swallow rev-parse failures
       // (e.g. worktree dir already removed by external cleanup)
-      if (err instanceof GSDError) throw err;
+      if (err instanceof HXError) throw err;
       debugLog("mergeMilestoneToMain", {
         action: "reconcile-skipped",
         reason: String(err),
@@ -1451,8 +1451,8 @@ export function mergeMilestoneToMain(
       const fileList = mergeResult.dirtyFiles?.length
         ? `Dirty files:\n${mergeResult.dirtyFiles.map((f) => `  ${f}`).join("\n")}`
         : `Check \`git status\` in the project root for details.`;
-      throw new GSDError(
-        GSD_GIT_ERROR,
+      throw new HXError(
+        HX_GIT_ERROR,
         `Squash merge of ${milestoneBranch} rejected: working tree has dirty or untracked files ` +
           `that conflict with the merge. ${fileList}`,
       );
@@ -1543,8 +1543,8 @@ export function mergeMilestoneToMain(
       // .gsd/ conflicts during the merge itself: accept HEAD (the just-committed
       // version) and drop the now-applied stash.
       const uu = nativeConflictFiles(originalBasePath_);
-      const gsdUU = uu.filter((f) => f.startsWith(".gsd/"));
-      const nonGsdUU = uu.filter((f) => !f.startsWith(".gsd/"));
+      const gsdUU = uu.filter((f) => f.startsWith(".hx/"));
+      const nonGsdUU = uu.filter((f) => !f.startsWith(".hx/"));
 
       if (gsdUU.length > 0) {
         for (const f of gsdUU) {
@@ -1592,13 +1592,13 @@ export function mergeMilestoneToMain(
       milestoneBranch,
     );
     const codeChanges = numstat.filter(
-      (entry) => !entry.path.startsWith(".gsd/"),
+      (entry) => !entry.path.startsWith(".hx/"),
     );
     if (codeChanges.length > 0) {
       // Milestone has unanchored code changes — abort teardown.
       process.chdir(previousCwd);
-      throw new GSDError(
-        GSD_GIT_ERROR,
+      throw new HXError(
+        HX_GIT_ERROR,
         `Squash merge produced nothing to commit but milestone branch "${milestoneBranch}" ` +
           `has ${codeChanges.length} code file(s) not on "${mainBranch}". ` +
           `Aborting worktree teardown to prevent data loss.`,
@@ -1619,7 +1619,7 @@ export function mergeMilestoneToMain(
         "HEAD",
       );
       codeFilesChanged = mergedFiles.some(
-        (entry) => !entry.path.startsWith(".gsd/"),
+        (entry) => !entry.path.startsWith(".hx/"),
       );
     } catch {
       // If HEAD~1 doesn't exist (first commit), assume code was changed

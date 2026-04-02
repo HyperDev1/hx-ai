@@ -2,8 +2,8 @@ import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync, rmSync,
 import { basename, dirname, join } from "node:path";
 
 import type { DoctorIssue, DoctorIssueCode } from "./doctor-types.js";
-import { cleanNumberedGsdVariants } from "./repo-identity.js";
-import { milestonesDir, gsdRoot, resolveGsdRootFile } from "./paths.js";
+import { cleanNumberedHxVariants } from "./repo-identity.js";
+import { milestonesDir, hxRoot, resolveHxRootFile } from "./paths.js";
 import { deriveState } from "./state.js";
 import { saveFile } from "./files.js";
 import { nativeIsRepo, nativeForEachRef, nativeUpdateRef } from "./native-git-bridge.js";
@@ -18,7 +18,7 @@ export async function checkRuntimeHealth(
   fixesApplied: string[],
   shouldFix: (code: DoctorIssueCode) => boolean,
 ): Promise<void> {
-  const root = gsdRoot(basePath);
+  const root = hxRoot(basePath);
 
   // ── Stale crash lock ──────────────────────────────────────────────────
   try {
@@ -32,7 +32,7 @@ export async function checkRuntimeHealth(
           scope: "project",
           unitId: "project",
           message: `Stale auto.lock from PID ${lock.pid} (started ${lock.startedAt}, was executing ${lock.unitType} ${lock.unitId}) — process is no longer running`,
-          file: ".gsd/auto.lock",
+          file: ".hx/auto.lock",
           fixable: true,
         });
 
@@ -47,7 +47,7 @@ export async function checkRuntimeHealth(
   }
 
   // ── Stranded lock directory ────────────────────────────────────────────
-  // proper-lockfile creates a `.gsd.lock/` directory as the OS-level lock
+  // proper-lockfile creates a `.hx.lock/` directory as the OS-level lock
   // mechanism. If the process was SIGKILLed or crashed hard, this directory
   // can remain on disk without any live process holding it. The next session
   // fails to acquire the lock until the directory is removed (#1245).
@@ -95,7 +95,7 @@ export async function checkRuntimeHealth(
           scope: "project",
           unitId: status.milestoneId,
           message: `Stale parallel session for ${status.milestoneId} (PID ${status.pid}, started ${new Date(status.startedAt).toISOString()}, last heartbeat ${new Date(status.lastHeartbeat).toISOString()}) — process is no longer running`,
-          file: `.gsd/parallel/${status.milestoneId}.status.json`,
+          file: `.hx/parallel/${status.milestoneId}.status.json`,
           fixable: true,
         });
 
@@ -138,7 +138,7 @@ export async function checkRuntimeHealth(
           scope: "project",
           unitId: "project",
           message: `${orphaned.length} completed-unit key(s) reference missing artifacts: ${orphaned.slice(0, 3).join(", ")}${orphaned.length > 3 ? "..." : ""}`,
-          file: ".gsd/completed-units.json",
+          file: ".hx/completed-units.json",
           fixable: true,
         });
 
@@ -175,7 +175,7 @@ export async function checkRuntimeHealth(
             scope: "project",
             unitId: "project",
             message: `hook-state.json has ${Object.keys(state.cycleCounts).length} residual cycle count(s) from a previous session`,
-            file: ".gsd/hook-state.json",
+            file: ".hx/hook-state.json",
             fixable: true,
           });
 
@@ -216,7 +216,7 @@ export async function checkRuntimeHealth(
           scope: "project",
           unitId: "project",
           message: `Activity logs: ${files.length} files, ${totalMB.toFixed(1)}MB (thresholds: ${BLOAT_FILE_THRESHOLD} files / ${BLOAT_SIZE_MB}MB)`,
-          file: ".gsd/activity/",
+          file: ".hx/activity/",
           fixable: true,
         });
 
@@ -233,7 +233,7 @@ export async function checkRuntimeHealth(
 
   // ── STATE.md health ───────────────────────────────────────────────────
   try {
-    const stateFilePath = resolveGsdRootFile(basePath, "STATE");
+    const stateFilePath = resolveHxRootFile(basePath, "STATE");
     const milestonesPath = milestonesDir(basePath);
 
     if (existsSync(milestonesPath)) {
@@ -244,7 +244,7 @@ export async function checkRuntimeHealth(
           scope: "project",
           unitId: "project",
           message: "STATE.md is missing — state display will not work",
-          file: ".gsd/STATE.md",
+          file: ".hx/STATE.md",
           fixable: true,
         });
 
@@ -278,7 +278,7 @@ export async function checkRuntimeHealth(
             scope: "project",
             unitId: "project",
             message: `STATE.md is stale — shows "${current.phase}" but derived state is "${fresh.phase}"`,
-            file: ".gsd/STATE.md",
+            file: ".hx/STATE.md",
             fixable: true,
           });
 
@@ -304,15 +304,15 @@ export async function checkRuntimeHealth(
 
       // Check for critical runtime patterns that must be present
       const criticalPatterns = [
-        ".gsd/activity/",
-        ".gsd/runtime/",
-        ".gsd/auto.lock",
-        ".gsd/gsd.db",
-        ".gsd/completed-units.json",
+        ".hx/activity/",
+        ".hx/runtime/",
+        ".hx/auto.lock",
+        ".hx/gsd.db",
+        ".hx/completed-units.json",
       ];
 
-      // If blanket .gsd/ or .gsd is present, all patterns are covered
-      const hasBlanketIgnore = existingLines.has(".gsd/") || existingLines.has(".gsd");
+      // If blanket .hx/ or .hx is present, all patterns are covered
+      const hasBlanketIgnore = existingLines.has(".hx/") || existingLines.has(".hx");
 
       if (!hasBlanketIgnore) {
         const missing = criticalPatterns.filter(p => !existingLines.has(p));
@@ -340,26 +340,26 @@ export async function checkRuntimeHealth(
 
   // ── External state symlink health ──────────────────────────────────────
   try {
-    const localGsd = join(basePath, ".gsd");
+    const localGsd = join(basePath, ".hx");
     if (existsSync(localGsd)) {
       const stat = lstatSync(localGsd);
 
-      // Check for .gsd.migrating (failed migration)
-      const migratingPath = join(basePath, ".gsd.migrating");
+      // Check for .hx.migrating (failed migration)
+      const migratingPath = join(basePath, ".hx.migrating");
       if (existsSync(migratingPath)) {
         issues.push({
           severity: "error",
           code: "failed_migration",
           scope: "project",
           unitId: "project",
-          message: "Found .gsd.migrating — a previous external state migration failed. State may be incomplete.",
-          file: ".gsd.migrating",
+          message: "Found .hx.migrating — a previous external state migration failed. State may be incomplete.",
+          file: ".hx.migrating",
           fixable: true,
         });
 
         if (shouldFix("failed_migration")) {
           if (recoverFailedMigration(basePath)) {
-            fixesApplied.push("recovered failed migration (.gsd.migrating → .gsd)");
+            fixesApplied.push("recovered failed migration (.hx.migrating → .hx)");
           }
         }
       }
@@ -374,8 +374,8 @@ export async function checkRuntimeHealth(
             code: "broken_symlink",
             scope: "project",
             unitId: "project",
-            message: ".gsd symlink target does not exist. External state directory may have been deleted.",
-            file: ".gsd",
+            message: ".hx symlink target does not exist. External state directory may have been deleted.",
+            file: ".hx",
             fixable: false,
           });
         }
@@ -386,10 +386,10 @@ export async function checkRuntimeHealth(
   }
 
   // ── Numbered .gsd collision variants (#2205) ───────────────────────────
-  // macOS APFS can create ".gsd 2", ".gsd 3" etc. when a directory blocks
+  // macOS APFS can create ".hx 2", ".hx 3" etc. when a directory blocks
   // symlink creation. These must be removed so the canonical .gsd is used.
   try {
-    const variantPattern = /^\.gsd \d+$/;
+    const variantPattern = /^\.hx \d+$/;
     const entries = readdirSync(basePath);
     const variants = entries.filter(e => variantPattern.test(e));
     if (variants.length > 0) {
@@ -406,7 +406,7 @@ export async function checkRuntimeHealth(
       }
 
       if (shouldFix("numbered_gsd_variant")) {
-        const removed = cleanNumberedGsdVariants(basePath);
+        const removed = cleanNumberedHxVariants(basePath);
         for (const name of removed) {
           fixesApplied.push(`removed numbered .gsd variant: ${name}`);
         }
@@ -430,7 +430,7 @@ export async function checkRuntimeHealth(
             scope: "project",
             unitId: "project",
             message: "metrics.json has an unexpected structure (version !== 1 or units is not an array) — metrics data may be unreliable",
-            file: ".gsd/metrics.json",
+            file: ".hx/metrics.json",
             fixable: false,
           });
         }
@@ -441,7 +441,7 @@ export async function checkRuntimeHealth(
           scope: "project",
           unitId: "project",
           message: "metrics.json is not valid JSON — metrics data may be corrupt",
-          file: ".gsd/metrics.json",
+          file: ".hx/metrics.json",
           fixable: false,
         });
       }
@@ -469,7 +469,7 @@ export async function checkRuntimeHealth(
             scope: "project",
             unitId: "project",
             message: `metrics.json has ${parsed.units.length} unit entries (${fileSizeMB}MB) — threshold is ${BLOAT_UNITS_THRESHOLD}. Run /gsd doctor --fix to prune to the newest 1500 entries.`,
-            file: ".gsd/metrics.json",
+            file: ".hx/metrics.json",
             fixable: true,
           });
           if (shouldFix("metrics_ledger_bloat")) {

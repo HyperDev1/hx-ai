@@ -1,7 +1,7 @@
 /**
  * GSD External State Migration
  *
- * Migrates legacy in-project `.gsd/` directories to the external
+ * Migrates legacy in-project `.hx/` directories to the external
  * `~/.gsd/projects/<hash>/` state directory. After migration, a
  * symlink replaces the original directory so all paths remain valid.
  */
@@ -9,7 +9,7 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, lstatSync, mkdirSync, readdirSync, realpathSync, renameSync, cpSync, rmSync, symlinkSync } from "node:fs";
 import { join } from "node:path";
-import { externalGsdRoot } from "./repo-identity.js";
+import { externalHxRoot } from "./repo-identity.js";
 import { getErrorMessage } from "./error-utils.js";
 import { hasGitTrackedGsdFiles } from "./gitignore.js";
 import { GIT_NO_PROMPT_ENV } from "./git-constants.js";
@@ -20,21 +20,21 @@ export interface MigrationResult {
 }
 
 /**
- * Migrate a legacy in-project `.gsd/` directory to external storage.
+ * Migrate a legacy in-project `.hx/` directory to external storage.
  *
  * Algorithm:
- * 1. If `<project>/.gsd` is a symlink or doesn't exist -> skip
- * 2. If `<project>/.gsd` is a real directory:
+ * 1. If `<project>/.hx` is a symlink or doesn't exist -> skip
+ * 2. If `<project>/.hx` is a real directory:
  *    a. Compute external path from repoIdentity
  *    b. mkdir -p external dir
- *    c. Rename `.gsd` -> `.gsd.migrating` (atomic on same FS, acts as lock)
+ *    c. Rename `.gsd` -> `.hx.migrating` (atomic on same FS, acts as lock)
  *    d. Copy contents to external dir (skip `worktrees/` subdirectory)
- *    e. Create symlink `.gsd -> external path`
- *    f. Remove `.gsd.migrating`
- * 3. On failure: rename `.gsd.migrating` back to `.gsd` (rollback)
+ *    e. Create symlink `.hx -> external path`
+ *    f. Remove `.hx.migrating`
+ * 3. On failure: rename `.hx.migrating` back to `.gsd` (rollback)
  */
 export function migrateToExternalState(basePath: string): MigrationResult {
-  const localGsd = join(basePath, ".gsd");
+  const localGsd = join(basePath, ".hx");
 
   // Skip if doesn't exist
   if (!existsSync(localGsd)) {
@@ -48,19 +48,19 @@ export function migrateToExternalState(basePath: string): MigrationResult {
       return { migrated: false };
     }
     if (!stat.isDirectory()) {
-      return { migrated: false, error: ".gsd exists but is not a directory or symlink" };
+      return { migrated: false, error: ".hx exists but is not a directory or symlink" };
     }
   } catch (err) {
-    return { migrated: false, error: `Cannot stat .gsd: ${getErrorMessage(err)}` };
+    return { migrated: false, error: `Cannot stat .hx: ${getErrorMessage(err)}` };
   }
 
-  // Skip if .gsd/ contains git-tracked files — the project intentionally
-  // keeps .gsd/ in version control and migration would destroy that.
+  // Skip if .hx/ contains git-tracked files — the project intentionally
+  // keeps .hx/ in version control and migration would destroy that.
   if (hasGitTrackedGsdFiles(basePath)) {
     return { migrated: false };
   }
 
-  // Skip if .gsd/worktrees/ has active worktree directories (#1337).
+  // Skip if .hx/worktrees/ has active worktree directories (#1337).
   // On Windows, active git worktrees hold OS-level directory handles that
   // prevent rename/delete. Attempting migration causes EBUSY and data loss.
   const worktreesDir = join(localGsd, "worktrees");
@@ -76,14 +76,14 @@ export function migrateToExternalState(basePath: string): MigrationResult {
     }
   }
 
-  const externalPath = externalGsdRoot(basePath);
-  const migratingPath = join(basePath, ".gsd.migrating");
+  const externalPath = externalHxRoot(basePath);
+  const migratingPath = join(basePath, ".hx.migrating");
 
   try {
     // mkdir -p the external dir
     mkdirSync(externalPath, { recursive: true });
 
-    // Rename .gsd -> .gsd.migrating (atomic lock).
+    // Rename .gsd -> .hx.migrating (atomic lock).
     // On Windows, NTFS may reject rename with EPERM if file descriptors are
     // open (VS Code watchers, antivirus on-access scan). Fall back to
     // copy+delete (#1292).
@@ -121,7 +121,7 @@ export function migrateToExternalState(basePath: string): MigrationResult {
       }
     }
 
-    // Create symlink .gsd -> external path
+    // Create symlink .hx -> external path
     symlinkSync(externalPath, localGsd, "junction");
 
     // Verify the symlink resolves correctly before removing the backup (#1377).
@@ -149,9 +149,9 @@ export function migrateToExternalState(basePath: string): MigrationResult {
     // Clean the git index — any .gsd/* files tracked before migration now
     // sit behind the symlink and git can't follow it, causing them to show
     // as deleted. Remove them from the index so the working tree stays clean.
-    // --ignore-unmatch makes this a no-op on fresh projects with no tracked .gsd/.
+    // --ignore-unmatch makes this a no-op on fresh projects with no tracked .hx/.
     try {
-      execFileSync("git", ["rm", "-r", "--cached", "--ignore-unmatch", ".gsd"], {
+      execFileSync("git", ["rm", "-r", "--cached", "--ignore-unmatch", ".hx"], {
         cwd: basePath,
         stdio: ["ignore", "pipe", "ignore"],
         env: GIT_NO_PROMPT_ENV,
@@ -161,18 +161,18 @@ export function migrateToExternalState(basePath: string): MigrationResult {
       // Non-fatal — git may be unavailable or nothing was tracked
     }
 
-    // Remove .gsd.migrating only after symlink is verified and index is clean
+    // Remove .hx.migrating only after symlink is verified and index is clean
     rmSync(migratingPath, { recursive: true, force: true });
 
     return { migrated: true };
   } catch (err) {
-    // Rollback: rename .gsd.migrating back to .gsd
+    // Rollback: rename .hx.migrating back to .gsd
     try {
       if (existsSync(migratingPath) && !existsSync(localGsd)) {
         renameSync(migratingPath, localGsd);
       }
     } catch {
-      // Rollback failed -- leave .gsd.migrating for doctor to detect
+      // Rollback failed -- leave .hx.migrating for doctor to detect
     }
 
     return {
@@ -183,12 +183,12 @@ export function migrateToExternalState(basePath: string): MigrationResult {
 }
 
 /**
- * Recover from a failed migration (`.gsd.migrating` exists).
- * Moves `.gsd.migrating` back to `.gsd` if `.gsd` doesn't exist.
+ * Recover from a failed migration (`.hx.migrating` exists).
+ * Moves `.hx.migrating` back to `.gsd` if `.gsd` doesn't exist.
  */
 export function recoverFailedMigration(basePath: string): boolean {
-  const localGsd = join(basePath, ".gsd");
-  const migratingPath = join(basePath, ".gsd.migrating");
+  const localGsd = join(basePath, ".hx");
+  const migratingPath = join(basePath, ".hx.migrating");
 
   if (!existsSync(migratingPath)) return false;
   if (existsSync(localGsd)) return false; // both exist -- ambiguous, don't touch

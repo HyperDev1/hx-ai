@@ -70,14 +70,14 @@ export function captureIntegrationBranch(basePath: string, milestoneId: string):
 
 /**
  * Find the worktrees segment in a path, supporting both direct
- * (`/.gsd/worktrees/`) and symlink-resolved (`/.gsd/projects/<hash>/worktrees/`)
+ * (`/.hx/worktrees/`) and symlink-resolved (`/.hx/projects/<hash>/worktrees/`)
  * layouts.  When `.gsd` is a symlink to `~/.gsd/projects/<hash>`, resolved
  * paths contain the intermediate `projects/<hash>/` segment that the old
  * single-marker check missed.
  */
 function findWorktreeSegment(normalizedPath: string): { gsdIdx: number; afterWorktrees: number } | null {
   // Direct layout: /.gsd/worktrees/<name>
-  const directMarker = "/.gsd/worktrees/";
+  const directMarker = "/.hx/worktrees/";
   const idx = normalizedPath.indexOf(directMarker);
   if (idx !== -1) {
     return { gsdIdx: idx, afterWorktrees: idx + directMarker.length };
@@ -107,12 +107,12 @@ export function detectWorktreeName(basePath: string): string | null {
 /**
  * Resolve the project root from a path that may be inside a worktree.
  * If the path contains a worktrees segment, returns the portion before
- * `/.gsd/`. Otherwise returns the input unchanged.
+ * `/.hx/`. Otherwise returns the input unchanged.
  *
- * When the worker was spawned with GSD_PROJECT_ROOT set, use that directly —
+ * When the worker was spawned with HX_PROJECT_ROOT set, use that directly —
  * the coordinator already knows the real project root unambiguously.
  *
- * When `/.gsd/` in the resolved path is actually the user-level `~/.gsd/`
+ * When `/.hx/` in the resolved path is actually the user-level `~/.gsd/`
  * (common when `.gsd` is a symlink into `~/.gsd/projects/<hash>`), the
  * string-slice heuristic would return `~` — which is catastrophically wrong.
  * In that case, fall back to reading the worktree's `.git` file, which
@@ -124,8 +124,8 @@ export function detectWorktreeName(basePath: string): string | null {
  */
 export function resolveProjectRoot(basePath: string): string {
   // Layer 1: If the coordinator passed the real project root, use it.
-  if (process.env.GSD_PROJECT_ROOT) {
-    return process.env.GSD_PROJECT_ROOT;
+  if (process.env.HX_PROJECT_ROOT) {
+    return process.env.HX_PROJECT_ROOT;
   }
 
   const normalizedPath = basePath.replaceAll("\\", "/");
@@ -143,10 +143,10 @@ export function resolveProjectRoot(basePath: string): string {
   // Layer 2: Guard against resolving to the user's home directory.
   // When .gsd is a symlink into ~/.gsd/projects/<hash>, the resolved path
   // contains /.gsd/ at the user-level boundary. Slicing there yields ~ — wrong.
-  const gsdHome = normalizePathForCompare(process.env.GSD_HOME || join(homedir(), ".gsd"));
-  const candidateGsdPath = normalizePathForCompare(join(candidate, ".gsd"));
+  const hxHome = normalizePathForCompare(process.env.HX_HOME || join(homedir(), ".hx"));
+  const candidateGsdPath = normalizePathForCompare(join(candidate, ".hx"));
 
-  if (candidateGsdPath === gsdHome || candidateGsdPath.startsWith(gsdHome + "/")) {
+  if (candidateGsdPath === hxHome || candidateGsdPath.startsWith(hxHome + "/")) {
     // The candidate is the home directory (or within it in a way that .gsd
     // maps to the user-level GSD dir). Try to recover the real project root
     // from the worktree's .git file.

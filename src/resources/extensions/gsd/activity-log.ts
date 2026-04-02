@@ -11,11 +11,11 @@
 import { writeFileSync, writeSync, mkdirSync, readdirSync, unlinkSync, statSync, openSync, closeSync, constants } from "node:fs";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
-import { GSDError, GSD_IO_ERROR } from "./errors.js";
+import { HXError, HX_IO_ERROR } from "./errors.js";
 
 const SEQ_PREFIX_RE = /^(\d+)-/;
 import type { ExtensionContext } from "@gsd/pi-coding-agent";
-import { gsdRoot } from "./paths.js";
+import { hxRoot } from "./paths.js";
 
 interface ActivityLogState {
   nextSeq: number;
@@ -96,7 +96,7 @@ function nextActivityFilePath(
     }
   }
   // Fallback: should never reach here in practice
-  throw new GSDError(GSD_IO_ERROR, `Failed to find available activity log sequence in ${activityDir}`);
+  throw new HXError(HX_IO_ERROR, `Failed to find available activity log sequence in ${activityDir}`);
 }
 
 export function saveActivityLog(
@@ -109,7 +109,7 @@ export function saveActivityLog(
     const entries = ctx.sessionManager.getEntries();
     if (!entries || entries.length === 0) return null;
 
-    const activityDir = join(gsdRoot(basePath), "activity");
+    const activityDir = join(hxRoot(basePath), "activity");
     mkdirSync(activityDir, { recursive: true });
 
     const safeUnitId = unitId.replace(/\//g, "-");

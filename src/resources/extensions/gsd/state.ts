@@ -30,8 +30,8 @@ import {
   resolveSliceFile,
   resolveTaskFile,
   resolveTasksDir,
-  resolveGsdRootFile,
-  gsdRoot,
+  resolveHxRootFile,
+  hxRoot,
 } from './paths.js';
 
 import { findMilestoneIds } from './milestone-ids.js';
@@ -133,7 +133,7 @@ export function invalidateStateCache(): void {
  */
 export async function getActiveMilestoneId(basePath: string): Promise<string | null> {
   // Parallel worker isolation
-  const milestoneLock = process.env.GSD_MILESTONE_LOCK;
+  const milestoneLock = process.env.HX_MILESTONE_LOCK;
   if (milestoneLock) {
     const milestoneIds = findMilestoneIds(basePath);
     if (!milestoneIds.includes(milestoneLock)) return null;
@@ -277,7 +277,7 @@ function extractContextTitle(content: string | null, fallback: string): string {
  * Must produce field-identical GSDState to _deriveStateImpl() for the same project.
  */
 export async function deriveStateFromDb(basePath: string): Promise<GSDState> {
-  const requirements = parseRequirementCounts(await loadFile(resolveGsdRootFile(basePath, "REQUIREMENTS")));
+  const requirements = parseRequirementCounts(await loadFile(resolveHxRootFile(basePath, "REQUIREMENTS")));
 
   let allMilestones = getAllMilestones();
 
@@ -325,7 +325,7 @@ export async function deriveStateFromDb(basePath: string): Promise<GSDState> {
   for (const id of sortedIds) allMilestones.push(byId.get(id)!);
 
   // Parallel worker isolation: when locked, filter to just the locked milestone
-  const milestoneLock = process.env.GSD_MILESTONE_LOCK;
+  const milestoneLock = process.env.HX_MILESTONE_LOCK;
   const milestones = milestoneLock
     ? allMilestones.filter(m => m.id === milestoneLock)
     : allMilestones;
@@ -830,12 +830,12 @@ export async function _deriveStateImpl(basePath: string): Promise<GSDState> {
   const milestoneIds = findMilestoneIds(basePath);
 
   // ── Parallel worker isolation ──────────────────────────────────────────
-  // When GSD_MILESTONE_LOCK is set, this process is a parallel worker
+  // When HX_MILESTONE_LOCK is set, this process is a parallel worker
   // scoped to a single milestone. Filter the milestone list so this worker
   // only sees its assigned milestone (all others are treated as if they
   // don't exist). This gives each worker complete isolation without
   // modifying any other state derivation logic.
-  const milestoneLock = process.env.GSD_MILESTONE_LOCK;
+  const milestoneLock = process.env.HX_MILESTONE_LOCK;
   if (milestoneLock && milestoneIds.includes(milestoneLock)) {
     milestoneIds.length = 0;
     milestoneIds.push(milestoneLock);
@@ -846,7 +846,7 @@ export async function _deriveStateImpl(basePath: string): Promise<GSDState> {
   // in one call and build an in-memory content map keyed by absolute path.
   // This eliminates O(N) individual fs.readFile calls during traversal.
   const fileContentCache = new Map<string, string>();
-  const gsdDir = gsdRoot(basePath);
+  const gsdDir = hxRoot(basePath);
 
   // Filesystem fallback: used when deriveStateFromDb() is not available
   // (pre-migration projects). The DB-backed path is preferred when available
@@ -870,7 +870,7 @@ export async function _deriveStateImpl(basePath: string): Promise<GSDState> {
     return loadFile(path);
   }
 
-  const requirements = parseRequirementCounts(await cachedLoadFile(resolveGsdRootFile(basePath, "REQUIREMENTS")));
+  const requirements = parseRequirementCounts(await cachedLoadFile(resolveHxRootFile(basePath, "REQUIREMENTS")));
 
   if (milestoneIds.length === 0) {
     return {

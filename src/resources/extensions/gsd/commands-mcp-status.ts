@@ -43,7 +43,7 @@ function readMcpConfigs(): McpServerRawConfig[] {
   const seen = new Set<string>();
   const configPaths = [
     join(process.cwd(), ".mcp.json"),
-    join(process.cwd(), ".gsd", "mcp.json"),
+    join(process.cwd(), ".hx", "mcp.json"),
   ];
 
   for (const configPath of configPaths) {

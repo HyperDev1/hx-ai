@@ -29,7 +29,7 @@ import { MergeConflictError } from "../git-service.js";
 import { join } from "node:path";
 import { existsSync, cpSync } from "node:fs";
 import { logWarning, logError } from "../workflow-logger.js";
-import { gsdRoot } from "../paths.js";
+import { hxRoot } from "../paths.js";
 import { atomicWriteSync } from "../atomic-write.js";
 import { verifyExpectedArtifact } from "../auto-recovery.js";
 import { writeUnitRuntimeRecord } from "../unit-runtime.js";
@@ -77,7 +77,7 @@ async function generateMilestoneReport(
     (m: { id: string }) => m.id === milestoneId,
   );
   const msTitle = completedMs?.title ?? milestoneId;
-  const gsdVersion = process.env.GSD_VERSION ?? "0.0.0";
+  const gsdVersion = process.env.HX_VERSION ?? "0.0.0";
   const projName = basename(reportBasePath);
   const doneSlices = snapData.milestones.reduce(
     (acc: number, m: { slices: { done: boolean }[] }) =>
@@ -309,10 +309,10 @@ export async function runPreDispatch(
 
     // Archive the old completed-units.json instead of wiping it (#2313).
     try {
-      const completedKeysPath = join(gsdRoot(s.basePath), "completed-units.json");
+      const completedKeysPath = join(hxRoot(s.basePath), "completed-units.json");
       if (existsSync(completedKeysPath) && s.currentMilestoneId) {
         const archivePath = join(
-          gsdRoot(s.basePath),
+          hxRoot(s.basePath),
           `completed-units-${s.currentMilestoneId}.json`,
         );
         cpSync(completedKeysPath, archivePath);
@@ -722,7 +722,7 @@ export async function runGuards(
     // In parallel worker mode, only count cost from the current auto-mode session
     // to avoid hitting the ceiling due to historical project-wide spend (#2184).
     let costUnits = currentLedger?.units;
-    if (process.env.GSD_PARALLEL_WORKER && s.autoStartTime && Array.isArray(costUnits)) {
+    if (process.env.HX_PARALLEL_WORKER && s.autoStartTime && Array.isArray(costUnits)) {
       const sessionStartISO = new Date(s.autoStartTime).toISOString();
       costUnits = costUnits.filter(
         (u: { startedAt?: string }) => u.startedAt != null && u.startedAt >= sessionStartISO,

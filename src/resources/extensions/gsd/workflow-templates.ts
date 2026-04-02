@@ -17,8 +17,8 @@ const registryPath = join(__extensionDir, "workflow-templates", "registry.json")
 function resolveGsdExtensionDir(): string {
   const moduleDir = dirname(fileURLToPath(import.meta.url));
   if (existsSync(join(moduleDir, "workflow-templates"))) return moduleDir;
-  const gsdHome = process.env.GSD_HOME || join(homedir(), ".gsd");
-  const agentGsdDir = join(gsdHome, "agent", "extensions", "gsd");
+  const hxHome = process.env.HX_HOME || join(homedir(), ".hx");
+  const agentGsdDir = join(hxHome, "agent", "extensions", "gsd");
   if (existsSync(join(agentGsdDir, "workflow-templates"))) return agentGsdDir;
   return moduleDir;
 }

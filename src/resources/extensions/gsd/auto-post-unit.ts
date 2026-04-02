@@ -70,7 +70,7 @@ function enqueueSidecar(
   if (notification) ctx.ui.notify(notification, "info");
   return "continue";
 }
-/** Unit types that only touch `.gsd/` internal state files (no code changes).
+/** Unit types that only touch `.hx/` internal state files (no code changes).
  *  Auto-commit is skipped for these — their state files are picked up by the
  *  next actual task commit via `smartStage()`. */
 const LIFECYCLE_ONLY_UNITS = new Set([
@@ -235,7 +235,7 @@ export async function postUnitPreVerification(pctx: PostUnitContext, opts?: PreV
   const { s, ctx, pi, buildSnapshotOpts, stopAuto, pauseAuto } = pctx;
 
   // ── Parallel worker signal check ──
-  const milestoneLock = process.env.GSD_MILESTONE_LOCK;
+  const milestoneLock = process.env.HX_MILESTONE_LOCK;
   if (milestoneLock) {
     const signal = consumeSignal(s.basePath, milestoneLock);
     if (signal) {
@@ -305,7 +305,7 @@ export async function postUnitPreVerification(pctx: PostUnitContext, opts?: PreV
       _resetHasChangesCache();
 
       // Skip auto-commit for lifecycle-only units (#2553) — they only touch
-      // `.gsd/` internal state files. Those files are picked up by the next
+      // `.hx/` internal state files. Those files are picked up by the next
       // actual task commit via smartStage().
       if (!LIFECYCLE_ONLY_UNITS.has(s.currentUnit.type)) {
         const commitMsg = autoCommitCurrentBranch(s.basePath, s.currentUnit.type, s.currentUnit.id, taskContext);

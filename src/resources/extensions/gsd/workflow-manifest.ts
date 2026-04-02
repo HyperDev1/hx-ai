@@ -282,7 +282,7 @@ function restore(manifest: StateManifest): void {
 export function writeManifest(basePath: string): void {
   const manifest = snapshotState();
   const json = JSON.stringify(manifest, null, 2);
-  const dir = join(basePath, ".gsd");
+  const dir = join(basePath, ".hx");
   mkdirSync(dir, { recursive: true });
   atomicWriteSync(join(dir, "state-manifest.json"), json);
 }
@@ -293,7 +293,7 @@ export function writeManifest(basePath: string): void {
  * Read state-manifest.json and return parsed manifest, or null if not found.
  */
 export function readManifest(basePath: string): StateManifest | null {
-  const manifestPath = join(basePath, ".gsd", "state-manifest.json");
+  const manifestPath = join(basePath, ".hx", "state-manifest.json");
 
   if (!existsSync(manifestPath)) {
     return null;

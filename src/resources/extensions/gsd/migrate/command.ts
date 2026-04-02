@@ -12,7 +12,7 @@
 import type { ExtensionAPI, ExtensionCommandContext } from "@gsd/pi-coding-agent";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve, join, dirname } from "node:path";
-import { gsdRoot } from "../paths.js";
+import { hxRoot } from "../paths.js";
 import { fileURLToPath } from "node:url";
 import { showNextAction } from "../../shared/tui.js";
 import {
@@ -145,7 +145,7 @@ export async function handleMigrate(
     );
   }
 
-  const targetGsdExists = existsSync(gsdRoot(process.cwd()));
+  const targetGsdExists = existsSync(hxRoot(process.cwd()));
   if (targetGsdExists) {
     lines.push("");
     lines.push("⚠ A .gsd directory already exists in the current working directory — it will be overwritten.");
@@ -180,7 +180,7 @@ export async function handleMigrate(
   ctx.ui.notify("Writing .gsd directory…", "info");
 
   const result = await writeGSDDirectory(project, process.cwd());
-  const gsdPath = gsdRoot(process.cwd());
+  const gsdPath = hxRoot(process.cwd());
 
   ctx.ui.notify(
     `✓ Migration complete — ${result.paths.length} file(s) written to .gsd/`,

@@ -275,7 +275,7 @@ export async function handleCompleteSlice(
     summaryPath = join(sliceDir, `${params.sliceId}-SUMMARY.md`);
   } else {
     // Slice dir doesn't exist on disk yet — build path manually and ensure dirs
-    const gsdDir = join(basePath, ".gsd");
+    const gsdDir = join(basePath, ".hx");
     const manualSliceDir = join(gsdDir, "milestones", params.milestoneId, "slices", params.sliceId);
     mkdirSync(manualSliceDir, { recursive: true });
     summaryPath = join(manualSliceDir, `${params.sliceId}-SUMMARY.md`);
@@ -292,13 +292,13 @@ export async function handleCompleteSlice(
     const roadmapToggled = await renderRoadmapCheckboxes(basePath, params.milestoneId);
     if (!roadmapToggled) {
       process.stderr.write(
-        `gsd-db: complete_slice — could not find roadmap for ${params.milestoneId}, skipping checkbox toggle\n`,
+        `hx-db: complete_slice — could not find roadmap for ${params.milestoneId}, skipping checkbox toggle\n`,
       );
     }
   } catch (renderErr) {
     // Disk render failed — roll back DB status so state stays consistent
     process.stderr.write(
-      `gsd-db: complete_slice — disk render failed, rolling back DB status: ${(renderErr as Error).message}\n`,
+      `hx-db: complete_slice — disk render failed, rolling back DB status: ${(renderErr as Error).message}\n`,
     );
     updateSliceStatus(params.milestoneId, params.sliceId, 'pending');
     invalidateStateCache();

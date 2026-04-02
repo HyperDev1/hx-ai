@@ -240,7 +240,7 @@ export async function handleSkip(unitArg: string, ctx: ExtensionCommandContext, 
   const { existsSync: fileExists, writeFileSync: writeFile, mkdirSync: mkDir, readFileSync: readFile } = await import("node:fs");
   const { join: pathJoin } = await import("node:path");
 
-  const completedKeysFile = pathJoin(basePath, ".gsd", "completed-units.json");
+  const completedKeysFile = pathJoin(basePath, ".hx", "completed-units.json");
   let keys: string[] = [];
   try {
     if (fileExists(completedKeysFile)) {
@@ -271,7 +271,7 @@ export async function handleSkip(unitArg: string, ctx: ExtensionCommandContext, 
   }
 
   keys.push(skipKey);
-  mkDir(pathJoin(basePath, ".gsd"), { recursive: true });
+  mkDir(pathJoin(basePath, ".hx"), { recursive: true });
   writeFile(completedKeysFile, JSON.stringify(keys), "utf-8");
 
   ctx.ui.notify(`Skipped: ${skipKey}. Will not be dispatched in auto-mode.`, "success");

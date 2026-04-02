@@ -19,13 +19,13 @@ import {
   _getAdapter,
 } from './gsd-db.js';
 import {
-  resolveGsdRootFile,
+  resolveHxRootFile,
   resolveMilestoneFile,
   resolveSliceFile,
   resolveSlicePath,
   resolveTasksDir,
   milestonesDir,
-  gsdRoot,
+  hxRoot,
   resolveTaskFiles,
 } from './paths.js';
 import { findMilestoneIds } from './guided-flow.js';
@@ -271,7 +271,7 @@ export function parseRequirementsSections(content: string): Requirement[] {
  * Handles supersession chains.
  */
 function importDecisions(gsdDir: string): number {
-  const filePath = resolveGsdRootFile(gsdDir, 'DECISIONS');
+  const filePath = resolveHxRootFile(gsdDir, 'DECISIONS');
   if (!existsSync(filePath)) return 0;
 
   const content = readFileSync(filePath, 'utf-8');
@@ -288,7 +288,7 @@ function importDecisions(gsdDir: string): number {
  * Import requirements from REQUIREMENTS.md into the database.
  */
 function importRequirements(gsdDir: string): number {
-  const filePath = resolveGsdRootFile(gsdDir, 'REQUIREMENTS');
+  const filePath = resolveHxRootFile(gsdDir, 'REQUIREMENTS');
   if (!existsSync(filePath)) return 0;
 
   const content = readFileSync(filePath, 'utf-8');
@@ -314,7 +314,7 @@ const TASK_SUFFIXES = ['PLAN', 'SUMMARY', 'CONTINUE', 'CONTEXT', 'RESEARCH'];
  */
 function importHierarchyArtifacts(gsdDir: string): number {
   let count = 0;
-  const gsdPath = gsdRoot(gsdDir);
+  const gsdPath = hxRoot(gsdDir);
 
   // Root-level artifacts: PROJECT.md, QUEUE.md
   const rootFiles = ['PROJECT.md', 'QUEUE.md', 'SECRETS-MANIFEST.md'];
@@ -696,7 +696,7 @@ export function migrateFromMarkdown(gsdDir: string): {
   artifacts: number;
   hierarchy: { milestones: number; slices: number; tasks: number };
 } {
-  const dbPath = join(gsdRoot(gsdDir), 'gsd.db');
+  const dbPath = join(hxRoot(gsdDir), 'hx.db');
 
   // Open DB if not already open
   if (!_getAdapter()) {

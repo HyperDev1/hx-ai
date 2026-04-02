@@ -32,7 +32,7 @@ import {
   buildSliceFileName,
   resolveMilestoneFile,
   clearPathCache,
-  resolveGsdRootFile,
+  resolveHxRootFile,
 } from "./paths.js";
 import {
   existsSync,
@@ -54,11 +54,11 @@ export { resolveExpectedArtifactPath, diagnoseExpectedArtifact };
 // ─── Artifact Resolution & Verification ───────────────────────────────────────
 
 /**
- * Check whether a milestone produced implementation artifacts (non-`.gsd/` files)
+ * Check whether a milestone produced implementation artifacts (non-`.hx/` files)
  * in the git history. Uses `git log --name-only` to inspect all commits on the
- * current branch that touch files outside `.gsd/`.
+ * current branch that touch files outside `.hx/`.
  *
- * Returns true if at least one non-`.gsd/` file was committed, false otherwise.
+ * Returns true if at least one non-`.hx/` file was committed, false otherwise.
  * Non-fatal: returns true on git errors to avoid blocking the pipeline when
  * running outside a git repo (e.g., tests).
  */
@@ -86,10 +86,10 @@ export function hasImplementationArtifacts(basePath: string): boolean {
     // commit repo, or other edge case where git diff returns nothing).
     if (changedFiles.length === 0) return true;
 
-    // Filter out .gsd/ files — only implementation files count.
-    // If every changed file is under .gsd/, the milestone produced no
+    // Filter out .hx/ files — only implementation files count.
+    // If every changed file is under .hx/, the milestone produced no
     // implementation code (#1703).
-    const implFiles = changedFiles.filter(f => !f.startsWith(".gsd/") && !f.startsWith(".gsd\\"));
+    const implFiles = changedFiles.filter(f => !f.startsWith(".hx/") && !f.startsWith(".hx\\"));
     return implFiles.length > 0;
   } catch {
     // Non-fatal — if git operations fail, don't block the pipeline
@@ -186,7 +186,7 @@ export function verifyExpectedArtifact(
   clearParseCache();
 
   if (unitType === "rewrite-docs") {
-    const overridesPath = resolveGsdRootFile(base, "OVERRIDES");
+    const overridesPath = resolveHxRootFile(base, "OVERRIDES");
     if (!existsSync(overridesPath)) return true;
     const content = readFileSync(overridesPath, "utf-8");
     return !content.includes("**Scope:** active");
@@ -376,7 +376,7 @@ export function verifyExpectedArtifact(
   }
 
   // complete-milestone must have produced implementation artifacts (#1703).
-  // A milestone with only .gsd/ plan files and zero implementation code is
+  // A milestone with only .hx/ plan files and zero implementation code is
   // not genuinely complete — the LLM wrote plan files but skipped actual work.
   if (unitType === "complete-milestone") {
     if (!hasImplementationArtifacts(base)) return false;
@@ -483,16 +483,16 @@ export function reconcileMergeState(
       // Commit may already exist; non-fatal
     }
   } else {
-    // Still conflicted — try auto-resolving .gsd/ state file conflicts (#530)
-    const gsdConflicts = conflictedFiles.filter((f) => f.startsWith(".gsd/"));
-    const codeConflicts = conflictedFiles.filter((f) => !f.startsWith(".gsd/"));
+    // Still conflicted — try auto-resolving .hx/ state file conflicts (#530)
+    const hxConflicts = conflictedFiles.filter((f) => f.startsWith(".hx/"));
+    const codeConflicts = conflictedFiles.filter((f) => !f.startsWith(".hx/"));
 
-    if (gsdConflicts.length > 0 && codeConflicts.length === 0) {
-      // All conflicts are in .gsd/ state files — auto-resolve by accepting theirs
+    if (hxConflicts.length > 0 && codeConflicts.length === 0) {
+      // All conflicts are in .hx/ state files — auto-resolve by accepting theirs
       let resolved = true;
       try {
-        nativeCheckoutTheirs(basePath, gsdConflicts);
-        nativeAddPaths(basePath, gsdConflicts);
+        nativeCheckoutTheirs(basePath, hxConflicts);
+        nativeAddPaths(basePath, hxConflicts);
       } catch {
         resolved = false;
       }
@@ -500,10 +500,10 @@ export function reconcileMergeState(
         try {
           nativeCommit(
             basePath,
-            "chore: auto-resolve .gsd/ state file conflicts",
+            "chore: auto-resolve .hx/ state file conflicts",
           );
           ctx.ui.notify(
-            `Auto-resolved ${gsdConflicts.length} .gsd/ state file conflict(s) from prior merge.`,
+            `Auto-resolved ${hxConflicts.length} .hx/ state file conflict(s) from prior merge.`,
             "info",
           );
         } catch {

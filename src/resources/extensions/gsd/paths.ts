@@ -1,5 +1,5 @@
 /**
- * GSD Paths — ID-based path resolution
+ * HX Paths — ID-based path resolution
  *
  * Directories use bare IDs: M001/, S01/, etc.
  * Files use ID-SUFFIX: M001-ROADMAP.md, S01-PLAN.md, T01-PLAN.md
@@ -256,7 +256,7 @@ export function resolveTaskJsonFiles(tasksDir: string, suffix: string): string[]
 
 // ─── Full Path Builders ────────────────────────────────────────────────────
 
-export const GSD_ROOT_FILES = {
+export const HX_ROOT_FILES = {
   PROJECT: "PROJECT.md",
   DECISIONS: "DECISIONS.md",
   QUEUE: "QUEUE.md",
@@ -266,9 +266,9 @@ export const GSD_ROOT_FILES = {
   KNOWLEDGE: "KNOWLEDGE.md",
 } as const;
 
-export type GSDRootFileKey = keyof typeof GSD_ROOT_FILES;
+export type HXRootFileKey = keyof typeof HX_ROOT_FILES;
 
-const LEGACY_GSD_ROOT_FILES: Record<GSDRootFileKey, string> = {
+const LEGACY_HX_ROOT_FILES: Record<HXRootFileKey, string> = {
   PROJECT: "project.md",
   DECISIONS: "decisions.md",
   QUEUE: "queue.md",
@@ -280,36 +280,36 @@ const LEGACY_GSD_ROOT_FILES: Record<GSDRootFileKey, string> = {
 
 // ─── GSD Root Discovery ───────────────────────────────────────────────────────
 
-const gsdRootCache = new Map<string, string>();
+const hxRootCache = new Map<string, string>();
 
 /** Exported for tests only — do not call in production code. */
-export function _clearGsdRootCache(): void {
-  gsdRootCache.clear();
+export function _clearHxRootCache(): void {
+  hxRootCache.clear();
 }
 
 /**
- * Resolve the `.gsd` directory for a given project base path.
+ * Resolve the `.hx` directory for a given project base path.
  *
  * Probe order:
- *   1. basePath/.gsd         — fast path (common case)
+ *   1. basePath/.hx         — fast path (common case)
  *   2. git rev-parse root    — handles cwd-is-a-subdirectory
- *   3. Walk up from basePath — handles moved .gsd in an ancestor (bounded by git root)
- *   4. basePath/.gsd         — creation fallback (init scenario)
+ *   3. Walk up from basePath — handles moved .hx in an ancestor (bounded by git root)
+ *   4. basePath/.hx         — creation fallback (init scenario)
  *
  * Result is cached per basePath for the process lifetime.
  */
-export function gsdRoot(basePath: string): string {
-  const cached = gsdRootCache.get(basePath);
+export function hxRoot(basePath: string): string {
+  const cached = hxRootCache.get(basePath);
   if (cached) return cached;
 
-  const result = probeGsdRoot(basePath);
-  gsdRootCache.set(basePath, result);
+  const result = probeHxRoot(basePath);
+  hxRootCache.set(basePath, result);
   return result;
 }
 
-function probeGsdRoot(rawBasePath: string): string {
+function probeHxRoot(rawBasePath: string): string {
   // 1. Fast path — check the input path directly
-  const local = join(rawBasePath, ".gsd");
+  const local = join(rawBasePath, ".hx");
   if (existsSync(local)) return local;
 
   // Resolve symlinks so path comparisons work correctly across platforms
@@ -333,7 +333,7 @@ function probeGsdRoot(rawBasePath: string): string {
   } catch { /* git not available */ }
 
   if (gitRoot) {
-    const candidate = join(gitRoot, ".gsd");
+    const candidate = join(gitRoot, ".hx");
     if (existsSync(candidate)) return candidate;
   }
 
@@ -341,7 +341,7 @@ function probeGsdRoot(rawBasePath: string): string {
   if (gitRoot && basePath !== gitRoot) {
     let cur = dirname(basePath);
     while (cur !== basePath) {
-      const candidate = join(cur, ".gsd");
+      const candidate = join(cur, ".hx");
       if (existsSync(candidate)) return candidate;
       if (cur === gitRoot) break;
       basePath = cur;
@@ -353,24 +353,24 @@ function probeGsdRoot(rawBasePath: string): string {
   return local;
 }
 export function milestonesDir(basePath: string): string {
-  return join(gsdRoot(basePath), "milestones");
+  return join(hxRoot(basePath), "milestones");
 }
 
 export function resolveRuntimeFile(basePath: string): string {
-  return join(gsdRoot(basePath), "RUNTIME.md");
+  return join(hxRoot(basePath), "RUNTIME.md");
 }
 
-export function resolveGsdRootFile(basePath: string, key: GSDRootFileKey): string {
-  const root = gsdRoot(basePath);
-  const canonical = join(root, GSD_ROOT_FILES[key]);
+export function resolveHxRootFile(basePath: string, key: HXRootFileKey): string {
+  const root = hxRoot(basePath);
+  const canonical = join(root, HX_ROOT_FILES[key]);
   if (existsSync(canonical)) return canonical;
-  const legacy = join(root, LEGACY_GSD_ROOT_FILES[key]);
+  const legacy = join(root, LEGACY_HX_ROOT_FILES[key]);
   if (existsSync(legacy)) return legacy;
   return canonical;
 }
 
-export function relGsdRootFile(key: GSDRootFileKey): string {
-  return `.gsd/${GSD_ROOT_FILES[key]}`;
+export function relHxRootFile(key: HXRootFileKey): string {
+  return `.hx/${HX_ROOT_FILES[key]}`;
 }
 
 /**
@@ -452,8 +452,8 @@ export function resolveTaskFile(
  */
 export function relMilestonePath(basePath: string, milestoneId: string): string {
   const dir = resolveDir(milestonesDir(basePath), milestoneId);
-  if (dir) return `.gsd/milestones/${dir}`;
-  return `.gsd/milestones/${milestoneId}`;
+  if (dir) return `.hx/milestones/${dir}`;
+  return `.hx/milestones/${milestoneId}`;
 }
 
 /**

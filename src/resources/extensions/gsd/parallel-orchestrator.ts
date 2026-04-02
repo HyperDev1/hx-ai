@@ -3,7 +3,7 @@
  *
  * Manages worker lifecycle, budget tracking, and coordination. Workers are
  * separate processes spawned via child_process, each running in its own git
- * worktree with GSD_MILESTONE_LOCK env var set. The coordinator monitors
+ * worktree with HX_MILESTONE_LOCK env var set. The coordinator monitors
  * workers via session status files (see session-status-io.ts).
  */
 
@@ -19,7 +19,7 @@ import {
 } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { gsdRoot } from "./paths.js";
+import { hxRoot } from "./paths.js";
 import { createWorktree, worktreePath } from "./worktree-manager.js";
 import { autoWorktreeBranch, runWorktreePostCreateHook, syncGsdStateToWorktree } from "./auto-worktree.js";
 import { nativeBranchExists } from "./native-git-bridge.js";
@@ -90,7 +90,7 @@ export interface PersistedState {
 }
 
 function stateFilePath(basePath: string): string {
-  return join(gsdRoot(basePath), ORCHESTRATOR_STATE_FILE);
+  return join(hxRoot(basePath), ORCHESTRATOR_STATE_FILE);
 }
 
 /**
@@ -100,7 +100,7 @@ function stateFilePath(basePath: string): string {
 export function persistState(basePath: string): void {
   if (!state) return;
   try {
-    const dir = gsdRoot(basePath);
+    const dir = hxRoot(basePath);
     if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 
     const persisted: PersistedState = {
@@ -182,12 +182,12 @@ export function restoreState(basePath: string): PersistedState | null {
 }
 
 function workerLogPath(basePath: string, milestoneId: string): string {
-  return join(gsdRoot(basePath), "parallel", `${milestoneId}.stderr.log`);
+  return join(hxRoot(basePath), "parallel", `${milestoneId}.stderr.log`);
 }
 
 function appendWorkerLog(basePath: string, milestoneId: string, chunk: string): void {
   try {
-    const dir = join(gsdRoot(basePath), "parallel");
+    const dir = join(hxRoot(basePath), "parallel");
     if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
     appendFileSync(workerLogPath(basePath, milestoneId), chunk, "utf-8");
   } catch {
@@ -357,7 +357,7 @@ export async function startParallel(
   prefs: GSDPreferences | undefined,
 ): Promise<{ started: string[]; errors: Array<{ mid: string; error: string }> }> {
   // Prevent workers from spawning nested parallel sessions
-  if (process.env.GSD_PARALLEL_WORKER) {
+  if (process.env.HX_PARALLEL_WORKER) {
     return { started: [], errors: [{ mid: "all", error: "Cannot start parallel from within a parallel worker" }] };
   }
 
@@ -520,7 +520,7 @@ function createMilestoneWorktree(basePath: string, milestoneId: string): string 
 /**
  * Spawn a worker process for a milestone.
  * The worker runs `gsd headless --json auto` in the milestone's worktree
- * with GSD_MILESTONE_LOCK set to isolate state derivation.
+ * with HX_MILESTONE_LOCK set to isolate state derivation.
  *
  * IMPORTANT: We use `headless --json auto` instead of `--print "/gsd auto"`.
  * --print mode calls session.prompt() which returns immediately after the
@@ -552,14 +552,14 @@ export function spawnWorker(
       cwd: worker.worktreePath,
       env: {
         ...process.env,
-        GSD_MILESTONE_LOCK: milestoneId,
+        HX_MILESTONE_LOCK: milestoneId,
         // Pass the real project root so workers don't need to re-derive it.
         // Without this, process.cwd() resolves symlinks and the worktree
         // path heuristic can match the user-level ~/.gsd instead of the
         // project .gsd, causing writes to ~ and corrupting user config.
-        GSD_PROJECT_ROOT: basePath,
+        HX_PROJECT_ROOT: basePath,
         // Prevent workers from spawning their own parallel sessions
-        GSD_PARALLEL_WORKER: "1",
+        HX_PARALLEL_WORKER: "1",
       },
       stdio: ["ignore", "pipe", "pipe"],
       detached: false,
@@ -679,13 +679,13 @@ export function spawnWorker(
 
 /**
  * Resolve the GSD CLI binary path.
- * Uses GSD_BIN_PATH env var (set by loader.ts) or falls back to
+ * Uses HX_BIN_PATH env var (set by loader.ts) or falls back to
  * finding the binary relative to the current module.
  */
 function resolveGsdBin(): string | null {
-  // GSD_BIN_PATH is set by loader.ts to the absolute path of dist/loader.js
-  if (process.env.GSD_BIN_PATH && existsSync(process.env.GSD_BIN_PATH)) {
-    return process.env.GSD_BIN_PATH;
+  // HX_BIN_PATH is set by loader.ts to the absolute path of dist/loader.js
+  if (process.env.HX_BIN_PATH && existsSync(process.env.HX_BIN_PATH)) {
+    return process.env.HX_BIN_PATH;
   }
 
   // Fallback: try to find loader.js relative to this file

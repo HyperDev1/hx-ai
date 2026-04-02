@@ -38,25 +38,25 @@ const CMD_TIMEOUT = 5_000;
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 /** Worktree sentinel — path segment that marks an auto-worktree directory. */
-const WORKTREE_PATH_SEGMENT = `${join(".gsd", "worktrees")}/`;
+const WORKTREE_PATH_SEGMENT = `${join(".hx", "worktrees")}/`;
 
 /**
- * Resolve the project root when running inside a `.gsd/worktrees/<name>/`
+ * Resolve the project root when running inside a `.hx/worktrees/<name>/`
  * auto-worktree. Returns `null` if not in a worktree.
  *
  * Detection order:
- *   1. `GSD_WORKTREE` env var (set by the worktree launcher)
- *   2. `.gsd/worktrees/` segment in basePath
+ *   1. `HX_WORKTREE` env var (set by the worktree launcher)
+ *   2. `.hx/worktrees/` segment in basePath
  */
 function resolveWorktreeProjectRoot(basePath: string): string | null {
-  const envRoot = process.env.GSD_WORKTREE;
+  const envRoot = process.env.HX_WORKTREE;
   if (envRoot) return envRoot;
 
   const normalised = basePath.replace(/\\/g, "/");
   const idx = normalised.indexOf(WORKTREE_PATH_SEGMENT.replace(/\\/g, "/"));
   if (idx === -1) return null;
 
-  // Everything before `.gsd/worktrees/` is the project root
+  // Everything before `.hx/worktrees/` is the project root
   return basePath.slice(0, idx);
 }
 

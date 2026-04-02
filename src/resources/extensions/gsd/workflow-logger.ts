@@ -177,7 +177,7 @@ export function formatForNotification(entries: readonly LogEntry[]): string {
 export function readAuditLog(basePath?: string): LogEntry[] {
   const bp = basePath ?? _auditBasePath;
   if (!bp) return [];
-  const auditPath = join(bp, ".gsd", "audit-log.jsonl");
+  const auditPath = join(bp, ".hx", "audit-log.jsonl");
   if (!existsSync(auditPath)) return [];
   try {
     const content = readFileSync(auditPath, "utf-8");
@@ -231,7 +231,7 @@ function _push(
   // Persist to .gsd/audit-log.jsonl so entries survive context resets
   if (_auditBasePath) {
     try {
-      const auditDir = join(_auditBasePath, ".gsd");
+      const auditDir = join(_auditBasePath, ".hx");
       mkdirSync(auditDir, { recursive: true });
       appendFileSync(join(auditDir, "audit-log.jsonl"), JSON.stringify(entry) + "\n", "utf-8");
     } catch (auditErr) {

@@ -20,10 +20,10 @@ import {
   resolveSkillDiscoveryMode,
   getIsolationMode,
 } from "./preferences.js";
-import { ensureGsdSymlink, isInheritedRepo, validateProjectId } from "./repo-identity.js";
+import { ensureHxSymlink, isInheritedRepo, validateProjectId } from "./repo-identity.js";
 import { migrateToExternalState, recoverFailedMigration } from "./migrate-external.js";
 import { collectSecretsFromManifest } from "../get-secrets-from-user.js";
-import { gsdRoot, resolveMilestoneFile, milestonesDir } from "./paths.js";
+import { hxRoot, resolveMilestoneFile, milestonesDir } from "./paths.js";
 import { invalidateAllCaches } from "./cache.js";
 import { synthesizeCrashRecovery } from "./session-forensics.js";
 import {
@@ -113,7 +113,7 @@ async function openProjectDbIfPresent(basePath: string): Promise<void> {
     openDatabase(gsdDbPath);
   } catch (err) {
     process.stderr.write(
-      `gsd-db: failed to open existing database: ${(err as Error).message}\n`,
+      `hx-db: failed to open existing database: ${(err as Error).message}\n`,
     );
   }
 }
@@ -156,11 +156,11 @@ export async function bootstrapAutoSession(
     : null;
 
   try {
-    // Validate GSD_PROJECT_ID early so the user gets immediate feedback
-    const customProjectId = process.env.GSD_PROJECT_ID;
+    // Validate HX_PROJECT_ID early so the user gets immediate feedback
+    const customProjectId = process.env.HX_PROJECT_ID;
     if (customProjectId && !validateProjectId(customProjectId)) {
       ctx.ui.notify(
-        `GSD_PROJECT_ID must contain only alphanumeric characters, hyphens, and underscores. Got: "${customProjectId}"`,
+        `HX_PROJECT_ID must contain only alphanumeric characters, hyphens, and underscores. Got: "${customProjectId}"`,
         "error",
       );
       return releaseLockAndReturn();
@@ -180,7 +180,7 @@ export async function bootstrapAutoSession(
     }
 
     // Migrate legacy in-project .gsd/ to external state directory.
-    // Migration MUST run before ensureGitignore to avoid adding ".gsd" to
+    // Migration MUST run before ensureGitignore to avoid adding ".hx" to
     // .gitignore when .gsd/ is git-tracked (data-loss bug #1364).
     recoverFailedMigration(base);
     const migration = migrateToExternalState(base);
@@ -188,18 +188,18 @@ export async function bootstrapAutoSession(
       ctx.ui.notify(`External state migration warning: ${migration.error}`, "warning");
     }
     // Ensure symlink exists (handles fresh projects and post-migration)
-    ensureGsdSymlink(base);
+    ensureHxSymlink(base);
 
     // Ensure .gitignore has baseline patterns.
     // ensureGitignore checks for git-tracked .gsd/ files and skips the
-    // ".gsd" pattern if the project intentionally tracks .gsd/ in git.
+    // ".hx" pattern if the project intentionally tracks .gsd/ in git.
     const gitPrefs = loadEffectiveGSDPreferences()?.preferences?.git;
     const manageGitignore = gitPrefs?.manage_gitignore;
     ensureGitignore(base, { manageGitignore });
     if (manageGitignore !== false) untrackRuntimeFiles(base);
 
     // Bootstrap .gsd/ if it doesn't exist
-    const gsdDir = join(base, ".gsd");
+    const gsdDir = join(base, ".hx");
     if (!existsSync(gsdDir)) {
       mkdirSync(join(gsdDir, "milestones"), { recursive: true });
       try {
@@ -237,7 +237,7 @@ export async function bootstrapAutoSession(
           "info",
         );
       } else {
-        const activityDir = join(gsdRoot(base), "activity");
+        const activityDir = join(hxRoot(base), "activity");
         const recovery = synthesizeCrashRecovery(
           base,
           crashLock.unitType,
@@ -262,7 +262,7 @@ export async function bootstrapAutoSession(
     }
 
     // ── Debug mode ──
-    if (!isDebugEnabled() && process.env.GSD_DEBUG === "1") {
+    if (!isDebugEnabled() && process.env.HX_DEBUG === "1") {
       enableDebug(base);
     }
     if (isDebugEnabled()) {
@@ -289,7 +289,7 @@ export async function bootstrapAutoSession(
 
     // Clean stale runtime unit files for completed milestones (#887)
     cleanStaleRuntimeUnits(
-      gsdRoot(base),
+      hxRoot(base),
       (mid) => !!resolveMilestoneFile(base, mid, "SUMMARY"),
     );
 
@@ -555,7 +555,7 @@ export async function bootstrapAutoSession(
 
     // ── DB lifecycle ──
     const gsdDbPath = resolveProjectRootDbPath(s.basePath);
-    const gsdDirPath = join(s.basePath, ".gsd");
+    const gsdDirPath = join(s.basePath, ".hx");
     if (existsSync(gsdDirPath) && !existsSync(gsdDbPath)) {
       const hasDecisions = existsSync(join(gsdDirPath, "DECISIONS.md"));
       const hasRequirements = existsSync(join(gsdDirPath, "REQUIREMENTS.md"));
@@ -577,7 +577,7 @@ export async function bootstrapAutoSession(
         openDatabase(gsdDbPath);
       } catch (err) {
         process.stderr.write(
-          `gsd-db: failed to open existing database: ${(err as Error).message}\n`,
+          `hx-db: failed to open existing database: ${(err as Error).message}\n`,
         );
       }
     }
@@ -682,7 +682,7 @@ export async function bootstrapAutoSession(
 
     // Pre-flight: validate milestone queue
     try {
-      const msDir = join(base, ".gsd", "milestones");
+      const msDir = join(base, ".hx", "milestones");
       if (existsSync(msDir)) {
         const milestoneIds = readdirSync(msDir, { withFileTypes: true })
           .filter((d) => d.isDirectory() && /^M\d{3}/.test(d.name))

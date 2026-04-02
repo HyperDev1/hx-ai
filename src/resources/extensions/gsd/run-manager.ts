@@ -1,7 +1,7 @@
 /**
  * run-manager.ts — Create and list isolated workflow run directories.
  *
- * Each run lives under `.gsd/workflow-runs/<name>/<timestamp>/` and contains:
+ * Each run lives under `.hx/workflow-runs/<name>/<timestamp>/` and contains:
  * - DEFINITION.yaml — frozen snapshot of the workflow definition at run-creation time
  * - GRAPH.yaml — initialized step graph with all steps pending
  * - PARAMS.json — (optional) parameter overrides used for this run
@@ -86,7 +86,7 @@ export function createRun(
   defName: string,
   overrides?: Record<string, string>,
 ): string {
-  const defsDir = join(basePath, ".gsd", DEFS_DIR);
+  const defsDir = join(basePath, ".hx", DEFS_DIR);
 
   // Load and validate the definition
   const rawDef = loadDefinition(defsDir, defName);
@@ -98,7 +98,7 @@ export function createRun(
 
   // Create the run directory
   const timestamp = makeTimestamp();
-  const runDir = join(basePath, ".gsd", RUNS_DIR, defName, timestamp);
+  const runDir = join(basePath, ".hx", RUNS_DIR, defName, timestamp);
   mkdirSync(runDir, { recursive: true });
 
   // Freeze the definition as DEFINITION.yaml
@@ -131,7 +131,7 @@ export function createRun(
  * @returns Array of run metadata, sorted newest-first within each definition
  */
 export function listRuns(basePath: string, defName?: string): RunMetadata[] {
-  const runsRoot = join(basePath, ".gsd", RUNS_DIR);
+  const runsRoot = join(basePath, ".hx", RUNS_DIR);
   if (!existsSync(runsRoot)) return [];
 
   const results: RunMetadata[] = [];

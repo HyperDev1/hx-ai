@@ -13,7 +13,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { createRequire } from "node:module";
-import { gsdRoot, milestonesDir, buildTaskFileName } from "./paths.js";
+import { hxRoot, milestonesDir, buildTaskFileName } from "./paths.js";
 import { MILESTONE_ID_RE } from "./milestone-ids.js";
 import type { Classification, CaptureEntry } from "./captures.js";
 import {
@@ -40,7 +40,7 @@ export function executeInject(
 ): string | null {
   try {
     // Resolve the plan file path
-    const planPath = join(gsdRoot(basePath), "milestones", mid, "slices", sid, `${sid}-PLAN.md`);
+    const planPath = join(hxRoot(basePath), "milestones", mid, "slices", sid, `${sid}-PLAN.md`);
     if (!existsSync(planPath)) return null;
 
     const content = readFileSync(planPath, "utf-8");
@@ -104,7 +104,7 @@ export function executeInject(
     // Write a minimal task plan file so the dispatch rule does not
     // fall back to plan-slice regeneration (#909 guard).
     try {
-      const tasksDir = join(gsdRoot(basePath), "milestones", mid, "slices", sid, "tasks");
+      const tasksDir = join(hxRoot(basePath), "milestones", mid, "slices", sid, "tasks");
       if (!existsSync(tasksDir)) mkdirSync(tasksDir, { recursive: true });
       const taskPlanPath = join(tasksDir, buildTaskFileName(newId, "PLAN"));
       if (!existsSync(taskPlanPath)) {
@@ -147,7 +147,7 @@ export function executeReplan(
 ): boolean {
   try {
     const triggerPath = join(
-      basePath, ".gsd", "milestones", mid, "slices", sid, `${sid}-REPLAN-TRIGGER.md`,
+      basePath, ".hx", "milestones", mid, "slices", sid, `${sid}-REPLAN-TRIGGER.md`,
     );
     const ts = new Date().toISOString();
     const content = [
@@ -330,7 +330,7 @@ export function buildQuickTaskPrompt(capture: CaptureEntry): string {
     `## Instructions`,
     ``,
     `1. Execute this task as a small, self-contained change.`,
-    `2. Do NOT modify any \`.gsd/\` plan files — this is a one-off, not a planned task.`,
+    `2. Do NOT modify any \`.hx/\` plan files — this is a one-off, not a planned task.`,
     `3. Commit your changes with a descriptive message.`,
     `4. Keep changes minimal and focused on the capture text.`,
     `5. When done, say: "Quick task complete."`,

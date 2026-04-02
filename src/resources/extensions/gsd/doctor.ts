@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { loadFile, parseSummary, saveFile, parseTaskPlanMustHaves, countMustHavesMentionedInSummary } from "./files.js";
 import { parseRoadmap as parseLegacyRoadmap, parsePlan as parseLegacyPlan } from "./parsers-legacy.js";
 import { isDbAvailable, getMilestoneSlices, getSliceTasks } from "./gsd-db.js";
-import { resolveMilestoneFile, resolveMilestonePath, resolveSliceFile, resolveSlicePath, resolveTaskFile, resolveTasksDir, milestonesDir, gsdRoot, relMilestoneFile, relSliceFile, relTaskFile, relSlicePath, relGsdRootFile, resolveGsdRootFile, relMilestonePath } from "./paths.js";
+import { resolveMilestoneFile, resolveMilestonePath, resolveSliceFile, resolveSlicePath, resolveTaskFile, resolveTasksDir, milestonesDir, hxRoot, relMilestoneFile, relSliceFile, relTaskFile, relSlicePath, relHxRootFile, resolveHxRootFile, relMilestonePath } from "./paths.js";
 import { deriveState, isMilestoneComplete } from "./state.js";
 import { invalidateAllCaches } from "./cache.js";
 import { loadEffectiveGSDPreferences, type GSDPreferences } from "./preferences.js";
@@ -138,7 +138,7 @@ function buildStateMarkdown(state: Awaited<ReturnType<typeof deriveState>>): str
 
 async function updateStateFile(basePath: string, fixesApplied: string[]): Promise<void> {
   const state = await deriveState(basePath);
-  const path = resolveGsdRootFile(basePath, "STATE");
+  const path = resolveHxRootFile(basePath, "STATE");
   await saveFile(path, buildStateMarkdown(state));
   fixesApplied.push(`updated ${path}`);
 }
@@ -147,7 +147,7 @@ async function updateStateFile(basePath: string, fixesApplied: string[]): Promis
 export async function rebuildState(basePath: string): Promise<void> {
   invalidateAllCaches();
   const state = await deriveState(basePath);
-  const path = resolveGsdRootFile(basePath, "STATE");
+  const path = resolveHxRootFile(basePath, "STATE");
   await saveFile(path, buildStateMarkdown(state));
 }
 
@@ -176,7 +176,7 @@ function auditRequirements(content: string | null): DoctorIssue[] {
         scope: "project",
         unitId: requirementId,
         message: `${requirementId} is Active but has no primary owning slice`,
-        file: relGsdRootFile("REQUIREMENTS"),
+        file: relHxRootFile("REQUIREMENTS"),
         fixable: false,
       });
     }
@@ -188,7 +188,7 @@ function auditRequirements(content: string | null): DoctorIssue[] {
         scope: "project",
         unitId: requirementId,
         message: `${requirementId} is Blocked but has no reason in Notes`,
-        file: relGsdRootFile("REQUIREMENTS"),
+        file: relHxRootFile("REQUIREMENTS"),
         fixable: false,
       });
     }
@@ -268,7 +268,7 @@ export interface DoctorHistoryEntry {
 
 async function appendDoctorHistory(basePath: string, report: DoctorReport): Promise<void> {
   try {
-    const historyPath = join(gsdRoot(basePath), "doctor-history.jsonl");
+    const historyPath = join(hxRoot(basePath), "doctor-history.jsonl");
     const errorCount = report.issues.filter(i => i.severity === "error").length;
     const warningCount = report.issues.filter(i => i.severity === "warning").length;
     const issueDetails = report.issues
@@ -314,7 +314,7 @@ async function appendDoctorHistory(basePath: string, report: DoctorReport): Prom
 /** Read the last N doctor history entries. Returns most-recent-first. */
 export async function readDoctorHistory(basePath: string, lastN = 50): Promise<DoctorHistoryEntry[]> {
   try {
-    const historyPath = join(gsdRoot(basePath), "doctor-history.jsonl");
+    const historyPath = join(hxRoot(basePath), "doctor-history.jsonl");
     if (!existsSync(historyPath)) return [];
     const lines = readFileSync(historyPath, "utf-8").split("\n").filter(l => l.trim());
     return lines.slice(-lastN).reverse().map(l => JSON.parse(l) as DoctorHistoryEntry);
@@ -392,7 +392,7 @@ export async function runGSDDoctor(basePath: string, options?: { fix?: boolean; 
     return report;
   }
 
-  const requirementsPath = resolveGsdRootFile(basePath, "REQUIREMENTS");
+  const requirementsPath = resolveHxRootFile(basePath, "REQUIREMENTS");
   const requirementsContent = await loadFile(requirementsPath);
   issues.push(...auditRequirements(requirementsContent));
 

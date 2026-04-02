@@ -7,7 +7,7 @@ import type { ExtensionContext } from "@gsd/pi-coding-agent";
 import { debugTime } from "../debug-logger.js";
 import { loadPrompt } from "../prompt-loader.js";
 import { resolveAllSkillReferences, renderPreferencesForSystemPrompt, loadEffectiveGSDPreferences } from "../preferences.js";
-import { resolveGsdRootFile, resolveSliceFile, resolveSlicePath, resolveTaskFile, resolveTaskFiles, resolveTasksDir, relSliceFile, relSlicePath, relTaskFile } from "../paths.js";
+import { resolveHxRootFile, resolveSliceFile, resolveSlicePath, resolveTaskFile, resolveTaskFiles, resolveTasksDir, relSliceFile, relSlicePath, relTaskFile } from "../paths.js";
 import { hasSkillSnapshot, detectNewSkills, formatSkillsXml } from "../skill-discovery.js";
 import { getActiveAutoWorktreeContext } from "../auto-worktree.js";
 import { getActiveWorktreeName, getWorktreeOriginalCwd } from "../worktree-command.js";
@@ -16,12 +16,12 @@ import { formatOverridesSection, loadActiveOverrides, loadFile, parseContinue, p
 import { toPosixPath } from "../../shared/mod.js";
 import { markCmuxPromptShown, shouldPromptToEnableCmux } from "../../cmux/index.js";
 
-const gsdHome = process.env.GSD_HOME || join(homedir(), ".gsd");
+const hxHome = process.env.HX_HOME || join(homedir(), ".hx");
 
 function warnDeprecatedAgentInstructions(): void {
   const paths = [
-    join(gsdHome, "agent-instructions.md"),
-    join(process.cwd(), ".gsd", "agent-instructions.md"),
+    join(hxHome, "agent-instructions.md"),
+    join(process.cwd(), ".hx", "agent-instructions.md"),
   ];
   for (const path of paths) {
     if (existsSync(path)) {
@@ -38,7 +38,7 @@ export async function buildBeforeAgentStartResult(
   event: { prompt: string; systemPrompt: string },
   ctx: ExtensionContext,
 ): Promise<{ systemPrompt: string; message?: { customType: string; content: string; display: false } } | undefined> {
-  if (!existsSync(join(process.cwd(), ".gsd"))) return undefined;
+  if (!existsSync(join(process.cwd(), ".hx"))) return undefined;
 
   const stopContextTimer = debugTime("context-inject");
   const systemContent = loadPrompt("system");
@@ -64,7 +64,7 @@ export async function buildBeforeAgentStartResult(
     }
   }
 
-  const { block: knowledgeBlock, globalSizeKb } = loadKnowledgeBlock(gsdHome, process.cwd());
+  const { block: knowledgeBlock, globalSizeKb } = loadKnowledgeBlock(hxHome, process.cwd());
   if (globalSizeKb > 4) {
     ctx.ui.notify(
       `GSD: ~/.gsd/agent/KNOWLEDGE.md is ${globalSizeKb.toFixed(1)}KB — consider trimming to keep system prompt lean.`,
@@ -121,11 +121,11 @@ export async function buildBeforeAgentStartResult(
   };
 }
 
-export function loadKnowledgeBlock(gsdHomeDir: string, cwd: string): { block: string; globalSizeKb: number } {
+export function loadKnowledgeBlock(hxHomeDir: string, cwd: string): { block: string; globalSizeKb: number } {
   // 1. Global knowledge (~/.gsd/agent/KNOWLEDGE.md) — cross-project, user-maintained
   let globalKnowledge = "";
   let globalSizeKb = 0;
-  const globalKnowledgePath = join(gsdHomeDir, "agent", "KNOWLEDGE.md");
+  const globalKnowledgePath = join(hxHomeDir, "agent", "KNOWLEDGE.md");
   if (existsSync(globalKnowledgePath)) {
     try {
       const content = readFileSync(globalKnowledgePath, "utf-8").trim();
@@ -140,7 +140,7 @@ export function loadKnowledgeBlock(gsdHomeDir: string, cwd: string): { block: st
 
   // 2. Project knowledge (.gsd/KNOWLEDGE.md) — project-specific
   let projectKnowledge = "";
-  const knowledgePath = resolveGsdRootFile(cwd, "KNOWLEDGE");
+  const knowledgePath = resolveHxRootFile(cwd, "KNOWLEDGE");
   if (existsSync(knowledgePath)) {
     try {
       const content = readFileSync(knowledgePath, "utf-8").trim();

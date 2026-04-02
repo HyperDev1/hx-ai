@@ -27,7 +27,7 @@ import { verifyExpectedArtifact } from "./auto-recovery.js";
 import { deriveState } from "./state.js";
 import { isAutoActive } from "./auto.js";
 import { loadPrompt } from "./prompt-loader.js";
-import { gsdRoot } from "./paths.js";
+import { hxRoot } from "./paths.js";
 import { formatDuration } from "../shared/format-utils.js";
 import { getAutoWorktreePath } from "./auto-worktree.js";
 import { loadEffectiveGSDPreferences, loadGlobalGSDPreferences, getGlobalGSDPreferencesPath } from "./preferences.js";
@@ -181,7 +181,7 @@ export async function handleForensics(
   }
 
   const basePath = process.cwd();
-  const root = gsdRoot(basePath);
+  const root = hxRoot(basePath);
   if (!existsSync(root)) {
     ctx.ui.notify("No GSD state found. Run /gsd auto first.", "warning");
     return;
@@ -231,8 +231,8 @@ export async function handleForensics(
   // when import.meta.url resolves to the npm-global install path (Windows).
   let gsdSourceDir = dirname(fileURLToPath(import.meta.url));
   if (!existsSync(join(gsdSourceDir, "prompts"))) {
-    const gsdHome = process.env.GSD_HOME || join(homedir(), ".gsd");
-    const fallback = join(gsdHome, "agent", "extensions", "gsd");
+    const hxHome = process.env.HX_HOME || join(homedir(), ".hx");
+    const fallback = join(hxHome, "agent", "extensions", "gsd");
     if (existsSync(join(fallback, "prompts"))) gsdSourceDir = fallback;
   }
 
@@ -304,10 +304,10 @@ export async function buildForensicReport(basePath: string): Promise<ForensicRep
     }
   }
 
-  // 8. GSD version — use GSD_VERSION env var set by the loader at startup.
+  // 8. GSD version — use HX_VERSION env var set by the loader at startup.
   // Extensions run from ~/.gsd/agent/extensions/gsd/ at runtime, so path-traversal
   // from import.meta.url would resolve to ~/package.json (wrong on every system).
-  const gsdVersion = process.env.GSD_VERSION || "unknown";
+  const gsdVersion = process.env.HX_VERSION || "unknown";
 
   // 9. Scan journal for flow timeline and structured events
   const journalSummary = scanJournalForForensics(basePath);
@@ -411,7 +411,7 @@ function resolveActivityDirs(basePath: string, activeMilestone?: string | null):
   if (activeMilestone) {
     const wtPath = getAutoWorktreePath(basePath, activeMilestone);
     if (wtPath) {
-      const wtActivityDir = join(gsdRoot(wtPath), "activity");
+      const wtActivityDir = join(hxRoot(wtPath), "activity");
       if (existsSync(wtActivityDir)) {
         dirs.push(wtActivityDir);
       }
@@ -419,7 +419,7 @@ function resolveActivityDirs(basePath: string, activeMilestone?: string | null):
   }
 
   // Always include root activity logs
-  const rootActivityDir = join(gsdRoot(basePath), "activity");
+  const rootActivityDir = join(hxRoot(basePath), "activity");
   dirs.push(rootActivityDir);
 
   return dirs;
@@ -447,7 +447,7 @@ const MAX_JOURNAL_RECENT_EVENTS = 20;
  */
 function scanJournalForForensics(basePath: string): JournalSummary | null {
   try {
-    const journalDir = join(gsdRoot(basePath), "journal");
+    const journalDir = join(hxRoot(basePath), "journal");
     if (!existsSync(journalDir)) return null;
 
     const files = readdirSync(journalDir).filter(f => f.endsWith(".jsonl")).sort();
@@ -576,7 +576,7 @@ function gatherActivityLogMeta(basePath: string, activeMilestone?: string | null
 // ─── Completed Keys Loader ────────────────────────────────────────────────────
 
 function loadCompletedKeys(basePath: string): string[] {
-  const file = join(gsdRoot(basePath), "completed-units.json");
+  const file = join(hxRoot(basePath), "completed-units.json");
   try {
     if (existsSync(file)) {
       return JSON.parse(readFileSync(file, "utf-8"));
@@ -780,7 +780,7 @@ function detectJournalAnomalies(journal: JournalSummary | null, anomalies: Foren
 // ─── Report Persistence ───────────────────────────────────────────────────────
 
 function saveForensicReport(basePath: string, report: ForensicReport, problemDescription: string): string {
-  const dir = join(gsdRoot(basePath), "forensics");
+  const dir = join(hxRoot(basePath), "forensics");
   mkdirSync(dir, { recursive: true });
 
   const ts = new Date().toISOString().replace(/[:.]/g, "-").replace("T", "-").slice(0, 19);
