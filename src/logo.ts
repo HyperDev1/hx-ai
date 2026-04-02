@@ -7,7 +7,7 @@
  */
 
 /** Raw logo lines — no ANSI codes, no leading newline. */
-export const GSD_LOGO: readonly string[] = [
+export const HX_LOGO: readonly string[] = [
   '   ██████╗ ███████╗██████╗ ',
   '  ██╔════╝ ██╔════╝██╔══██╗',
   '  ██║  ███╗███████╗██║  ██║',
@@ -23,5 +23,5 @@ export const GSD_LOGO: readonly string[] = [
  * @returns Ready-to-write string with leading/trailing newlines.
  */
 export function renderLogo(color: (s: string) => string): string {
-  return '\n' + GSD_LOGO.map(color).join('\n') + '\n'
+  return '\n' + HX_LOGO.map(color).join('\n') + '\n'
 }

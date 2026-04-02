@@ -14,7 +14,7 @@ interface UpdateCheckResult {
 }
 
 export async function checkForUpdate(): Promise<UpdateCheckResult> {
-  const currentVersion = process.env.GSD_VERSION || "0.0.0"
+  const currentVersion = process.env.HX_VERSION || "0.0.0"
 
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)

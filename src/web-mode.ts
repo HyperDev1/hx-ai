@@ -36,7 +36,7 @@ export interface WebModeLaunchOptions {
   packageRoot?: string
   host?: string
   port?: number
-  /** Additional allowed origins for CORS (forwarded as GSD_WEB_ALLOWED_ORIGINS). */
+  /** Additional allowed origins for CORS (forwarded as HX_WEB_ALLOWED_ORIGINS). */
   allowedOrigins?: string[]
 }
 
@@ -584,15 +584,15 @@ export async function launchWebMode(
     ...(deps.env ?? process.env),
     HOSTNAME: host,
     PORT: String(port),
-    GSD_WEB_HOST: host,
-    GSD_WEB_PORT: String(port),
-    GSD_WEB_AUTH_TOKEN: authToken,
-    GSD_WEB_PROJECT_CWD: options.cwd,
-    GSD_WEB_PROJECT_SESSIONS_DIR: options.projectSessionsDir,
-    GSD_WEB_PACKAGE_ROOT: resolution.packageRoot,
-    GSD_WEB_HOST_KIND: resolution.kind,
-    ...(resolution.kind === 'source-dev' ? { NEXT_PUBLIC_GSD_DEV: '1' } : {}),
-    ...(options.allowedOrigins?.length ? { GSD_WEB_ALLOWED_ORIGINS: options.allowedOrigins.join(',') } : {}),
+    HX_WEB_HOST: host,
+    HX_WEB_PORT: String(port),
+    HX_WEB_AUTH_TOKEN: authToken,
+    HX_WEB_PROJECT_CWD: options.cwd,
+    HX_WEB_PROJECT_SESSIONS_DIR: options.projectSessionsDir,
+    HX_WEB_PACKAGE_ROOT: resolution.packageRoot,
+    HX_WEB_HOST_KIND: resolution.kind,
+    ...(resolution.kind === 'source-dev' ? { NEXT_PUBLIC_HX_DEV: '1' } : {}),
+    ...(options.allowedOrigins?.length ? { HX_WEB_ALLOWED_ORIGINS: options.allowedOrigins.join(',') } : {}),
   }
 
   try {

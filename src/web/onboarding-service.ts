@@ -380,7 +380,7 @@ async function defaultValidateApiKey(
 }
 
 function resolveRuntimeTestValidateApiKey(env: NodeJS.ProcessEnv): OnboardingServiceDeps["validateApiKey"] | undefined {
-  if (env.GSD_WEB_TEST_FAKE_API_KEY_VALIDATION !== "1") {
+  if (env.HX_WEB_TEST_FAKE_API_KEY_VALIDATION !== "1") {
     return undefined;
   }
 

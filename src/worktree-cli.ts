@@ -10,7 +10,7 @@
  *   gsd worktree remove <n>   Remove a specific worktree
  *
  * On session exit (via session_shutdown event), auto-commits dirty work
- * so nothing is lost. The GSD extension reads GSD_CLI_WORKTREE to know
+ * so nothing is lost. The GSD extension reads HX_CLI_WORKTREE to know
  * when a session was launched via -w.
  *
  * Note: Extension modules are .ts files loaded via jiti (not compiled to .js).
@@ -330,8 +330,8 @@ async function handleWorktreeFlag(worktreeFlag: boolean | string): Promise<void>
       // Single active worktree — resume it
       const wt = withChanges[0]
       process.chdir(wt.path)
-      process.env.GSD_CLI_WORKTREE = wt.name
-      process.env.GSD_CLI_WORKTREE_BASE = basePath
+      process.env.HX_CLI_WORKTREE = wt.name
+      process.env.HX_CLI_WORKTREE_BASE = basePath
       process.stderr.write(chalk.green(`✓ Resumed worktree ${chalk.bold(wt.name)}\n`))
       process.stderr.write(chalk.dim(`  path   ${wt.path}\n`))
       process.stderr.write(chalk.dim(`  branch ${wt.branch}\n\n`))
@@ -362,8 +362,8 @@ async function handleWorktreeFlag(worktreeFlag: boolean | string): Promise<void>
 
   if (found) {
     process.chdir(found.path)
-    process.env.GSD_CLI_WORKTREE = name
-    process.env.GSD_CLI_WORKTREE_BASE = basePath
+    process.env.HX_CLI_WORKTREE = name
+    process.env.HX_CLI_WORKTREE_BASE = basePath
     process.stderr.write(chalk.green(`✓ Resumed worktree ${chalk.bold(name)}\n`))
     process.stderr.write(chalk.dim(`  path   ${found.path}\n`))
     process.stderr.write(chalk.dim(`  branch ${found.branch}\n\n`))
@@ -382,8 +382,8 @@ async function createAndEnter(ext: ExtensionModules, basePath: string, name: str
     }
 
     process.chdir(info.path)
-    process.env.GSD_CLI_WORKTREE = name
-    process.env.GSD_CLI_WORKTREE_BASE = basePath
+    process.env.HX_CLI_WORKTREE = name
+    process.env.HX_CLI_WORKTREE_BASE = basePath
     process.stderr.write(chalk.green(`✓ Created worktree ${chalk.bold(name)}\n`))
     process.stderr.write(chalk.dim(`  path   ${info.path}\n`))
     process.stderr.write(chalk.dim(`  branch ${info.branch}\n\n`))

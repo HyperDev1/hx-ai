@@ -64,7 +64,7 @@ interface CliFlags {
 }
 
 function exitIfManagedResourcesAreNewer(currentAgentDir: string): void {
-  const currentVersion = process.env.GSD_VERSION || '0.0.0'
+  const currentVersion = process.env.HX_VERSION || '0.0.0'
   const managedVersion = getNewerManagedResourceVersion(currentAgentDir, currentVersion)
   if (!managedVersion) {
     return
@@ -103,7 +103,7 @@ function parseCliArgs(argv: string[]): CliFlags {
     } else if (arg === '--list-models') {
       flags.listModels = (i + 1 < args.length && !args[i + 1].startsWith('-')) ? args[++i] : true
     } else if (arg === '--version' || arg === '-v') {
-      process.stdout.write((process.env.GSD_VERSION || '0.0.0') + '\n')
+      process.stdout.write((process.env.HX_VERSION || '0.0.0') + '\n')
       process.exit(0)
     } else if (arg === '--worktree' || arg === '-w') {
       // -w with no value → auto-generate name; -w <name> → use that name
@@ -113,7 +113,7 @@ function parseCliArgs(argv: string[]): CliFlags {
         flags.worktree = true
       }
     } else if (arg === '--help' || arg === '-h') {
-      printHelp(process.env.GSD_VERSION || '0.0.0')
+      printHelp(process.env.HX_VERSION || '0.0.0')
       process.exit(0)
     } else if (arg === '--web') {
       flags.web = true
@@ -180,7 +180,7 @@ if (!process.stdin.isTTY && !isPrintMode && !hasSubcommand && !cliFlags.listMode
 // `gsd <subcommand> --help` — show subcommand-specific help
 const subcommand = cliFlags.messages[0]
 if (subcommand && process.argv.includes('--help')) {
-  if (printSubcommandHelp(subcommand, process.env.GSD_VERSION || '0.0.0')) {
+  if (printSubcommandHelp(subcommand, process.env.HX_VERSION || '0.0.0')) {
     process.exit(0)
   }
 }
@@ -510,7 +510,7 @@ if (isPrintMode) {
     const { startMcpServer } = await import('./mcp-server.js')
     await startMcpServer({
       tools: session.agent.state.tools ?? [],
-      version: process.env.GSD_VERSION || '0.0.0',
+      version: process.env.HX_VERSION || '0.0.0',
     })
     // MCP server runs until the transport closes; keep alive
     await new Promise(() => {})
@@ -675,10 +675,10 @@ if (!process.stdin.isTTY) {
 
 // Welcome screen — shown on every fresh interactive session before TUI takes over.
 // Skip when the first-run banner was already printed in loader.ts (prevents double banner).
-if (!process.env.GSD_FIRST_RUN_BANNER) {
+if (!process.env.HX_FIRST_RUN_BANNER) {
   const { printWelcomeScreen } = await import('./welcome-screen.js')
   printWelcomeScreen({
-    version: process.env.GSD_VERSION || '0.0.0',
+    version: process.env.HX_VERSION || '0.0.0',
     modelName: settingsManager.getDefaultModel() || undefined,
     provider: settingsManager.getDefaultProvider() || undefined,
   })
