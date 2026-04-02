@@ -415,7 +415,7 @@ export interface SaveArtifactOpts {
 
 /**
  * Save an artifact to DB and write the corresponding markdown file to disk.
- * The path is relative to .gsd/ (e.g. "milestones/M001/slices/S06/tasks/T01-SUMMARY.md").
+ * The path is relative to .hx/ (e.g. "milestones/M001/slices/S06/tasks/T01-SUMMARY.md").
  * The full file path is computed as basePath + '.hx/' + path.
  */
 export async function saveArtifactToDb(
@@ -429,7 +429,7 @@ export async function saveArtifactToDb(
     const gsdDir = resolve(basePath, '.hx');
     const fullPath = resolve(basePath, '.hx', opts.path);
     if (!fullPath.startsWith(gsdDir)) {
-      throw new HXError(HX_IO_ERROR, `saveArtifactToDb: path escapes .gsd/ directory: ${opts.path}`);
+      throw new HXError(HX_IO_ERROR, `saveArtifactToDb: path escapes .hx/ directory: ${opts.path}`);
     }
 
     // Shrinkage guard: if the file already exists and the new content is

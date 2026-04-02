@@ -3,7 +3,7 @@
  *
  * Manage the extension registry: list, enable, disable, info.
  * Self-contained — no imports outside the extensions tree (extensions are loaded
- * via jiti at runtime from ~/.gsd/agent/, not compiled by tsc).
+ * via jiti at runtime from ~/.hx/agent/, not compiled by tsc).
  */
 
 import type { ExtensionCommandContext } from "@hyperlab/hx-coding-agent";

@@ -1,5 +1,5 @@
 /**
- * /hx migrate — one-shot migration from .planning to .gsd
+ * /hx migrate — one-shot migration from .planning to .hx
  *
  * Thin UX orchestrator: resolves paths, runs the validate → parse → transform →
  * preview → write pipeline, and shows confirmation UI via showNextAction.

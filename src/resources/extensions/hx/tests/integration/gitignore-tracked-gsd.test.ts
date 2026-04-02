@@ -1,7 +1,7 @@
 /**
  * gitignore-tracked-gsd.test.ts — Regression tests for #1364.
  *
- * Verifies that ensureGitignore() does NOT add ".gsd" to .gitignore
+ * Verifies that ensureGitignore() does NOT add ".hx" to .gitignore
  * when .hx/ contains git-tracked files, and that migrateToExternalState()
  * aborts migration for tracked .hx/ directories.
  *
@@ -217,7 +217,7 @@ test("migrateToExternalState aborts when .hx/ has tracked files (#1364)", (t) =>
     // .hx/ should still be a real directory, not a symlink
     assert.ok(existsSync(join(dir, ".hx", "PROJECT.md")), ".hx/PROJECT.md should still exist");
 
-    // No .gsd.migrating should exist
+    // No .hx.migrating should exist
     assert.ok(
       !existsSync(join(dir, ".hx.migrating")),
       ".hx.migrating should not exist",

@@ -24,7 +24,7 @@ function makeTmp(name: string): string {
 }
 
 /**
- * Build a minimal .gsd structure: milestone with one slice, one task
+ * Build a minimal .hx structure: milestone with one slice, one task
  * marked done with a summary — but no slice summary and roadmap unchecked.
  * Previously this triggered reconciliation; now it should produce no
  * reconciliation issue codes.

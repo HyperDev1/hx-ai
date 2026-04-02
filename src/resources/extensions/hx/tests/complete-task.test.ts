@@ -50,7 +50,7 @@ function cleanupDir(dirPath: string): void {
 }
 
 /**
- * Create a temp project directory with .gsd structure for handler tests.
+ * Create a temp project directory with .hx structure for handler tests.
  */
 function createTempProject(): { basePath: string; planPath: string } {
   const basePath = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-handler-'));

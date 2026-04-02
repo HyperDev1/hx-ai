@@ -77,14 +77,14 @@ describe("parallel-worker-lock-contention (#2184)", () => {
   // ─── Bug 1b: effectiveLockTarget returns per-milestone directory ─────────
   test("Bug 1b: effectiveLockTarget returns gsdDir without parallel env", () => {
     delete process.env.HX_PARALLEL_WORKER;
-    const gsdDir = "/tmp/test/.gsd";
+    const gsdDir = "/tmp/test/.hx";
     assert.equal(effectiveLockTarget(gsdDir), gsdDir);
   });
 
   test("Bug 1b: effectiveLockTarget returns parallel/<MID> in parallel mode", () => {
     process.env.HX_PARALLEL_WORKER = "1";
     process.env.HX_MILESTONE_LOCK = "M003";
-    const gsdDir = "/tmp/test/.gsd";
+    const gsdDir = "/tmp/test/.hx";
     assert.equal(effectiveLockTarget(gsdDir), join(gsdDir, "parallel", "M003"));
   });
 
@@ -154,7 +154,7 @@ describe("parallel-worker-lock-contention (#2184)", () => {
   });
 
   // ─── Bug 3: syncProjectRootToWorktree skips same-path symlinks ───────────
-  test("Bug 3: syncProjectRootToWorktree skips when .gsd resolves to same path (symlink)", () => {
+  test("Bug 3: syncProjectRootToWorktree skips when .hx resolves to same path (symlink)", () => {
     const base = mkdtempSync(join(tmpdir(), "gsd-symlink-sync-"));
     const externalGsd = join(base, "external-gsd");
     const projectRoot = join(base, "project");
@@ -171,7 +171,7 @@ describe("parallel-worker-lock-contention (#2184)", () => {
       "# Roadmap",
     );
 
-    // Symlink both project and worktree .gsd to the same external directory
+    // Symlink both project and worktree .hx to the same external directory
     symlinkSync(externalGsd, join(projectRoot, ".hx"));
     symlinkSync(externalGsd, join(worktreePath, ".hx"));
 
@@ -199,7 +199,7 @@ describe("parallel-worker-lock-contention (#2184)", () => {
   });
 
   // ─── Bug 3b: sync still works when paths are different ───────────────────
-  test("Bug 3b: syncProjectRootToWorktree copies when .gsd paths are different", () => {
+  test("Bug 3b: syncProjectRootToWorktree copies when .hx paths are different", () => {
     const base = mkdtempSync(join(tmpdir(), "gsd-diff-sync-"));
     const projectRoot = join(base, "project");
     const worktreePath = join(base, "worktree");

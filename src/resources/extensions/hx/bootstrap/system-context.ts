@@ -122,7 +122,7 @@ export async function buildBeforeAgentStartResult(
 }
 
 export function loadKnowledgeBlock(hxHomeDir: string, cwd: string): { block: string; globalSizeKb: number } {
-  // 1. Global knowledge (~/.gsd/agent/KNOWLEDGE.md) — cross-project, user-maintained
+  // 1. Global knowledge (~/.hx/agent/KNOWLEDGE.md) — cross-project, user-maintained
   let globalKnowledge = "";
   let globalSizeKb = 0;
   const globalKnowledgePath = join(hxHomeDir, "agent", "KNOWLEDGE.md");
@@ -138,7 +138,7 @@ export function loadKnowledgeBlock(hxHomeDir: string, cwd: string): { block: str
     }
   }
 
-  // 2. Project knowledge (.gsd/KNOWLEDGE.md) — project-specific
+  // 2. Project knowledge (.hx/KNOWLEDGE.md) — project-specific
   let projectKnowledge = "";
   const knowledgePath = resolveHxRootFile(cwd, "KNOWLEDGE");
   if (existsSync(knowledgePath)) {
@@ -202,7 +202,7 @@ function buildWorktreeContextBlock(): string {
       `- Branch: ${autoWorktree.branch}`,
       "",
       "All file operations, bash commands, and GSD state resolve against the worktree path above.",
-      "Write every .gsd artifact in the worktree path above, never in the main project tree.",
+      "Write every .hx artifact in the worktree path above, never in the main project tree.",
     ].join("\n");
   }
 

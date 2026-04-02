@@ -72,7 +72,7 @@ export function registerDbTools(pi: ExtensionAPI): void {
       "Use gsd_decision_save when recording an architectural, pattern, library, or observability decision.",
       "Decision IDs are auto-assigned (D001, D002, ...) — never guess or provide an ID.",
       "All fields except revisable, when_context, and made_by are required.",
-      "The tool writes to the DB and regenerates .gsd/DECISIONS.md automatically.",
+      "The tool writes to the DB and regenerates .hx/DECISIONS.md automatically.",
       "Set made_by to 'human' when the user explicitly directed the decision, 'agent' when the LLM chose autonomously (default), or 'collaborative' when it was discussed and agreed together.",
     ],
     parameters: Type.Object({

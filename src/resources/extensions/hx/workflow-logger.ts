@@ -2,7 +2,7 @@
 // Centralized warning/error accumulator for the workflow engine pipeline.
 // Captures structured entries that the auto-loop can drain after each unit
 // to surface root causes for stuck loops, silent degradation, and blocked writes.
-// All entries are also persisted to .gsd/audit-log.jsonl for post-mortem analysis.
+// All entries are also persisted to .hx/audit-log.jsonl for post-mortem analysis.
 //
 // Stderr policy: every logWarning/logError call writes immediately to stderr
 // for terminal visibility. This is intentional — unlike debug-logger (which is
@@ -228,7 +228,7 @@ function _push(
     _buffer.shift();
   }
 
-  // Persist to .gsd/audit-log.jsonl so entries survive context resets
+  // Persist to .hx/audit-log.jsonl so entries survive context resets
   if (_auditBasePath) {
     try {
       const auditDir = join(_auditBasePath, ".hx");

@@ -55,12 +55,12 @@ describe('repo-identity-worktree', () => {
 
 test('ensureHxSymlink points worktree at main repo external state dir', () => {
     const mainState = ensureHxSymlink(base);
-    assert.deepStrictEqual(mainState, realpathSync(join(base, ".hx")), "ensureHxSymlink(base) returns the current main repo .gsd target");
+    assert.deepStrictEqual(mainState, realpathSync(join(base, ".hx")), "ensureHxSymlink(base) returns the current main repo .hx target");
     const worktreeState = ensureHxSymlink(worktreePath);
     assert.deepStrictEqual(worktreeState, expectedExternalState, "worktree symlink target matches main repo external state dir");
-    assert.ok(existsSync(join(worktreePath, ".hx")), "worktree .gsd exists");
-    assert.ok(lstatSync(join(worktreePath, ".hx")).isSymbolicLink(), "worktree .gsd is a symlink");
-    assert.deepStrictEqual(realpathSync(join(worktreePath, ".hx")), realpathSync(expectedExternalState), "worktree .gsd symlink resolves to main repo external state dir");
+    assert.ok(existsSync(join(worktreePath, ".hx")), "worktree .hx exists");
+    assert.ok(lstatSync(join(worktreePath, ".hx")).isSymbolicLink(), "worktree .hx is a symlink");
+    assert.deepStrictEqual(realpathSync(join(worktreePath, ".hx")), realpathSync(expectedExternalState), "worktree .hx symlink resolves to main repo external state dir");
 });
 
 test('ensureHxSymlink heals stale worktree symlinks', () => {
@@ -73,14 +73,14 @@ test('ensureHxSymlink heals stale worktree symlinks', () => {
     assert.deepStrictEqual(realpathSync(join(worktreePath, ".hx")), realpathSync(expectedExternalState), "healed worktree symlink resolves to canonical external state dir");
 });
 
-test('ensureHxSymlink preserves worktree .gsd directories', () => {
+test('ensureHxSymlink preserves worktree .hx directories', () => {
     rmSync(join(worktreePath, ".hx"), { recursive: true, force: true });
     mkdirSync(join(worktreePath, ".hx", "milestones"), { recursive: true });
     writeFileSync(join(worktreePath, ".hx", "milestones", "stale.txt"), "stale\n", "utf-8");
     const preservedDirState = ensureHxSymlink(worktreePath);
-    assert.deepStrictEqual(preservedDirState, join(worktreePath, ".hx"), "worktree .gsd directory is left in place for sync-based refresh");
-    assert.ok(lstatSync(join(worktreePath, ".hx")).isDirectory(), "worktree .gsd directory remains a directory");
-    assert.ok(existsSync(join(worktreePath, ".hx", "milestones", "stale.txt")), "existing worktree .gsd directory contents remain available for sync logic");
+    assert.deepStrictEqual(preservedDirState, join(worktreePath, ".hx"), "worktree .hx directory is left in place for sync-based refresh");
+    assert.ok(lstatSync(join(worktreePath, ".hx")).isDirectory(), "worktree .hx directory remains a directory");
+    assert.ok(existsSync(join(worktreePath, ".hx", "milestones", "stale.txt")), "existing worktree .hx directory contents remain available for sync logic");
 });
 
 test('HX_PROJECT_ID overrides computed repo hash', () => {
@@ -132,7 +132,7 @@ test('ensureHxSymlink refreshes repo-meta gitRoot after repo move with fixed pro
       delete process.env.HX_PROJECT_ID;
 });
 
-test('isInheritedRepo detects subdirectory of parent repo without .gsd (#1639)', () => {
+test('isInheritedRepo detects subdirectory of parent repo without .hx (#1639)', () => {
       const parentRepo = realpathSync(mkdtempSync(join(tmpdir(), "gsd-inherited-parent-")));
       run("git init -b main", parentRepo);
       run('git config user.name "Pi Test"', parentRepo);
@@ -143,10 +143,10 @@ test('isInheritedRepo detects subdirectory of parent repo without .gsd (#1639)',
 
       const subdir = join(parentRepo, "newproject");
       mkdirSync(subdir, { recursive: true });
-      assert.ok(isInheritedRepo(subdir), "subdirectory of parent repo without .gsd is inherited");
+      assert.ok(isInheritedRepo(subdir), "subdirectory of parent repo without .hx is inherited");
 
       mkdirSync(join(parentRepo, ".hx"), { recursive: true });
-      assert.ok(!isInheritedRepo(subdir), "subdirectory of parent repo WITH .gsd is NOT inherited");
+      assert.ok(!isInheritedRepo(subdir), "subdirectory of parent repo WITH .hx is NOT inherited");
 
       assert.ok(!isInheritedRepo(parentRepo), "git root is not inherited");
 
@@ -184,7 +184,7 @@ test('subdirectory of parent repo gets unique identity after git init (#1639)', 
       rmSync(parentRepo, { recursive: true, force: true });
 });
 
-test('ensureHxSymlink from subdirectory does not create .gsd in subdir when git-root .gsd exists (#2380)', () => {
+test('ensureHxSymlink from subdirectory does not create .hx in subdir when git-root .hx exists (#2380)', () => {
     const repo = realpathSync(mkdtempSync(join(tmpdir(), "gsd-subdir-symlink-")));
     run("git init -b main", repo);
     run('git config user.name "Pi Test"', repo);
@@ -194,24 +194,24 @@ test('ensureHxSymlink from subdirectory does not create .gsd in subdir when git-
     run("git add README.md", repo);
     run('git commit -m "init"', repo);
 
-    // Set up .gsd symlink at the git root (normal project initialisation)
+    // Set up .hx symlink at the git root (normal project initialisation)
     ensureHxSymlink(repo);
-    assert.ok(existsSync(join(repo, ".hx")), "root .gsd exists after ensureHxSymlink");
-    assert.ok(lstatSync(join(repo, ".hx")).isSymbolicLink(), "root .gsd is a symlink");
+    assert.ok(existsSync(join(repo, ".hx")), "root .hx exists after ensureHxSymlink");
+    assert.ok(lstatSync(join(repo, ".hx")).isSymbolicLink(), "root .hx is a symlink");
 
     // Create a subdirectory and call ensureHxSymlink from there
     const subdir = join(repo, "src", "lib");
     mkdirSync(subdir, { recursive: true });
     ensureHxSymlink(subdir);
 
-    // ensureHxSymlink should NOT create a .gsd in the subdirectory
-    // because the git root already has a valid .gsd symlink.
-    assert.ok(!existsSync(join(subdir, ".hx")), "no .gsd created in subdirectory when git-root .gsd exists (#2380)");
-    assert.ok(!existsSync(join(repo, "src", ".hx")), "no .gsd created in intermediate directory");
+    // ensureHxSymlink should NOT create a .hx in the subdirectory
+    // because the git root already has a valid .hx symlink.
+    assert.ok(!existsSync(join(subdir, ".hx")), "no .hx created in subdirectory when git-root .hx exists (#2380)");
+    assert.ok(!existsSync(join(repo, "src", ".hx")), "no .hx created in intermediate directory");
 
-    // The root .gsd should still be intact
-    assert.ok(existsSync(join(repo, ".hx")), "root .gsd still exists");
-    assert.ok(lstatSync(join(repo, ".hx")).isSymbolicLink(), "root .gsd is still a symlink");
+    // The root .hx should still be intact
+    assert.ok(existsSync(join(repo, ".hx")), "root .hx still exists");
+    assert.ok(lstatSync(join(repo, ".hx")).isSymbolicLink(), "root .hx is still a symlink");
 
     rmSync(repo, { recursive: true, force: true });
 });

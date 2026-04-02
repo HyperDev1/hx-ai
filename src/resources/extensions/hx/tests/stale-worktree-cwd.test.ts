@@ -39,9 +39,9 @@ function createTempRepo(): string {
 test("detects stale worktree path and extracts project root", () => {
   // Simulate the path pattern: /project/.hx/worktrees/M004/...
   const projectRoot = "/Users/test/myproject";
-  const stalePath = `${projectRoot}${sep}.gsd${sep}worktrees${sep}M004`;
+  const stalePath = `${projectRoot}${sep}.hx${sep}worktrees${sep}M004`;
 
-  const marker = `${sep}.gsd${sep}worktrees${sep}`;
+  const marker = `${sep}.hx${sep}worktrees${sep}`;
   const idx = stalePath.indexOf(marker);
 
   assert.ok(idx !== -1, "marker found in stale path");
@@ -50,7 +50,7 @@ test("detects stale worktree path and extracts project root", () => {
 
 test("does not trigger on normal project path", () => {
   const normalPath = "/Users/test/myproject";
-  const marker = `${sep}.gsd${sep}worktrees${sep}`;
+  const marker = `${sep}.hx${sep}worktrees${sep}`;
   const idx = normalPath.indexOf(marker);
 
   assert.equal(idx, -1, "marker not found in normal path");
@@ -119,10 +119,10 @@ test("process.cwd() inside removed worktree is recoverable", () => {
     // Enter the stale directory
     process.chdir(staleWtDir);
     const cwdBefore = process.cwd();
-    assert.ok(cwdBefore.includes(`${sep}.gsd${sep}worktrees${sep}`), "cwd is inside worktree dir");
+    assert.ok(cwdBefore.includes(`${sep}.hx${sep}worktrees${sep}`), "cwd is inside worktree dir");
 
     // Simulate escapeStaleWorktree logic
-    const marker = `${sep}.gsd${sep}worktrees${sep}`;
+    const marker = `${sep}.hx${sep}worktrees${sep}`;
     const idx = cwdBefore.indexOf(marker);
     assert.ok(idx !== -1, "marker found");
 

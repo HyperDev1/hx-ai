@@ -1,5 +1,5 @@
 /**
- * HX Activity Log — Save raw chat sessions to .gsd/activity/
+ * HX Activity Log — Save raw chat sessions to .hx/activity/
  *
  * Before each context wipe in auto-mode, dumps the full session
  * as JSONL. No formatting, no truncation, no information loss.

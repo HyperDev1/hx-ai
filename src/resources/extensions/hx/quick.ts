@@ -165,10 +165,10 @@ export async function handleQuick(
   const basePath = process.cwd();
   const root = hxRoot(basePath);
 
-  // Validate: .gsd/ must exist
+  // Validate: .hx/ must exist
   if (!existsSync(root)) {
     ctx.ui.notify(
-      "No .gsd/ directory found. Run /hx to initialize a project first.",
+      "No .hx/ directory found. Run /hx to initialize a project first.",
       "error",
     );
     return;

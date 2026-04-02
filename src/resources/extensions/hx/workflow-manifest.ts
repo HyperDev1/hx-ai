@@ -276,7 +276,7 @@ function restore(manifest: StateManifest): void {
 // ─── writeManifest ───────────────────────────────────────────────────────
 
 /**
- * Write current DB state to .gsd/state-manifest.json via atomicWriteSync.
+ * Write current DB state to .hx/state-manifest.json via atomicWriteSync.
  * Uses JSON.stringify with 2-space indent for git three-way merge friendliness.
  */
 export function writeManifest(basePath: string): void {

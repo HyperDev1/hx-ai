@@ -348,11 +348,11 @@ test('.hx/ exists detection', () => {
     const base = mkdtempSync(join(tmpdir(), 'gsd-cmd-exists-'));
     try {
       // No .hx/ yet
-      assert.ok(!existsSync(join(base, ".hx")), 'exists-detection: .gsd absent initially');
+      assert.ok(!existsSync(join(base, ".hx")), 'exists-detection: .hx absent initially');
 
       // Create .hx/
       mkdirSync(join(base, ".hx"), { recursive: true });
-      assert.ok(existsSync(join(base, ".hx")), 'exists-detection: .gsd detected after creation');
+      assert.ok(existsSync(join(base, ".hx")), 'exists-detection: .hx detected after creation');
     } finally {
       rmSync(base, { recursive: true, force: true });
     }

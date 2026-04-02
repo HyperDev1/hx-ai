@@ -5,7 +5,7 @@
 // complete-task and complete-slice enforce ownership when claims exist.
 // If no claim file is present, ownership is not enforced (backward compatible).
 //
-// Claim file location: .gsd/unit-claims.json
+// Claim file location: .hx/unit-claims.json
 // Unit key format:
 //   task:  "<milestoneId>/<sliceId>/<taskId>"
 //   slice: "<milestoneId>/<sliceId>"

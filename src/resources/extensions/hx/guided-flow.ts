@@ -68,9 +68,9 @@ function nextMilestoneIdReserved(existingIds: string[], uniqueEnabled: boolean):
 
 // ─── Commit Instruction Helpers ──────────────────────────────────────────────
 
-/** Build commit instruction for planning prompts. .gsd/ is managed externally and always gitignored. */
+/** Build commit instruction for planning prompts. .hx/ is managed externally and always gitignored. */
 function buildDocsCommitInstruction(_message: string): string {
-  return "Do not commit planning artifacts — .gsd/ is managed externally.";
+  return "Do not commit planning artifacts — .hx/ is managed externally.";
 }
 
 // ─── Auto-start after discuss ─────────────────────────────────────────────────
@@ -354,8 +354,8 @@ function buildHeadlessDiscussPrompt(nextId: string, seedContext: string, _basePa
 }
 
 /**
- * Bootstrap a .gsd/ project from scratch for headless use.
- * Ensures git repo, .gsd/ structure, gitignore, and preferences all exist.
+ * Bootstrap a .hx/ project from scratch for headless use.
+ * Ensures git repo, .hx/ structure, gitignore, and preferences all exist.
  */
 function bootstrapGsdProject(basePath: string): void {
   if (!nativeIsRepo(basePath) || isInheritedRepo(basePath)) {
@@ -386,7 +386,7 @@ export async function showHeadlessMilestoneCreation(
   // Clear stale reservations from previous cancelled sessions (#2488)
   clearReservedMilestoneIds();
 
-  // Ensure .gsd/ is bootstrapped
+  // Ensure .hx/ is bootstrapped
   bootstrapGsdProject(basePath);
 
   // Generate next milestone ID
@@ -516,7 +516,7 @@ export async function showDiscuss(
   pi: ExtensionAPI,
   basePath: string,
 ): Promise<void> {
-  // Guard: no .gsd/ project
+  // Guard: no .hx/ project
   if (!existsSync(hxRoot(basePath))) {
     ctx.ui.notify("No GSD project found. Run /hx to start one first.", "warning");
     return;
@@ -998,17 +998,17 @@ export async function showSmartEntry(
       // "fresh" — fall through to init wizard
     }
 
-    // No .gsd/ — run the project init wizard
+    // No .hx/ — run the project init wizard
     const result = await showProjectInit(ctx, pi, basePath, detection);
     if (!result.completed) return; // User cancelled
 
-    // Init wizard bootstrapped .gsd/ — fall through to the normal flow below
+    // Init wizard bootstrapped .hx/ — fall through to the normal flow below
     // which will detect "no milestones" and start the discuss prompt
   }
 
   // ── Ensure git repo exists — GSD needs it for worktree isolation ──────
   // Also handle inherited repos: if basePath is a subdirectory of another
-  // git repo that has no .gsd, create a fresh repo to prevent cross-project
+  // git repo that has no .hx, create a fresh repo to prevent cross-project
   // state leaks (#1639).
   if (!nativeIsRepo(basePath) || isInheritedRepo(basePath)) {
     const mainBranch = loadEffectiveHXPreferences()?.preferences?.git?.main_branch || "main";
@@ -1094,7 +1094,7 @@ export async function showSmartEntry(
       // First ever — skip wizard, just ask directly
       pendingAutoStart = { ctx, pi, basePath, milestoneId: nextId, step: stepMode };
       await dispatchWorkflow(pi, buildDiscussPrompt(nextId,
-        `New project, milestone ${nextId}. Do NOT read or explore .gsd/ — it's empty scaffolding.`,
+        `New project, milestone ${nextId}. Do NOT read or explore .hx/ — it's empty scaffolding.`,
         basePath
       ), "gsd-run", ctx, "discuss-milestone");
     } else {

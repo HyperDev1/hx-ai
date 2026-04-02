@@ -45,7 +45,7 @@ export async function showQueue(
   pi: ExtensionAPI,
   basePath: string,
 ): Promise<void> {
-  // ── Ensure .gsd/ exists ─────────────────────────────────────────────
+  // ── Ensure .hx/ exists ─────────────────────────────────────────────
   const gsd = hxRoot(basePath);
   if (!existsSync(gsd)) {
     ctx.ui.notify("No GSD project found. Run /hx to start one first.", "warning");
@@ -200,7 +200,7 @@ export async function showQueueAdd(
     preamble,
     existingMilestonesContext: existingContext,
     inlinedTemplates: queueInlinedTemplates,
-    commitInstruction: "Do not commit planning artifacts — .gsd/ is managed externally.",
+    commitInstruction: "Do not commit planning artifacts — .hx/ is managed externally.",
   });
 
   pi.sendMessage(

@@ -31,7 +31,7 @@ async function writeProjectCmuxPreferences(
   prefs.version = prefs.version || 1;
 
   const frontmatter = serializePreferencesToFrontmatter(prefs);
-  let body = "\n# HX Skill Preferences\n\nSee `~/.gsd/agent/extensions/hx/docs/preferences-reference.md` for full field documentation and examples.\n";
+  let body = "\n# HX Skill Preferences\n\nSee `~/.hx/agent/extensions/hx/docs/preferences-reference.md` for full field documentation and examples.\n";
   if (existsSync(path)) {
     const preserved = extractBodyAfterFrontmatter(readFileSync(path, "utf-8"));
     if (preserved) body = preserved;

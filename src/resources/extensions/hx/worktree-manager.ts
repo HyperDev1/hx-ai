@@ -1,17 +1,17 @@
 /**
  * GSD Worktree Manager
  *
- * Creates and manages git worktrees under .gsd/worktrees/<name>/.
+ * Creates and manages git worktrees under .hx/worktrees/<name>/.
  * Each worktree gets its own branch (worktree/<name>) and a full
  * working copy of the project, enabling parallel work streams.
  *
- * The merge helper compares .gsd/ artifacts between a worktree and
+ * The merge helper compares .hx/ artifacts between a worktree and
  * the main branch, then dispatches an LLM-guided merge flow.
  *
  * Flow:
- *   1. create()  — git worktree add .gsd/worktrees/<name> -b worktree/<name>
+ *   1. create()  — git worktree add .hx/worktrees/<name> -b worktree/<name>
  *   2. user works in the worktree (new plans, milestones, etc.)
- *   3. merge()   — LLM-guided reconciliation of .gsd/ artifacts back to main
+ *   3. merge()   — LLM-guided reconciliation of .hx/ artifacts back to main
  *   4. remove()  — git worktree remove + branch cleanup
  */
 
@@ -55,11 +55,11 @@ export interface FileLineStat {
 }
 
 export interface WorktreeDiffSummary {
-  /** Files only in the worktree .gsd/ (new artifacts) */
+  /** Files only in the worktree .hx/ (new artifacts) */
   added: string[];
   /** Files in both but with different content */
   modified: string[];
-  /** Files only in main .gsd/ (deleted in worktree) */
+  /** Files only in main .hx/ (deleted in worktree) */
   removed: string[];
 }
 
@@ -116,7 +116,7 @@ export function worktreeBranchName(name: string): string {
 // ─── Core Operations ───────────────────────────────────────────────────────
 
 /**
- * Create a new git worktree under .gsd/worktrees/<name>/ with branch worktree/<name>.
+ * Create a new git worktree under .hx/worktrees/<name>/ with branch worktree/<name>.
  * The branch is created from the current HEAD of the main branch.
  *
  * @param opts.branch — override the default `worktree/<name>` branch name
@@ -144,7 +144,7 @@ export function createWorktree(basePath: string, name: string, opts: { branch?: 
     }
   }
 
-  // Ensure the .gsd/worktrees/ directory exists
+  // Ensure the .hx/worktrees/ directory exists
   const wtDir = worktreesDir(basePath);
   mkdirSync(wtDir, { recursive: true });
 
@@ -195,7 +195,7 @@ export function createWorktree(basePath: string, name: string, opts: { branch?: 
 
 /**
  * List all GSD-managed worktrees.
- * Uses native worktree list and filters to those under .gsd/worktrees/.
+ * Uses native worktree list and filters to those under .hx/worktrees/.
  */
 export function listWorktrees(basePath: string): WorktreeInfo[] {
   const baseVariants = [resolve(basePath)];
@@ -248,7 +248,7 @@ export function listWorktrees(basePath: string): WorktreeInfo[] {
       ? normalizedEntryVariants.some(entryVariant => entryVariant.split("/").pop() === branchWorktreeName)
       : false;
 
-    // Only include worktrees under .gsd/worktrees/
+    // Only include worktrees under .hx/worktrees/
     if (!matchedRoot && !matchesBranchLeaf) continue;
 
     const matchedEntryPath = normalizedEntryVariants.find(entryVariant =>
@@ -291,10 +291,10 @@ export function removeWorktree(
   const { deleteBranch = true, force = true } = opts;
 
   // Resolve the ACTUAL worktree path from git's worktree list.
-  // The computed path may differ when .gsd/ is (or was) a symlink to an
+  // The computed path may differ when .hx/ is (or was) a symlink to an
   // external state directory — git resolves symlinks at worktree creation
   // time, so its registered path points to the resolved external location.
-  // If syncStateToProjectRoot later creates a real .gsd/ directory that
+  // If syncStateToProjectRoot later creates a real .hx/ directory that
   // shadows the symlink, the computed path diverges from git's record.
   try {
     const entries = nativeWorktreeList(basePath);
@@ -407,7 +407,7 @@ function parseDiffNameStatus(entries: { status: string; path: string }[]): Workt
 }
 
 /**
- * Diff the .gsd/ directory between the worktree branch and main branch.
+ * Diff the .hx/ directory between the worktree branch and main branch.
  * Returns a summary of added, modified, and removed GSD artifacts.
  */
 export function diffWorktreeGSD(basePath: string, name: string): WorktreeDiffSummary {
@@ -453,7 +453,7 @@ export function diffWorktreeNumstat(basePath: string, name: string): FileLineSta
 }
 
 /**
- * Get the full diff content for .gsd/ between the worktree branch and main.
+ * Get the full diff content for .hx/ between the worktree branch and main.
  * Returns the raw unified diff for LLM consumption.
  */
 export function getWorktreeGSDDiff(basePath: string, name: string): string {
@@ -464,7 +464,7 @@ export function getWorktreeGSDDiff(basePath: string, name: string): string {
 }
 
 /**
- * Get the full diff content for non-.gsd/ files between the worktree branch and main.
+ * Get the full diff content for non-.hx/ files between the worktree branch and main.
  * Returns the raw unified diff for LLM consumption.
  */
 export function getWorktreeCodeDiff(basePath: string, name: string): string {

@@ -710,7 +710,7 @@ function detectVerificationCommands(
 // ─── Global Setup Detection ─────────────────────────────────────────────────────
 
 /**
- * Check if global GSD setup exists (has ~/.gsd/ with preferences).
+ * Check if global GSD setup exists (has ~/.hx/ with preferences).
  */
 export function hasGlobalSetup(): boolean {
   return (
@@ -721,7 +721,7 @@ export function hasGlobalSetup(): boolean {
 
 /**
  * Check if this is the very first time HX has been used on this machine.
- * Returns true if ~/.gsd/ doesn't exist or has no preferences or auth.
+ * Returns true if ~/.hx/ doesn't exist or has no preferences or auth.
  */
 export function isFirstEverLaunch(): boolean {
   if (!existsSync(hxHome)) return true;

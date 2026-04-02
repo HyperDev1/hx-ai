@@ -42,7 +42,7 @@ run('git config user.email "test@example.com"', base);
 // Create external state directory structure
 mkdirSync(join(externalState, "worktrees"), { recursive: true });
 
-// Create .gsd as a symlink to the external state directory
+// Create .hx as a symlink to the external state directory
 symlinkSync(externalState, join(base, ".hx"));
 
 // Verify the symlink is in place
@@ -80,7 +80,7 @@ describe('worktree-symlink-removal', async () => {
   const computedPath = worktreePath(base, "M002");
   assert.ok(existsSync(computedPath), "computed path exists (via symlink)");
 
-  // Simulate what syncStateToProjectRoot does: replace the .gsd symlink with
+  // Simulate what syncStateToProjectRoot does: replace the .hx symlink with
   // a real directory containing stale worktree data. This causes worktreePath()
   // to compute a LOCAL path that differs from git's REGISTERED path (the
   // resolved external path). The stale local dir passes existsSync but is not

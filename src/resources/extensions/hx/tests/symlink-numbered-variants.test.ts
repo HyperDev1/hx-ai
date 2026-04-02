@@ -1,9 +1,9 @@
 /**
  * Tests for macOS numbered symlink variant cleanup (#2205).
  *
- * macOS can rename `.gsd` to `.hx 2`, `.hx 3`, etc. when a directory
+ * macOS can rename `.hx` to `.hx 2`, `.hx 3`, etc. when a directory
  * already exists at the target path. ensureHxSymlink() must detect and
- * remove these numbered variants so the real `.gsd` symlink is always
+ * remove these numbered variants so the real `.hx` symlink is always
  * the one in use.
  */
 
@@ -50,7 +50,7 @@ describe('symlink-numbered-variants', async () => {
     const externalPath = externalHxRoot(base);
 
     // ── Test: numbered variant directories are cleaned up ──────────────
-    console.log("\n=== ensureHxSymlink removes numbered .gsd variants (#2205) ===");
+    console.log("\n=== ensureHxSymlink removes numbered .hx variants (#2205) ===");
     {
       // Simulate macOS creating numbered variants: ".hx 2", ".hx 3"
       mkdirSync(join(base, ".hx 2"), { recursive: true });
@@ -59,8 +59,8 @@ describe('symlink-numbered-variants', async () => {
 
       const result = ensureHxSymlink(base);
       assert.deepStrictEqual(result, externalPath, "ensureHxSymlink returns external path");
-      assert.ok(existsSync(join(base, ".hx")), ".gsd exists after ensureHxSymlink");
-      assert.ok(lstatSync(join(base, ".hx")).isSymbolicLink(), ".gsd is a symlink");
+      assert.ok(existsSync(join(base, ".hx")), ".hx exists after ensureHxSymlink");
+      assert.ok(lstatSync(join(base, ".hx")).isSymbolicLink(), ".hx is a symlink");
 
       // The numbered variants must have been removed
       assert.ok(!existsSync(join(base, ".hx 2")), '".hx 2" directory was cleaned up');
@@ -74,8 +74,8 @@ describe('symlink-numbered-variants', async () => {
       // Clean slate
       rmSync(join(base, ".hx"), { recursive: true, force: true });
 
-      // Simulate: ".hx 2" is a symlink to the correct target (the real .gsd)
-      // and ".gsd" doesn't exist — this is the actual macOS scenario
+      // Simulate: ".hx 2" is a symlink to the correct target (the real .hx)
+      // and ".hx" doesn't exist — this is the actual macOS scenario
       const staleTarget = join(stateDir, "projects", "stale-target");
       mkdirSync(staleTarget, { recursive: true });
       symlinkSync(externalPath, join(base, ".hx 2"), "junction");
@@ -83,37 +83,37 @@ describe('symlink-numbered-variants', async () => {
 
       const result = ensureHxSymlink(base);
       assert.deepStrictEqual(result, externalPath, "ensureHxSymlink returns external path when variants exist");
-      assert.ok(existsSync(join(base, ".hx")), ".gsd exists");
-      assert.ok(lstatSync(join(base, ".hx")).isSymbolicLink(), ".gsd is a symlink");
+      assert.ok(existsSync(join(base, ".hx")), ".hx exists");
+      assert.ok(lstatSync(join(base, ".hx")).isSymbolicLink(), ".hx is a symlink");
 
       assert.ok(!existsSync(join(base, ".hx 2")), '".hx 2" symlink variant was cleaned up');
       assert.ok(!existsSync(join(base, ".hx 3")), '".hx 3" symlink variant was cleaned up');
     }
 
-    // ── Test: real .gsd directory blocks symlink, but variants still cleaned ──
-    console.log("\n=== ensureHxSymlink cleans variants even when .gsd is a real directory ===");
+    // ── Test: real .hx directory blocks symlink, but variants still cleaned ──
+    console.log("\n=== ensureHxSymlink cleans variants even when .hx is a real directory ===");
     {
       // Clean slate
       rmSync(join(base, ".hx"), { recursive: true, force: true });
 
-      // .gsd is a real directory (git-tracked) and numbered variants exist
+      // .hx is a real directory (git-tracked) and numbered variants exist
       mkdirSync(join(base, ".hx", "milestones"), { recursive: true });
       writeFileSync(join(base, ".hx", "milestones", "M001.md"), "# M001\n", "utf-8");
       mkdirSync(join(base, ".hx 2"), { recursive: true });
       mkdirSync(join(base, ".hx 3"), { recursive: true });
 
       const result = ensureHxSymlink(base);
-      // When .gsd is a real directory, ensureHxSymlink preserves it
-      assert.deepStrictEqual(result, join(base, ".hx"), "real .gsd directory preserved");
-      assert.ok(lstatSync(join(base, ".hx")).isDirectory(), ".gsd remains a directory");
+      // When .hx is a real directory, ensureHxSymlink preserves it
+      assert.deepStrictEqual(result, join(base, ".hx"), "real .hx directory preserved");
+      assert.ok(lstatSync(join(base, ".hx")).isDirectory(), ".hx remains a directory");
 
       // But the numbered variants should still be cleaned up
-      assert.ok(!existsSync(join(base, ".hx 2")), '".hx 2" cleaned even when .gsd is a directory');
-      assert.ok(!existsSync(join(base, ".hx 3")), '".hx 3" cleaned even when .gsd is a directory');
+      assert.ok(!existsSync(join(base, ".hx 2")), '".hx 2" cleaned even when .hx is a directory');
+      assert.ok(!existsSync(join(base, ".hx 3")), '".hx 3" cleaned even when .hx is a directory');
     }
 
     // ── Test: only numeric-suffixed variants are removed ───────────────
-    console.log("\n=== ensureHxSymlink only removes .gsd + space + digit variants ===");
+    console.log("\n=== ensureHxSymlink only removes .hx + space + digit variants ===");
     {
       rmSync(join(base, ".hx"), { recursive: true, force: true });
 

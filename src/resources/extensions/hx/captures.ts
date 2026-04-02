@@ -59,13 +59,13 @@ const VALID_CLASSIFICATIONS: readonly string[] = [
  */
 export function resolveCapturesPath(basePath: string): string {
   const resolved = resolve(basePath);
-  // Direct layout: /.gsd/worktrees/
-  const worktreeMarker = `${sep}.gsd${sep}worktrees${sep}`;
+  // Direct layout: /.hx/worktrees/
+  const worktreeMarker = `${sep}.hx${sep}worktrees${sep}`;
   let idx = resolved.indexOf(worktreeMarker);
   if (idx === -1) {
-    // Symlink-resolved layout: /.gsd/projects/<hash>/worktrees/
+    // Symlink-resolved layout: /.hx/projects/<hash>/worktrees/
     const symlinkRe = new RegExp(
-      `\\${sep}\\.gsd\\${sep}projects\\${sep}[a-f0-9]+\\${sep}worktrees\\${sep}`,
+      `\\${sep}\\.hx\\${sep}projects\\${sep}[a-f0-9]+\\${sep}worktrees\\${sep}`,
     );
     const match = resolved.match(symlinkRe);
     if (match && match.index !== undefined) idx = match.index;

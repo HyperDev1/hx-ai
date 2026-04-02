@@ -210,7 +210,7 @@ export function detectConflicts(
 // ─── writeConflictsFile ───────────────────────────────────────────────────────
 
 /**
- * Write a human-readable CONFLICTS.md to basePath/.gsd/CONFLICTS.md.
+ * Write a human-readable CONFLICTS.md to basePath/.hx/CONFLICTS.md.
  * Lists each conflict with both sides' event payloads and resolution instructions.
  */
 export function writeConflictsFile(

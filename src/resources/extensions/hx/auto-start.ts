@@ -170,7 +170,7 @@ export async function bootstrapAutoSession(
     // nativeIsRepo() uses `git rev-parse` which traverses up to parent dirs,
     // so a parent repo can make it return true even when base has no .git of
     // its own. Check for a local .git instead (defense-in-depth for the case
-    // where isInheritedRepo() returns a false negative, e.g. stale .gsd at
+    // where isInheritedRepo() returns a false negative, e.g. stale .hx at
     // the parent git root). See #2393 and related issue.
     const hasLocalGit = existsSync(join(base, ".git"));
     if (!hasLocalGit || isInheritedRepo(base)) {
@@ -179,9 +179,9 @@ export async function bootstrapAutoSession(
       nativeInit(base, mainBranch);
     }
 
-    // Migrate legacy in-project .gsd/ to external state directory.
+    // Migrate legacy in-project .hx/ to external state directory.
     // Migration MUST run before ensureGitignore to avoid adding ".hx" to
-    // .gitignore when .gsd/ is git-tracked (data-loss bug #1364).
+    // .gitignore when .hx/ is git-tracked (data-loss bug #1364).
     recoverFailedMigration(base);
     const migration = migrateToExternalState(base);
     if (migration.error) {
@@ -191,14 +191,14 @@ export async function bootstrapAutoSession(
     ensureHxSymlink(base);
 
     // Ensure .gitignore has baseline patterns.
-    // ensureGitignore checks for git-tracked .gsd/ files and skips the
-    // ".hx" pattern if the project intentionally tracks .gsd/ in git.
+    // ensureGitignore checks for git-tracked .hx/ files and skips the
+    // ".hx" pattern if the project intentionally tracks .hx/ in git.
     const gitPrefs = loadEffectiveHXPreferences()?.preferences?.git;
     const manageGitignore = gitPrefs?.manage_gitignore;
     ensureGitignore(base, { manageGitignore });
     if (manageGitignore !== false) untrackRuntimeFiles(base);
 
-    // Bootstrap .gsd/ if it doesn't exist
+    // Bootstrap .hx/ if it doesn't exist
     const gsdDir = join(base, ".hx");
     if (!existsSync(gsdDir)) {
       mkdirSync(join(gsdDir, "milestones"), { recursive: true });
@@ -317,7 +317,7 @@ export async function bootstrapAutoSession(
       (state.phase === "pre-planning" || state.phase === "complete") &&
       shouldUseWorktreeIsolation() &&
       !detectWorktreeName(base) &&
-      !base.includes(`${pathSep}.gsd${pathSep}worktrees${pathSep}`)
+      !base.includes(`${pathSep}.hx${pathSep}worktrees${pathSep}`)
     ) {
       const milestoneBranch = `milestone/${state.activeMilestone.id}`;
       const { nativeBranchExists } = await import("./native-git-bridge.js");
@@ -526,14 +526,14 @@ export async function bootstrapAutoSession(
     s.originalBasePath = base;
 
     const isUnderGsdWorktrees = (p: string): boolean => {
-      // Direct layout: /.gsd/worktrees/
-      const marker = `${pathSep}.gsd${pathSep}worktrees${pathSep}`;
+      // Direct layout: /.hx/worktrees/
+      const marker = `${pathSep}.hx${pathSep}worktrees${pathSep}`;
       if (p.includes(marker)) return true;
-      const worktreesSuffix = `${pathSep}.gsd${pathSep}worktrees`;
+      const worktreesSuffix = `${pathSep}.hx${pathSep}worktrees`;
       if (p.endsWith(worktreesSuffix)) return true;
-      // Symlink-resolved layout: /.gsd/projects/<hash>/worktrees/
+      // Symlink-resolved layout: /.hx/projects/<hash>/worktrees/
       const symlinkRe = new RegExp(
-        `\\${pathSep}\\.gsd\\${pathSep}projects\\${pathSep}[a-f0-9]+\\${pathSep}worktrees(?:\\${pathSep}|$)`,
+        `\\${pathSep}\\.hx\\${pathSep}projects\\${pathSep}[a-f0-9]+\\${pathSep}worktrees(?:\\${pathSep}|$)`,
       );
       return symlinkRe.test(p);
     };

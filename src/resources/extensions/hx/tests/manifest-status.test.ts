@@ -182,7 +182,7 @@ describe('getManifestStatus: simple temp dir tests', () => {
   // ─── Missing manifest ────────────────────────────────────────────────────────
 
   test('missing manifest — returns null', async () => {
-    // No .gsd directory at all
+    // No .hx directory at all
     const result = await getManifestStatus(tmp, 'M001');
     assert.strictEqual(result, null);
   });

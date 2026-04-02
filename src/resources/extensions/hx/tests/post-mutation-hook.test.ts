@@ -150,7 +150,7 @@ test('post-mutation-hook: manifest has version 1 and includes completed task', a
 // ─── Post-mutation hook: non-fatal on hook failure ───────────────────────
 
 test('post-mutation-hook: handler still returns success even if projections dir is missing', async () => {
-  // basePath with NO .gsd directory — projections will fail to find milestones
+  // basePath with NO .hx directory — projections will fail to find milestones
   // but handler should still return a result (not throw)
   const base = tempDir();
   const dbPath = path.join(base, 'test.db');

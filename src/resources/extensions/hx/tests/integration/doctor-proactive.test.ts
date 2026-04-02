@@ -260,7 +260,7 @@ describe('doctor-proactive', async () => {
     test('health gate: STATE.md missing — auto-healed', async () => {
       const dir = realpathSync(mkdtempSync(join(tmpdir(), "doc-proactive-")));
       cleanups.push(dir);
-      // Minimal .gsd structure: milestones dir exists but no STATE.md
+      // Minimal .hx structure: milestones dir exists but no STATE.md
       mkdirSync(join(dir, ".hx", "milestones"), { recursive: true });
 
       const stateFile = join(dir, ".hx", "STATE.md");

@@ -71,7 +71,7 @@ const LEGACY_PROJECT_PREFERENCES_FILE = "preferences.md";
 // ─── Shared Constants & Helpers ─────────────────────────────────────────────
 
 /**
- * Root-level .gsd/ state files synced between worktree and project root.
+ * Root-level .hx/ state files synced between worktree and project root.
  * Single source of truth — used by syncGsdStateToWorktree, syncWorktreeStateBack,
  * and the dispatch-level sync functions.
  */
@@ -198,7 +198,7 @@ export function syncProjectRootToWorktree(
   const prGsd = join(projectRoot, ".hx");
   const wtGsd = join(worktreePath_, ".hx");
 
-  // When .gsd is a symlink to the same external directory in both locations,
+  // When .hx is a symlink to the same external directory in both locations,
   // cpSync rejects the copy because source === destination (ERR_FS_CP_EINVAL).
   // Compare realpaths and skip when they resolve to the same physical path (#2184).
   if (isSamePath(prGsd, wtGsd)) return;
@@ -236,7 +236,7 @@ export function syncProjectRootToWorktree(
 }
 
 /**
- * Sync dispatch-critical .gsd/ state files from worktree to project root.
+ * Sync dispatch-critical .hx/ state files from worktree to project root.
  * Only runs when inside an auto-worktree (worktreePath differs from projectRoot).
  * Copies: STATE.md + active milestone directory (roadmap, slice plans, task summaries).
  * Non-fatal — sync failure should never block dispatch.
@@ -252,7 +252,7 @@ export function syncStateToProjectRoot(
   const wtGsd = join(worktreePath_, ".hx");
   const prGsd = join(projectRoot, ".hx");
 
-  // When .gsd is a symlink to the same external directory in both locations,
+  // When .hx is a symlink to the same external directory in both locations,
   // cpSync rejects the copy because source === destination (ERR_FS_CP_EINVAL).
   // Compare realpaths and skip when they resolve to the same physical path (#2184).
   if (isSamePath(wtGsd, prGsd)) return;
@@ -261,7 +261,7 @@ export function syncStateToProjectRoot(
   safeCopy(join(wtGsd, "STATE.md"), join(prGsd, "STATE.md"), { force: true });
 
   // 2. Milestone directory — ROADMAP, slice PLANs, task summaries
-  // Copy the entire milestone .gsd subtree so deriveState reads current checkboxes
+  // Copy the entire milestone .hx subtree so deriveState reads current checkboxes
   safeCopyRecursive(
     join(wtGsd, "milestones", milestoneId),
     join(prGsd, "milestones", milestoneId),
@@ -335,7 +335,7 @@ export function checkResourcesStale(
  * Returns the corrected base path.
  */
 export function escapeStaleWorktree(base: string): string {
-  // Direct layout: /.gsd/worktrees/
+  // Direct layout: /.hx/worktrees/
   const directMarker = `${pathSep}.hx${pathSep}worktrees${pathSep}`;
   let idx = base.indexOf(directMarker);
   if (idx === -1) {
@@ -348,12 +348,12 @@ export function escapeStaleWorktree(base: string): string {
     idx = match.index;
   }
 
-  // base is inside .gsd/worktrees/<something> — extract the project root
+  // base is inside .hx/worktrees/<something> — extract the project root
   const projectRoot = base.slice(0, idx);
 
-  // Guard: If the candidate project root's .gsd IS the user-level ~/.gsd,
-  // the string-slice heuristic matched the wrong /.gsd/ boundary. This happens
-  // when .gsd is a symlink into ~/.gsd/projects/<hash> and process.cwd()
+  // Guard: If the candidate project root's .hx IS the user-level ~/.hx,
+  // the string-slice heuristic matched the wrong /.hx/ boundary. This happens
+  // when .hx is a symlink into ~/.hx/projects/<hash> and process.cwd()
   // resolved through the symlink. Returning ~ would be catastrophic (#1676).
   const candidateGsd = join(projectRoot, ".hx").replaceAll("\\", "/");
   const hxHomePath = hxHome.replaceAll("\\", "/");
@@ -411,15 +411,15 @@ export function cleanStaleRuntimeUnits(
 // ─── Worktree ↔ Main Repo Sync (#1311) ──────────────────────────────────────
 
 /**
- * Sync .gsd/ state from the main repo into the worktree.
+ * Sync .hx/ state from the main repo into the worktree.
  *
- * When .gsd/ is a symlink to the external state directory, both the main
+ * When .hx/ is a symlink to the external state directory, both the main
  * repo and worktree share the same directory — no sync needed.
  *
- * When .gsd/ is a real directory (e.g., git-tracked or manage_gitignore:false),
+ * When .hx/ is a real directory (e.g., git-tracked or manage_gitignore:false),
  * the worktree has its own copy that may be stale. This function copies
  * missing milestones, CONTEXT, ROADMAP, DECISIONS, REQUIREMENTS, and
- * PROJECT files from the main repo's .gsd/ into the worktree's .gsd/.
+ * PROJECT files from the main repo's .hx/ into the worktree's .hx/.
  *
  * Only adds missing content — never overwrites existing files in the worktree
  * (the worktree's execution state is authoritative for in-progress work).
@@ -437,7 +437,7 @@ export function syncGsdStateToWorktree(
 
   if (!existsSync(mainGsd) || !existsSync(wtGsd)) return { synced };
 
-  // Sync root-level .gsd/ files (DECISIONS, REQUIREMENTS, PROJECT, KNOWLEDGE, etc.)
+  // Sync root-level .hx/ files (DECISIONS, REQUIREMENTS, PROJECT, KNOWLEDGE, etc.)
   for (const f of ROOT_STATE_FILES) {
     const src = join(mainGsd, f);
     const dst = join(wtGsd, f);
@@ -570,7 +570,7 @@ export function syncGsdStateToWorktree(
  * updated ROADMAP) are visible from the project root (#1412).
  *
  * Syncs:
- *   1. Root-level .gsd/ files (REQUIREMENTS, PROJECT, DECISIONS, KNOWLEDGE,
+ *   1. Root-level .hx/ files (REQUIREMENTS, PROJECT, DECISIONS, KNOWLEDGE,
  *      OVERRIDES) — the worktree's versions overwrite main's because the
  *      worktree is the authoritative execution context.
  *   2. ALL milestone directories found in the worktree — not just the
@@ -580,7 +580,7 @@ export function syncGsdStateToWorktree(
  *
  * History: Originally only synced milestones/<milestoneId>/ and assumed
  * root-level files would be carried by the squash merge. In practice,
- * .gsd/ files are often untracked (gitignored or never committed), so the
+ * .hx/ files are often untracked (gitignored or never committed), so the
  * squash merge carries nothing. This caused next-milestone artifacts and
  * updated REQUIREMENTS/PROJECT to be silently lost on teardown.
  */
@@ -614,7 +614,7 @@ export function syncWorktreeStateBack(
     }
   }
 
-  // ── 1. Sync root-level .gsd/ files back ──────────────────────────────
+  // ── 1. Sync root-level .hx/ files back ──────────────────────────────
   // The worktree is authoritative — complete-milestone updates REQUIREMENTS,
   // PROJECT, etc. These must overwrite main's copies so they survive teardown.
   // Also includes QUEUE.md, completed-units.json, and metrics.json which are
@@ -925,10 +925,10 @@ export function createAutoWorktree(
     });
   }
 
-  // Copy .gsd/ planning artifacts from the source repo into the new worktree.
+  // Copy .hx/ planning artifacts from the source repo into the new worktree.
   // Worktrees are fresh git checkouts — untracked files don't carry over.
   // Planning artifacts may be untracked if the project's .gitignore had a
-  // blanket .gsd/ rule (pre-v2.14.0). Without this copy, auto-mode loops
+  // blanket .hx/ rule (pre-v2.14.0). Without this copy, auto-mode loops
   // on plan-slice because the plan file doesn't exist in the worktree.
   //
   // IMPORTANT: Skip when re-attaching to an existing branch (#759).
@@ -978,7 +978,7 @@ export function createAutoWorktree(
 }
 
 /**
- * Copy .gsd/ planning artifacts from source repo to a new worktree.
+ * Copy .hx/ planning artifacts from source repo to a new worktree.
  * Copies milestones/, DECISIONS.md, REQUIREMENTS.md, PROJECT.md, QUEUE.md,
  * STATE.md, KNOWLEDGE.md, and OVERRIDES.md.
  * Skips runtime files (auto.lock, metrics.json, etc.) and the worktrees/ dir.
@@ -1403,7 +1403,7 @@ export function mergeMilestoneToMain(
 
   // 7. Stash any pre-existing dirty files so the squash merge is not
   //    blocked by unrelated local changes (#2151).  clearProjectRootStateFiles
-  //    only removes untracked .gsd/ files; tracked dirty files elsewhere (e.g.
+  //    only removes untracked .hx/ files; tracked dirty files elsewhere (e.g.
   //    .planning/work-state.json with stash conflict markers) are invisible to
   //    that cleanup but will cause `git merge --squash` to reject.
   let stashed = false;
@@ -1426,12 +1426,12 @@ export function mergeMilestoneToMain(
     // report the dirty tree if it fails.
   }
 
-  // 8. Squash merge — auto-resolve .gsd/ state file conflicts (#530)
+  // 8. Squash merge — auto-resolve .hx/ state file conflicts (#530)
   const mergeResult = nativeMergeSquash(originalBasePath_, milestoneBranch);
 
   if (!mergeResult.success) {
     // Dirty working tree — the merge was rejected before it started (e.g.
-    // untracked .gsd/ files left by syncStateToProjectRoot).  Preserve the
+    // untracked .hx/ files left by syncStateToProjectRoot).  Preserve the
     // milestone branch so commits are not lost.
     if (mergeResult.conflicts.includes("__dirty_working_tree__")) {
       // Pop stash before throwing so local work is not lost.
@@ -1447,7 +1447,7 @@ export function mergeMilestoneToMain(
       // Restore cwd so the caller is not stranded on the integration branch
       process.chdir(previousCwd);
       // Surface the actual dirty filenames from git stderr instead of
-      // generically blaming .gsd/ (#2151).
+      // generically blaming .hx/ (#2151).
       const fileList = mergeResult.dirtyFiles?.length
         ? `Dirty files:\n${mergeResult.dirtyFiles.map((f) => `  ${f}`).join("\n")}`
         : `Check \`git status\` in the project root for details.`;
@@ -1537,10 +1537,10 @@ export function mergeMilestoneToMain(
         encoding: "utf-8",
       });
     } catch {
-      // Stash pop after squash merge can conflict on .gsd/ state files that
+      // Stash pop after squash merge can conflict on .hx/ state files that
       // diverged between branches.  Left unresolved, these UU entries block
       // every subsequent merge.  Auto-resolve them the same way we handle
-      // .gsd/ conflicts during the merge itself: accept HEAD (the just-committed
+      // .hx/ conflicts during the merge itself: accept HEAD (the just-committed
       // version) and drop the now-applied stash.
       const uu = nativeConflictFiles(originalBasePath_);
       const hxUU = uu.filter((f) => f.startsWith(".hx/"));
@@ -1564,7 +1564,7 @@ export function mergeMilestoneToMain(
       }
 
       if (nonHxUU.length === 0) {
-        // All conflicts were .gsd/ files — safe to drop the stash
+        // All conflicts were .hx/ files — safe to drop the stash
         try {
           execFileSync("git", ["stash", "drop"], {
             cwd: originalBasePath_,
@@ -1573,7 +1573,7 @@ export function mergeMilestoneToMain(
           });
         } catch { /* stash may already be consumed */ }
       } else {
-        // Non-.gsd conflicts remain — leave stash for manual resolution
+        // Non-.hx conflicts remain — leave stash for manual resolution
         logWarning("reconcile", "Stash pop conflict on non-.hx files after merge", {
           files: nonHxUU.join(", "),
         });
@@ -1583,7 +1583,7 @@ export function mergeMilestoneToMain(
 
   // 9b. Safety check (#1792): if nothing was committed, verify the milestone
   // work is already on the integration branch before allowing teardown.
-  // Compare only non-.gsd/ paths — .gsd/ state files diverge normally and
+  // Compare only non-.hx/ paths — .hx/ state files diverge normally and
   // are auto-resolved during the squash merge.
   if (nothingToCommit) {
     const numstat = nativeDiffNumstat(
@@ -1606,8 +1606,8 @@ export function mergeMilestoneToMain(
     }
   }
 
-  // 9c. Detect whether any non-.gsd/ code files were actually merged (#1906).
-  // When a milestone only produced .gsd/ metadata (summaries, roadmaps) but no
+  // 9c. Detect whether any non-.hx/ code files were actually merged (#1906).
+  // When a milestone only produced .hx/ metadata (summaries, roadmaps) but no
   // real code, the user sees "milestone complete" but nothing changed in their
   // codebase. Surface this so the caller can warn the user.
   let codeFilesChanged = false;

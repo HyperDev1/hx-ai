@@ -128,7 +128,7 @@ export function findMilestoneIds(basePath: string): string[] {
   } catch (err) {
     // Log why milestone scanning failed — silent [] here causes infinite loops (#456)
     if (existsSync(dir)) {
-      console.error(`[hx] findMilestoneIds: .gsd/milestones/ exists but readdirSync failed — ${getErrorMessage(err)}`);
+      console.error(`[hx] findMilestoneIds: .hx/milestones/ exists but readdirSync failed — ${getErrorMessage(err)}`);
     }
     return [];
   }

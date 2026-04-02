@@ -524,7 +524,7 @@ export class RuleRegistry {
   formatHookStatus(): string {
     const entries = this.getHookStatus();
     if (entries.length === 0) {
-      return "No hooks configured. Add post_unit_hooks or pre_dispatch_hooks to .gsd/PREFERENCES.md";
+      return "No hooks configured. Add post_unit_hooks or pre_dispatch_hooks to .hx/PREFERENCES.md";
     }
 
     const lines: string[] = ["Configured Hooks:", ""];

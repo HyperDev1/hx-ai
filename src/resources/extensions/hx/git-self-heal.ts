@@ -3,7 +3,7 @@
  *
  * Four synchronous functions for recovering from broken git state
  * during auto-mode operations. Uses only `git reset --hard HEAD` —
- * never `git clean` (which would delete untracked .gsd/ dirs).
+ * never `git clean` (which would delete untracked .hx/ dirs).
  *
  * Observability: Each function returns structured results describing
  * what actions were taken. `formatGitError` maps raw git errors to

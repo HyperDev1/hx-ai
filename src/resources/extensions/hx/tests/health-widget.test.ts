@@ -39,14 +39,14 @@ function activeData(overrides: Partial<HealthWidgetData> = {}): HealthWidgetData
   };
 }
 
-test("detectHealthWidgetProjectState: no .gsd returns none", (t) => {
+test("detectHealthWidgetProjectState: no .hx returns none", (t) => {
   const dir = makeTempDir("none");
   t.after(() => { cleanup(dir); });
 
   assert.equal(detectHealthWidgetProjectState(dir), "none");
 });
 
-test("detectHealthWidgetProjectState: bootstrapped .gsd without milestones returns initialized", (t) => {
+test("detectHealthWidgetProjectState: bootstrapped .hx without milestones returns initialized", (t) => {
   const dir = makeTempDir("initialized");
   t.after(() => { cleanup(dir); });
 

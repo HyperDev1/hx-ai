@@ -1,7 +1,7 @@
 /**
  * GSD Auto Mode — Fresh Session Per Unit
  *
- * State machine driven by .gsd/ files on disk. Each "unit" of work
+ * State machine driven by .hx/ files on disk. Each "unit" of work
  * (plan slice, execute task, complete slice) gets a fresh session via
  * the stashed ctx.newSession() pattern.
  *

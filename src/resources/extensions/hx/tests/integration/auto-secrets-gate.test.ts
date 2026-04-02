@@ -47,7 +47,7 @@ test('secrets gate: no manifest exists — getManifestStatus returns null', asyn
   const tmp = makeTempDir('gate-no-manifest');
   t.after(() => rmSync(tmp, { recursive: true, force: true }));
 
-  // No .gsd directory at all
+  // No .hx directory at all
   const result = await getManifestStatus(tmp, 'M001');
   assert.strictEqual(result, null, 'should return null when no manifest file exists');
 });

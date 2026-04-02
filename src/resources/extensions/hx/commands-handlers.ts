@@ -152,7 +152,7 @@ export async function handleCapture(args: string, ctx: ExtensionCommandContext):
 
   const basePath = process.cwd();
 
-  // Ensure .gsd/ exists — capture should work even without a milestone
+  // Ensure .hx/ exists — capture should work even without a milestone
   const gsdDir = hxRoot(basePath);
   if (!existsSync(gsdDir)) {
     mkdirSync(gsdDir, { recursive: true });

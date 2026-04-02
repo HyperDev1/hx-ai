@@ -1,7 +1,7 @@
 /**
  * GSD Worktree Command — /worktree
  *
- * Create, list, merge, and remove git worktrees under .gsd/worktrees/.
+ * Create, list, merge, and remove git worktrees under .hx/worktrees/.
  *
  * Usage:
  *   /worktree <name>        — create a new worktree
@@ -243,7 +243,7 @@ export function registerWorktreeCommand(pi: ExtensionAPI): void {
   // but process.cwd() is still inside the worktree. Detect this and recover.
   if (!originalCwd) {
     const cwd = process.cwd();
-    const marker = `${sep}.gsd${sep}worktrees${sep}`;
+    const marker = `${sep}.hx${sep}worktrees${sep}`;
     const markerIdx = cwd.indexOf(marker);
     if (markerIdx !== -1) {
       originalCwd = cwd.slice(0, markerIdx);
@@ -289,7 +289,7 @@ function hasExistingMilestones(wtPath: string): boolean {
 
 /**
  * Clear GSD planning artifacts so auto-mode starts fresh with the discuss flow.
- * Keeps the .gsd/ directory structure intact but removes milestones and root planning files.
+ * Keeps the .hx/ directory structure intact but removes milestones and root planning files.
  */
 function clearGSDPlans(wtPath: string): void {
   const mDir = milestonesDir(wtPath);
@@ -582,7 +582,7 @@ async function handleMerge(
       return;
     }
 
-    // Gather merge context — full repo diff, not just .gsd/
+    // Gather merge context — full repo diff, not just .hx/
     const diffSummary = diffWorktreeAll(basePath, name);
     const numstat = diffWorktreeNumstat(basePath, name);
     const gsdDiff = getWorktreeGSDDiff(basePath, name);

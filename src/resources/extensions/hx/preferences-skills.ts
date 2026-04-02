@@ -25,7 +25,7 @@ export type { GSDSkillRule, SkillDiscoveryMode, SkillResolution, SkillResolution
 /**
  * Known skill directories, in priority order.
  * Global skills (~/.agents/skills/) take precedence over project skills.
- * Legacy ~/.gsd/agent/skills/ is included as a fallback for pre-migration installs.
+ * Legacy ~/.hx/agent/skills/ is included as a fallback for pre-migration installs.
  */
 export function getSkillSearchDirs(cwd: string): Array<{ dir: string; method: SkillResolution["method"] }> {
   const dirs: Array<{ dir: string; method: SkillResolution["method"] }> = [

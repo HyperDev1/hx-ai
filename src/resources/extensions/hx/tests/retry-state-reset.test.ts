@@ -23,7 +23,7 @@ import { parseUnitId } from "../unit-id.ts";
 function createRetryFixture(): { base: string; cleanup: () => void } {
   const base = mkdtempSync(join(tmpdir(), "gsd-retry-reset-"));
 
-  // Create the .gsd structure for M001/S01/T01
+  // Create the .hx structure for M001/S01/T01
   const milestonesTasksDir = join(base, ".hx", "milestones", "M001", "slices", "S01", "tasks");
   mkdirSync(milestonesTasksDir, { recursive: true });
 

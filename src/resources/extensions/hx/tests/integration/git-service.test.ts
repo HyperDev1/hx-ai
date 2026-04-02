@@ -1219,13 +1219,13 @@ describe('git-service', async () => {
     rmSync(repo, { recursive: true, force: true });
   });
 
-  // ─── ensureGitignore: always adds .gsd to gitignore ──────────────────
+  // ─── ensureGitignore: always adds .hx to gitignore ──────────────────
 
-  test('ensureGitignore: adds .gsd entry', async () => {
+  test('ensureGitignore: adds .hx entry', async () => {
     const { ensureGitignore } = await import("../../gitignore.ts");
     const repo = mkdtempSync(join(tmpdir(), "gsd-gitignore-external-state-"));
 
-    // Should add .gsd to gitignore (external state dir is a symlink)
+    // Should add .hx to gitignore (external state dir is a symlink)
     const modified = ensureGitignore(repo);
     assert.ok(modified, "ensureGitignore: gitignore was modified");
 
@@ -1241,21 +1241,21 @@ describe('git-service', async () => {
     rmSync(repo, { recursive: true, force: true });
   });
 
-  // ─── nativeAddAllWithExclusions: symlinked .gsd fallback ───────────────
+  // ─── nativeAddAllWithExclusions: symlinked .hx fallback ───────────────
 
-  test('nativeAddAllWithExclusions: symlinked .gsd fallback', () => {
-    // When .gsd is a symlink, git rejects `:!.hx/...` pathspecs with
+  test('nativeAddAllWithExclusions: symlinked .hx fallback', () => {
+    // When .hx is a symlink, git rejects `:!.hx/...` pathspecs with
     // "fatal: pathspec '...' is beyond a symbolic link". The fix falls
     // back to plain `git add -A`, which respects .gitignore.
     const repo = initTempRepo();
 
-    // Create the real .gsd directory outside the repo, then symlink it
+    // Create the real .hx directory outside the repo, then symlink it
     const externalGsd = mkdtempSync(join(tmpdir(), "gsd-external-"));
     mkdirSync(join(externalGsd, "activity"), { recursive: true });
     writeFileSync(join(externalGsd, "activity", "log.jsonl"), "log data");
     writeFileSync(join(externalGsd, "STATE.md"), "# State");
 
-    // Symlink .gsd -> external directory
+    // Symlink .hx -> external directory
     symlinkSync(externalGsd, join(repo, ".hx"));
 
     // Add .gitignore so git add -A fallback skips .hx/
@@ -1264,7 +1264,7 @@ describe('git-service', async () => {
     // Create a real file that should be staged
     createFile(repo, "src/app.ts", "export const x = 1;");
 
-    // nativeAddAllWithExclusions should NOT throw despite .gsd being a symlink
+    // nativeAddAllWithExclusions should NOT throw despite .hx being a symlink
     let threw = false;
     try {
       nativeAddAllWithExclusions(repo, RUNTIME_EXCLUSION_PATHS);
@@ -1272,20 +1272,20 @@ describe('git-service', async () => {
       threw = true;
       console.error("  unexpected error:", e);
     }
-    assert.ok(!threw, "nativeAddAllWithExclusions does not throw with symlinked .gsd");
+    assert.ok(!threw, "nativeAddAllWithExclusions does not throw with symlinked .hx");
 
     // Verify the real file was staged
     const staged = run("git diff --cached --name-only", repo);
-    assert.ok(staged.includes("src/app.ts"), "real file staged despite symlinked .gsd");
+    assert.ok(staged.includes("src/app.ts"), "real file staged despite symlinked .hx");
     assert.ok(!staged.includes(".hx"), ".hx content not staged");
 
     rmSync(repo, { recursive: true, force: true });
     rmSync(externalGsd, { recursive: true, force: true });
   });
 
-  // ─── nativeAddAllWithExclusions: non-symlinked .gsd still works ───────
+  // ─── nativeAddAllWithExclusions: non-symlinked .hx still works ───────
 
-  test('nativeAddAllWithExclusions: non-symlinked .gsd still works', () => {
+  test('nativeAddAllWithExclusions: non-symlinked .hx still works', () => {
     // Verify the normal (non-symlink) case still works with pathspec exclusions
     const repo = initTempRepo();
 
@@ -1299,10 +1299,10 @@ describe('git-service', async () => {
     } catch {
       threw = true;
     }
-    assert.ok(!threw, "nativeAddAllWithExclusions works with normal .gsd directory");
+    assert.ok(!threw, "nativeAddAllWithExclusions works with normal .hx directory");
 
     const staged = run("git diff --cached --name-only", repo);
-    assert.ok(staged.includes("src/code.ts"), "real file staged with normal .gsd");
+    assert.ok(staged.includes("src/code.ts"), "real file staged with normal .hx");
 
     rmSync(repo, { recursive: true, force: true });
   });
@@ -1414,15 +1414,15 @@ describe('git-service', async () => {
     rmSync(repo, { recursive: true, force: true });
   });
 
-  // ─── autoCommit: symlinked .gsd does NOT stage milestone artifacts (#2247) ──
+  // ─── autoCommit: symlinked .hx does NOT stage milestone artifacts (#2247) ──
 
-  test('autoCommit: symlinked .gsd does NOT stage milestone artifacts (#2247)', () => {
-    // When .gsd is a symlink (external state project), .hx/ files live outside
+  test('autoCommit: symlinked .hx does NOT stage milestone artifacts (#2247)', () => {
+    // When .hx is a symlink (external state project), .hx/ files live outside
     // the repo by design. smartStage() must NOT force-stage them into git — the
     // .gitignore exclusion is correct and intentional.
     const repo = initTempRepo();
 
-    // Create an external .gsd directory and symlink it into the repo
+    // Create an external .hx directory and symlink it into the repo
     const externalGsd = mkdtempSync(join(tmpdir(), "gsd-external-symlink-"));
     mkdirSync(join(externalGsd, "milestones", "M009"), { recursive: true });
     mkdirSync(join(externalGsd, "activity"), { recursive: true });
@@ -1430,7 +1430,7 @@ describe('git-service', async () => {
 
     symlinkSync(externalGsd, join(repo, ".hx"));
 
-    // .gitignore blocks .gsd (as ensureGitignore would do for symlink projects)
+    // .gitignore blocks .hx (as ensureGitignore would do for symlink projects)
     writeFileSync(join(repo, ".gitignore"), ".hx\n");
     run('git add .gitignore', repo);
     run('git commit -m "add gitignore"', repo);

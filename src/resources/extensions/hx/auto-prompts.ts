@@ -240,7 +240,7 @@ export async function inlineDependencySummaries(
 }
 
 /**
- * Load a well-known .gsd/ root file for optional inlining.
+ * Load a well-known .hx/ root file for optional inlining.
  * Handles the existsSync check internally.
  */
 export async function inlineGsdRootFile(
@@ -848,7 +848,7 @@ export async function buildDiscussMilestonePrompt(mid: string, midTitle: string,
     milestoneTitle: midTitle,
     inlinedTemplates: discussTemplates,
     structuredQuestionsAvailable: "true",
-    commitInstruction: "Do not commit planning artifacts — .gsd/ is managed externally.",
+    commitInstruction: "Do not commit planning artifacts — .hx/ is managed externally.",
   });
 
   // If a CONTEXT-DRAFT.md exists, append it as seed material
@@ -1070,7 +1070,7 @@ export async function buildPlanSlicePrompt(
   const executorContextConstraints = formatExecutorConstraints();
 
   const outputRelPath = relSliceFile(base, mid, sid, "PLAN");
-  const commitInstruction = "Do not commit — .gsd/ planning docs are managed externally and not tracked in git.";
+  const commitInstruction = "Do not commit — .hx/ planning docs are managed externally and not tracked in git.";
   return loadPrompt("plan-slice", {
     workingDirectory: base,
     milestoneId: mid, sliceId: sid, sliceTitle: sTitle,
@@ -1639,7 +1639,7 @@ export async function buildReassessRoadmapPrompt(
     // Non-fatal — captures module may not be available
   }
 
-  const reassessCommitInstruction = "Do not commit — .gsd/ planning docs are managed externally and not tracked in git.";
+  const reassessCommitInstruction = "Do not commit — .hx/ planning docs are managed externally and not tracked in git.";
 
   return loadPrompt("reassess-roadmap", {
     workingDirectory: base,

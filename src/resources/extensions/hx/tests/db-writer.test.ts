@@ -33,7 +33,7 @@ import type { Decision, Requirement } from '../types.ts';
 
 function makeTmpDir(): string {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-dbwriter-'));
-  // Create .gsd directory structure
+  // Create .hx directory structure
   fs.mkdirSync(path.join(dir, ".hx"), { recursive: true });
   return dir;
 }

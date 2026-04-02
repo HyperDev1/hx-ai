@@ -21,7 +21,7 @@ const dirEntryCache = new Map<string, Dirent[]>();
 const dirListCache = new Map<string, string[]>();
 
 // ─── Native Tree Cache ────────────────────────────────────────────────────────
-// When the native module is available, scan the entire .gsd/ tree in one call
+// When the native module is available, scan the entire .hx/ tree in one call
 // and serve directory listings from memory instead of individual readdirSync calls.
 
 let nativeTreeCache: Map<string, GsdTreeEntry[]> | null = null;
@@ -62,7 +62,7 @@ function cachedReaddirWithTypes(dirPath: string): Dirent[] {
   const cached = dirEntryCache.get(dirPath);
   if (cached) return cached;
 
-  // Try native tree cache for paths under .gsd/
+  // Try native tree cache for paths under .hx/
   if (nativeTreeBase) {
     const key = nativeTreeKey(dirPath, nativeTreeBase);
     if (key && nativeTreeCache) {
@@ -104,7 +104,7 @@ function cachedReaddir(dirPath: string): string[] {
   const cached = dirListCache.get(dirPath);
   if (cached) return cached;
 
-  // Try native tree cache for paths under .gsd/
+  // Try native tree cache for paths under .hx/
   if (nativeTreeBase) {
     const key = nativeTreeKey(dirPath, nativeTreeBase);
     if (key && nativeTreeCache) {
@@ -444,10 +444,10 @@ export function resolveTaskFile(
   return file ? join(tDir, file) : null;
 }
 
-// ─── Relative Path Builders (for prompts — .gsd/milestones/...) ────────────
+// ─── Relative Path Builders (for prompts — .hx/milestones/...) ────────────
 
 /**
- * Build relative .gsd/ path to a milestone directory.
+ * Build relative .hx/ path to a milestone directory.
  * Uses the actual directory name on disk if it exists, otherwise bare ID.
  */
 export function relMilestonePath(basePath: string, milestoneId: string): string {
@@ -457,7 +457,7 @@ export function relMilestonePath(basePath: string, milestoneId: string): string 
 }
 
 /**
- * Build relative .gsd/ path to a milestone file.
+ * Build relative .hx/ path to a milestone file.
  */
 export function relMilestoneFile(
   basePath: string, milestoneId: string, suffix: string
@@ -472,7 +472,7 @@ export function relMilestoneFile(
 }
 
 /**
- * Build relative .gsd/ path to a slice directory.
+ * Build relative .hx/ path to a slice directory.
  */
 export function relSlicePath(
   basePath: string, milestoneId: string, sliceId: string
@@ -488,7 +488,7 @@ export function relSlicePath(
 }
 
 /**
- * Build relative .gsd/ path to a slice file.
+ * Build relative .hx/ path to a slice file.
  */
 export function relSliceFile(
   basePath: string, milestoneId: string, sliceId: string, suffix: string
@@ -503,7 +503,7 @@ export function relSliceFile(
 }
 
 /**
- * Build relative .gsd/ path to a task file.
+ * Build relative .hx/ path to a task file.
  */
 export function relTaskFile(
   basePath: string, milestoneId: string, sliceId: string,

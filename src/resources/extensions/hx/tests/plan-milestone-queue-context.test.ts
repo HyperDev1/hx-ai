@@ -38,7 +38,7 @@ describe("plan-milestone queue context", () => {
 
       const prompt = await buildPlanMilestonePrompt("M010", "M010", base);
 
-      assert.match(prompt, /Source: `\.gsd\/QUEUE\.md`/);
+      assert.match(prompt, /Source: `\.hx\/QUEUE\.md`/);
       assert.match(prompt, /Analytics Dashboard — Interactivity, Intelligence & Demo Readiness/);
       assert.match(prompt, /Ship a polished analytics dashboard/);
     } finally {

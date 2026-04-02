@@ -61,7 +61,7 @@ test("syncWorktreeStateBack copies task summaries from tasks/ subdirectory (#167
     writeFile(wtBase, `.hx/milestones/${mid}/slices/S01/tasks/T02-PLAN.md`, "# Task 2 Plan\n");
     writeFile(wtBase, `.hx/milestones/${mid}/slices/S01/tasks/T02-SUMMARY.md`, "# Task 2 Summary\n");
 
-    // Set up main with empty .gsd
+    // Set up main with empty .hx
     mkdirSync(join(mainBase, ".hx"), { recursive: true });
 
     // Run sync

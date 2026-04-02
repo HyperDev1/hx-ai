@@ -11,13 +11,13 @@ import { setLogBasePath } from "../workflow-logger.js";
  * Resolve the correct DB path for the current working directory.
  * If `basePath` is inside a `.hx/worktrees/<MID>/` directory, returns
  * the project root's `.hx/hx.db` (shared WAL — R012). Otherwise
- * returns `<basePath>/.gsd/hx.db`.
+ * returns `<basePath>/.hx/hx.db`.
  */
 export function resolveProjectRootDbPath(basePath: string): string {
   // Detect worktree: look for `.hx/worktrees/` in the path segments.
-  // A worktree path looks like: /project/root/.gsd/worktrees/M001/...
-  // We need to resolve back to /project/root/.gsd/hx.db
-  const marker = `${sep}.gsd${sep}worktrees${sep}`;
+  // A worktree path looks like: /project/root/.hx/worktrees/M001/...
+  // We need to resolve back to /project/root/.hx/hx.db
+  const marker = `${sep}.hx${sep}worktrees${sep}`;
   const idx = basePath.indexOf(marker);
   if (idx !== -1) {
     const projectRoot = basePath.slice(0, idx);
@@ -44,7 +44,7 @@ export async function ensureDbOpen(): Promise<boolean> {
     const dbPath = resolveProjectRootDbPath(basePath);
     const gsdDir = join(basePath, ".hx");
 
-    // Derive the project root from the DB path (strip .gsd/hx.db)
+    // Derive the project root from the DB path (strip .hx/hx.db)
     const projectRoot = join(dbPath, "..", "..");
 
     // Open existing DB file (may be at project root for worktrees)
@@ -54,7 +54,7 @@ export async function ensureDbOpen(): Promise<boolean> {
       return opened;
     }
 
-    // No DB file — create + migrate from Markdown if .gsd/ has content
+    // No DB file — create + migrate from Markdown if .hx/ has content
     if (existsSync(gsdDir)) {
       const hasDecisions = existsSync(join(gsdDir, "DECISIONS.md"));
       const hasRequirements = existsSync(join(gsdDir, "REQUIREMENTS.md"));
@@ -75,7 +75,7 @@ export async function ensureDbOpen(): Promise<boolean> {
         return opened;
       }
 
-      // .gsd/ exists but has no Markdown content (fresh project) — create empty DB
+      // .hx/ exists but has no Markdown content (fresh project) — create empty DB
       const opened = db.openDatabase(dbPath);
       if (opened) setLogBasePath(projectRoot);
       return opened;

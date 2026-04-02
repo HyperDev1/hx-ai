@@ -250,7 +250,7 @@ describe("auto-worktree-milestone-merge", { timeout: 300_000 }, () => {
     let threw = false;
     try {
       const result = mergeMilestoneToMain(repo, "M050", roadmap);
-      assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("HX-Milestone: M050"), "merge commit created despite .gsd conflict");
+      assert.ok(result.commitMessage.includes("feat:") && result.commitMessage.includes("HX-Milestone: M050"), "merge commit created despite .hx conflict");
     } catch (err) {
       threw = true;
     }

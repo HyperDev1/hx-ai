@@ -33,7 +33,7 @@ function createRepoWithCompletedMilestone(): string {
   run("git commit -m init", dir);
   run("git branch -M main", dir);
 
-  // Create .gsd structure with milestone M001 — all slices done → complete
+  // Create .hx structure with milestone M001 — all slices done → complete
   const msDir = join(dir, ".hx", "milestones", "M001");
   mkdirSync(msDir, { recursive: true });
   writeFileSync(join(msDir, "ROADMAP.md"), `---
@@ -57,7 +57,7 @@ Test
 _None_
 `);
 
-  // Commit .gsd files
+  // Commit .hx files
   run("git add -A", dir);
   run("git commit -m \"add milestone\"", dir);
 
@@ -270,7 +270,7 @@ describe('doctor-git', async () => {
       const dir = realpathSync(mkdtempSync(join(tmpdir(), "doc-git-test-")));
       cleanups.push(dir);
 
-      // Create minimal .gsd structure (no git)
+      // Create minimal .hx structure (no git)
       mkdirSync(join(dir, ".hx"), { recursive: true });
 
       const result = await runGSDDoctor(dir);
@@ -518,14 +518,14 @@ describe('doctor-git', async () => {
       assert.ok(trackedIssues.length > 0, "none-mode: tracked runtime files IS detected");
     });
 
-    // ─── Test: Symlinked .gsd does not cause false orphan detection ────
+    // ─── Test: Symlinked .hx does not cause false orphan detection ────
     if (process.platform !== "win32") {
-    test('worktree_directory_orphaned (symlinked .gsd not false-positive)', async () => {
+    test('worktree_directory_orphaned (symlinked .hx not false-positive)', async () => {
       const dir = createRepoWithActiveMilestone();
       cleanups.push(dir);
 
-      // Move .gsd to an external location and replace with a symlink.
-      // This simulates the ~/.hx/projects/<hash> layout where .gsd is a symlink.
+      // Move .hx to an external location and replace with a symlink.
+      // This simulates the ~/.hx/projects/<hash> layout where .hx is a symlink.
       const externalGsd = join(realpathSync(mkdtempSync(join(tmpdir(), "doc-git-symlink-"))), "gsd-data");
       cleanups.push(externalGsd);
       renameSync(join(dir, ".hx"), externalGsd);
@@ -537,7 +537,7 @@ describe('doctor-git', async () => {
 
       const detect = await runGSDDoctor(dir);
       const orphanDirIssues = detect.issues.filter(i => i.code === "worktree_directory_orphaned");
-      assert.deepStrictEqual(orphanDirIssues.length, 0, "registered worktree via symlinked .gsd NOT flagged as orphaned");
+      assert.deepStrictEqual(orphanDirIssues.length, 0, "registered worktree via symlinked .hx NOT flagged as orphaned");
     });
     } else {
     }

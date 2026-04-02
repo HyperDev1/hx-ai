@@ -141,13 +141,13 @@ export function resolveProjectRoot(basePath: string): string {
     : basePath.slice(0, seg.gsdIdx);
 
   // Layer 2: Guard against resolving to the user's home directory.
-  // When .gsd is a symlink into ~/.hx/projects/<hash>, the resolved path
-  // contains /.gsd/ at the user-level boundary. Slicing there yields ~ — wrong.
+  // When .hx is a symlink into ~/.hx/projects/<hash>, the resolved path
+  // contains /.hx/ at the user-level boundary. Slicing there yields ~ — wrong.
   const hxHome = normalizePathForCompare(process.env.HX_HOME || join(homedir(), ".hx"));
   const candidateGsdPath = normalizePathForCompare(join(candidate, ".hx"));
 
   if (candidateGsdPath === hxHome || candidateGsdPath.startsWith(hxHome + "/")) {
-    // The candidate is the home directory (or within it in a way that .gsd
+    // The candidate is the home directory (or within it in a way that .hx
     // maps to the user-level GSD dir). Try to recover the real project root
     // from the worktree's .git file.
     const realRoot = resolveProjectRootFromGitFile(basePath);

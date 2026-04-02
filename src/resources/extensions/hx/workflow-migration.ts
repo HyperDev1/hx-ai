@@ -11,7 +11,7 @@ import { parseRoadmap, parsePlan } from "./parsers-legacy.js";
 // ─── needsAutoMigration ───────────────────────────────────────────────────
 
 /**
- * Returns true when engine tables are empty AND a .gsd/milestones/ directory
+ * Returns true when engine tables are empty AND a .hx/milestones/ directory
  * with markdown files exists — signals that this is a legacy project that needs
  * one-time migration from markdown to engine state.
  */
@@ -28,7 +28,7 @@ export function needsAutoMigration(basePath: string): boolean {
     return false;
   }
 
-  // Check if .gsd/milestones/ directory exists
+  // Check if .hx/milestones/ directory exists
   const milestonesDir = join(basePath, ".hx", "milestones");
   if (!existsSync(milestonesDir)) return false;
 
@@ -38,8 +38,8 @@ export function needsAutoMigration(basePath: string): boolean {
 // ─── migrateFromMarkdown ──────────────────────────────────────────────────
 
 /**
- * Migrate legacy markdown-only .gsd/ projects to engine DB state.
- * Reads .gsd/milestones/<ID>/ directories and parses ROADMAP.md, *-PLAN.md
+ * Migrate legacy markdown-only .hx/ projects to engine DB state.
+ * Reads .hx/milestones/<ID>/ directories and parses ROADMAP.md, *-PLAN.md
  * files. All inserts are wrapped in a transaction.
  *
  * This function only INSERTs data into the already-existing v10 schema tables
@@ -60,7 +60,7 @@ export function migrateFromMarkdown(basePath: string): void {
 
   const milestonesDir = join(basePath, ".hx", "milestones");
   if (!existsSync(milestonesDir)) {
-    process.stderr.write("workflow-migration: no .gsd/milestones/ directory found, nothing to migrate\n");
+    process.stderr.write("workflow-migration: no .hx/milestones/ directory found, nothing to migrate\n");
     return;
   }
 
@@ -76,7 +76,7 @@ export function migrateFromMarkdown(basePath: string): void {
   }
 
   if (milestoneDirs.length === 0) {
-    process.stderr.write("workflow-migration: no milestone directories found in .gsd/milestones/\n");
+    process.stderr.write("workflow-migration: no milestone directories found in .hx/milestones/\n");
     return;
   }
 

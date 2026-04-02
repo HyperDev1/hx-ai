@@ -70,9 +70,9 @@ function deriveStatus(graph: WorkflowGraph): "pending" | "running" | "complete" 
 /**
  * Create a new isolated run directory for a workflow definition.
  *
- * 1. Loads the definition from `<basePath>/.gsd/workflow-defs/<defName>.yaml`
+ * 1. Loads the definition from `<basePath>/.hx/workflow-defs/<defName>.yaml`
  * 2. Applies parameter substitution if overrides are provided
- * 3. Creates `<basePath>/.gsd/workflow-runs/<defName>/<timestamp>/`
+ * 3. Creates `<basePath>/.hx/workflow-runs/<defName>/<timestamp>/`
  * 4. Writes frozen DEFINITION.yaml, initialized GRAPH.yaml, and optional PARAMS.json
  *
  * @param basePath — project root directory
@@ -123,7 +123,7 @@ export function createRun(
 /**
  * List existing workflow runs with metadata.
  *
- * Scans `<basePath>/.gsd/workflow-runs/` for run directories. Each run's
+ * Scans `<basePath>/.hx/workflow-runs/` for run directories. Each run's
  * GRAPH.yaml is read to derive step counts and overall status.
  *
  * @param basePath — project root directory

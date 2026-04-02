@@ -247,7 +247,7 @@ auto_supervisor: {}
 
 Project-specific guidance for skill selection and execution preferences.
 
-See \`~/.gsd/agent/extensions/hx/docs/preferences-reference.md\` for full field documentation and examples.
+See \`~/.hx/agent/extensions/hx/docs/preferences-reference.md\` for full field documentation and examples.
 
 ## Fields
 

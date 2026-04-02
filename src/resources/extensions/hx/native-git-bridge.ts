@@ -713,9 +713,9 @@ export function nativeAddAllWithExclusions(basePath: string, exclusions: readonl
     if (stderr.includes("ignored by one of your .gitignore files")) {
       return;
     }
-    // When .gsd is a symlink, git rejects `:!.gsd/...` pathspecs with
+    // When .hx is a symlink, git rejects `:!.hx/...` pathspecs with
     // "beyond a symbolic link". Fall back to plain `git add -A` which
-    // respects .gitignore (where .gsd/ is listed by default).
+    // respects .gitignore (where .hx/ is listed by default).
     if (stderr.includes("beyond a symbolic link")) {
       nativeAddAll(basePath);
       return;
@@ -866,7 +866,7 @@ export function nativeMergeSquash(basePath: string, branch: string): GitMergeRes
       stderr.includes("overwritten by merge")
     ) {
       // Extract filenames from git stderr so callers can report which files
-      // are dirty instead of generically blaming .gsd/ (#2151).
+      // are dirty instead of generically blaming .hx/ (#2151).
       // Git lists them as tab-indented lines between the "would be overwritten"
       // header and the "Please commit" footer.
       const dirtyFiles = stderr

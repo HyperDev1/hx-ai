@@ -9,7 +9,7 @@
  *
  * All templates are eagerly loaded into cache at module init via warmCache().
  * This prevents a running session from being invalidated when another `gsd`
- * launch overwrites ~/.gsd/agent/ with newer templates via initResources().
+ * launch overwrites ~/.hx/agent/ with newer templates via initResources().
  * Without eager caching, the in-memory extension code (which knows variable
  * set A) can read a newer template from disk (which expects variable set B),
  * causing a "template declares {{X}} but no value was provided" crash
@@ -30,7 +30,7 @@ import { homedir } from "node:os";
  * On Windows (npm global install via MSYS2 / Git Bash) this can resolve to
  * the npm-global `AppData/Roaming/npm/…` path, which does NOT contain the
  * prompts/ and templates/ subtrees that initResources() copies to
- * `~/.gsd/agent/extensions/hx/`. Detect the mismatch and fall back to
+ * `~/.hx/agent/extensions/hx/`. Detect the mismatch and fall back to
  * the user-local agent directory.
  */
 function resolveExtensionDir(): string {

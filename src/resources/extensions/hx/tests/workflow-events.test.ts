@@ -28,7 +28,7 @@ function makeEvent(cmd: string, params: Record<string, unknown> = {}): Omit<Work
 
 // ─── appendEvent ─────────────────────────────────────────────────────────
 
-test('workflow-events: appendEvent creates .gsd dir and event-log.jsonl', () => {
+test('workflow-events: appendEvent creates .hx dir and event-log.jsonl', () => {
   const base = tempDir();
   try {
     appendEvent(base, makeEvent('complete-task', { milestoneId: 'M001', taskId: 'T01' }));

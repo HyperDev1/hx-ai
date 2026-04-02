@@ -24,7 +24,7 @@ const IGNORED_PATTERNS = [
 const DEBOUNCE_MS = 300;
 
 /**
- * Start watching `agentDir` (e.g. `~/.gsd/agent/`) for config changes.
+ * Start watching `agentDir` (e.g. `~/.hx/agent/`) for config changes.
  * Emits events on the supplied EventBus when watched files are modified.
  */
 export async function startFileWatcher(

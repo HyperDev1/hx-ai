@@ -41,8 +41,8 @@ import { clearPathCache } from "./paths.js";
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
 /**
- * Convert an absolute file path to a .gsd-relative artifact path.
- * E.g. "/project/.gsd/milestones/M001/M001-ROADMAP.md" → "milestones/M001/M001-ROADMAP.md"
+ * Convert an absolute file path to a .hx-relative artifact path.
+ * E.g. "/project/.hx/milestones/M001/M001-ROADMAP.md" → "milestones/M001/M001-ROADMAP.md"
  */
 function toArtifactPath(absPath: string, basePath: string): string {
   const root = hxRoot(basePath);

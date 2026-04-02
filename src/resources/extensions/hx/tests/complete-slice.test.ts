@@ -50,7 +50,7 @@ function cleanupDir(dirPath: string): void {
 }
 
 /**
- * Create a temp project directory with .gsd structure and roadmap for handler tests.
+ * Create a temp project directory with .hx structure and roadmap for handler tests.
  */
 function createTempProject(): { basePath: string; roadmapPath: string } {
   const basePath = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-slice-handler-'));

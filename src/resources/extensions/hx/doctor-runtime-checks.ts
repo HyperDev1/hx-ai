@@ -385,9 +385,9 @@ export async function checkRuntimeHealth(
     // Non-fatal — external state check failed
   }
 
-  // ── Numbered .gsd collision variants (#2205) ───────────────────────────
+  // ── Numbered .hx collision variants (#2205) ───────────────────────────
   // macOS APFS can create ".hx 2", ".hx 3" etc. when a directory blocks
-  // symlink creation. These must be removed so the canonical .gsd is used.
+  // symlink creation. These must be removed so the canonical .hx is used.
   try {
     const variantPattern = /^\.hx \d+$/;
     const entries = readdirSync(basePath);
@@ -408,7 +408,7 @@ export async function checkRuntimeHealth(
       if (shouldFix("numbered_gsd_variant")) {
         const removed = cleanNumberedHxVariants(basePath);
         for (const name of removed) {
-          fixesApplied.push(`removed numbered .gsd variant: ${name}`);
+          fixesApplied.push(`removed numbered .hx variant: ${name}`);
         }
       }
     }

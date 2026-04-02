@@ -13,7 +13,7 @@ export function registerShortcuts(pi: ExtensionAPI): void {
     description: shortcutDesc("Open GSD dashboard", "/hx status"),
     handler: async (ctx) => {
       if (!existsSync(join(process.cwd(), ".hx"))) {
-        ctx.ui.notify("No .gsd/ directory found. Run /hx to start.", "info");
+        ctx.ui.notify("No .hx/ directory found. Run /hx to start.", "info");
         return;
       }
       await ctx.ui.custom<void>(

@@ -337,10 +337,10 @@ describe('feature-branch-lifecycle-integration', async () => {
       const wtPath = createAutoWorktree(repo, milestoneId);
       tempDirs.push(wtPath);
 
-      // With external state, worktree .gsd is a symlink to shared state.
+      // With external state, worktree .hx is a symlink to shared state.
       // Verify symlink was created (planning files are shared, not copied).
       const wtGsd = join(wtPath, ".hx");
-      assert.ok(existsSync(wtGsd), "worktree .gsd exists (symlink or dir)");
+      assert.ok(existsSync(wtGsd), "worktree .hx exists (symlink or dir)");
 
       // Clean up: chdir back before teardown
       process.chdir(savedCwd);

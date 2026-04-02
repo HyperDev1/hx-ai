@@ -1,5 +1,5 @@
 // Migration writer integration test
-// Writes a complete .gsd tree to a temp dir, verifies file existence,
+// Writes a complete .hx tree to a temp dir, verifies file existence,
 // parses key files, and asserts deriveState() returns coherent state.
 // Also tests generatePreview() for correct counts.
 

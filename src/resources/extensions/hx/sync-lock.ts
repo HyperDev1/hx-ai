@@ -27,7 +27,7 @@ function sleepSync(ms: number): void {
  * Acquire an advisory sync lock for the given basePath.
  * Returns { acquired: true } on success, { acquired: false } after timeout.
  *
- * - Creates lock file at {basePath}/.gsd/sync.lock with JSON { pid, acquired_at }
+ * - Creates lock file at {basePath}/.hx/sync.lock with JSON { pid, acquired_at }
  * - If lock exists and mtime > 60s (stale), overrides it
  * - If lock exists and not stale, spins up to timeoutMs before giving up
  */

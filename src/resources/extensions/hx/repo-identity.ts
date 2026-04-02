@@ -3,7 +3,7 @@
  *
  * Computes a stable per-repo identity hash, resolves the external
  * `~/.hx/projects/<hash>/` state directory, and manages the
- * `<project>/.gsd → external` symlink.
+ * `<project>/.hx → external` symlink.
  */
 
 import { createHash } from "node:crypto";
@@ -104,7 +104,7 @@ export function readRepoMeta(externalPath: string): RepoMeta | null {
  * Returns true when ALL of:
  *   1. basePath is inside a git repo (git rev-parse succeeds)
  *   2. The resolved git root is a proper ancestor of basePath
- *   3. There is no *project* `.gsd` directory at the git root or any
+ *   3. There is no *project* `.hx` directory at the git root or any
  *      intermediate ancestor (the parent project has not been
  *      initialised with GSD)
  *
@@ -112,7 +112,7 @@ export function readRepoMeta(externalPath: string): RepoMeta | null {
  * `repoIdentity()` produces a hash unique to this directory, preventing
  * cross-project state leaks (#1639).
  *
- * When the git root already has a project `.gsd`, the directory is a
+ * When the git root already has a project `.hx`, the directory is a
  * legitimate subdirectory of an existing GSD project — `cd src/ && /hx`
  * should still load the parent project's milestones.
  */
@@ -123,13 +123,13 @@ export function isInheritedRepo(basePath: string): boolean {
     const normalizedRoot = canonicalizeExistingPath(root);
     if (normalizedBase === normalizedRoot) return false; // basePath IS the root
 
-    // The git root is a proper ancestor. Check whether it already has .gsd
+    // The git root is a proper ancestor. Check whether it already has .hx
     // (i.e. the parent project was initialised with GSD).
     if (isProjectGsd(join(root, ".hx"))) return false;
 
-    // Walk up from basePath's parent to the git root checking for .gsd.
+    // Walk up from basePath's parent to the git root checking for .hx.
     // Start at dirname(normalizedBase), NOT normalizedBase itself — finding
-    // .gsd at basePath means GSD state is set up for THIS project, which
+    // .hx at basePath means GSD state is set up for THIS project, which
     // says nothing about whether the git repo is inherited from an ancestor.
     let dir = dirname(normalizedBase);
     while (dir !== normalizedRoot && dir !== dirname(dir)) {
@@ -144,15 +144,15 @@ export function isInheritedRepo(basePath: string): boolean {
 }
 
 /**
- * Distinguish a *project* `.gsd` from the global `~/.gsd` state directory.
+ * Distinguish a *project* `.hx` from the global `~/.hx` state directory.
  *
- * A project `.gsd` is either:
+ * A project `.hx` is either:
  *   - A symlink to an external state directory (normal post-migration layout)
  *   - A legacy real directory that is NOT the global GSD home
  *
  * When the user's home directory is itself a git repo (e.g. dotfile managers),
- * `~/.gsd` exists but is the global state directory — not a project `.gsd`.
- * Treating it as a project `.gsd` would cause isInheritedRepo() to wrongly
+ * `~/.hx` exists but is the global state directory — not a project `.hx`.
+ * Treating it as a project `.hx` would cause isInheritedRepo() to wrongly
  * conclude that subdirectories are part of the home "project" (#2393).
  */
 function isProjectGsd(gsdPath: string): boolean {
@@ -161,7 +161,7 @@ function isProjectGsd(gsdPath: string): boolean {
   try {
     const stat = lstatSync(gsdPath);
 
-    // Symlinks are always project .gsd (created by ensureGsdSymlink).
+    // Symlinks are always project .hx (created by ensureGsdSymlink).
     if (stat.isSymbolicLink()) return true;
 
     // For real directories, check that this isn't the global GSD home.
@@ -175,7 +175,7 @@ function isProjectGsd(gsdPath: string): boolean {
       return true;
     }
   } catch {
-    // lstat failed — treat as no .gsd present
+    // lstat failed — treat as no .hx present
   }
 
   return false;
@@ -318,13 +318,13 @@ export function externalProjectsRoot(): string {
 /**
  * macOS collision pattern: `.hx 2`, `.hx 3`, `.hx 4`, etc.
  *
- * When `symlinkSync` (or Finder) tries to create `.gsd` but a real directory
+ * When `symlinkSync` (or Finder) tries to create `.hx` but a real directory
  * already exists at that path, macOS APFS silently renames the new entry to
  * `.hx 2`, then `.hx 3`, and so on. These numbered variants confuse GSD
- * because the canonical `.gsd` path no longer resolves to the external state
+ * because the canonical `.hx` path no longer resolves to the external state
  * directory, making tracked planning files appear deleted.
  *
- * This helper scans the project root for entries matching `.gsd <digits>` and
+ * This helper scans the project root for entries matching `.hx <digits>` and
  * removes them. It is called early in `ensureGsdSymlink()` so that the
  * canonical `.hx` path is always the one in use.
  */
@@ -356,11 +356,11 @@ export function cleanNumberedHxVariants(projectPath: string): string[] {
 /**
  * Ensure the `<project>/.hx` symlink points to the external state directory.
  *
- * 1. Clean up any macOS numbered collision variants (`.gsd 2`, `.gsd 3`, etc.)
+ * 1. Clean up any macOS numbered collision variants (`.hx 2`, `.hx 3`, etc.)
  * 2. mkdir -p the external dir
- * 3. If `<project>/.gsd` doesn't exist → create symlink
- * 4. If `<project>/.gsd` is already the correct symlink → no-op
- * 5. If `<project>/.gsd` is a real directory → return as-is (migration handles later)
+ * 3. If `<project>/.hx` doesn't exist → create symlink
+ * 4. If `<project>/.hx` is already the correct symlink → no-op
+ * 5. If `<project>/.hx` is a real directory → return as-is (migration handles later)
  *
  * Returns the resolved external path.
  */
@@ -370,7 +370,7 @@ export function ensureHxSymlink(projectPath: string): string {
   const inWorktree = isInsideWorktree(projectPath);
 
   // Guard: Never create a symlink at ~/.hx — that's the user-level HX home,
-  // not a project .gsd. This can happen if resolveProjectRoot() or
+  // not a project .hx. This can happen if resolveProjectRoot() or
   // escapeStaleWorktree() returned ~ as the project root (#1676).
   const localHxNormalized = localHx.replaceAll("\\", "/");
   const hxHomePath = hxHome.replaceAll("\\", "/");
@@ -379,10 +379,10 @@ export function ensureHxSymlink(projectPath: string): string {
   }
 
   // Guard: If projectPath is a plain subdirectory (not a worktree) of a git
-  // repo that already has a .gsd at the git root, do not create a duplicate
-  // symlink in the subdirectory — that causes `.gsd 2` collision variants on
+  // repo that already has a .hx at the git root, do not create a duplicate
+  // symlink in the subdirectory — that causes `.hx 2` collision variants on
   // macOS (#2380). Worktrees are excluded because they legitimately need their
-  // own .gsd symlink pointing at the shared external state dir.
+  // own .hx symlink pointing at the shared external state dir.
   if (!inWorktree) {
     try {
       const gitRoot = resolveGitRoot(projectPath);
@@ -397,7 +397,7 @@ export function ensureHxSymlink(projectPath: string): string {
               return rootStat.isSymbolicLink() ? realpathSync(rootGsd) : rootGsd;
             }
           } catch {
-            // Fall through to normal logic if we can't stat root .gsd
+            // Fall through to normal logic if we can't stat root .hx
           }
         }
       }
@@ -406,7 +406,7 @@ export function ensureHxSymlink(projectPath: string): string {
     }
   }
 
-  // Clean up macOS numbered collision variants (.gsd 2, .gsd 3, etc.) before
+  // Clean up macOS numbered collision variants (.hx 2, .hx 3, etc.) before
   // any existence checks — otherwise they accumulate and confuse state (#2205).
   cleanNumberedHxVariants(projectPath);
 
@@ -449,7 +449,7 @@ export function ensureHxSymlink(projectPath: string): string {
     if (stat.isDirectory()) {
       // Real directory in the main repo — migration will handle this later.
       // In worktrees, keep the directory in place and let syncGsdStateToWorktree
-      // refresh its contents. Replacing a git-tracked .gsd directory with a
+      // refresh its contents. Replacing a git-tracked .hx directory with a
       // symlink makes git think tracked planning files were deleted.
       return localHx;
     }

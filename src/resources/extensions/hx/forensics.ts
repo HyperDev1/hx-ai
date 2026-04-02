@@ -54,7 +54,7 @@ interface UnitTrace {
   mtime: number;
 }
 
-/** Summary of .gsd/activity/ directory metadata. */
+/** Summary of .hx/activity/ directory metadata. */
 interface ActivityLogMeta {
   fileCount: number;
   totalSizeBytes: number;
@@ -63,7 +63,7 @@ interface ActivityLogMeta {
 }
 
 /**
- * Summary of .gsd/journal/ data for forensic investigation.
+ * Summary of .hx/journal/ data for forensic investigation.
  *
  * To avoid loading huge journal histories into memory, only the most recent
  * daily files are fully parsed. Older files are line-counted for totals.
@@ -155,7 +155,7 @@ async function writeForensicsDedupPref(ctx: ExtensionCommandContext, enabled: bo
 
   const frontmatter = serializePreferencesToFrontmatter(prefs);
   const raw = existsSync(prefsPath) ? readFileSync(prefsPath, "utf-8") : "";
-  let body = "\n# HX Skill Preferences\n\nSee `~/.gsd/agent/extensions/hx/docs/preferences-reference.md` for full field documentation and examples.\n";
+  let body = "\n# HX Skill Preferences\n\nSee `~/.hx/agent/extensions/hx/docs/preferences-reference.md` for full field documentation and examples.\n";
   const start = raw.startsWith("---\n") ? 4 : raw.startsWith("---\r\n") ? 5 : -1;
   if (start !== -1) {
     const closingIdx = raw.indexOf("\n---", start);
@@ -227,7 +227,7 @@ export async function handleForensics(
   const report = await buildForensicReport(basePath);
   const savedPath = saveForensicReport(basePath, report, problemDescription);
 
-  // Derive GSD source dir for prompt — fall back to ~/.gsd/agent/extensions/hx/
+  // Derive GSD source dir for prompt — fall back to ~/.hx/agent/extensions/hx/
   // when import.meta.url resolves to the npm-global install path (Windows).
   let gsdSourceDir = dirname(fileURLToPath(import.meta.url));
   if (!existsSync(join(gsdSourceDir, "prompts"))) {
@@ -305,7 +305,7 @@ export async function buildForensicReport(basePath: string): Promise<ForensicRep
   }
 
   // 8. GSD version — use HX_VERSION env var set by the loader at startup.
-  // Extensions run from ~/.gsd/agent/extensions/hx/ at runtime, so path-traversal
+  // Extensions run from ~/.hx/agent/extensions/hx/ at runtime, so path-traversal
   // from import.meta.url would resolve to ~/package.json (wrong on every system).
   const gsdVersion = process.env.HX_VERSION || "unknown";
 

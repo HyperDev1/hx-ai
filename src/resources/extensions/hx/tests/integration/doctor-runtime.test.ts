@@ -19,7 +19,7 @@ function run(cmd: string, cwd: string): string {
   return execSync(cmd, { cwd, stdio: ["ignore", "pipe", "pipe"], encoding: "utf-8" }).trim();
 }
 
-/** Create a minimal .gsd project with a milestone for STATE.md tests. */
+/** Create a minimal .hx project with a milestone for STATE.md tests. */
 function createMinimalProject(): string {
   const dir = realpathSync(mkdtempSync(join(tmpdir(), "doc-runtime-test-")));
   const msDir = join(dir, ".hx", "milestones", "M001");
@@ -42,7 +42,7 @@ function createMinimalProject(): string {
   return dir;
 }
 
-/** Create a minimal git repo with .gsd for gitignore tests. */
+/** Create a minimal git repo with .hx for gitignore tests. */
 function createGitProject(): string {
   const dir = realpathSync(mkdtempSync(join(tmpdir(), "doc-runtime-git-")));
   run("git init", dir);
@@ -211,7 +211,7 @@ None
       const dir = createGitProject();
       cleanups.push(dir);
 
-      // Create .gsd dir so checks can run
+      // Create .hx dir so checks can run
       mkdirSync(join(dir, ".hx"), { recursive: true });
 
       // Write a .gitignore missing GSD runtime patterns
@@ -227,7 +227,7 @@ None
       const fixed = await runGSDDoctor(dir, { fix: true });
       assert.ok(fixed.fixesApplied.some(f => f.includes("added missing GSD runtime patterns")), "fix adds patterns");
 
-      // Verify .gsd entry was added (external state symlink)
+      // Verify .hx entry was added (external state symlink)
       const content = readFileSync(join(dir, ".gitignore"), "utf-8");
       assert.ok(content.includes(".hx"), "gitignore now has .hx entry");
     });
@@ -279,7 +279,7 @@ node_modules/
 
     // ─── Test: Stranded lock directory detection & fix ────────────────
     // Skip on Windows: proper-lockfile uses advisory file locking on Windows,
-    // not the directory-based mechanism. The .gsd.lock/ directory pattern is
+    // not the directory-based mechanism. The .hx.lock/ directory pattern is
     // a POSIX-specific lockfile implementation detail.
     if (process.platform !== "win32") {
     test('stranded_lock_directory', async () => {
@@ -287,7 +287,7 @@ node_modules/
       cleanups.push(dir);
 
       // Create the proper-lockfile lock directory without a live lock holder.
-      // The lock dir sits at <parent of .gsd>/.gsd.lock (i.e., <basePath>/.gsd.lock).
+      // The lock dir sits at <parent of .hx>/.hx.lock (i.e., <basePath>/.hx.lock).
       const lockDir = join(dir, ".hx.lock");
       mkdirSync(lockDir, { recursive: true });
 

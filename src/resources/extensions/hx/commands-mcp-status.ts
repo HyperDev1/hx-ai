@@ -93,7 +93,7 @@ export function formatMcpStatusReport(servers: McpServerStatus[]): string {
     return [
       "No MCP servers configured.",
       "",
-      "Add servers to .mcp.json or .gsd/mcp.json to enable MCP integrations.",
+      "Add servers to .mcp.json or .hx/mcp.json to enable MCP integrations.",
       "See: https://modelcontextprotocol.io/quickstart",
     ].join("\n");
   }
