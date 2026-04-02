@@ -41,6 +41,9 @@
   },
   "packageManager": "npm@10.9.3",
   "scripts": {
+    "lint": "npx @biomejs/biome check src/",
+    "lint:fix": "npx @biomejs/biome check --write src/",
+    "format": "npx @biomejs/biome format --write src/",
     "build:pi-tui": "npm run build -w @hyperlab/hx-tui",
     "build:pi-ai": "npm run build -w @hyperlab/hx-ai",
     "build:pi-agent-core": "npm run build -w @hyperlab/hx-agent-core",
