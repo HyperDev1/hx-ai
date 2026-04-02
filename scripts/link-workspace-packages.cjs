@@ -44,21 +44,22 @@ for (const [dir, name] of Object.entries(packageMap)) {
 
   if (!existsSync(source)) continue
 
-  // Skip if already correctly linked or is a real directory (bundled)
-  if (existsSync(target)) {
-    try {
-      const stat = lstatSync(target)
-      if (stat.isSymbolicLink()) {
-        const linkTarget = readlinkSync(target)
-        if (resolve(join(nodeModulesGsd, linkTarget)) === source || linkTarget === source) {
-          continue // Already correct
-        }
-        unlinkSync(target) // Wrong target, relink
-      } else {
-        continue // Real directory (e.g., copied or from bundleDependencies), don't touch
+  // Skip if already correctly linked or is a real directory (bundled).
+  // Use lstatSync to detect broken symlinks (existsSync follows the link
+  // and returns false when the target is missing, leaving the dangling
+  // symlink in place and causing symlinkSync to fail with EEXIST).
+  let targetStat = null
+  try { targetStat = lstatSync(target) } catch { /* does not exist at all */ }
+
+  if (targetStat) {
+    if (targetStat.isSymbolicLink()) {
+      const linkTarget = readlinkSync(target)
+      if (resolve(join(nodeModulesGsd, linkTarget)) === source || linkTarget === source) {
+        continue // Already correct
       }
-    } catch {
-      continue
+      unlinkSync(target) // Wrong target (or broken), relink
+    } else {
+      continue // Real directory (e.g., copied or from bundleDependencies), don't touch
     }
   }
 
