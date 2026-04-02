@@ -23,7 +23,7 @@ import {
 import { isAutoActive } from "./auto.js";
 import { projectRoot } from "./commands/context.js";
 import { loadPrompt } from "./prompt-loader.js";
-import { loadEffectiveGSDPreferences } from "./preferences.js";
+import { loadEffectiveHXPreferences } from "./preferences.js";
 
 export function dispatchDoctorHeal(pi: ExtensionAPI, scope: string | undefined, reportText: string, structuredIssues: string): void {
   const workflowPath = process.env.HX_WORKFLOW_PATH ?? join(process.env.HOME ?? "~", ".hx", "agent", "HX-WORKFLOW.md");
@@ -289,7 +289,7 @@ export async function handleKnowledge(args: string, ctx: ExtensionCommandContext
     const scope = state.activeMilestone?.id
       ? `${state.activeMilestone.id}${state.activeSlice ? `/${state.activeSlice.id}` : ""}`
       : "global";
-    const prefs = loadEffectiveGSDPreferences();
+    const prefs = loadEffectiveHXPreferences();
     const language = prefs?.preferences.language ?? "en";
 
     const prompt = loadPrompt("knowledge-refine", {
@@ -340,7 +340,7 @@ export async function handleKnowledge(args: string, ctx: ExtensionCommandContext
   // - Brief discussion to improve clarity
   // - Confirmation in user's language before saving
   if (!rawMode && pi) {
-    const prefs = loadEffectiveGSDPreferences();
+    const prefs = loadEffectiveHXPreferences();
     const language = prefs?.preferences.language ?? "en";
 
     const prompt = loadPrompt("knowledge-refine", {

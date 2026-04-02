@@ -1,5 +1,5 @@
 /**
- * GSD Preferences -- loading, merging, and rendering.
+ * HX Preferences -- loading, merging, and rendering.
  *
  * This module is the primary entry point for preference operations.
  * Type definitions live in ./preferences-types.js, validation in
@@ -91,7 +91,7 @@ function globalPreferencesPath(): string {
 }
 
 function legacyGlobalPreferencesPath(): string {
-  return join(homedir(), ".pi", "agent", "gsd-preferences.md");
+  return join(homedir(), ".pi", "agent", "hx-preferences.md");
 }
 
 function projectPreferencesPath(): string {
@@ -106,34 +106,34 @@ function projectPreferencesPathLegacy(): string {
   return join(hxRoot(process.cwd()), "preferences.md");
 }
 
-export function getGlobalGSDPreferencesPath(): string {
+export function getGlobalHXPreferencesPath(): string {
   return globalPreferencesPath();
 }
 
-export function getLegacyGlobalGSDPreferencesPath(): string {
+export function getLegacyGlobalHXPreferencesPath(): string {
   return legacyGlobalPreferencesPath();
 }
 
-export function getProjectGSDPreferencesPath(): string {
+export function getProjectHXPreferencesPath(): string {
   return projectPreferencesPath();
 }
 
 // ─── Loading ────────────────────────────────────────────────────────────────
 
-export function loadGlobalGSDPreferences(): LoadedGSDPreferences | null {
+export function loadGlobalHXPreferences(): LoadedGSDPreferences | null {
   return loadPreferencesFile(globalPreferencesPath(), "global")
     ?? loadPreferencesFile(globalPreferencesPathLegacy(), "global")
     ?? loadPreferencesFile(legacyGlobalPreferencesPath(), "global");
 }
 
-export function loadProjectGSDPreferences(): LoadedGSDPreferences | null {
+export function loadProjectHXPreferences(): LoadedGSDPreferences | null {
   return loadPreferencesFile(projectPreferencesPath(), "project")
     ?? loadPreferencesFile(projectPreferencesPathLegacy(), "project");
 }
 
-export function loadEffectiveGSDPreferences(): LoadedGSDPreferences | null {
-  const globalPreferences = loadGlobalGSDPreferences();
-  const projectPreferences = loadProjectGSDPreferences();
+export function loadEffectiveHXPreferences(): LoadedGSDPreferences | null {
+  const globalPreferences = loadGlobalHXPreferences();
+  const projectPreferences = loadProjectHXPreferences();
 
   if (!globalPreferences && !projectPreferences) return null;
 
@@ -216,7 +216,7 @@ export function parsePreferencesMarkdown(content: string): GSDPreferences | null
   }
 
   // Fallback: heading+list format (e.g. "## Git\n- isolation: none") (#2036)
-  // GSD agents may write preferences files without frontmatter delimiters.
+  // HX agents may write preferences files without frontmatter delimiters.
   if (/^##\s+\w/m.test(content)) {
     return parseHeadingListFormat(content);
   }
@@ -426,7 +426,7 @@ function mergePreDispatchHooks(
 
 export function renderPreferencesForSystemPrompt(preferences: GSDPreferences, resolutions?: Map<string, SkillResolution>): string {
   const validated = validatePreferences(preferences);
-  const lines: string[] = ["## GSD Skill Preferences"];
+  const lines: string[] = ["## HX Skill Preferences"];
 
   if (validated.errors.length > 0) {
     lines.push("- Validation: some preference values were ignored because they were invalid.");
@@ -438,7 +438,7 @@ export function renderPreferencesForSystemPrompt(preferences: GSDPreferences, re
   preferences = validated.preferences;
 
   lines.push(
-    "- Treat these as explicit skill-selection policy for GSD work.",
+    "- Treat these as explicit skill-selection policy for HX work.",
     "- If a listed skill exists and is relevant, load and follow it instead of treating it as a vague suggestion.",
     "- Current user instructions still override these defaults.",
   );
@@ -513,8 +513,8 @@ export function renderPreferencesForSystemPrompt(preferences: GSDPreferences, re
       "## Language",
       `- Respond to the user in **${langLabel}**.`,
       "- All conversational text — narration, explanations, questions, summaries, error descriptions — must be in this language.",
-      "- All GSD artifacts (PLAN.md, SUMMARY.md, CONTEXT.md, SCOPE.md, ASSESS.md, ROADMAP.md, UAT.md, etc.) must be written in English. This includes their headings, body text, task descriptions, narratives, and any prose content inside them. Artifacts are project documentation — they stay language-neutral.",
-      "- Keep the following in English regardless of language setting: code, variable names, commit messages, branch names, CLI output, artifact file names, artifact structure (headings, frontmatter keys), technical terms that have no standard translation, and GSD commands.",
+      "- All HX artifacts (PLAN.md, SUMMARY.md, CONTEXT.md, SCOPE.md, ASSESS.md, ROADMAP.md, UAT.md, etc.) must be written in English. This includes their headings, body text, task descriptions, narratives, and any prose content inside them. Artifacts are project documentation — they stay language-neutral.",
+      "- Keep the following in English regardless of language setting: code, variable names, commit messages, branch names, CLI output, artifact file names, artifact structure (headings, frontmatter keys), technical terms that have no standard translation, and HX commands.",
     );
   }
 
@@ -528,7 +528,7 @@ export function renderPreferencesForSystemPrompt(preferences: GSDPreferences, re
  * Returns an empty array when no hooks are configured.
  */
 export function resolvePostUnitHooks(): PostUnitHookConfig[] {
-  const prefs = loadEffectiveGSDPreferences();
+  const prefs = loadEffectiveHXPreferences();
   return (prefs?.preferences.post_unit_hooks ?? [])
     .filter(h => h.enabled !== false);
 }
@@ -538,7 +538,7 @@ export function resolvePostUnitHooks(): PostUnitHookConfig[] {
  * Returns an empty array when no hooks are configured.
  */
 export function resolvePreDispatchHooks(): PreDispatchHookConfig[] {
-  const prefs = loadEffectiveGSDPreferences();
+  const prefs = loadEffectiveHXPreferences();
   return (prefs?.preferences.pre_dispatch_hooks ?? [])
     .filter(h => h.enabled !== false);
 }
@@ -549,12 +549,12 @@ export function resolvePreDispatchHooks(): PreDispatchHookConfig[] {
  * Resolve the effective git isolation mode from preferences.
  * Returns "none" (default), "worktree", or "branch".
  *
- * Default is "none" so GSD works out of the box without PREFERENCES.md.
+ * Default is "none" so HX works out of the box without PREFERENCES.md.
  * Worktree isolation requires explicit opt-in because it depends on git
  * branch infrastructure that must be set up before use.
  */
 export function getIsolationMode(): "none" | "worktree" | "branch" {
-  const prefs = loadEffectiveGSDPreferences()?.preferences?.git;
+  const prefs = loadEffectiveHXPreferences()?.preferences?.git;
   if (prefs?.isolation === "worktree") return "worktree";
   if (prefs?.isolation === "branch") return "branch";
   return "none"; // default — no isolation, work on current branch

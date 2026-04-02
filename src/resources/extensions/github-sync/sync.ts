@@ -18,7 +18,7 @@ import {
   resolveTaskFile,
 } from "../hx/paths.js";
 import { debugLog } from "../hx/debug-logger.js";
-import { loadEffectiveGSDPreferences } from "../hx/preferences.js";
+import { loadEffectiveHXPreferences } from "../hx/preferences.js";
 
 import type { GitHubSyncConfig, SyncMapping } from "./types.js";
 import {
@@ -505,7 +505,7 @@ let _cachedConfig: GitHubSyncConfig | null | undefined;
 function loadGitHubSyncConfig(_basePath: string): GitHubSyncConfig | null {
   if (_cachedConfig !== undefined) return _cachedConfig;
   try {
-    const prefs = loadEffectiveGSDPreferences();
+    const prefs = loadEffectiveHXPreferences();
     const github = (prefs?.preferences as Record<string, unknown>)?.github;
     if (!github || typeof github !== "object") {
       _cachedConfig = null;

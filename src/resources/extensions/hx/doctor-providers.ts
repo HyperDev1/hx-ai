@@ -15,7 +15,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { AuthStorage } from "@hyperlab/hx-coding-agent";
 import { getEnvApiKey } from "@hyperlab/hx-ai";
-import { loadEffectiveGSDPreferences } from "./preferences.js";
+import { loadEffectiveHXPreferences } from "./preferences.js";
 import { getAuthPath, PROVIDER_REGISTRY, type ProviderCategory } from "./key-manager.js";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -80,7 +80,7 @@ function collectConfiguredModelProviders(): Set<string> {
   const providers = new Set<string>();
 
   try {
-    const loaded = loadEffectiveGSDPreferences();
+    const loaded = loadEffectiveHXPreferences();
     const models = loaded?.preferences?.models;
     if (!models) {
       // Default: Anthropic
@@ -256,7 +256,7 @@ function checkLlmProviders(): ProviderCheckResult[] {
 
 function checkRemoteQuestionsProvider(): ProviderCheckResult | null {
   try {
-    const loaded = loadEffectiveGSDPreferences();
+    const loaded = loadEffectiveHXPreferences();
     const rq = loaded?.preferences?.remote_questions;
     if (!rq) return null;
 

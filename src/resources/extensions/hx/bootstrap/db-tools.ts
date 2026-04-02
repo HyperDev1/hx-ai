@@ -3,7 +3,7 @@ import type { ExtensionAPI } from "@hyperlab/hx-coding-agent";
 import { Text } from "@hyperlab/hx-tui";
 
 import { findMilestoneIds, nextMilestoneId, claimReservedId, getReservedMilestoneIds } from "../guided-flow.js";
-import { loadEffectiveGSDPreferences } from "../preferences.js";
+import { loadEffectiveHXPreferences } from "../preferences.js";
 import { ensureDbOpen } from "./dynamic-tools.js";
 import { StringEnum } from "@hyperlab/hx-ai";
 import { logError } from "../workflow-logger.js";
@@ -307,7 +307,7 @@ export function registerDbTools(pi: ExtensionAPI): void {
 
       const basePath = process.cwd();
       const existingIds = findMilestoneIds(basePath);
-      const uniqueEnabled = !!loadEffectiveGSDPreferences()?.preferences?.unique_milestone_ids;
+      const uniqueEnabled = !!loadEffectiveHXPreferences()?.preferences?.unique_milestone_ids;
       const allIds = [...new Set([...existingIds, ...getReservedMilestoneIds()])];
       const newId = nextMilestoneId(allIds, uniqueEnabled);
       await ensureMilestoneDbRow(newId);

@@ -19,7 +19,7 @@ import type { DispatchAction, DispatchContext } from "./auto-dispatch.js";
 
 import { deriveState } from "./state.js";
 import { resolveDispatch } from "./auto-dispatch.js";
-import { loadEffectiveGSDPreferences } from "./preferences.js";
+import { loadEffectiveHXPreferences } from "./preferences.js";
 
 // ─── Bridge: DispatchAction → EngineDispatchAction ────────────────────────
 
@@ -75,7 +75,7 @@ export class DevWorkflowEngine implements WorkflowEngine {
     const gsd = state.raw as GSDState;
     const mid = gsd.activeMilestone?.id ?? "";
     const midTitle = gsd.activeMilestone?.title ?? "";
-    const loaded = loadEffectiveGSDPreferences();
+    const loaded = loadEffectiveHXPreferences();
     const prefs = loaded?.preferences ?? undefined;
 
     const dispatchCtx: DispatchContext = {

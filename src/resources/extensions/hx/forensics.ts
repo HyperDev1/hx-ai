@@ -30,7 +30,7 @@ import { loadPrompt } from "./prompt-loader.js";
 import { hxRoot } from "./paths.js";
 import { formatDuration } from "../shared/format-utils.js";
 import { getAutoWorktreePath } from "./auto-worktree.js";
-import { loadEffectiveGSDPreferences, loadGlobalGSDPreferences, getGlobalGSDPreferencesPath } from "./preferences.js";
+import { loadEffectiveHXPreferences, loadGlobalHXPreferences, getGlobalHXPreferencesPath } from "./preferences.js";
 import { showNextAction } from "../shared/tui.js";
 import { ensurePreferencesFile, serializePreferencesToFrontmatter } from "./commands-prefs-wizard.js";
 
@@ -146,9 +146,9 @@ Only proceed to issue creation if no matches were found OR the user explicitly c
 `;
 
 async function writeForensicsDedupPref(ctx: ExtensionCommandContext, enabled: boolean): Promise<void> {
-  const prefsPath = getGlobalGSDPreferencesPath();
+  const prefsPath = getGlobalHXPreferencesPath();
   await ensurePreferencesFile(prefsPath, ctx, "global");
-  const existing = loadGlobalGSDPreferences();
+  const existing = loadGlobalHXPreferences();
   const prefs: Record<string, unknown> = existing?.preferences ? { ...existing.preferences } : {};
   prefs.version = prefs.version || 1;
   prefs.forensics_dedup = enabled;
@@ -200,7 +200,7 @@ export async function handleForensics(
   }
 
   // ─── Duplicate detection opt-in ─────────────────────────────────────────────
-  const effectivePrefs = loadEffectiveGSDPreferences()?.preferences;
+  const effectivePrefs = loadEffectiveHXPreferences()?.preferences;
   let dedupEnabled = effectivePrefs?.forensics_dedup === true;
 
   if (effectivePrefs?.forensics_dedup === undefined) {

@@ -12,7 +12,7 @@ import type { ExtensionContext } from "@hyperlab/hx-coding-agent";
 import type { GSDState } from "./types.js";
 import { runProviderChecks, summariseProviderIssues } from "./doctor-providers.js";
 import { runEnvironmentChecks } from "./doctor-environment.js";
-import { loadEffectiveGSDPreferences } from "./preferences.js";
+import { loadEffectiveHXPreferences } from "./preferences.js";
 import { loadLedgerFromDisk, getProjectTotals } from "./metrics.js";
 import { describeNextUnit, estimateTimeRemaining, updateSliceProgressCache } from "./auto-dashboard.js";
 import { projectRoot } from "./commands/context.js";
@@ -35,7 +35,7 @@ function loadHealthWidgetData(basePath: string): HealthWidgetData {
   const projectState = detectHealthWidgetProjectState(basePath);
 
   try {
-    const prefs = loadEffectiveGSDPreferences();
+    const prefs = loadEffectiveHXPreferences();
     budgetCeiling = prefs?.preferences?.budget_ceiling;
 
     const ledger = loadLedgerFromDisk(basePath);

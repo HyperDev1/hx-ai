@@ -300,7 +300,7 @@ describe('doctor-git', async () => {
     }
 
     // ─── Test 7: none-mode skips orphaned worktree check ───────────────
-    // NOTE: loadEffectiveGSDPreferences() resolves PROJECT_PREFERENCES_PATH
+    // NOTE: loadEffectiveHXPreferences() resolves PROJECT_PREFERENCES_PATH
     // at module load time from process.cwd(). We write the prefs file to
     // the test runner's cwd .hx/PREFERENCES.md and clean up afterwards.
     if (process.platform !== "win32") {

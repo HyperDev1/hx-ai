@@ -1,5 +1,5 @@
 /**
- * Headless Orchestrator — `gsd headless`
+ * Headless Orchestrator — `hx headless`
  *
  * Runs any /hx subcommand without a TUI by spawning a child process in
  * RPC mode, auto-responding to extension UI requests, and streaming
@@ -54,7 +54,7 @@ import type { ExtensionUIRequest, ProgressContext } from './headless-ui.js'
 
 import {
   loadContext,
-  bootstrapGsdProject,
+  bootstrapHxProject,
 } from './headless-context.js'
 
 // ---------------------------------------------------------------------------
@@ -301,23 +301,23 @@ async function runHeadlessOnce(options: HeadlessOptions, restartCount: number): 
     }
 
     // Bootstrap .hx/ if needed
-    const gsdDir = join(process.cwd(), '.hx')
-    if (!existsSync(gsdDir)) {
+    const hxDir = join(process.cwd(), '.hx')
+    if (!existsSync(hxDir)) {
       if (!options.json) {
         process.stderr.write('[headless] Bootstrapping .hx/ project structure...\n')
       }
-      bootstrapGsdProject(process.cwd())
+      bootstrapHxProject(process.cwd())
     }
 
     // Write context to temp file for the RPC child to read
-    const runtimeDir = join(gsdDir, 'runtime')
+    const runtimeDir = join(hxDir, 'runtime')
     mkdirSync(runtimeDir, { recursive: true })
     writeFileSync(join(runtimeDir, 'headless-context.md'), contextContent, 'utf-8')
   }
 
   // Validate .hx/ directory (skip for new-milestone since we just bootstrapped it)
-  const gsdDir = join(process.cwd(), '.hx')
-  if (!isNewMilestone && !existsSync(gsdDir)) {
+  const hxDir = join(process.cwd(), '.hx')
+  if (!isNewMilestone && !existsSync(hxDir)) {
     process.stderr.write('[headless] Error: No .hx/ directory found in current directory.\n')
     process.stderr.write("[headless] Run 'hx' interactively first to initialize a project.\n")
     process.exit(1)
@@ -333,7 +333,7 @@ async function runHeadlessOnce(options: HeadlessOptions, restartCount: number): 
   // Resolve CLI path for the child process
   const cliPath = process.env.HX_BIN_PATH || process.argv[1]
   if (!cliPath) {
-    process.stderr.write('[headless] Error: Cannot determine CLI path. Set HX_BIN_PATH or run via gsd.\n')
+    process.stderr.write('[headless] Error: Cannot determine CLI path. Set HX_BIN_PATH or run via hx.\n')
     process.exit(1)
   }
 
@@ -348,7 +348,7 @@ async function runHeadlessOnce(options: HeadlessOptions, restartCount: number): 
   if (injector) {
     clientOptions.env = injector.getSecretEnvVars()
   }
-  // Signal headless mode to the GSD extension (skips UAT human pause, etc.)
+  // Signal headless mode to the HX extension (skips UAT human pause, etc.)
   clientOptions.env = { ...(clientOptions.env as Record<string, string> || {}), HX_HEADLESS: '1' }
   // Propagate --bare to the child process
   if (options.bare) {
@@ -741,7 +741,7 @@ async function runHeadlessOnce(options: HeadlessOptions, restartCount: number): 
   // v2 protocol negotiation — attempt init for structured completion events
   let v2Enabled = false
   try {
-    await client.init({ clientId: 'gsd-headless' })
+    await client.init({ clientId: 'hx-headless' })
     v2Enabled = true
   } catch {
     process.stderr.write('[headless] Warning: v2 init failed, falling back to v1 string-matching\n')

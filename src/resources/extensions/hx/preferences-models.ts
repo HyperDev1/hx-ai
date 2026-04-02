@@ -18,7 +18,7 @@ import type {
   ResolvedModelConfig,
   AutoSupervisorConfig,
 } from "./preferences-types.js";
-import { loadEffectiveGSDPreferences, getGlobalGSDPreferencesPath } from "./preferences.js";
+import { loadEffectiveHXPreferences, getGlobalHXPreferencesPath } from "./preferences.js";
 
 // Re-export types so existing consumers of ./preferences-models.js keep working
 export type { GSDPhaseModelConfig, GSDModelConfig, GSDModelConfigV2, ResolvedModelConfig } from "./preferences-types.js";
@@ -41,7 +41,7 @@ export function resolveModelForUnit(unitType: string): string | undefined {
  * - Extended: `planning: { model: claude-opus-4-6, fallbacks: [glm-5, minimax-m2.5] }`
  */
 export function resolveModelWithFallbacksForUnit(unitType: string): ResolvedModelConfig | undefined {
-  const prefs = loadEffectiveGSDPreferences();
+  const prefs = loadEffectiveHXPreferences();
   if (!prefs?.preferences.models) return undefined;
   const m = prefs.preferences.models as GSDModelConfigV2;
 
@@ -155,7 +155,7 @@ export function validateModelId(modelId: string): boolean {
  * YAML block, and writes back. Creates the file if it doesn't exist.
  */
 export function updatePreferencesModels(models: GSDModelConfigV2): void {
-  const prefsPath = getGlobalGSDPreferencesPath();
+  const prefsPath = getGlobalHXPreferencesPath();
 
   let content = "";
   if (existsSync(prefsPath)) {
@@ -200,7 +200,7 @@ export function updatePreferencesModels(models: GSDModelConfigV2): void {
  * Returns the merged config with defaults applied.
  */
 export function resolveDynamicRoutingConfig(): DynamicRoutingConfig {
-  const prefs = loadEffectiveGSDPreferences();
+  const prefs = loadEffectiveHXPreferences();
   const configured = prefs?.preferences.dynamic_routing;
   if (!configured) return defaultRoutingConfig();
   return {
@@ -210,7 +210,7 @@ export function resolveDynamicRoutingConfig(): DynamicRoutingConfig {
 }
 
 export function resolveAutoSupervisorConfig(): AutoSupervisorConfig {
-  const prefs = loadEffectiveGSDPreferences();
+  const prefs = loadEffectiveHXPreferences();
   const configured = prefs?.preferences.auto_supervisor ?? {};
 
   return {
@@ -276,7 +276,7 @@ export function resolveProfileDefaults(profile: TokenProfile): Partial<GSDPrefer
  * Returns "balanced" when no profile is set (D046).
  */
 export function resolveEffectiveProfile(): TokenProfile {
-  const prefs = loadEffectiveGSDPreferences();
+  const prefs = loadEffectiveHXPreferences();
   const profile = prefs?.preferences.token_profile;
   if (profile && VALID_TOKEN_PROFILES.has(profile)) return profile;
   return "balanced";
@@ -301,7 +301,7 @@ export function resolveInlineLevel(): InlineLevel {
  * Explicit preference always wins.
  */
 export function resolveContextSelection(): import("./types.js").ContextSelectionMode {
-  const prefs = loadEffectiveGSDPreferences();
+  const prefs = loadEffectiveHXPreferences();
   if (prefs?.preferences.context_selection) return prefs.preferences.context_selection;
   const profile = resolveEffectiveProfile();
   return profile === "budget" ? "smart" : "full";
@@ -312,6 +312,6 @@ export function resolveContextSelection(): import("./types.js").ContextSelection
  * Returns undefined if not configured (caller falls back to existing behavior).
  */
 export function resolveSearchProviderFromPreferences(): GSDPreferences["search_provider"] | undefined {
-  const prefs = loadEffectiveGSDPreferences();
+  const prefs = loadEffectiveHXPreferences();
   return prefs?.preferences.search_provider;
 }

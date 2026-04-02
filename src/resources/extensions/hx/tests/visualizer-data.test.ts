@@ -189,8 +189,8 @@ assert.ok(
 );
 
 assert.ok(
-  dataSrc.includes("loadEffectiveGSDPreferences"),
-  "uses loadEffectiveGSDPreferences",
+  dataSrc.includes("loadEffectiveHXPreferences"),
+  "uses loadEffectiveHXPreferences",
 );
 
 assert.ok(

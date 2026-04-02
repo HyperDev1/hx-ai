@@ -45,8 +45,8 @@ export function registerHooks(pi: ExtensionAPI): void {
 
     // Apply show_token_cost preference (#1515)
     try {
-      const { loadEffectiveGSDPreferences } = await import("../preferences.js");
-      const prefs = loadEffectiveGSDPreferences();
+      const { loadEffectiveHXPreferences } = await import("../preferences.js");
+      const prefs = loadEffectiveHXPreferences();
       process.env.HX_SHOW_TOKEN_COST = prefs?.preferences.show_token_cost ? "1" : "";
     } catch { /* non-fatal */ }
     if (isFirstSession) {

@@ -13,7 +13,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { hxRoot } from "./paths.js";
 import { GIT_NO_PROMPT_ENV } from "./git-constants.js";
-import { loadEffectiveGSDPreferences } from "./preferences.js";
+import { loadEffectiveHXPreferences } from "./preferences.js";
 
 
 import {
@@ -699,7 +699,7 @@ export function createDraftPR(
 
 /** Create a GitServiceImpl with the current effective git preferences. */
 export function createGitService(basePath: string): GitServiceImpl {
-  const gitPrefs = loadEffectiveGSDPreferences()?.preferences?.git ?? {};
+  const gitPrefs = loadEffectiveHXPreferences()?.preferences?.git ?? {};
   return new GitServiceImpl(basePath, gitPrefs);
 }
 

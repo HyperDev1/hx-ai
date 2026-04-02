@@ -6,7 +6,7 @@ import type { ExtensionContext } from "@hyperlab/hx-coding-agent";
 
 import { debugTime } from "../debug-logger.js";
 import { loadPrompt } from "../prompt-loader.js";
-import { resolveAllSkillReferences, renderPreferencesForSystemPrompt, loadEffectiveGSDPreferences } from "../preferences.js";
+import { resolveAllSkillReferences, renderPreferencesForSystemPrompt, loadEffectiveHXPreferences } from "../preferences.js";
 import { resolveHxRootFile, resolveSliceFile, resolveSlicePath, resolveTaskFile, resolveTaskFiles, resolveTasksDir, relSliceFile, relSlicePath, relTaskFile } from "../paths.js";
 import { hasSkillSnapshot, detectNewSkills, formatSkillsXml } from "../skill-discovery.js";
 import { getActiveAutoWorktreeContext } from "../auto-worktree.js";
@@ -42,7 +42,7 @@ export async function buildBeforeAgentStartResult(
 
   const stopContextTimer = debugTime("context-inject");
   const systemContent = loadPrompt("system");
-  const loadedPreferences = loadEffectiveGSDPreferences();
+  const loadedPreferences = loadEffectiveHXPreferences();
   if (shouldPromptToEnableCmux(loadedPreferences?.preferences)) {
     markCmuxPromptShown();
     ctx.ui.notify(

@@ -17,7 +17,7 @@ import { join, resolve, sep } from "node:path";
 import { homedir } from "node:os";
 
 import { GitServiceImpl, writeIntegrationBranch, type TaskCommitContext } from "./git-service.js";
-import { loadEffectiveGSDPreferences } from "./preferences.js";
+import { loadEffectiveHXPreferences } from "./preferences.js";
 
 export { MergeConflictError } from "./git-service.js";
 export type { TaskCommitContext } from "./git-service.js";
@@ -34,7 +34,7 @@ let cachedBasePath: string | null = null;
  */
 function getService(basePath: string): GitServiceImpl {
   if (cachedService === null || cachedBasePath !== basePath) {
-    const loaded = loadEffectiveGSDPreferences();
+    const loaded = loadEffectiveHXPreferences();
     const gitPrefs = loaded?.preferences?.git ?? {};
     cachedService = new GitServiceImpl(basePath, gitPrefs);
     cachedBasePath = basePath;

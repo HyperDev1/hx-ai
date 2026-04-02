@@ -359,7 +359,7 @@ function makeMockDeps(
         blockers: [],
       } as any;
     },
-    loadEffectiveGSDPreferences: () => ({ preferences: {} }),
+    loadEffectiveHXPreferences: () => ({ preferences: {} }),
     preDispatchHealthGate: async () => ({ proceed: true, fixesApplied: [] }),
     syncProjectRootToWorktree: () => {},
     checkResourcesStale: () => null,

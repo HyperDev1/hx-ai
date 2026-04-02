@@ -30,7 +30,7 @@ import { stopWebMode } from './web-mode.js'
 import { getProjectSessionsDir } from './project-sessions.js'
 import { markStartup, printStartupTimings } from './startup-timings.js'
 import { bootstrapRtk, HX_RTK_DISABLED_ENV } from './rtk.js'
-import { loadEffectiveGSDPreferences } from './resources/extensions/hx/preferences.js'
+import { loadEffectiveHXPreferences } from './resources/extensions/hx/preferences.js'
 
 // ---------------------------------------------------------------------------
 // V8 compile cache — Node 22+ can cache compiled bytecode across runs,
@@ -59,7 +59,7 @@ interface CliFlags {
   web?: boolean
   webPath?: string
 
-  /** Set by `gsd sessions` when the user picks a specific session to resume */
+  /** Set by `hx sessions` when the user picks a specific session to resume */
   _selectedSessionPath?: string
 }
 
@@ -72,7 +72,7 @@ function exitIfManagedResourcesAreNewer(currentAgentDir: string): void {
 
   process.stderr.write(
     `[hx] ${chalk.yellow('Version mismatch detected')}\n` +
-    `[hx] Synced resources are from ${chalk.bold(`v${managedVersion}`)}, but this \`gsd\` binary is ${chalk.dim(`v${currentVersion}`)}.\n` +
+    `[hx] Synced resources are from ${chalk.bold(`v${managedVersion}`)}, but this \`hx\` binary is ${chalk.dim(`v${currentVersion}`)}.\n` +
     `[hx] Run ${chalk.bold('npm install -g @hyperlab/hx@latest')} or ${chalk.bold('hx update')}, then try again.\n`,
   )
   process.exit(1)
@@ -140,7 +140,7 @@ async function ensureRtkBootstrap(): Promise<void> {
   // Honor HX_RTK_DISABLED if already explicitly set in the environment
   // (env var takes precedence over preferences for manual override).
   if (!process.env[HX_RTK_DISABLED_ENV]) {
-    const prefs = loadEffectiveGSDPreferences();
+    const prefs = loadEffectiveHXPreferences();
     const rtkEnabled = prefs?.preferences.experimental?.rtk === true;
     if (!rtkEnabled) {
       process.env[HX_RTK_DISABLED_ENV] = "1";
@@ -177,7 +177,7 @@ if (!process.stdin.isTTY && !isPrintMode && !hasSubcommand && !cliFlags.listMode
   process.exit(1)
 }
 
-// `gsd <subcommand> --help` — show subcommand-specific help
+// `hx <subcommand> --help` — show subcommand-specific help
 const subcommand = cliFlags.messages[0]
 if (subcommand && process.argv.includes('--help')) {
   if (printSubcommandHelp(subcommand, process.env.HX_VERSION || '0.0.0')) {
@@ -198,7 +198,7 @@ if (packageCommand.handled) {
   process.exit(packageCommand.exitCode)
 }
 
-// `gsd config` — replay the setup wizard and exit
+// `hx config` — replay the setup wizard and exit
 if (cliFlags.messages[0] === 'config') {
   const authStorage = AuthStorage.create(authFilePath)
   loadStoredEnvKeys(authStorage)
@@ -206,7 +206,7 @@ if (cliFlags.messages[0] === 'config') {
   process.exit(0)
 }
 
-// `gsd web stop [path|all]` — stop web server before anything else
+// `hx web stop [path|all]` — stop web server before anything else
 if (cliFlags.messages[0] === 'web' && cliFlags.messages[1] === 'stop') {
   const webFlags = parseWebCliArgs(process.argv)
   const webBranch = await runWebCliBranch(webFlags, {
@@ -220,7 +220,7 @@ if (cliFlags.messages[0] === 'web' && cliFlags.messages[1] === 'stop') {
   }
 }
 
-// `hx --web [path]` or `gsd web [start] [path]` — launch browser-only web mode
+// `hx --web [path]` or `hx web [start] [path]` — launch browser-only web mode
 if (cliFlags.web || (cliFlags.messages[0] === 'web' && cliFlags.messages[1] !== 'stop')) {
   await ensureRtkBootstrap()
   const webFlags = parseWebCliArgs(process.argv)
@@ -235,7 +235,7 @@ if (cliFlags.web || (cliFlags.messages[0] === 'web' && cliFlags.messages[1] !== 
 }
 
 
-// `gsd sessions` — list past sessions and pick one to resume
+// `hx sessions` — list past sessions and pick one to resume
 if (cliFlags.messages[0] === 'sessions') {
   const cwd = process.cwd()
   const safePath = `--${cwd.replace(/^[/\\]/, '').replace(/[/\\:]/g, '-')}--`
@@ -292,7 +292,7 @@ if (cliFlags.messages[0] === 'sessions') {
   cliFlags._selectedSessionPath = selected.path
 }
 
-// `gsd headless` — run auto-mode without TUI
+// `hx headless` — run auto-mode without TUI
 if (cliFlags.messages[0] === 'headless') {
   await ensureRtkBootstrap()
   const { runHeadless, parseHeadlessArgs } = await import('./headless.js')
@@ -427,7 +427,7 @@ if (settingsManager.getDefaultThinkingLevel() !== 'off' && !configuredExists) {
   settingsManager.setDefaultThinkingLevel('off')
 }
 
-// GSD always uses quiet startup — the gsd extension renders its own branded header
+// HX always uses quiet startup — the hx extension renders its own branded header
 if (!settingsManager.getQuietStartup()) {
   settingsManager.setQuietStartup(true)
 }
@@ -525,7 +525,7 @@ if (isPrintMode) {
 }
 
 // ---------------------------------------------------------------------------
-// Worktree subcommand — `gsd worktree <list|merge|clean|remove>`
+// Worktree subcommand — `hx worktree <list|merge|clean|remove>`
 // ---------------------------------------------------------------------------
 if (cliFlags.messages[0] === 'worktree' || cliFlags.messages[0] === 'wt') {
   const { handleList, handleMerge, handleClean, handleRemove } = await import('./worktree-cli.js')
@@ -577,7 +577,7 @@ const cwd = process.cwd()
 const projectSessionsDir = getProjectSessionsDir(cwd)
 
 // Migrate legacy flat sessions: before per-directory scoping, all .jsonl session
-// files lived directly in ~/.gsd/sessions/. Move them into the correct per-cwd
+// files lived directly in ~/.hx/sessions/. Move them into the correct per-cwd
 // subdirectory so /resume can find them.
 migrateLegacyFlatSessions(sessionsDir, projectSessionsDir)
 

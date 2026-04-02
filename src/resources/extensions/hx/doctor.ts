@@ -7,7 +7,7 @@ import { isDbAvailable, getMilestoneSlices, getSliceTasks } from "./hx-db.js";
 import { resolveMilestoneFile, resolveMilestonePath, resolveSliceFile, resolveSlicePath, resolveTaskFile, resolveTasksDir, milestonesDir, hxRoot, relMilestoneFile, relSliceFile, relTaskFile, relSlicePath, relHxRootFile, resolveHxRootFile, relMilestonePath } from "./paths.js";
 import { deriveState, isMilestoneComplete } from "./state.js";
 import { invalidateAllCaches } from "./cache.js";
-import { loadEffectiveGSDPreferences, type GSDPreferences } from "./preferences.js";
+import { loadEffectiveHXPreferences, type GSDPreferences } from "./preferences.js";
 
 import type { DoctorIssue, DoctorIssueCode, DoctorReport } from "./doctor-types.js";
 import { GLOBAL_STATE_CODES } from "./doctor-types.js";
@@ -341,7 +341,7 @@ export async function runGSDDoctor(basePath: string, options?: { fix?: boolean; 
     return true;
   };
 
-  const prefs = loadEffectiveGSDPreferences();
+  const prefs = loadEffectiveHXPreferences();
   if (prefs) {
     const prefIssues = validatePreferenceShape(prefs.preferences);
     for (const issue of prefIssues) {

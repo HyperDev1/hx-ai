@@ -15,7 +15,7 @@ import { join } from "node:path";
 import { loadPrompt } from "./prompt-loader.js";
 import { hxRoot } from "./paths.js";
 import { GitServiceImpl, runGit } from "./git-service.js";
-import { loadEffectiveGSDPreferences } from "./preferences.js";
+import { loadEffectiveHXPreferences } from "./preferences.js";
 import { nativeHasStagedChanges } from "./native-git-bridge.js";
 
 interface QuickReturnState {
@@ -129,7 +129,7 @@ export function cleanupQuickBranch(basePath = process.cwd()): boolean {
   if (!state) return false;
 
   const repoPath = state.basePath;
-  const gitPrefs = loadEffectiveGSDPreferences()?.preferences?.git ?? {};
+  const gitPrefs = loadEffectiveHXPreferences()?.preferences?.git ?? {};
   const git = new GitServiceImpl(repoPath, gitPrefs);
 
   if (git.getCurrentBranch() === state.quickBranch) {
@@ -193,7 +193,7 @@ export async function handleQuick(
   const date = new Date().toISOString().split("T")[0];
 
   // Create git branch for the quick task
-  const gitPrefs = loadEffectiveGSDPreferences()?.preferences?.git ?? {};
+  const gitPrefs = loadEffectiveHXPreferences()?.preferences?.git ?? {};
   const git = new GitServiceImpl(basePath, gitPrefs);
   const branchName = `gsd/quick/${taskNum}-${slug}`;
   let originalBranch = git.getCurrentBranch();

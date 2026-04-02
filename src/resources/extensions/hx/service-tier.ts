@@ -13,9 +13,9 @@ import type { ExtensionCommandContext } from "@hyperlab/hx-coding-agent";
 import { existsSync, readFileSync } from "node:fs";
 import { saveFile } from "./files.js";
 import {
-  getGlobalGSDPreferencesPath,
-  loadEffectiveGSDPreferences,
-  loadGlobalGSDPreferences,
+  getGlobalHXPreferencesPath,
+  loadEffectiveHXPreferences,
+  loadGlobalHXPreferences,
 } from "./preferences.js";
 import { ensurePreferencesFile, serializePreferencesToFrontmatter } from "./commands-prefs-wizard.js";
 
@@ -108,7 +108,7 @@ export function resolveServiceTierIcon(tier: ServiceTierSetting, modelId: string
  * Read the effective service_tier setting from preferences.
  */
 export function getEffectiveServiceTier(): ServiceTierSetting {
-  const prefs = loadEffectiveGSDPreferences()?.preferences;
+  const prefs = loadEffectiveHXPreferences()?.preferences;
   const raw = prefs?.service_tier;
   if (raw === "priority" || raw === "flex") return raw;
   return undefined;
@@ -129,10 +129,10 @@ async function writeGlobalServiceTier(
   ctx: ExtensionCommandContext,
   tier: ServiceTierSetting,
 ): Promise<void> {
-  const path = getGlobalGSDPreferencesPath();
+  const path = getGlobalHXPreferencesPath();
   await ensurePreferencesFile(path, ctx, "global");
 
-  const existing = loadGlobalGSDPreferences();
+  const existing = loadGlobalHXPreferences();
   const prefs: Record<string, unknown> = existing?.preferences ? { ...existing.preferences } : {};
   prefs.version = prefs.version || 1;
 

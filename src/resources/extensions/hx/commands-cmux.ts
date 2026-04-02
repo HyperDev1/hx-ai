@@ -3,9 +3,9 @@ import { existsSync, readFileSync } from "node:fs";
 import { clearCmuxSidebar, CmuxClient, detectCmuxEnvironment, resolveCmuxConfig } from "../cmux/index.js";
 import { saveFile } from "./files.js";
 import {
-  getProjectGSDPreferencesPath,
-  loadEffectiveGSDPreferences,
-  loadProjectGSDPreferences,
+  getProjectHXPreferencesPath,
+  loadEffectiveHXPreferences,
+  loadProjectHXPreferences,
 } from "./preferences.js";
 import { ensurePreferencesFile, serializePreferencesToFrontmatter } from "./commands-prefs-wizard.js";
 
@@ -22,10 +22,10 @@ async function writeProjectCmuxPreferences(
   ctx: ExtensionCommandContext,
   updater: (prefs: Record<string, unknown>) => void,
 ): Promise<void> {
-  const path = getProjectGSDPreferencesPath();
+  const path = getProjectHXPreferencesPath();
   await ensurePreferencesFile(path, ctx, "project");
 
-  const existing = loadProjectGSDPreferences();
+  const existing = loadProjectHXPreferences();
   const prefs: Record<string, unknown> = existing?.preferences ? { ...existing.preferences } : { version: 1 };
   updater(prefs);
   prefs.version = prefs.version || 1;
@@ -43,7 +43,7 @@ async function writeProjectCmuxPreferences(
 }
 
 function formatCmuxStatus(): string {
-  const loaded = loadEffectiveGSDPreferences();
+  const loaded = loadEffectiveHXPreferences();
   const detected = detectCmuxEnvironment();
   const resolved = resolveCmuxConfig(loaded?.preferences);
   const capabilities = new CmuxClient(resolved).getCapabilities() as Record<string, unknown> | null;
@@ -103,7 +103,7 @@ export async function handleCmux(args: string, ctx: ExtensionCommandContext): Pr
   }
 
   if (trimmed === "off") {
-    const effective = loadEffectiveGSDPreferences()?.preferences;
+    const effective = loadEffectiveHXPreferences()?.preferences;
     await writeProjectCmuxPreferences(ctx, (prefs) => {
       prefs.cmux = { ...((prefs.cmux as Record<string, unknown> | undefined) ?? {}), enabled: false };
     });
@@ -126,7 +126,7 @@ export async function handleCmux(args: string, ctx: ExtensionCommandContext): Pr
     });
 
     if (!enabled && feature === "sidebar") {
-      clearCmuxSidebar(loadEffectiveGSDPreferences()?.preferences);
+      clearCmuxSidebar(loadEffectiveHXPreferences()?.preferences);
     }
 
     const note = feature === "browser" && enabled

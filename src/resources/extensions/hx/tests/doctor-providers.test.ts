@@ -193,7 +193,7 @@ test("summariseProviderIssues ignores unconfigured optional providers", () => {
 // ─── runProviderChecks — env var detection ────────────────────────────────────
 
 test("runProviderChecks detects Anthropic key from ANTHROPIC_API_KEY env var", () => {
-  // Isolate from real HOME so loadEffectiveGSDPreferences returns null (default → anthropic)
+  // Isolate from real HOME so loadEffectiveHXPreferences returns null (default → anthropic)
   // and auth.json lookups hit an empty directory.
   const tmpHome = realpathSync(mkdtempSync(join(tmpdir(), "gsd-providers-env-test-")));
   withEnv({ ANTHROPIC_API_KEY: "sk-ant-test-key", ANTHROPIC_OAUTH_TOKEN: undefined, HOME: tmpHome }, () => {

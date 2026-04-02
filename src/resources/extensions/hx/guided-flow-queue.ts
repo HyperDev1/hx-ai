@@ -19,7 +19,7 @@ import {
 } from "./paths.js";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { nativeAddPaths, nativeCommit } from "./native-git-bridge.js";
-import { loadEffectiveGSDPreferences } from "./preferences.js";
+import { loadEffectiveHXPreferences } from "./preferences.js";
 import { loadQueueOrder, sortByQueueOrder, saveQueueOrder } from "./queue-order.js";
 import { findMilestoneIds, nextMilestoneId } from "./milestone-ids.js";
 
@@ -173,7 +173,7 @@ export async function showQueueAdd(
   // Note: the LLM will use the gsd_milestone_generate_id tool to get IDs
   // at creation time, but we still mention the next ID in the preamble
   // for context about where the sequence is.
-  const uniqueEnabled = !!loadEffectiveGSDPreferences()?.preferences?.unique_milestone_ids;
+  const uniqueEnabled = !!loadEffectiveHXPreferences()?.preferences?.unique_milestone_ids;
   const nextId = nextMilestoneId(milestoneIds, uniqueEnabled);
 
   // ── Build preamble ──────────────────────────────────────────────────

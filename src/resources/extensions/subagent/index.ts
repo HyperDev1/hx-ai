@@ -34,7 +34,7 @@ import {
 	readIsolationMode,
 } from "./isolation.js";
 import { registerWorker, updateWorker } from "./worker-registry.js";
-import { loadEffectiveGSDPreferences } from "../hx/preferences.js";
+import { loadEffectiveHXPreferences } from "../hx/preferences.js";
 import { CmuxClient, shellEscape } from "../cmux/index.js";
 
 const MAX_PARALLEL_TASKS = 8;
@@ -657,7 +657,7 @@ export default function (pi: ExtensionAPI) {
 			const discovery = discoverAgents(ctx.cwd, agentScope);
 			const agents = discovery.agents;
 			const confirmProjectAgents = params.confirmProjectAgents ?? false;
-			const cmuxClient = CmuxClient.fromPreferences(loadEffectiveGSDPreferences()?.preferences);
+			const cmuxClient = CmuxClient.fromPreferences(loadEffectiveHXPreferences()?.preferences);
 			const cmuxSplitsEnabled = cmuxClient.getConfig().splits;
 
 			// Resolve isolation mode

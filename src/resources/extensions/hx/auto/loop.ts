@@ -79,7 +79,7 @@ export async function autoLoop(
 
     try {
       // ── Blanket try/catch: one bad iteration must not kill the session
-      const prefs = deps.loadEffectiveGSDPreferences()?.preferences;
+      const prefs = deps.loadEffectiveHXPreferences()?.preferences;
 
       // ── Check sidecar queue before deriveState ──
       let sidecarItem: SidecarItem | undefined;

@@ -11,12 +11,12 @@ import { existsSync, readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
-  getGlobalGSDPreferencesPath,
-  getLegacyGlobalGSDPreferencesPath,
-  getProjectGSDPreferencesPath,
-  loadGlobalGSDPreferences,
-  loadProjectGSDPreferences,
-  loadEffectiveGSDPreferences,
+  getGlobalHXPreferencesPath,
+  getLegacyGlobalHXPreferencesPath,
+  getProjectHXPreferencesPath,
+  loadGlobalHXPreferences,
+  loadProjectHXPreferences,
+  loadEffectiveHXPreferences,
   resolveAllSkillReferences,
 } from "./preferences.js";
 import { loadFile, saveFile, splitFrontmatter, parseFrontmatterMap } from "./files.js";
@@ -54,13 +54,13 @@ export async function handlePrefs(args: string, ctx: ExtensionCommandContext): P
 
   if (trimmed === "" || trimmed === "global" || trimmed === "wizard" || trimmed === "setup"
     || trimmed === "wizard global" || trimmed === "setup global") {
-    await ensurePreferencesFile(getGlobalGSDPreferencesPath(), ctx, "global");
+    await ensurePreferencesFile(getGlobalHXPreferencesPath(), ctx, "global");
     await handlePrefsWizard(ctx, "global");
     return;
   }
 
   if (trimmed === "project" || trimmed === "wizard project" || trimmed === "setup project") {
-    await ensurePreferencesFile(getProjectGSDPreferencesPath(), ctx, "project");
+    await ensurePreferencesFile(getProjectHXPreferencesPath(), ctx, "project");
     await handlePrefsWizard(ctx, "project");
     return;
   }
@@ -75,18 +75,18 @@ export async function handlePrefs(args: string, ctx: ExtensionCommandContext): P
     return;
   }
   if (trimmed === "status") {
-    const globalPrefs = loadGlobalGSDPreferences();
-    const projectPrefs = loadProjectGSDPreferences();
-    const canonicalGlobal = getGlobalGSDPreferencesPath();
-    const legacyGlobal = getLegacyGlobalGSDPreferencesPath();
+    const globalPrefs = loadGlobalHXPreferences();
+    const projectPrefs = loadProjectHXPreferences();
+    const canonicalGlobal = getGlobalHXPreferencesPath();
+    const legacyGlobal = getLegacyGlobalHXPreferencesPath();
     const globalStatus = globalPrefs
       ? `present: ${globalPrefs.path}${globalPrefs.path === legacyGlobal ? " (legacy fallback)" : ""}`
       : `missing: ${canonicalGlobal}`;
-    const projectStatus = projectPrefs ? `present: ${projectPrefs.path}` : `missing: ${getProjectGSDPreferencesPath()}`;
+    const projectStatus = projectPrefs ? `present: ${projectPrefs.path}` : `missing: ${getProjectHXPreferencesPath()}`;
 
     const lines = [`GSD skill prefs — global ${globalStatus}; project ${projectStatus}`];
 
-    const effective = loadEffectiveGSDPreferences();
+    const effective = loadEffectiveHXPreferences();
     let hasUnresolved = false;
     if (effective) {
       const report = resolveAllSkillReferences(effective.preferences, process.cwd());
@@ -108,7 +108,7 @@ export async function handlePrefs(args: string, ctx: ExtensionCommandContext): P
 }
 
 export async function handleImportClaude(ctx: ExtensionCommandContext, scope: "global" | "project"): Promise<void> {
-  const path = scope === "project" ? getProjectGSDPreferencesPath() : getGlobalGSDPreferencesPath();
+  const path = scope === "project" ? getProjectHXPreferencesPath() : getGlobalHXPreferencesPath();
   if (!existsSync(path)) {
     await ensurePreferencesFile(path, ctx, scope);
   }
@@ -135,8 +135,8 @@ export async function handleImportClaude(ctx: ExtensionCommandContext, scope: "g
 }
 
 export async function handlePrefsMode(ctx: ExtensionCommandContext, scope: "global" | "project"): Promise<void> {
-  const path = scope === "project" ? getProjectGSDPreferencesPath() : getGlobalGSDPreferencesPath();
-  const existing = scope === "project" ? loadProjectGSDPreferences() : loadGlobalGSDPreferences();
+  const path = scope === "project" ? getProjectHXPreferencesPath() : getGlobalHXPreferencesPath();
+  const existing = scope === "project" ? loadProjectHXPreferences() : loadGlobalHXPreferences();
   const prefs: Record<string, unknown> = existing?.preferences ? { ...existing.preferences } : {};
 
   await configureMode(ctx, prefs);
@@ -620,8 +620,8 @@ export async function handlePrefsWizard(
   ctx: ExtensionCommandContext,
   scope: "global" | "project",
 ): Promise<void> {
-  const path = scope === "project" ? getProjectGSDPreferencesPath() : getGlobalGSDPreferencesPath();
-  const existing = scope === "project" ? loadProjectGSDPreferences() : loadGlobalGSDPreferences();
+  const path = scope === "project" ? getProjectHXPreferencesPath() : getGlobalHXPreferencesPath();
+  const existing = scope === "project" ? loadProjectHXPreferences() : loadGlobalHXPreferences();
   const prefs: Record<string, unknown> = existing?.preferences ? { ...existing.preferences } : {};
 
   ctx.ui.notify(`GSD preferences (${scope}) — pick a category to configure.`, "info");

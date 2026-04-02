@@ -10,7 +10,7 @@ import { handleStart, handleTemplates } from "../../commands-workflow-templates.
 import { hxRoot } from "../../paths.js";
 import { deriveState } from "../../state.js";
 import { isParked, parkMilestone, unparkMilestone } from "../../milestone-actions.js";
-import { loadEffectiveGSDPreferences } from "../../preferences.js";
+import { loadEffectiveHXPreferences } from "../../preferences.js";
 import { nextMilestoneId } from "../../milestone-ids.js";
 import { findMilestoneIds } from "../../guided-flow.js";
 import { projectRoot } from "../context.js";
@@ -275,7 +275,7 @@ export async function handleWorkflowCommand(trimmed: string, ctx: ExtensionComma
 
 export function getNextMilestoneId(basePath: string): string {
   const milestoneIds = findMilestoneIds(basePath);
-  const uniqueIds = !!loadEffectiveGSDPreferences()?.preferences?.unique_milestone_ids;
+  const uniqueIds = !!loadEffectiveHXPreferences()?.preferences?.unique_milestone_ids;
   return nextMilestoneId(milestoneIds, uniqueIds);
 }
 

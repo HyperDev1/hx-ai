@@ -2,7 +2,7 @@ import type { ExtensionCommandContext, ExtensionContext } from "@hyperlab/hx-cod
 import type { GSDState } from "../../types.js";
 
 import { computeProgressScore, formatProgressLine } from "../../progress-score.js";
-import { loadEffectiveGSDPreferences, getGlobalGSDPreferencesPath, getProjectGSDPreferencesPath } from "../../preferences.js";
+import { loadEffectiveHXPreferences, getGlobalHXPreferencesPath, getProjectHXPreferencesPath } from "../../preferences.js";
 import { ensurePreferencesFile, handlePrefs, handlePrefsMode, handlePrefsWizard } from "../../commands-prefs-wizard.js";
 import { runEnvironmentChecks } from "../../doctor-environment.js";
 import { deriveState } from "../../state.js";
@@ -156,7 +156,7 @@ export async function handleSetup(args: string, ctx: ExtensionCommandContext): P
     return;
   }
   if (args === "prefs") {
-    await ensurePreferencesFile(getGlobalGSDPreferencesPath(), ctx, "global");
+    await ensurePreferencesFile(getGlobalHXPreferencesPath(), ctx, "global");
     await handlePrefsWizard(ctx, "global");
     return;
   }
@@ -200,7 +200,7 @@ export async function handleCoreCommand(trimmed: string, ctx: ExtensionCommandCo
   if (trimmed === "mode" || trimmed.startsWith("mode ")) {
     const modeArgs = trimmed.replace(/^mode\s*/, "").trim();
     const scope = modeArgs === "project" ? "project" : "global";
-    const path = scope === "project" ? getProjectGSDPreferencesPath() : getGlobalGSDPreferencesPath();
+    const path = scope === "project" ? getProjectHXPreferencesPath() : getGlobalHXPreferencesPath();
     await ensurePreferencesFile(path, ctx, scope);
     await handlePrefsMode(ctx, scope);
     return true;

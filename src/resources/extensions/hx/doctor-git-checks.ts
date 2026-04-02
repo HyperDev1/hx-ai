@@ -12,7 +12,7 @@ import { abortAndReset } from "./git-self-heal.js";
 import { RUNTIME_EXCLUSION_PATHS, resolveMilestoneIntegrationBranch, writeIntegrationBranch } from "./git-service.js";
 import { nativeIsRepo, nativeWorktreeList, nativeWorktreeRemove, nativeBranchList, nativeBranchDelete, nativeLsFiles, nativeRmCached } from "./native-git-bridge.js";
 import { getAllWorktreeHealth } from "./worktree-health.js";
-import { loadEffectiveGSDPreferences } from "./preferences.js";
+import { loadEffectiveHXPreferences } from "./preferences.js";
 
 export async function checkGitHealth(
   basePath: string,
@@ -254,7 +254,7 @@ export async function checkGitHealth(
   // and causes the next merge operation to fail silently.
   try {
     const state = await deriveState(basePath);
-    const gitPrefs = loadEffectiveGSDPreferences()?.preferences?.git ?? {};
+    const gitPrefs = loadEffectiveHXPreferences()?.preferences?.git ?? {};
     for (const milestone of state.registry) {
       if (milestone.status === "complete") continue;
       const resolution = resolveMilestoneIntegrationBranch(basePath, milestone.id, gitPrefs);

@@ -20,7 +20,7 @@ import {
   classifyUnitPhase,
 } from './metrics.js';
 import { loadAllCaptures, countPendingCaptures } from './captures.js';
-import { loadEffectiveGSDPreferences } from './preferences.js';
+import { loadEffectiveHXPreferences } from './preferences.js';
 import { runProviderChecks, type ProviderCheckResult } from './doctor-providers.js';
 import { generateSkillHealthReport } from './skill-health.js';
 import { runEnvironmentChecks, type EnvironmentCheckResult } from './doctor-environment.js';
@@ -591,7 +591,7 @@ function loadKnowledge(basePath: string): KnowledgeInfo {
 // ─── Health Loader ────────────────────────────────────────────────────────────
 
 function loadHealth(units: UnitMetrics[], totals: ProjectTotals | null, basePath: string): HealthInfo {
-  const prefs = loadEffectiveGSDPreferences();
+  const prefs = loadEffectiveHXPreferences();
   const budgetCeiling = prefs?.preferences?.budget_ceiling;
   const tokenProfile = prefs?.preferences?.token_profile ?? 'standard';
 

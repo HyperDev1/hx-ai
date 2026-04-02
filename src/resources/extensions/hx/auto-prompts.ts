@@ -16,7 +16,7 @@ import {
   relMilestoneFile, relSliceFile, relSlicePath, relMilestonePath,
   resolveHxRootFile, relHxRootFile, resolveRuntimeFile,
 } from "./paths.js";
-import { resolveSkillDiscoveryMode, resolveInlineLevel, loadEffectiveGSDPreferences, resolveAllSkillReferences } from "./preferences.js";
+import { resolveSkillDiscoveryMode, resolveInlineLevel, loadEffectiveHXPreferences, resolveAllSkillReferences } from "./preferences.js";
 import { parseRoadmap } from "./parsers-legacy.js";
 import type { GSDState, InlineLevel } from "./types.js";
 import type { GSDPreferences } from "./preferences.js";
@@ -46,7 +46,7 @@ function capPreamble(preamble: string): string {
 function formatExecutorConstraints(): string {
   let windowTokens: number;
   try {
-    const prefs = loadEffectiveGSDPreferences();
+    const prefs = loadEffectiveHXPreferences();
     windowTokens = resolveExecutorContextWindow(undefined, prefs?.preferences);
   } catch {
     windowTokens = 200_000; // safe default
@@ -452,7 +452,7 @@ export function buildSkillActivationBlock(params: {
   taskPlanContent?: string | null;
   preferences?: GSDPreferences;
 }): string {
-  const prefs = params.preferences ?? loadEffectiveGSDPreferences()?.preferences;
+  const prefs = params.preferences ?? loadEffectiveHXPreferences()?.preferences;
   const contextTokens = tokenizeSkillContext(
     params.milestoneId,
     params.milestoneTitle,
@@ -1181,7 +1181,7 @@ export async function buildExecuteTaskPrompt(
   const overridesSection = formatOverridesSection(activeOverrides);
 
   // Compute verification budget for the executor's context window (issue #707)
-  const prefs = loadEffectiveGSDPreferences();
+  const prefs = loadEffectiveHXPreferences();
   const contextWindow = resolveExecutorContextWindow(undefined, prefs?.preferences);
   const budgets = computeBudgets(contextWindow);
   const verificationBudget = `~${Math.round(budgets.verificationBudgetChars / 1000)}K chars`;

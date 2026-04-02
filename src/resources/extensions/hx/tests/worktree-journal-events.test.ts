@@ -46,7 +46,7 @@ function makeDeps(
     GitServiceImpl: class {
       constructor() {}
     } as unknown as WorktreeResolverDeps["GitServiceImpl"],
-    loadEffectiveGSDPreferences: () => ({ preferences: { git: {} } }),
+    loadEffectiveHXPreferences: () => ({ preferences: { git: {} } }),
     invalidateAllCaches: () => {},
     captureIntegrationBranch: () => {},
     ...overrides,

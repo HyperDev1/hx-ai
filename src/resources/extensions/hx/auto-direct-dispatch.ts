@@ -27,7 +27,7 @@ import {
   buildRunUatPrompt,
   buildReplanSlicePrompt,
 } from "./auto-prompts.js";
-import { loadEffectiveGSDPreferences } from "./preferences.js";
+import { loadEffectiveHXPreferences } from "./preferences.js";
 import { pauseAuto } from "./auto.js";
 
 export async function dispatchDirectPhase(
@@ -66,7 +66,7 @@ export async function dispatchDirectPhase(
         // When require_slice_discussion is enabled, pause auto-mode before
         // each new slice so the user can discuss requirements first (#789).
         const sliceContextFile = resolveSliceFile(base, mid, sid, "CONTEXT");
-        const requireDiscussion = loadEffectiveGSDPreferences()?.preferences?.phases?.require_slice_discussion;
+        const requireDiscussion = loadEffectiveHXPreferences()?.preferences?.phases?.require_slice_discussion;
         if (requireDiscussion && !sliceContextFile) {
           ctx.ui.notify(
             `Slice ${sid} requires discussion before planning. Run /hx discuss to discuss this slice, then /hx auto to resume.`,

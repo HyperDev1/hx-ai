@@ -4,7 +4,7 @@ import {
   formatRtkSavingsLabel,
   getRtkSessionSavings,
 } from "../shared/rtk-session-stats.js";
-import { loadEffectiveGSDPreferences } from "./preferences.js";
+import { loadEffectiveHXPreferences } from "./preferences.js";
 
 const STATUS_KEY = "gsd-rtk";
 const REFRESH_INTERVAL_MS = 30_000;
@@ -19,7 +19,7 @@ function clearTimer(): void {
 }
 
 function isRtkEnabledInPrefs(): boolean {
-  return loadEffectiveGSDPreferences()?.preferences.experimental?.rtk === true;
+  return loadEffectiveHXPreferences()?.preferences.experimental?.rtk === true;
 }
 
 function updateStatus(ctx: ExtensionContext): void {

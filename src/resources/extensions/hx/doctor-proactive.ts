@@ -23,7 +23,7 @@ import { rebuildState } from "./doctor.js";
 import { deriveState } from "./state.js";
 import { resolveMilestoneIntegrationBranch } from "./git-service.js";
 import { nativeIsRepo } from "./native-git-bridge.js";
-import { loadEffectiveGSDPreferences } from "./preferences.js";
+import { loadEffectiveHXPreferences } from "./preferences.js";
 import { runEnvironmentChecks } from "./doctor-environment.js";
 
 // ── Health Score Tracking ──────────────────────────────────────────────────
@@ -278,7 +278,7 @@ export async function preDispatchHealthGate(basePath: string): Promise<PreDispat
     if (nativeIsRepo(basePath)) {
       const state = await deriveState(basePath);
       if (state.activeMilestone) {
-        const gitPrefs = loadEffectiveGSDPreferences()?.preferences?.git ?? {};
+        const gitPrefs = loadEffectiveHXPreferences()?.preferences?.git ?? {};
         const resolution = resolveMilestoneIntegrationBranch(basePath, state.activeMilestone.id, gitPrefs);
         if (resolution.status === "fallback" && resolution.effectiveBranch) {
           fixesApplied.push(

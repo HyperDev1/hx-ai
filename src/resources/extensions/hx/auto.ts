@@ -56,7 +56,7 @@ import {
 import type { SessionLockStatus } from "./session-lock.js";
 import {
   resolveAutoSupervisorConfig,
-  loadEffectiveGSDPreferences,
+  loadEffectiveHXPreferences,
   getIsolationMode,
 } from "./preferences.js";
 import { sendDesktopNotification } from "./notifications.js";
@@ -237,7 +237,7 @@ const s = new AutoSession();
 const STATE_REBUILD_MIN_INTERVAL_MS = 30_000;
 
 export function shouldUseWorktreeIsolation(): boolean {
-  const prefs = loadEffectiveGSDPreferences()?.preferences?.git;
+  const prefs = loadEffectiveHXPreferences()?.preferences?.git;
   if (prefs?.isolation === "worktree") return true;
   // Default is false — worktree isolation requires explicit opt-in
   return false;
@@ -309,7 +309,7 @@ export function getAutoDashboardData(): AutoDashboardData {
   const rtkSavings = sessionId && s.basePath
     ? getRtkSessionSavings(s.basePath, sessionId)
     : null;
-  const rtkEnabled = loadEffectiveGSDPreferences()?.preferences.experimental?.rtk === true;
+  const rtkEnabled = loadEffectiveHXPreferences()?.preferences.experimental?.rtk === true;
   // Pending capture count — lazy check, non-fatal
   let pendingCaptureCount = 0;
   try {
@@ -524,7 +524,7 @@ function handleLostSessionLock(
   s.paused = false;
   clearUnitTimeout();
   deregisterSigtermHandler();
-  clearCmuxSidebar(loadEffectiveGSDPreferences()?.preferences);
+  clearCmuxSidebar(loadEffectiveHXPreferences()?.preferences);
   const base = lockBase();
   const lockFilePath = base ? join(hxRoot(base), "auto.lock") : "unknown";
   const recoverySuggestion = "\nTo recover, run: gsd doctor --fix";
@@ -590,7 +590,7 @@ export async function stopAuto(
   reason?: string,
 ): Promise<void> {
   if (!s.active && !s.paused) return;
-  const loadedPreferences = loadEffectiveGSDPreferences()?.preferences;
+  const loadedPreferences = loadEffectiveHXPreferences()?.preferences;
   const reasonSuffix = reason ? ` — ${reason}` : "";
 
   try {
@@ -914,8 +914,8 @@ function buildResolverDeps(): WorktreeResolverDeps {
       readFileSync(path, encoding as BufferEncoding),
     GitServiceImpl:
       GitServiceImpl as unknown as WorktreeResolverDeps["GitServiceImpl"],
-    loadEffectiveGSDPreferences:
-      loadEffectiveGSDPreferences as unknown as WorktreeResolverDeps["loadEffectiveGSDPreferences"],
+    loadEffectiveHXPreferences:
+      loadEffectiveHXPreferences as unknown as WorktreeResolverDeps["loadEffectiveHXPreferences"],
     invalidateAllCaches,
     captureIntegrationBranch,
   };
@@ -954,7 +954,7 @@ function buildLoopDeps(): LoopDeps {
     invalidateAllCaches,
     deriveState,
     rebuildState,
-    loadEffectiveGSDPreferences,
+    loadEffectiveHXPreferences,
 
     // Pre-dispatch health gate
     preDispatchHealthGate,
@@ -1164,7 +1164,7 @@ export async function startAuto(
     restoreHookState(s.basePath);
     try {
       await rebuildState(s.basePath);
-      syncCmuxSidebar(loadEffectiveGSDPreferences()?.preferences, await deriveState(s.basePath));
+      syncCmuxSidebar(loadEffectiveHXPreferences()?.preferences, await deriveState(s.basePath));
     } catch (e) {
       debugLog("resume-rebuild-state-failed", {
         error: e instanceof Error ? e.message : String(e),
@@ -1214,7 +1214,7 @@ export async function startAuto(
       "resuming",
       s.currentMilestoneId ?? "unknown",
     );
-    logCmuxEvent(loadEffectiveGSDPreferences()?.preferences, s.stepMode ? "Step-mode resumed." : "Auto-mode resumed.", "progress");
+    logCmuxEvent(loadEffectiveHXPreferences()?.preferences, s.stepMode ? "Step-mode resumed." : "Auto-mode resumed.", "progress");
 
     await autoLoop(ctx, pi, s, buildLoopDeps());
     cleanupAfterLoopExit(ctx);
@@ -1241,11 +1241,11 @@ export async function startAuto(
   if (!ready) return;
 
   try {
-    syncCmuxSidebar(loadEffectiveGSDPreferences()?.preferences, await deriveState(s.basePath));
+    syncCmuxSidebar(loadEffectiveHXPreferences()?.preferences, await deriveState(s.basePath));
   } catch {
     // Best-effort only — sidebar sync must never block auto-mode startup
   }
-  logCmuxEvent(loadEffectiveGSDPreferences()?.preferences, requestedStepMode ? "Step-mode started." : "Auto-mode started.", "progress");
+  logCmuxEvent(loadEffectiveHXPreferences()?.preferences, requestedStepMode ? "Step-mode started." : "Auto-mode started.", "progress");
 
   // Dispatch the first unit
   await autoLoop(ctx, pi, s, buildLoopDeps());

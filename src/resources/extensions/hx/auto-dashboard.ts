@@ -23,7 +23,7 @@ import { makeUI } from "../shared/tui.js";
 import { GLYPH, INDENT } from "../shared/mod.js";
 import { computeProgressScore } from "./progress-score.js";
 import { getActiveWorktreeName } from "./worktree-command.js";
-import { loadEffectiveGSDPreferences, getGlobalGSDPreferencesPath } from "./preferences.js";
+import { loadEffectiveHXPreferences, getGlobalHXPreferencesPath } from "./preferences.js";
 import { resolveServiceTierIcon, getEffectiveServiceTier } from "./service-tier.js";
 import { parseUnitId } from "./unit-id.js";
 import {
@@ -371,7 +371,7 @@ function ensureWidgetModeLoaded(): void {
   if (widgetModeInitialized) return;
   widgetModeInitialized = true;
   try {
-    const loaded = loadEffectiveGSDPreferences();
+    const loaded = loadEffectiveHXPreferences();
     const saved = loaded?.preferences?.widget_mode;
     if (saved && WIDGET_MODES.includes(saved as WidgetMode)) {
       widgetMode = saved as WidgetMode;
@@ -382,7 +382,7 @@ function ensureWidgetModeLoaded(): void {
 /** Persist widget mode to global preferences YAML. */
 function persistWidgetMode(mode: WidgetMode): void {
   try {
-    const prefsPath = getGlobalGSDPreferencesPath();
+    const prefsPath = getGlobalHXPreferencesPath();
     let content = "";
     if (existsSync(prefsPath)) {
       content = readFileSync(prefsPath, "utf-8");

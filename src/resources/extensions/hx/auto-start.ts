@@ -16,7 +16,7 @@ import type {
 import { deriveState } from "./state.js";
 import { loadFile, getManifestStatus } from "./files.js";
 import {
-  loadEffectiveGSDPreferences,
+  loadEffectiveHXPreferences,
   resolveSkillDiscoveryMode,
   getIsolationMode,
 } from "./preferences.js";
@@ -175,7 +175,7 @@ export async function bootstrapAutoSession(
     const hasLocalGit = existsSync(join(base, ".git"));
     if (!hasLocalGit || isInheritedRepo(base)) {
       const mainBranch =
-        loadEffectiveGSDPreferences()?.preferences?.git?.main_branch || "main";
+        loadEffectiveHXPreferences()?.preferences?.git?.main_branch || "main";
       nativeInit(base, mainBranch);
     }
 
@@ -193,7 +193,7 @@ export async function bootstrapAutoSession(
     // Ensure .gitignore has baseline patterns.
     // ensureGitignore checks for git-tracked .gsd/ files and skips the
     // ".hx" pattern if the project intentionally tracks .gsd/ in git.
-    const gitPrefs = loadEffectiveGSDPreferences()?.preferences?.git;
+    const gitPrefs = loadEffectiveHXPreferences()?.preferences?.git;
     const manageGitignore = gitPrefs?.manage_gitignore;
     ensureGitignore(base, { manageGitignore });
     if (manageGitignore !== false) untrackRuntimeFiles(base);
@@ -213,7 +213,7 @@ export async function bootstrapAutoSession(
     // Initialize GitServiceImpl
     s.gitService = new GitServiceImpl(
       s.basePath,
-      loadEffectiveGSDPreferences()?.preferences?.git ?? {},
+      loadEffectiveHXPreferences()?.preferences?.git ?? {},
     );
 
     // Check for crash from previous session. Skip our own fresh bootstrap lock.

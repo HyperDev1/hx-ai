@@ -29,7 +29,7 @@ import { readSessionLockData, isSessionLockProcessAlive } from "./session-lock.j
 import { nativeIsRepo, nativeInit } from "./native-git-bridge.js";
 import { isInheritedRepo } from "./repo-identity.js";
 import { ensureGitignore, ensurePreferences, untrackRuntimeFiles } from "./gitignore.js";
-import { loadEffectiveGSDPreferences } from "./preferences.js";
+import { loadEffectiveHXPreferences } from "./preferences.js";
 import { detectProjectState } from "./detection.js";
 import { showProjectInit, offerMigration } from "./init-wizard.js";
 import { validateDirectory } from "./validate-directory.js";
@@ -359,7 +359,7 @@ function buildHeadlessDiscussPrompt(nextId: string, seedContext: string, _basePa
  */
 function bootstrapGsdProject(basePath: string): void {
   if (!nativeIsRepo(basePath) || isInheritedRepo(basePath)) {
-    const mainBranch = loadEffectiveGSDPreferences()?.preferences?.git?.main_branch || "main";
+    const mainBranch = loadEffectiveHXPreferences()?.preferences?.git?.main_branch || "main";
     nativeInit(basePath, mainBranch);
   }
 
@@ -391,7 +391,7 @@ export async function showHeadlessMilestoneCreation(
 
   // Generate next milestone ID
   const existingIds = findMilestoneIds(basePath);
-  const prefs = loadEffectiveGSDPreferences();
+  const prefs = loadEffectiveHXPreferences();
   const nextId = nextMilestoneIdReserved(existingIds, prefs?.preferences?.unique_milestone_ids ?? false);
 
   // Create milestone directory
@@ -594,7 +594,7 @@ export async function showDiscuss(
       }), "gsd-discuss", ctx, "discuss-milestone");
     } else if (choice === "skip_milestone") {
       const milestoneIds = findMilestoneIds(basePath);
-      const uniqueMilestoneIds = !!loadEffectiveGSDPreferences()?.preferences?.unique_milestone_ids;
+      const uniqueMilestoneIds = !!loadEffectiveHXPreferences()?.preferences?.unique_milestone_ids;
       const nextId = nextMilestoneIdReserved(milestoneIds, uniqueMilestoneIds);
       pendingAutoStart = { ctx, pi, basePath, milestoneId: nextId, step: false };
       await dispatchWorkflow(pi, buildDiscussPrompt(nextId, `New milestone ${nextId}.`, basePath), "gsd-run", ctx, "discuss-milestone");
@@ -939,7 +939,7 @@ async function handleMilestoneActions(
 
   if (choice === "skip") {
     const milestoneIds = findMilestoneIds(basePath);
-    const uniqueMilestoneIds = !!loadEffectiveGSDPreferences()?.preferences?.unique_milestone_ids;
+    const uniqueMilestoneIds = !!loadEffectiveHXPreferences()?.preferences?.unique_milestone_ids;
     const nextId = nextMilestoneIdReserved(milestoneIds, uniqueMilestoneIds);
     pendingAutoStart = { ctx, pi, basePath, milestoneId: nextId, step: stepMode };
     await dispatchWorkflow(pi, buildDiscussPrompt(nextId,
@@ -1011,7 +1011,7 @@ export async function showSmartEntry(
   // git repo that has no .gsd, create a fresh repo to prevent cross-project
   // state leaks (#1639).
   if (!nativeIsRepo(basePath) || isInheritedRepo(basePath)) {
-    const mainBranch = loadEffectiveGSDPreferences()?.preferences?.git?.main_branch || "main";
+    const mainBranch = loadEffectiveHXPreferences()?.preferences?.git?.main_branch || "main";
     nativeInit(basePath, mainBranch);
   }
 
@@ -1086,7 +1086,7 @@ export async function showSmartEntry(
       }
     }
 
-    const uniqueMilestoneIds = !!loadEffectiveGSDPreferences()?.preferences?.unique_milestone_ids;
+    const uniqueMilestoneIds = !!loadEffectiveHXPreferences()?.preferences?.unique_milestone_ids;
     const nextId = nextMilestoneIdReserved(milestoneIds, uniqueMilestoneIds);
     const isFirst = milestoneIds.length === 0;
 
@@ -1149,7 +1149,7 @@ export async function showSmartEntry(
 
     if (choice === "new_milestone") {
       const milestoneIds = findMilestoneIds(basePath);
-      const uniqueMilestoneIds = !!loadEffectiveGSDPreferences()?.preferences?.unique_milestone_ids;
+      const uniqueMilestoneIds = !!loadEffectiveHXPreferences()?.preferences?.unique_milestone_ids;
       const nextId = nextMilestoneIdReserved(milestoneIds, uniqueMilestoneIds);
 
       pendingAutoStart = { ctx, pi, basePath, milestoneId: nextId, step: stepMode };
@@ -1215,7 +1215,7 @@ export async function showSmartEntry(
       }), "gsd-discuss", ctx, "discuss-milestone");
     } else if (choice === "skip_milestone") {
       const milestoneIds = findMilestoneIds(basePath);
-      const uniqueMilestoneIds = !!loadEffectiveGSDPreferences()?.preferences?.unique_milestone_ids;
+      const uniqueMilestoneIds = !!loadEffectiveHXPreferences()?.preferences?.unique_milestone_ids;
       const nextId = nextMilestoneIdReserved(milestoneIds, uniqueMilestoneIds);
       pendingAutoStart = { ctx, pi, basePath, milestoneId: nextId, step: stepMode };
       await dispatchWorkflow(pi, buildDiscussPrompt(nextId,
@@ -1299,7 +1299,7 @@ export async function showSmartEntry(
         }), "gsd-run", ctx, "discuss-milestone");
       } else if (choice === "skip_milestone") {
         const milestoneIds = findMilestoneIds(basePath);
-        const uniqueMilestoneIds = !!loadEffectiveGSDPreferences()?.preferences?.unique_milestone_ids;
+        const uniqueMilestoneIds = !!loadEffectiveHXPreferences()?.preferences?.unique_milestone_ids;
         const nextId = nextMilestoneIdReserved(milestoneIds, uniqueMilestoneIds);
         pendingAutoStart = { ctx, pi, basePath, milestoneId: nextId, step: stepMode };
         await dispatchWorkflow(pi, buildDiscussPrompt(nextId,

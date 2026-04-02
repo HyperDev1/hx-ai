@@ -158,7 +158,7 @@ function makeMockDeps(overrides?: Partial<LoopDeps>): LoopDeps & { callLog: stri
       } as any;
     },
     rebuildState: async () => {},
-    loadEffectiveGSDPreferences: () => undefined,
+    loadEffectiveHXPreferences: () => undefined,
     preDispatchHealthGate: async () => ({ proceed: true, fixesApplied: [] }),
     syncProjectRootToWorktree: () => {},
     checkResourcesStale: () => null,

@@ -129,8 +129,8 @@ function makeDeps(
         this.gitConfig = gitConfig;
       }
     } as unknown as WorktreeResolverDeps["GitServiceImpl"],
-    loadEffectiveGSDPreferences: () => {
-      calls.push({ fn: "loadEffectiveGSDPreferences", args: [] });
+    loadEffectiveHXPreferences: () => {
+      calls.push({ fn: "loadEffectiveHXPreferences", args: [] });
       return { preferences: { git: {} } };
     },
     invalidateAllCaches: () => {

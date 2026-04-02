@@ -44,7 +44,7 @@ import {
 import { MergeConflictError, readIntegrationBranch, RUNTIME_EXCLUSION_PATHS } from "./git-service.js";
 import { debugLog } from "./debug-logger.js";
 import { logWarning } from "./workflow-logger.js";
-import { loadEffectiveGSDPreferences } from "./preferences.js";
+import { loadEffectiveHXPreferences } from "./preferences.js";
 import {
   nativeGetCurrentBranch,
   nativeDetectMainBranch,
@@ -741,7 +741,7 @@ export function runWorktreePostCreateHook(
   hookPath?: string,
 ): string | null {
   if (hookPath === undefined) {
-    const prefs = loadEffectiveGSDPreferences()?.preferences?.git;
+    const prefs = loadEffectiveHXPreferences()?.preferences?.git;
     hookPath = prefs?.worktree_post_create;
   }
   if (!hookPath) return null;
@@ -1304,7 +1304,7 @@ export function mergeMilestoneToMain(
   //    then auto-detect (origin/HEAD → main → master → current). Never hardcode
   //    "main": repos using "master" or a custom default branch would fail at
   //    checkout and leave the user with a broken merge state (#1668).
-  const prefs = loadEffectiveGSDPreferences()?.preferences?.git ?? {};
+  const prefs = loadEffectiveHXPreferences()?.preferences?.git ?? {};
   const integrationBranch = readIntegrationBranch(
     originalBasePath_,
     milestoneId,

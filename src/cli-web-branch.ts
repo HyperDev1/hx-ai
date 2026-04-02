@@ -16,7 +16,7 @@ export interface CliFlags {
   tools?: string[]
   messages: string[]
   web?: boolean
-  /** Optional project path for web mode: `gsd --web <path>` or `gsd web start <path>` */
+  /** Optional project path for web mode: `hx --web <path>` or `hx web start <path>` */
   webPath?: string
   /** Custom host to bind web server to: `--host 0.0.0.0` */
   webHost?: string

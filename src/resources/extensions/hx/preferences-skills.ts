@@ -17,7 +17,7 @@ import type {
   SkillResolutionReport,
 } from "./preferences-types.js";
 import { validatePreferences } from "./preferences-validation.js";
-import { loadEffectiveGSDPreferences } from "./preferences.js";
+import { loadEffectiveHXPreferences } from "./preferences.js";
 
 // Re-export types so existing consumers of ./preferences-skills.js keep working
 export type { GSDSkillRule, SkillDiscoveryMode, SkillResolution, SkillResolutionReport } from "./preferences-types.js";
@@ -161,7 +161,7 @@ export function formatSkillRef(ref: string, resolutions: Map<string, SkillResolu
  * Defaults to "suggest" -- skills are identified during research but not installed automatically.
  */
 export function resolveSkillDiscoveryMode(): SkillDiscoveryMode {
-  const prefs = loadEffectiveGSDPreferences();
+  const prefs = loadEffectiveHXPreferences();
   return prefs?.preferences.skill_discovery ?? "suggest";
 }
 
@@ -170,6 +170,6 @@ export function resolveSkillDiscoveryMode(): SkillDiscoveryMode {
  * Returns 0 if disabled, default 60 if not configured.
  */
 export function resolveSkillStalenessDays(): number {
-  const prefs = loadEffectiveGSDPreferences();
+  const prefs = loadEffectiveHXPreferences();
   return prefs?.preferences.skill_staleness_days ?? 60;
 }
