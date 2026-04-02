@@ -161,6 +161,7 @@ const NESTED_COMPLETIONS: CompletionMap = {
     { cmd: "rule", desc: "Add a project rule (always/never do X)" },
     { cmd: "pattern", desc: "Add a code pattern to follow" },
     { cmd: "lesson", desc: "Record a lesson learned" },
+    { cmd: "search", desc: "Search existing knowledge entries" },
   ],
   start: [
     { cmd: "bugfix", desc: "Triage, fix, test, and ship a bug fix" },

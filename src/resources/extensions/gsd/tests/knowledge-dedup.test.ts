@@ -7,7 +7,7 @@ import assert from "node:assert/strict";
 import { mkdirSync, readFileSync, writeFileSync, rmSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { findSimilarKnowledge, appendKnowledge } from "../files.ts";
+import { findSimilarKnowledge, appendKnowledge, searchKnowledge } from "../files.ts";
 
 function makeTempDir(prefix: string): string {
   const dir = join(
@@ -175,4 +175,44 @@ test("knowledge: appendKnowledge pattern with where field", async () => {
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }
+});
+
+// ─── searchKnowledge ──────────────────────────────────────────────────────
+
+test("knowledge: searchKnowledge finds matches across all sections", () => {
+  const results = searchKnowledge(SAMPLE_KNOWLEDGE, "prepared statements");
+  assert.strictEqual(results.length, 1);
+  assert.strictEqual(results[0].id, "K001");
+  assert.strictEqual(results[0].type, "rule");
+});
+
+test("knowledge: searchKnowledge is case-insensitive", () => {
+  const results = searchKnowledge(SAMPLE_KNOWLEDGE, "postgresql");
+  assert.strictEqual(results.length, 1);
+  assert.strictEqual(results[0].id, "K002");
+});
+
+test("knowledge: searchKnowledge returns results from multiple sections", () => {
+  // "injection" appears in rules (K001 has "injection" in it? No — let's use a broader term)
+  const results = searchKnowledge(SAMPLE_KNOWLEDGE, "middleware");
+  assert.strictEqual(results.length, 1);
+  assert.strictEqual(results[0].type, "pattern");
+  assert.strictEqual(results[0].id, "P002");
+});
+
+test("knowledge: searchKnowledge returns empty array when no match", () => {
+  const results = searchKnowledge(SAMPLE_KNOWLEDGE, "GraphQL");
+  assert.strictEqual(results.length, 0);
+});
+
+test("knowledge: searchKnowledge returns empty array for empty query", () => {
+  const results = searchKnowledge(SAMPLE_KNOWLEDGE, "");
+  assert.strictEqual(results.length, 0);
+});
+
+test("knowledge: searchKnowledge finds lessons", () => {
+  const results = searchKnowledge(SAMPLE_KNOWLEDGE, "Docker");
+  assert.strictEqual(results.length, 1);
+  assert.strictEqual(results[0].id, "L001");
+  assert.strictEqual(results[0].type, "lesson");
 });

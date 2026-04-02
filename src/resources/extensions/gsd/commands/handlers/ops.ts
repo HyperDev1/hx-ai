@@ -3,7 +3,7 @@ import type { ExtensionAPI, ExtensionCommandContext } from "@gsd/pi-coding-agent
 import { enableDebug } from "../../debug-logger.js";
 import { dispatchDirectPhase } from "../../auto-direct-dispatch.js";
 import { handleConfig } from "../../commands-config.js";
-import { handleDoctor, handleCapture, handleKnowledge, handleRunHook, handleSkillHealth, handleSteer, handleTriage, handleUpdate } from "../../commands-handlers.js";
+import { handleDoctor, handleCapture, handleKnowledge, handleKnowledgeSearch, handleRunHook, handleSkillHealth, handleSteer, handleTriage, handleUpdate } from "../../commands-handlers.js";
 import { handleInspect } from "../../commands-inspect.js";
 import { handleLogs } from "../../commands-logs.js";
 import { handleCleanupBranches, handleCleanupSnapshots, handleSkip, handleCleanupProjects, handleCleanupWorktrees, handleRecover } from "../../commands-maintenance.js";
@@ -150,6 +150,10 @@ Examples:
   }
   if (trimmed === "steer") {
     ctx.ui.notify("Usage: /gsd steer <description of change>. Example: /gsd steer Use Postgres instead of SQLite", "warning");
+    return true;
+  }
+  if (trimmed.startsWith("knowledge search ")) {
+    await handleKnowledgeSearch(trimmed.replace(/^knowledge\s+search\s+/, "").trim(), ctx);
     return true;
   }
   if (trimmed.startsWith("knowledge ")) {

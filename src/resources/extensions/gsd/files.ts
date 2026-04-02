@@ -859,6 +859,61 @@ export function findSimilarKnowledge(
   return null;
 }
 
+export interface KnowledgeSearchResult {
+  id: string;
+  type: "rule" | "pattern" | "lesson";
+  text: string;
+}
+
+/**
+ * Search all knowledge sections (rules, patterns, lessons) for entries
+ * matching the query. Case-insensitive substring match.
+ * Returns all matches across all sections.
+ */
+export function searchKnowledge(
+  existing: string,
+  query: string,
+): KnowledgeSearchResult[] {
+  const queryLower = query.toLowerCase().trim();
+  if (!queryLower) return [];
+
+  const results: KnowledgeSearchResult[] = [];
+
+  const sections: Array<{ heading: string; type: "rule" | "pattern" | "lesson"; contentIdx: number }> = [
+    { heading: "## Rules", type: "rule", contentIdx: 1 },
+    { heading: "## Patterns", type: "pattern", contentIdx: 0 },
+    { heading: "## Lessons Learned", type: "lesson", contentIdx: 0 },
+  ];
+
+  for (const section of sections) {
+    const sectionIdx = existing.indexOf(section.heading);
+    if (sectionIdx === -1) continue;
+
+    const nextSection = existing.indexOf("\n## ", sectionIdx + section.heading.length);
+    const sectionContent = nextSection !== -1
+      ? existing.slice(sectionIdx, nextSection)
+      : existing.slice(sectionIdx);
+
+    const rowPattern = /^\| ([KPL]\d+) \|(.+)\|$/gm;
+    let match;
+
+    while ((match = rowPattern.exec(sectionContent)) !== null) {
+      const id = match[1];
+      const cells = match[2].split("|").map(c => c.trim());
+      const cellText = cells[section.contentIdx] ?? "";
+      const cellLower = cellText.toLowerCase().trim();
+
+      if (!cellLower || cellLower === "—") continue;
+
+      if (cellLower.includes(queryLower)) {
+        results.push({ id, type: section.type, text: cellText });
+      }
+    }
+  }
+
+  return results;
+}
+
 export async function appendKnowledge(
   basePath: string,
   type: "rule" | "pattern" | "lesson",

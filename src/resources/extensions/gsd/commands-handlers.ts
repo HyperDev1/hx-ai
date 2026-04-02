@@ -11,7 +11,7 @@ import { join } from "node:path";
 import { deriveState } from "./state.js";
 import { gsdRoot } from "./paths.js";
 import { appendCapture, hasPendingCaptures, loadPendingCaptures } from "./captures.js";
-import { appendOverride, appendKnowledge, findSimilarKnowledge } from "./files.js";
+import { appendOverride, appendKnowledge, findSimilarKnowledge, searchKnowledge } from "./files.js";
 import {
   formatDoctorIssuesForPrompt,
   formatDoctorReport,
@@ -335,6 +335,37 @@ export async function handleKnowledge(args: string, ctx: ExtensionCommandContext
   }
 
   ctx.ui.notify(`Added ${type} ${result.id} to KNOWLEDGE.md: "${entryText}"`, "success");
+}
+
+export async function handleKnowledgeSearch(query: string, ctx: ExtensionCommandContext): Promise<void> {
+  if (!query.trim()) {
+    ctx.ui.notify("Usage: /gsd knowledge search <text>", "warning");
+    return;
+  }
+
+  const basePath = process.cwd();
+  const { resolveGsdRootFile } = await import("./paths.js");
+  const { loadFile } = await import("./files.js");
+  const knowledgePath = resolveGsdRootFile(basePath, "KNOWLEDGE");
+  const existing = await loadFile(knowledgePath);
+
+  if (!existing) {
+    ctx.ui.notify("No KNOWLEDGE.md found. Add entries with /gsd knowledge rule|pattern|lesson.", "warning");
+    return;
+  }
+
+  const results = searchKnowledge(existing, query.trim());
+
+  if (results.length === 0) {
+    ctx.ui.notify(`No matching entries found for "${query.trim()}".`, "info");
+    return;
+  }
+
+  const lines = results.map(r => `  ${r.id} [${r.type}]: ${r.text}`);
+  ctx.ui.notify(
+    `Found ${results.length} match${results.length === 1 ? "" : "es"} for "${query.trim()}":\n${lines.join("\n")}`,
+    "info",
+  );
 }
 
 export async function handleRunHook(args: string, ctx: ExtensionCommandContext, pi: ExtensionAPI): Promise<void> {
