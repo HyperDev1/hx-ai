@@ -29,7 +29,7 @@ import {
 import { stopWebMode } from './web-mode.js'
 import { getProjectSessionsDir } from './project-sessions.js'
 import { markStartup, printStartupTimings } from './startup-timings.js'
-import { bootstrapRtk, GSD_RTK_DISABLED_ENV } from './rtk.js'
+import { bootstrapRtk, HX_RTK_DISABLED_ENV } from './rtk.js'
 import { loadEffectiveGSDPreferences } from './resources/extensions/gsd/preferences.js'
 
 // ---------------------------------------------------------------------------
@@ -137,13 +137,13 @@ async function ensureRtkBootstrap(): Promise<void> {
   if ((ensureRtkBootstrap as { _done?: boolean })._done) return
 
   // RTK is opt-in via experimental.rtk preference. Default: disabled.
-  // Honor GSD_RTK_DISABLED if already explicitly set in the environment
+  // Honor HX_RTK_DISABLED if already explicitly set in the environment
   // (env var takes precedence over preferences for manual override).
-  if (!process.env[GSD_RTK_DISABLED_ENV]) {
+  if (!process.env[HX_RTK_DISABLED_ENV]) {
     const prefs = loadEffectiveGSDPreferences();
     const rtkEnabled = prefs?.preferences.experimental?.rtk === true;
     if (!rtkEnabled) {
-      process.env[GSD_RTK_DISABLED_ENV] = "1";
+      process.env[HX_RTK_DISABLED_ENV] = "1";
     }
   }
 

@@ -104,11 +104,11 @@ if (!existsSync(appRoot)) {
     `  Get Shit Done ${dim}v${gsdVersion}${reset}\n` +
     `  ${green}Welcome.${reset} Setting up your environment...\n\n`
   )
-  process.env.GSD_FIRST_RUN_BANNER = '1'
+  process.env.HX_FIRST_RUN_BANNER = '1'
 }
 
-// GSD_CODING_AGENT_DIR — tells pi's getAgentDir() to return ~/.gsd/agent/ instead of ~/.gsd/agent/
-process.env.GSD_CODING_AGENT_DIR = agentDir
+// HX_CODING_AGENT_DIR — tells pi's getAgentDir() to return ~/.hx/agent/ instead of ~/.hx/agent/
+process.env.HX_CODING_AGENT_DIR = agentDir
 
 // RTK environment — make ~/.gsd/agent/bin visible to all child-process paths,
 // not just the bash tool, and force-disable RTK telemetry for GSD-managed use.
@@ -128,24 +128,24 @@ process.env.NODE_PATH = [gsdNodeModules, process.env.NODE_PATH]
 const { Module } = await import('module');
 (Module as any)._initPaths?.()
 
-// GSD_VERSION — expose package version so extensions can display it
-process.env.GSD_VERSION = gsdVersion
+// HX_VERSION — expose package version so extensions can display it
+process.env.HX_VERSION = gsdVersion
 
-// GSD_BIN_PATH — absolute path to this loader (dist/loader.js), used by patched subagent
+// HX_BIN_PATH — absolute path to this loader (dist/loader.js), used by patched subagent
 // to spawn gsd instead of pi when dispatching workflow tasks
-process.env.GSD_BIN_PATH = process.argv[1]
+process.env.HX_BIN_PATH = process.argv[1]
 
-// GSD_WORKFLOW_PATH — absolute path to bundled GSD-WORKFLOW.md, used by patched gsd extension
+// HX_WORKFLOW_PATH — absolute path to bundled GSD-WORKFLOW.md, used by patched gsd extension
 // when dispatching workflow prompts. Prefers dist/resources/ (stable, set at build time)
 // over src/resources/ (live working tree) — see resource-loader.ts for rationale.
 const distRes = join(gsdRoot, 'dist', 'resources')
 const srcRes = join(gsdRoot, 'src', 'resources')
 const resourcesDir = existsSync(distRes) ? distRes : srcRes
-process.env.GSD_WORKFLOW_PATH = join(resourcesDir, 'GSD-WORKFLOW.md')
+process.env.HX_WORKFLOW_PATH = join(resourcesDir, 'GSD-WORKFLOW.md')
 
-// GSD_BUNDLED_EXTENSION_PATHS — dynamically discovered bundled extension entry points.
+// HX_BUNDLED_EXTENSION_PATHS — dynamically discovered bundled extension entry points.
 // Uses the shared discoverExtensionEntryPaths() to scan the bundled resources
-// directory, then remaps discovered paths to agentDir (~/.gsd/agent/extensions/)
+// directory, then remaps discovered paths to agentDir (~/.hx/agent/extensions/)
 // where initResources() will sync them.
 const bundledExtDir = join(resourcesDir, 'extensions')
 const agentExtDir = join(agentDir, 'extensions')
@@ -158,7 +158,7 @@ const discoveredExtensionPaths = discoverExtensionEntryPaths(bundledExtDir)
     return isExtensionEnabled(registry, manifest.id)
   })
 
-process.env.GSD_BUNDLED_EXTENSION_PATHS = serializeBundledExtensionPaths(discoveredExtensionPaths)
+process.env.HX_BUNDLED_EXTENSION_PATHS = serializeBundledExtensionPaths(discoveredExtensionPaths)
 
 // Respect HTTP_PROXY / HTTPS_PROXY / NO_PROXY env vars for all outbound requests.
 // pi-coding-agent's cli.ts sets this, but GSD bypasses that entry point — so we
