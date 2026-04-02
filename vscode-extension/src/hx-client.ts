@@ -2,7 +2,7 @@ import { ChildProcess, spawn } from "node:child_process";
 import * as vscode from "vscode";
 
 /**
- * Mirrors the RPC command/response protocol from the GSD agent.
+ * Mirrors the RPC command/response protocol from the HX agent.
  * These types are intentionally kept minimal and self-contained so the
  * extension has no dependency on the agent packages at runtime.
  */
@@ -77,10 +77,10 @@ type PendingRequest = {
 };
 
 /**
- * Client that spawns `gsd --mode rpc` and communicates via JSON lines
+ * Client that spawns `hx --mode rpc` and communicates via JSON lines
  * over stdin/stdout. Emits VS Code events for streaming responses.
  */
-export class GsdClient implements vscode.Disposable {
+export class HxClient implements vscode.Disposable {
 	private process: ChildProcess | null = null;
 	private pendingRequests = new Map<string, PendingRequest>();
 	private requestId = 0;
@@ -116,7 +116,7 @@ export class GsdClient implements vscode.Disposable {
 	}
 
 	/**
-	 * Spawn the GSD agent in RPC mode.
+	 * Spawn the HX agent in RPC mode.
 	 */
 	async start(): Promise<void> {
 		if (this.process) {
@@ -167,9 +167,9 @@ export class GsdClient implements vscode.Disposable {
 					this.process = null;
 				}
 				const hint = err.code === "ENOENT"
-					? ` Make sure GSD is installed ("npm install -g gsd-pi") and set "gsd.binaryPath" to the absolute path if it is not on PATH.`
+					? ` Make sure HX is installed ("npm install -g @hyperlab/hx") and set "hx.binaryPath" to the absolute path if it is not on PATH.`
 					: "";
-				const message = `Failed to start GSD process: ${err.message}.${hint}`;
+				const message = `Failed to start HX process: ${err.message}.${hint}`;
 				this._onError.fire(message);
 				reject(new Error(message));
 			};
@@ -187,16 +187,16 @@ export class GsdClient implements vscode.Disposable {
 			}
 			this._onConnectionChange.fire(false);
 			const hint = err.code === "ENOENT"
-				? ` Make sure GSD is installed ("npm install -g gsd-pi") and set "gsd.binaryPath" to the absolute path if it is not on PATH.`
+				? ` Make sure HX is installed ("npm install -g @hyperlab/hx") and set "hx.binaryPath" to the absolute path if it is not on PATH.`
 				: "";
-			this._onError.fire(`GSD process error: ${err.message}.${hint}`);
+			this._onError.fire(`HX process error: ${err.message}.${hint}`);
 		});
 
 		proc.on("exit", (code, signal) => {
 			if (this.process === proc) {
 				this.process = null;
 			}
-			this.rejectAllPending(`GSD process exited (code=${code}, signal=${signal})`);
+			this.rejectAllPending(`HX process exited (code=${code}, signal=${signal})`);
 			this._onConnectionChange.fire(false);
 
 			if (code !== 0 && signal !== "SIGTERM") {
@@ -208,7 +208,7 @@ export class GsdClient implements vscode.Disposable {
 				if (this.restartTimestamps.length > 3) {
 					// Too many crashes within 60s — stop retrying
 					this._onError.fire(
-						`GSD process crashed ${this.restartTimestamps.length} times within 60s. Not restarting. Use "GSD: Start Agent" to retry manually.`,
+						`HX process crashed ${this.restartTimestamps.length} times within 60s. Not restarting. Use "HX: Start Agent" to retry manually.`,
 					);
 				} else if (this.restartCount < 3) {
 					this.restartCount++;
@@ -221,7 +221,7 @@ export class GsdClient implements vscode.Disposable {
 	}
 
 	/**
-	 * Stop the GSD agent process.
+	 * Stop the HX agent process.
 	 */
 	async stop(): Promise<void> {
 		if (!this.process) {
@@ -586,7 +586,7 @@ export class GsdClient implements vscode.Disposable {
 
 	private send(command: Record<string, unknown>): Promise<RpcResponse> {
 		if (!this.process?.stdin) {
-			return Promise.reject(new Error("GSD client not started"));
+			return Promise.reject(new Error("HX client not started"));
 		}
 
 		const id = `req_${++this.requestId}`;

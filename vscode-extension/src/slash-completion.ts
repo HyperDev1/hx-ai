@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import type { GsdClient, SlashCommand } from "./gsd-client.js";
+import type { HxClient, SlashCommand } from "./hx-client.js";
 
 /**
- * CompletionItemProvider that surfaces GSD slash commands when the user
+ * CompletionItemProvider that surfaces HX slash commands when the user
  * types `/` at the start of a line (or after only whitespace) in Markdown,
  * plaintext, and TypeScript/JavaScript files.
  *
@@ -15,7 +15,7 @@ export class GsdSlashCompletionProvider
 	private cachedCommands: SlashCommand[] = [];
 	private disposables: vscode.Disposable[] = [];
 
-	constructor(private readonly client: GsdClient) {
+	constructor(private readonly client: HxClient) {
 		// Refresh cache whenever the connection (re)establishes.
 		this.disposables.push(
 			client.onConnectionChange(async (connected) => {

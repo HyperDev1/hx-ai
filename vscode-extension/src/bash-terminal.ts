@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import type { AgentEvent, GsdClient } from "./gsd-client.js";
+import type { AgentEvent, HxClient } from "./hx-client.js";
 
 /**
- * Routes the GSD agent's Bash tool output to a dedicated VS Code terminal panel.
+ * Routes the HX agent's Bash tool output to a dedicated VS Code terminal panel.
  * Shows streaming output from tool_execution_update events in real time.
  */
 export class GsdBashTerminal implements vscode.Disposable {
@@ -10,7 +10,7 @@ export class GsdBashTerminal implements vscode.Disposable {
 	private writeEmitter: vscode.EventEmitter<string> | undefined;
 	private disposables: vscode.Disposable[] = [];
 
-	constructor(client: GsdClient) {
+	constructor(client: HxClient) {
 		this.disposables.push(
 			client.onEvent((evt: AgentEvent) => this.handleEvent(evt)),
 			client.onConnectionChange((connected) => {
@@ -31,7 +31,7 @@ export class GsdBashTerminal implements vscode.Disposable {
 				open: () => {},
 				close: () => { this.terminal = undefined; },
 			};
-			this.terminal = vscode.window.createTerminal({ name: "GSD Agent", pty });
+			this.terminal = vscode.window.createTerminal({ name: "HX Agent", pty });
 		}
 		return { terminal: this.terminal, writeEmitter: this.writeEmitter! };
 	}

@@ -1,12 +1,12 @@
 import * as vscode from "vscode";
-import type { GsdClient, SessionStats, ThinkingLevel } from "./gsd-client.js";
+import type { HxClient, SessionStats, ThinkingLevel } from "./hx-client.js";
 
 /**
  * WebviewViewProvider that renders a sidebar panel showing connection status,
  * model info, thinking level, token usage, cost, and quick action controls.
  */
 export class GsdSidebarProvider implements vscode.WebviewViewProvider {
-	public static readonly viewId = "gsd-sidebar";
+	public static readonly viewId = "hx-sidebar";
 
 	private view?: vscode.WebviewView;
 	private disposables: vscode.Disposable[] = [];
@@ -14,7 +14,7 @@ export class GsdSidebarProvider implements vscode.WebviewViewProvider {
 
 	constructor(
 		private readonly extensionUri: vscode.Uri,
-		private readonly client: GsdClient,
+		private readonly client: HxClient,
 	) {
 		this.disposables.push(
 			client.onConnectionChange(() => this.refresh()),
@@ -49,40 +49,40 @@ export class GsdSidebarProvider implements vscode.WebviewViewProvider {
 		webviewView.webview.onDidReceiveMessage(async (msg: { command: string; value?: string }) => {
 			switch (msg.command) {
 				case "start":
-					await vscode.commands.executeCommand("gsd.start");
+					await vscode.commands.executeCommand("hx.start");
 					break;
 				case "stop":
-					await vscode.commands.executeCommand("gsd.stop");
+					await vscode.commands.executeCommand("hx.stop");
 					break;
 				case "newSession":
-					await vscode.commands.executeCommand("gsd.newSession");
+					await vscode.commands.executeCommand("hx.newSession");
 					break;
 				case "cycleModel":
-					await vscode.commands.executeCommand("gsd.cycleModel");
+					await vscode.commands.executeCommand("hx.cycleModel");
 					break;
 				case "cycleThinking":
-					await vscode.commands.executeCommand("gsd.cycleThinking");
+					await vscode.commands.executeCommand("hx.cycleThinking");
 					break;
 				case "switchModel":
-					await vscode.commands.executeCommand("gsd.switchModel");
+					await vscode.commands.executeCommand("hx.switchModel");
 					break;
 				case "setThinking":
-					await vscode.commands.executeCommand("gsd.setThinking");
+					await vscode.commands.executeCommand("hx.setThinking");
 					break;
 				case "compact":
-					await vscode.commands.executeCommand("gsd.compact");
+					await vscode.commands.executeCommand("hx.compact");
 					break;
 				case "abort":
-					await vscode.commands.executeCommand("gsd.abort");
+					await vscode.commands.executeCommand("hx.abort");
 					break;
 				case "exportHtml":
-					await vscode.commands.executeCommand("gsd.exportHtml");
+					await vscode.commands.executeCommand("hx.exportHtml");
 					break;
 				case "sessionStats":
-					await vscode.commands.executeCommand("gsd.sessionStats");
+					await vscode.commands.executeCommand("hx.sessionStats");
 					break;
 				case "listCommands":
-					await vscode.commands.executeCommand("gsd.listCommands");
+					await vscode.commands.executeCommand("hx.listCommands");
 					break;
 				case "toggleAutoCompaction":
 					if (this.client.isConnected) {
@@ -100,19 +100,19 @@ export class GsdSidebarProvider implements vscode.WebviewViewProvider {
 					}
 					break;
 				case "setSessionName":
-					await vscode.commands.executeCommand("gsd.setSessionName");
+					await vscode.commands.executeCommand("hx.setSessionName");
 					break;
 				case "copyLastResponse":
-					await vscode.commands.executeCommand("gsd.copyLastResponse");
+					await vscode.commands.executeCommand("hx.copyLastResponse");
 					break;
 				case "autoMode":
 					if (this.client.isConnected) {
-						await this.client.sendPrompt("/gsd auto").catch(() => {});
+						await this.client.sendPrompt("/hx auto").catch(() => {});
 					}
 					break;
 				case "nextUnit":
 					if (this.client.isConnected) {
-						await this.client.sendPrompt("/gsd next").catch(() => {});
+						await this.client.sendPrompt("/hx next").catch(() => {});
 					}
 					break;
 				case "quickTask": {
@@ -121,7 +121,7 @@ export class GsdSidebarProvider implements vscode.WebviewViewProvider {
 						placeHolder: "e.g. fix the typo in README",
 					});
 					if (quickInput && this.client.isConnected) {
-						await this.client.sendPrompt(`/gsd quick ${quickInput}`).catch(() => {});
+						await this.client.sendPrompt(`/hx quick ${quickInput}`).catch(() => {});
 					}
 					break;
 				}
@@ -131,23 +131,23 @@ export class GsdSidebarProvider implements vscode.WebviewViewProvider {
 						placeHolder: "e.g. we should also handle the edge case for...",
 					});
 					if (thought && this.client.isConnected) {
-						await this.client.sendPrompt(`/gsd capture ${thought}`).catch(() => {});
+						await this.client.sendPrompt(`/hx capture ${thought}`).catch(() => {});
 					}
 					break;
 				}
 				case "status":
 					if (this.client.isConnected) {
-						await this.client.sendPrompt("/gsd status").catch(() => {});
+						await this.client.sendPrompt("/hx status").catch(() => {});
 					}
 					break;
 				case "forkSession":
-					await vscode.commands.executeCommand("gsd.forkSession");
+					await vscode.commands.executeCommand("hx.forkSession");
 					break;
 				case "toggleSteeringMode":
-					await vscode.commands.executeCommand("gsd.toggleSteeringMode");
+					await vscode.commands.executeCommand("hx.toggleSteeringMode");
 					break;
 				case "toggleFollowUpMode":
-					await vscode.commands.executeCommand("gsd.toggleFollowUpMode");
+					await vscode.commands.executeCommand("hx.toggleFollowUpMode");
 					break;
 			}
 		});

@@ -1,15 +1,15 @@
 import * as vscode from "vscode";
-import type { AgentEvent, GsdClient } from "./gsd-client.js";
+import type { AgentEvent, HxClient } from "./hx-client.js";
 
 /**
- * Registers the @gsd chat participant that forwards messages to the
- * GSD RPC client and streams tool execution events back to the chat.
+ * Registers the @hx chat participant that forwards messages to the
+ * HX RPC client and streams tool execution events back to the chat.
  */
 export function registerChatParticipant(
 	context: vscode.ExtensionContext,
-	client: GsdClient,
+	client: HxClient,
 ): vscode.Disposable {
-	const participant = vscode.chat.createChatParticipant("gsd.agent", async (
+	const participant = vscode.chat.createChatParticipant("hx.agent", async (
 		request: vscode.ChatRequest,
 		_chatContext: vscode.ChatContext,
 		response: vscode.ChatResponseStream,
@@ -17,12 +17,12 @@ export function registerChatParticipant(
 	) => {
 		// Auto-start the agent if not connected
 		if (!client.isConnected) {
-			response.progress("Starting GSD agent...");
+			response.progress("Starting HX agent...");
 			try {
 				await client.start();
 			} catch (err) {
 				const msg = err instanceof Error ? err.message : String(err);
-				response.markdown(`**Failed to start GSD agent:** ${msg}\n\nMake sure \`gsd\` is installed (\`npm install -g gsd-pi\`) and try again.`);
+				response.markdown(`**Failed to start HX agent:** ${msg}\n\nMake sure \`hx\` is installed (\`npm install -g hx-pi\`) and try again.`);
 				return;
 			}
 		}
@@ -49,7 +49,7 @@ export function registerChatParticipant(
 		const eventHandler = (event: AgentEvent) => {
 			switch (event.type) {
 				case "agent_start":
-					response.progress("GSD is working...");
+					response.progress("HX is working...");
 					break;
 
 				case "tool_execution_start": {
@@ -164,17 +164,17 @@ export function registerChatParticipant(
 		provideFollowups: (_result, _context, _token) => {
 			return [
 				{
-					prompt: "/gsd status",
+					prompt: "/hx status",
 					label: "$(info) Check status",
 					title: "Check project status",
 				},
 				{
-					prompt: "/gsd auto",
+					prompt: "/hx auto",
 					label: "$(rocket) Run auto mode",
 					title: "Run autonomous mode",
 				},
 				{
-					prompt: "/gsd capture",
+					prompt: "/hx capture",
 					label: "$(note) Capture a thought",
 					title: "Capture a thought mid-session",
 				},

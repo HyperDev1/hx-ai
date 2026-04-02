@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import type { AgentEvent, GsdClient } from "./gsd-client.js";
+import type { AgentEvent, HxClient } from "./hx-client.js";
 
 /**
- * Badges files in the VS Code explorer that GSD has written or edited
+ * Badges files in the VS Code explorer that HX has written or edited
  * during the current session.
  */
 export class GsdFileDecorationProvider implements vscode.FileDecorationProvider, vscode.Disposable {
@@ -12,7 +12,7 @@ export class GsdFileDecorationProvider implements vscode.FileDecorationProvider,
 	private modifiedUris = new Set<string>();
 	private disposables: vscode.Disposable[] = [];
 
-	constructor(private readonly client: GsdClient) {
+	constructor(private readonly client: HxClient) {
 		this.disposables.push(
 			this._onDidChangeFileDecorations,
 			client.onEvent((evt: AgentEvent) => this.handleEvent(evt)),
@@ -48,7 +48,7 @@ export class GsdFileDecorationProvider implements vscode.FileDecorationProvider,
 		if (this.modifiedUris.has(uri.toString())) {
 			return {
 				badge: "G",
-				tooltip: "Modified by GSD",
+				tooltip: "Modified by HX",
 				color: new vscode.ThemeColor("gitDecoration.modifiedResourceForeground"),
 			};
 		}
