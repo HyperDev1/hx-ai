@@ -319,13 +319,15 @@ export async function handleStart(
         "  spike           Scope → research → synthesize\n" +
         "  hotfix          Fix → ship (minimal ceremony)\n" +
         "  refactor        Inventory → plan → migrate → verify\n" +
+        "  revise          Assess → scope → plan → iterate → review (multi-round)\n" +
         "  security-audit  Scan → triage → remediate → re-scan\n" +
         "  dep-upgrade     Assess → upgrade → fix → verify\n" +
         "  full-project    Complete GSD with full ceremony\n\n" +
         "Examples:\n" +
         "  /gsd start bugfix fix login button not responding\n" +
         "  /gsd start spike evaluate auth libraries\n" +
-        "  /gsd start hotfix critical: API returns 500\n\n" +
+        "  /gsd start hotfix critical: API returns 500\n" +
+        "  /gsd start revise analytics dashboard layout needs rework\n\n" +
         "Flags:\n" +
         "  --dry-run       Preview what would happen without executing\n" +
         "  --issue <ref>   Link to a GitHub issue\n\n" +

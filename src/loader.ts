@@ -88,7 +88,7 @@ const pkgDir = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'pkg')
 // reads to determine APP_NAME and CONFIG_DIR_NAME
 process.env.PI_PACKAGE_DIR = pkgDir
 process.env.PI_SKIP_VERSION_CHECK = '1'  // GSD runs its own update check in cli.ts — suppress pi's
-process.title = 'gsd'
+process.title = 'hx'
 
 // Print branded banner on first launch (before ~/.gsd/ exists).
 // Set GSD_FIRST_RUN_BANNER so cli.ts skips the duplicate welcome screen.

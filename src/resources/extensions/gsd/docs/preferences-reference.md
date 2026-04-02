@@ -669,3 +669,18 @@ experimental:
 ```
 
 Opts in to RTK shell-command compression. RTK is downloaded automatically on first use. Set `GSD_RTK_DISABLED=1` to force-disable at the environment level regardless of this setting.
+
+## Language Example
+
+```yaml
+---
+version: 1
+language: tr
+---
+```
+
+Sets the response language to Turkish. GSD will communicate with the user in Turkish — narration, explanations, questions, and summaries will all be in the chosen language.
+
+**What stays in English regardless:** code, variable names, commit messages, branch names, CLI output, artifact file names, artifact headings/frontmatter keys, all artifact content (PLAN.md, SUMMARY.md, CONTEXT.md, etc. — these are project documentation and stay language-neutral), technical terms without standard translations.
+
+**Supported languages:** `en` (default), `tr`, `de`, `fr`, `es`, `pt`, `ja`, `ko`, `zh`, `ru`, `ar`, `it`, `nl`, `pl`, `uk`, `hi`.

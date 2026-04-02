@@ -171,6 +171,7 @@ const NESTED_COMPLETIONS: CompletionMap = {
     { cmd: "refactor", desc: "Inventory, plan waves, migrate, verify" },
     { cmd: "security-audit", desc: "Scan, triage, remediate, re-scan" },
     { cmd: "dep-upgrade", desc: "Assess, upgrade, fix breaks, verify" },
+    { cmd: "revise", desc: "Iteratively revise existing work with scope protection" },
     { cmd: "full-project", desc: "Complete GSD workflow with full ceremony" },
     { cmd: "resume", desc: "Resume an in-progress workflow" },
     { cmd: "--list", desc: "List all available templates" },

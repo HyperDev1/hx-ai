@@ -157,7 +157,7 @@ Examples:
     return true;
   }
   if (trimmed.startsWith("knowledge ")) {
-    await handleKnowledge(trimmed.replace(/^knowledge\s+/, "").trim(), ctx);
+    await handleKnowledge(trimmed.replace(/^knowledge\s+/, "").trim(), ctx, pi);
     return true;
   }
   if (trimmed === "knowledge") {

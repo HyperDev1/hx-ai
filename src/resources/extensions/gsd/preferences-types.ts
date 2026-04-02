@@ -93,6 +93,7 @@ export const KNOWN_PREFERENCE_KEYS = new Set<string>([
   "service_tier",
   "forensics_dedup",
   "show_token_cost",
+  "language",
   "experimental",
 ]);
 
@@ -252,6 +253,13 @@ export interface GSDPreferences {
   forensics_dedup?: boolean;
   /** Opt-in: show per-prompt and cumulative session token cost in the footer. Default: false. */
   show_token_cost?: boolean;
+  /**
+   * Response language preference. Controls which language GSD uses when communicating with the user.
+   * Code, technical terms, commit messages, and artifact structure always remain in English.
+   * Only conversational text (narration, explanations, questions) switches to the chosen language.
+   * Default: "en" (English).
+   */
+  language?: "en" | "tr" | "de" | "fr" | "es" | "pt" | "ja" | "ko" | "zh" | "ru" | "ar" | "it" | "nl" | "pl" | "uk" | "hi";
   /**
    * Opt-in experimental features. All features here are disabled by default.
    * See the preferences reference for details on each feature.

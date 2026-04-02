@@ -23,6 +23,7 @@ import {
 import { isAutoActive } from "./auto.js";
 import { projectRoot } from "./commands/context.js";
 import { loadPrompt } from "./prompt-loader.js";
+import { loadEffectiveGSDPreferences } from "./preferences.js";
 
 export function dispatchDoctorHeal(pi: ExtensionAPI, scope: string | undefined, reportText: string, structuredIssues: string): void {
   const workflowPath = process.env.GSD_WORKFLOW_PATH ?? join(process.env.HOME ?? "~", ".gsd", "agent", "GSD-WORKFLOW.md");
@@ -258,27 +259,67 @@ export async function handleSteer(change: string, ctx: ExtensionCommandContext, 
   }
 }
 
-export async function handleKnowledge(args: string, ctx: ExtensionCommandContext): Promise<void> {
+export async function handleKnowledge(args: string, ctx: ExtensionCommandContext, pi?: ExtensionAPI): Promise<void> {
   const parts = args.split(/\s+/);
-  const typeArg = parts[0]?.toLowerCase();
 
-  if (!typeArg || !["rule", "pattern", "lesson"].includes(typeArg)) {
+  // --raw flag: skip interactive refinement, use current behavior
+  const rawMode = parts.includes("--raw");
+  const filteredParts = parts.filter(p => p !== "--raw");
+  const firstArg = filteredParts[0]?.toLowerCase();
+  const isExplicitType = firstArg && ["rule", "pattern", "lesson"].includes(firstArg);
+
+  // ─── No-type mode: user gave text without specifying rule/pattern/lesson ─
+  // Dispatch to LLM to classify and refine
+  if (!isExplicitType && !rawMode && pi) {
+    const fullText = filteredParts.join(" ").trim();
+    if (!fullText) {
+      ctx.ui.notify(
+        "Usage: /gsd knowledge [rule|pattern|lesson] <description>\n" +
+        "       /gsd knowledge <description>  (AI auto-classifies)\n" +
+        "       /gsd knowledge --raw <rule|pattern|lesson> <description>\n" +
+        "Example: /gsd knowledge rule Use real DB for integration tests\n" +
+        "         /gsd knowledge always use prepared statements",
+        "warning",
+      );
+      return;
+    }
+
+    const basePath = process.cwd();
+    const state = await deriveState(basePath);
+    const scope = state.activeMilestone?.id
+      ? `${state.activeMilestone.id}${state.activeSlice ? `/${state.activeSlice.id}` : ""}`
+      : "global";
+    const prefs = loadEffectiveGSDPreferences();
+    const language = prefs?.preferences.language ?? "en";
+
+    const prompt = loadPrompt("knowledge-refine", {
+      type: "auto",
+      entry: fullText,
+      scope,
+      language: language === "en" ? "English" : language,
+    });
+
+    pi.sendMessage(
+      { customType: "gsd-knowledge-refine", content: prompt, display: false },
+      { triggerTurn: true },
+    );
+    return;
+  }
+
+  // ─── No-type mode without pi: fall back to usage message ──────────────
+  if (!isExplicitType) {
     ctx.ui.notify(
-      "Usage: /gsd knowledge <rule|pattern|lesson> <description>\n       /gsd knowledge --raw <rule|pattern|lesson> <description>\nExample: /gsd knowledge rule Use real DB for integration tests",
+      "Usage: /gsd knowledge <rule|pattern|lesson> <description>\n" +
+      "       /gsd knowledge <description>  (AI auto-classifies, requires active session)\n" +
+      "       /gsd knowledge --raw <rule|pattern|lesson> <description>\n" +
+      "Example: /gsd knowledge rule Use real DB for integration tests",
       "warning",
     );
     return;
   }
 
-  // --raw flag: skip interactive refinement, use current behavior
-  const rawMode = parts.includes("--raw");
-  const filteredParts = parts.filter(p => p !== "--raw");
+  // ─── Explicit type mode ────────────────────────────────────────────────
   const actualTypeArg = filteredParts[0]?.toLowerCase();
-
-  if (!actualTypeArg || !["rule", "pattern", "lesson"].includes(actualTypeArg)) {
-    ctx.ui.notify(`Usage: /gsd knowledge ${rawMode ? "--raw " : ""}<rule|pattern|lesson> <description>`, "warning");
-    return;
-  }
 
   const entryText = filteredParts.slice(1).join(" ").trim();
   if (!entryText) {
@@ -293,7 +334,30 @@ export async function handleKnowledge(args: string, ctx: ExtensionCommandContext
     ? `${state.activeMilestone.id}${state.activeSlice ? `/${state.activeSlice.id}` : ""}`
     : "global";
 
-  // Interactive refinement: ask follow-up questions to fill empty fields
+  // ─── Interactive refinement via LLM ────────────────────────────────────
+  // When not in --raw mode and pi is available, dispatch to LLM for:
+  // - Translation to English (knowledge entries are always stored in English)
+  // - Brief discussion to improve clarity
+  // - Confirmation in user's language before saving
+  if (!rawMode && pi) {
+    const prefs = loadEffectiveGSDPreferences();
+    const language = prefs?.preferences.language ?? "en";
+
+    const prompt = loadPrompt("knowledge-refine", {
+      type,
+      entry: entryText,
+      scope,
+      language: language === "en" ? "English" : language,
+    });
+
+    pi.sendMessage(
+      { customType: "gsd-knowledge-refine", content: prompt, display: false },
+      { triggerTurn: true },
+    );
+    return;
+  }
+
+  // ─── Raw mode: direct save without LLM refinement ─────────────────────
   let fields: { why?: string; where?: string; rootCause?: string; fix?: string } | undefined;
 
   if (!rawMode) {

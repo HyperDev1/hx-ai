@@ -370,6 +370,7 @@ function mergePreferences(base: GSDPreferences, override: GSDPreferences): GSDPr
     service_tier: override.service_tier ?? base.service_tier,
     forensics_dedup: override.forensics_dedup ?? base.forensics_dedup,
     show_token_cost: override.show_token_cost ?? base.show_token_cost,
+    language: override.language ?? base.language,
     experimental: (base.experimental || override.experimental)
       ? { ...(base.experimental ?? {}), ...(override.experimental ?? {}) }
       : undefined,
@@ -486,6 +487,35 @@ export function renderPreferencesForSystemPrompt(preferences: GSDPreferences, re
     for (const instruction of preferences.custom_instructions) {
       lines.push(`  - ${instruction}`);
     }
+  }
+
+  if (preferences.language && preferences.language !== "en") {
+    const languageNames: Record<string, string> = {
+      tr: "Turkish (Türkçe)",
+      de: "German (Deutsch)",
+      fr: "French (Français)",
+      es: "Spanish (Español)",
+      pt: "Portuguese (Português)",
+      ja: "Japanese (日本語)",
+      ko: "Korean (한국어)",
+      zh: "Chinese (中文)",
+      ru: "Russian (Русский)",
+      ar: "Arabic (العربية)",
+      it: "Italian (Italiano)",
+      nl: "Dutch (Nederlands)",
+      pl: "Polish (Polski)",
+      uk: "Ukrainian (Українська)",
+      hi: "Hindi (हिन्दी)",
+    };
+    const langLabel = languageNames[preferences.language] ?? preferences.language;
+    lines.push(
+      "",
+      "## Language",
+      `- Respond to the user in **${langLabel}**.`,
+      "- All conversational text — narration, explanations, questions, summaries, error descriptions — must be in this language.",
+      "- All GSD artifacts (PLAN.md, SUMMARY.md, CONTEXT.md, SCOPE.md, ASSESS.md, ROADMAP.md, UAT.md, etc.) must be written in English. This includes their headings, body text, task descriptions, narratives, and any prose content inside them. Artifacts are project documentation — they stay language-neutral.",
+      "- Keep the following in English regardless of language setting: code, variable names, commit messages, branch names, CLI output, artifact file names, artifact structure (headings, frontmatter keys), technical terms that have no standard translation, and GSD commands.",
+    );
   }
 
   return lines.join("\n");

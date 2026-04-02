@@ -80,6 +80,16 @@
       "artifact_dir": ".gsd/workflows/upgrades/",
       "estimated_complexity": "medium",
       "requires_project": false
+    },
+    "revise": {
+      "name": "Revise",
+      "description": "Iteratively revise existing work with scope protection and multi-round feedback",
+      "file": "revise.md",
+      "phases": ["assess", "scope", "plan", "iterate", "review"],
+      "triggers": ["revise", "revision", "redo", "iterate", "not right", "doesn't look", "change this", "fix the design", "looks wrong", "try again", "olmadı", "beğenmedim", "revize", "değiştir"],
+      "artifact_dir": ".gsd/workflows/revisions/",
+      "estimated_complexity": "medium",
+      "requires_project": false
     }
   }
 }

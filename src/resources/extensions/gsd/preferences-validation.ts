@@ -793,6 +793,16 @@ export function validatePreferences(preferences: GSDPreferences): {
     }
   }
 
+  // ─── Language ─────────────────────────────────────────────────────
+  if (preferences.language !== undefined) {
+    const validLanguages = new Set(["en", "tr", "de", "fr", "es", "pt", "ja", "ko", "zh", "ru", "ar", "it", "nl", "pl", "uk", "hi"]);
+    if (typeof preferences.language === "string" && validLanguages.has(preferences.language)) {
+      validated.language = preferences.language as GSDPreferences["language"];
+    } else {
+      errors.push(`language must be one of: ${[...validLanguages].join(", ")}`);
+    }
+  }
+
   // ─── Experimental Features ────────────────────────────────────────
   if (preferences.experimental !== undefined) {
     if (typeof preferences.experimental === "object" && preferences.experimental !== null) {
