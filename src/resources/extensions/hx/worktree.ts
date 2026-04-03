@@ -75,18 +75,18 @@ export function captureIntegrationBranch(basePath: string, milestoneId: string):
  * paths contain the intermediate `projects/<hash>/` segment that the old
  * single-marker check missed.
  */
-function findWorktreeSegment(normalizedPath: string): { gsdIdx: number; afterWorktrees: number } | null {
+function findWorktreeSegment(normalizedPath: string): { hxIdx: number; afterWorktrees: number } | null {
   // Direct layout: /.hx/worktrees/<name>
   const directMarker = "/.hx/worktrees/";
   const idx = normalizedPath.indexOf(directMarker);
   if (idx !== -1) {
-    return { gsdIdx: idx, afterWorktrees: idx + directMarker.length };
+    return { hxIdx: idx, afterWorktrees: idx + directMarker.length };
   }
   // Symlink-resolved layout: /.hx/projects/<hash>/worktrees/<name>
   const symlinkRe = /\/\.hx\/projects\/[a-f0-9]+\/worktrees\//;
   const match = normalizedPath.match(symlinkRe);
   if (match && match.index !== undefined) {
-    return { gsdIdx: match.index, afterWorktrees: match.index + match[0].length };
+    return { hxIdx: match.index, afterWorktrees: match.index + match[0].length };
   }
   return null;
 }
@@ -134,19 +134,19 @@ export function resolveProjectRoot(basePath: string): string {
 
   // Candidate root via the string-slice heuristic
   const sepChar = basePath.includes("\\") ? "\\" : "/";
-  const gsdMarker = `${sepChar}.hx${sepChar}`;
-  const gsdIdx = basePath.indexOf(gsdMarker);
-  const candidate = gsdIdx !== -1
-    ? basePath.slice(0, gsdIdx)
-    : basePath.slice(0, seg.gsdIdx);
+  const hxMarker = `${sepChar}.hx${sepChar}`;
+  const hxIdx = basePath.indexOf(hxMarker);
+  const candidate = hxIdx !== -1
+    ? basePath.slice(0, hxIdx)
+    : basePath.slice(0, seg.hxIdx);
 
   // Layer 2: Guard against resolving to the user's home directory.
   // When .hx is a symlink into ~/.hx/projects/<hash>, the resolved path
   // contains /.hx/ at the user-level boundary. Slicing there yields ~ — wrong.
   const hxHome = normalizePathForCompare(process.env.HX_HOME || join(homedir(), ".hx"));
-  const candidateGsdPath = normalizePathForCompare(join(candidate, ".hx"));
+  const candidateHxPath = normalizePathForCompare(join(candidate, ".hx"));
 
-  if (candidateGsdPath === hxHome || candidateGsdPath.startsWith(hxHome + "/")) {
+  if (candidateHxPath === hxHome || candidateHxPath.startsWith(hxHome + "/")) {
     // The candidate is the home directory (or within it in a way that .hx
     // maps to the user-level HX dir). Try to recover the real project root
     // from the worktree's .git file.

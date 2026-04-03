@@ -158,8 +158,8 @@ In a single pass:
 Preserve the specification's exact terminology, emphasis, and specific framing. Do not paraphrase domain-specific language into generics. If the spec said "craft feel," write "craft feel" — not "high-quality user experience." The context file is downstream agents' only window into this conversation — flattening specifics into generics loses the signal that shaped every decision.
 
 4. Write `{{contextPath}}` — use the **Context** output template below. Preserve key risks, unknowns, existing codebase constraints, integration points, and relevant requirements surfaced during research. Include an "Assumptions" section documenting every judgment call.
-5. Call `gsd_plan_milestone` to create the roadmap. Decompose into demoable vertical slices with risk, depends, demo sentences, proof strategy, verification classes, milestone definition of done, requirement coverage, and a boundary map. If the milestone crosses multiple runtime boundaries, include an explicit final integration slice that proves the assembled system works end-to-end in a real environment. Use the **Roadmap** output template below to structure the tool call parameters.
-6. For each architectural or pattern decision, call `gsd_decision_save` — the tool auto-assigns IDs and regenerates `.hx/DECISIONS.md` automatically.
+5. Call `hx_plan_milestone` to create the roadmap. Decompose into demoable vertical slices with risk, depends, demo sentences, proof strategy, verification classes, milestone definition of done, requirement coverage, and a boundary map. If the milestone crosses multiple runtime boundaries, include an explicit final integration slice that proves the assembled system works end-to-end in a real environment. Use the **Roadmap** output template below to structure the tool call parameters.
+6. For each architectural or pattern decision, call `hx_decision_save` — the tool auto-assigns IDs and regenerates `.hx/DECISIONS.md` automatically.
 7. {{commitInstruction}}
 
 After writing the files, say exactly: "Milestone {{milestoneId}} ready." — nothing else. Auto-mode will start automatically.
@@ -168,15 +168,15 @@ After writing the files, say exactly: "Milestone {{milestoneId}} ready." — not
 
 #### Phase 1: Shared artifacts
 
-1. For each milestone, call `gsd_milestone_generate_id` to get its ID — never invent milestone IDs manually. Then `mkdir -p .hx/milestones/<ID>/slices` for each.
+1. For each milestone, call `hx_milestone_generate_id` to get its ID — never invent milestone IDs manually. Then `mkdir -p .hx/milestones/<ID>/slices` for each.
 2. Write `.hx/PROJECT.md` — use the **Project** output template below.
 3. Write `.hx/REQUIREMENTS.md` — use the **Requirements** output template below. Capture Active, Deferred, Out of Scope, and any already Validated requirements. Later milestones may have provisional ownership where slice plans do not exist yet.
-4. For any architectural or pattern decisions, call `gsd_decision_save` — the tool auto-assigns IDs and regenerates `.hx/DECISIONS.md` automatically.
+4. For any architectural or pattern decisions, call `hx_decision_save` — the tool auto-assigns IDs and regenerates `.hx/DECISIONS.md` automatically.
 
 #### Phase 2: Primary milestone
 
 5. Write a full `CONTEXT.md` for the primary milestone (the first in sequence). Include an "Assumptions" section.
-6. Call `gsd_plan_milestone` for **only the primary milestone** — detail-planning later milestones now is waste because the codebase will change. Include requirement coverage and a milestone definition of done.
+6. Call `hx_plan_milestone` for **only the primary milestone** — detail-planning later milestones now is waste because the codebase will change. Include requirement coverage and a milestone definition of done.
 
 #### MANDATORY: depends_on Frontmatter in CONTEXT.md
 
@@ -243,11 +243,11 @@ After writing the files, say exactly: "Milestone {{milestoneId}} ready." — not
 - **Document assumptions** — every judgment call gets noted in CONTEXT.md under "Assumptions" with reasoning
 - **Investigate thoroughly** — scout codebase, check library docs, web search. Same rigor as interactive mode.
 - **Do focused research** — identify table stakes, domain standards, omissions, scope traps. Same rigor as interactive mode.
-- **Use proper tools** — `gsd_plan_milestone` for roadmaps, `gsd_decision_save` for decisions, `gsd_milestone_generate_id` for IDs
+- **Use proper tools** — `hx_plan_milestone` for roadmaps, `hx_decision_save` for decisions, `hx_milestone_generate_id` for IDs
 - **Print artifacts in chat** — requirements table, roadmap preview, depth summary. The TUI scrollback is the user's audit trail.
 - **Use depends_on frontmatter** for multi-milestone sequences
 - **Anti-reduction rule** — if the spec describes a big vision, plan the big vision. Phase complexity — don't cut it.
-- **Naming convention** — always use `gsd_milestone_generate_id` for IDs. Directories use bare IDs, files use ID-SUFFIX format.
+- **Naming convention** — always use `hx_milestone_generate_id` for IDs. Directories use bare IDs, files use ID-SUFFIX format.
 - **End with "Milestone {{milestoneId}} ready."** — this triggers auto-start detection
 
 {{inlinedTemplates}}

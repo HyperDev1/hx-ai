@@ -17,8 +17,8 @@ import { resolveSearchProviderFromPreferences } from '../hx/preferences.js'
 // Compute authFilePath locally instead of importing from app-paths.ts,
 // because extensions are copied to ~/.hx/agent/extensions/ at runtime
 // where the relative import '../../../app-paths.ts' doesn't resolve.
-const gsdHome = process.env.HX_HOME || join(homedir(), '.hx')
-const authFilePath = join(gsdHome, 'agent', 'auth.json')
+const hxHome = process.env.HX_HOME || join(homedir(), '.hx')
+const authFilePath = join(hxHome, 'agent', 'auth.json')
 
 export type SearchProvider = 'tavily' | 'brave' | 'ollama'
 export type SearchProviderPreference = SearchProvider | 'auto'

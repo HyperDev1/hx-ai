@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # S04 verification — npm pack tarball install smoke test
-# Checks: dist integrity, GSD_BUNDLED_EXTENSION_PATHS, prepublishOnly,
+# Checks: dist integrity, HX_BUNDLED_EXTENSION_PATHS, prepublishOnly,
 #         npm pack dry-run, tarball install, binary exists, launch (no extension
 #         errors, "hx" branding), ~/.hx/ untouched, non-TTY warning/no exit 1.
 
@@ -38,20 +38,20 @@ else
 fi
 
 # ----------------------------------------------------------------
-# Check 2 — GSD_BUNDLED_EXTENSION_PATHS does NOT reference src/resources
+# Check 2 — HX_BUNDLED_EXTENSION_PATHS does NOT reference src/resources
 # ----------------------------------------------------------------
 # The variable must be present and must use agentDir-based paths only.
-paths_line=$(grep "GSD_BUNDLED_EXTENSION_PATHS" dist/loader.js | grep -v "src/resources" | head -1)
+paths_line=$(grep "HX_BUNDLED_EXTENSION_PATHS" dist/loader.js | grep -v "src/resources" | head -1)
 if [ -n "$paths_line" ]; then
   # Double-check: none of the actual join() lines (not comments) reference src/resources.
   # We look only at lines containing join( to avoid matching comment lines like "NOT src/resources".
-  if grep -A 15 "GSD_BUNDLED_EXTENSION_PATHS" dist/loader.js | grep "join(" | grep -q "src/resources"; then
-    fail "2 — GSD_BUNDLED_EXTENSION_PATHS still references src/resources path(s)"
+  if grep -A 15 "HX_BUNDLED_EXTENSION_PATHS" dist/loader.js | grep "join(" | grep -q "src/resources"; then
+    fail "2 — HX_BUNDLED_EXTENSION_PATHS still references src/resources path(s)"
   else
-    pass "2 — GSD_BUNDLED_EXTENSION_PATHS uses agentDir-based paths (no src/resources)"
+    pass "2 — HX_BUNDLED_EXTENSION_PATHS uses agentDir-based paths (no src/resources)"
   fi
 else
-  fail "2 — GSD_BUNDLED_EXTENSION_PATHS line not found or still references src/resources"
+  fail "2 — HX_BUNDLED_EXTENSION_PATHS line not found or still references src/resources"
 fi
 
 echo ""
@@ -162,7 +162,7 @@ wait "$smoke_pid" 2>/dev/null || true
 ext_errors=$(grep "Extension load error" "$smoke_out" 2>/dev/null | wc -l | tr -d ' ')
 # Strip ANSI escape codes for branding check
 plain_out=$(sed 's/\x1b\[[0-9;]*m//g' "$smoke_out" 2>/dev/null || cat "$smoke_out")
-has_gsd=$(echo "$plain_out" | grep -qi "hx\|get shit done" && echo "yes" || echo "no")
+has_hx=$(echo "$plain_out" | grep -qi "hx\|get shit done" && echo "yes" || echo "no")
 
 if [ "$ext_errors" -eq 0 ]; then
   pass "8a — zero Extension load errors on launch"
@@ -171,7 +171,7 @@ else
   grep "Extension load error" "$smoke_out" | head -5 | sed 's/^/    /'
 fi
 
-if [ "$has_gsd" = "yes" ]; then
+if [ "$has_hx" = "yes" ]; then
   pass "8b — \"hx\" / \"get shit done\" branding found in launch output"
 else
   # Fallback: check if binary self-identifies differently (not "pi")

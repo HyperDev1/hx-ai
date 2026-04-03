@@ -19,8 +19,8 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import {
   type PendingUiRequest,
-  useGSDWorkspaceActions,
-  useGSDWorkspaceState,
+  useHXWorkspaceActions,
+  useHXWorkspaceState,
 } from "@/lib/hx-workspace-store"
 import { cn } from "@/lib/utils"
 
@@ -252,8 +252,8 @@ function RequestBody({
 }
 
 export function FocusedPanel() {
-  const workspace = useGSDWorkspaceState()
-  const { respondToUiRequest, dismissUiRequest } = useGSDWorkspaceActions()
+  const workspace = useHXWorkspaceState()
+  const { respondToUiRequest, dismissUiRequest } = useHXWorkspaceActions()
 
   const pending = workspace.pendingUiRequests
   const isOpen = pending.length > 0

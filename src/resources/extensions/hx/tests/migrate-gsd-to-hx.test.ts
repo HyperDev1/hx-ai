@@ -119,16 +119,16 @@ test("updates .gitignore from .gsd to .hx", () => {
 // ─── migrateGlobalGsdToHx ───────────────────────────────────────────
 
 test("syncs auth.json from ~/.gsd/agent/ to ~/.hx/agent/", () => {
-  const gsdHome = makeTempDir("hx-home-");
+  const legacyHome = makeTempDir("hx-home-");
   const hxHome = makeTempDir("hx-home-");
   try {
-    mkdirSync(join(gsdHome, "agent"), { recursive: true });
-    writeFileSync(join(gsdHome, "agent", "auth.json"), '{"anthropic":{"type":"api_key"}}');
+    mkdirSync(join(legacyHome, "agent"), { recursive: true });
+    writeFileSync(join(legacyHome, "agent", "auth.json"), '{"anthropic":{"type":"api_key"}}');
 
     // Set env vars for the test
     const origGsd = process.env.GSD_HOME;
     const origHx = process.env.HX_HOME;
-    process.env.GSD_HOME = gsdHome;
+    process.env.GSD_HOME = legacyHome;
     process.env.HX_HOME = hxHome;
 
     try {
@@ -140,23 +140,23 @@ test("syncs auth.json from ~/.gsd/agent/ to ~/.hx/agent/", () => {
       if (origHx !== undefined) process.env.HX_HOME = origHx; else delete process.env.HX_HOME;
     }
   } finally {
-    cleanup(gsdHome);
+    cleanup(legacyHome);
     cleanup(hxHome);
   }
 });
 
 test("does not overwrite existing hx auth.json", () => {
-  const gsdHome = makeTempDir("hx-home-");
+  const legacyHome = makeTempDir("hx-home-");
   const hxHome = makeTempDir("hx-home-");
   try {
-    mkdirSync(join(gsdHome, "agent"), { recursive: true });
+    mkdirSync(join(legacyHome, "agent"), { recursive: true });
     mkdirSync(join(hxHome, "agent"), { recursive: true });
-    writeFileSync(join(gsdHome, "agent", "auth.json"), '{"old":"gsd"}');
+    writeFileSync(join(legacyHome, "agent", "auth.json"), '{"old":"gsd"}');
     writeFileSync(join(hxHome, "agent", "auth.json"), '{"fresh":"hx"}');
 
     const origGsd = process.env.GSD_HOME;
     const origHx = process.env.HX_HOME;
-    process.env.GSD_HOME = gsdHome;
+    process.env.GSD_HOME = legacyHome;
     process.env.HX_HOME = hxHome;
 
     try {
@@ -169,7 +169,7 @@ test("does not overwrite existing hx auth.json", () => {
       if (origHx !== undefined) process.env.HX_HOME = origHx; else delete process.env.HX_HOME;
     }
   } finally {
-    cleanup(gsdHome);
+    cleanup(legacyHome);
     cleanup(hxHome);
   }
 });

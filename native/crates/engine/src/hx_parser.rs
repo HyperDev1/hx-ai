@@ -7,7 +7,7 @@
 //! Key operations:
 //! - `parseFrontmatter`: split frontmatter from body, parse YAML-like key-value pairs
 //! - `extractSection`: extract content under a specific heading
-//! - `batchParseGsdFiles`: walk a `.hx/` tree and parse all `.md` files in parallel
+//! - `batchParseHxFiles`: walk a `.hx/` tree and parse all `.md` files in parallel
 //! - `parseRoadmapFile`: parse structured roadmap data from content
 
 use std::path::Path;
@@ -38,7 +38,7 @@ pub struct SectionResult {
 
 /// A single parsed HX file from batch parsing.
 #[napi(object)]
-pub struct ParsedGsdFile {
+pub struct ParsedHxFile {
     /// Relative path from the base directory.
     pub path: String,
     /// Parsed frontmatter as JSON string.
@@ -56,7 +56,7 @@ pub struct ParsedGsdFile {
 #[napi(object)]
 pub struct BatchParseResult {
     /// All parsed files.
-    pub files: Vec<ParsedGsdFile>,
+    pub files: Vec<ParsedHxFile>,
     /// Number of files processed.
     pub count: u32,
 }
@@ -729,8 +729,8 @@ pub fn extract_all_sections(content: String, level: Option<u32>) -> String {
 /// Reads all markdown files under the given directory, parses frontmatter
 /// and extracts all level-2 sections for each file. Returns all results
 /// in a single call, avoiding repeated JS<->native boundary crossings.
-#[napi(js_name = "batchParseGsdFiles")]
-pub fn batch_parse_gsd_files(directory: String) -> Result<BatchParseResult> {
+#[napi(js_name = "batchParseHxFiles")]
+pub fn batch_parse_hx_files(directory: String) -> Result<BatchParseResult> {
     let dir_path = Path::new(&directory);
     if !dir_path.exists() {
         return Ok(BatchParseResult {
@@ -767,7 +767,7 @@ pub fn batch_parse_gsd_files(directory: String) -> Result<BatchParseResult> {
         let sections = extract_all_sections_internal(body, 2);
         let sections_json = sections_to_json(&sections);
 
-        parsed_files.push(ParsedGsdFile {
+        parsed_files.push(ParsedHxFile {
             path: path.clone(),
             metadata,
             body: body.to_string(),
@@ -838,15 +838,15 @@ pub fn parse_roadmap_file(content: String) -> NativeRoadmap {
 // ─── HX Tree Scanner ───────────────────────────────────────────────────────
 
 #[napi(object)]
-pub struct GsdTreeEntry {
+pub struct HxTreeEntry {
     pub path: String,
     pub name: String,
     #[napi(js_name = "isDir")]
     pub is_dir: bool,
 }
 
-#[napi(js_name = "scanGsdTree")]
-pub fn scan_gsd_tree(directory: String) -> Result<Vec<GsdTreeEntry>> {
+#[napi(js_name = "scanHxTree")]
+pub fn scan_hx_tree(directory: String) -> Result<Vec<HxTreeEntry>> {
     let base = Path::new(&directory);
     if !base.exists() {
         return Ok(Vec::new());
@@ -856,7 +856,7 @@ pub fn scan_gsd_tree(directory: String) -> Result<Vec<GsdTreeEntry>> {
     Ok(entries)
 }
 
-fn collect_tree_entries(base: &Path, dir: &Path, entries: &mut Vec<GsdTreeEntry>) -> Result<()> {
+fn collect_tree_entries(base: &Path, dir: &Path, entries: &mut Vec<HxTreeEntry>) -> Result<()> {
     let read_dir = match std::fs::read_dir(dir) {
         Ok(rd) => rd,
         Err(e) => {
@@ -886,7 +886,7 @@ fn collect_tree_entries(base: &Path, dir: &Path, entries: &mut Vec<GsdTreeEntry>
         let name = entry.file_name().to_string_lossy().to_string();
         let is_dir = file_type.is_dir();
 
-        entries.push(GsdTreeEntry {
+        entries.push(HxTreeEntry {
             path: relative,
             name,
             is_dir,

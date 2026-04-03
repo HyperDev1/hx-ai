@@ -14,20 +14,20 @@ const filesRoute = await import("../../../web/app/api/files/route.ts");
 const workspaceStatus = await import("../../../web/lib/workspace-status.ts");
 
 // ─── Helpers ──────────────────────────────────────────────────────────
-function makeGsdFixture(): { root: string; gsdDir: string; cleanup: () => void } {
+function makeHxFixture(): { root: string; hxDir: string; cleanup: () => void } {
   const root = mkdtempSync(join(tmpdir(), "hx-state-surfaces-"));
   const hxDir = join(root, ".hx");
-  mkdirSync(gsdDir, { recursive: true });
+  mkdirSync(hxDir, { recursive: true });
   return {
     root,
-    gsdDir,
+    hxDir,
     cleanup: () => rmSync(root, { recursive: true, force: true }),
   };
 }
 
 // ─── Group 1: Workspace index — risk/depends/demo fields ─────────────
 test("indexWorkspace extracts risk, depends, and demo from roadmap", async (t) => {
-  const { root, gsdDir, cleanup } = makeGsdFixture();
+  const { root, hxDir, cleanup } = makeHxFixture();
 
   t.after(() => { cleanup(); });
 
@@ -80,7 +80,7 @@ test("indexWorkspace extracts risk, depends, and demo from roadmap", async (t) =
 });
 
 test("indexWorkspace handles slices without risk/depends/demo", async (t) => {
-  const { root, gsdDir, cleanup } = makeGsdFixture();
+  const { root, hxDir, cleanup } = makeHxFixture();
 
   t.after(() => { cleanup(); });
 
@@ -192,7 +192,7 @@ test("getTaskStatus returns correct statuses", () => {
 
 // ─── Group 3: Files API — tree listing ───────────────────────────────
 test("files API returns tree listing of .hx/ directory", async (t) => {
-  const { root, gsdDir, cleanup } = makeGsdFixture();
+  const { root, hxDir, cleanup } = makeHxFixture();
   const origEnv = process.env.HX_WEB_PROJECT_CWD;
 
   t.after(() => {
@@ -232,7 +232,7 @@ test("files API returns tree listing of .hx/ directory", async (t) => {
 
 // ─── Group 4: Files API — file content ───────────────────────────────
 test("files API returns file content for valid path", async (t) => {
-  const { root, gsdDir, cleanup } = makeGsdFixture();
+  const { root, hxDir, cleanup } = makeHxFixture();
   const origEnv = process.env.HX_WEB_PROJECT_CWD;
 
   t.after(() => {
@@ -254,7 +254,7 @@ test("files API returns file content for valid path", async (t) => {
 });
 
 test("files API returns content for nested files", async (t) => {
-  const { root, gsdDir, cleanup } = makeGsdFixture();
+  const { root, hxDir, cleanup } = makeHxFixture();
   const origEnv = process.env.HX_WEB_PROJECT_CWD;
 
   t.after(() => {
@@ -280,7 +280,7 @@ test("files API returns content for nested files", async (t) => {
 
 // ─── Group 5: Files API — security: path traversal rejection ─────────
 test("files API rejects path traversal with ../", async (t) => {
-  const { root, cleanup } = makeGsdFixture();
+  const { root, cleanup } = makeHxFixture();
   const origEnv = process.env.HX_WEB_PROJECT_CWD;
 
   t.after(() => {
@@ -301,7 +301,7 @@ test("files API rejects path traversal with ../", async (t) => {
 });
 
 test("files API rejects absolute paths", async (t) => {
-  const { root, cleanup } = makeGsdFixture();
+  const { root, cleanup } = makeHxFixture();
   const origEnv = process.env.HX_WEB_PROJECT_CWD;
 
   t.after(() => {
@@ -322,7 +322,7 @@ test("files API rejects absolute paths", async (t) => {
 });
 
 test("files API returns 404 for missing files", async (t) => {
-  const { root, cleanup } = makeGsdFixture();
+  const { root, cleanup } = makeHxFixture();
   const origEnv = process.env.HX_WEB_PROJECT_CWD;
 
   t.after(() => {
@@ -378,7 +378,7 @@ const MOCK_DATA_PATTERNS = [
   /const\s+recentActivity\s*=\s*\[/,      // const recentActivity = [...]
   /const\s+currentSliceTasks\s*=\s*\[/,   // const currentSliceTasks = [...]
   /const\s+modelUsage\s*=\s*\[/,          // const modelUsage = [...]
-  /const\s+gsdFiles\s*=\s*\[/,            // const gsdFiles = [...]
+  /const\s+hxFiles\s*=\s*\[/,            // const hxFiles = [...]
   /AutoModeState.*idle.*working/,          // old enum-style mock state
   /Lorem\s+ipsum/i,                        // lorem placeholder text
   /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z["'](?:.*,\s*$)/m,  // hardcoded ISO timestamps in array literals

@@ -23,7 +23,7 @@ import {
   mergeWorktreeToMain,
   diffWorktreeAll,
   diffWorktreeNumstat,
-  getWorktreeGSDDiff,
+  getWorktreeHXDiff,
   getWorktreeCodeDiff,
   getWorktreeLog,
   worktreeBranchName,
@@ -291,7 +291,7 @@ function hasExistingMilestones(wtPath: string): boolean {
  * Clear HX planning artifacts so auto-mode starts fresh with the discuss flow.
  * Keeps the .hx/ directory structure intact but removes milestones and root planning files.
  */
-function clearGSDPlans(wtPath: string): void {
+function clearHXPlans(wtPath: string): void {
   const mDir = milestonesDir(wtPath);
   if (existsSync(mDir)) {
     rmSync(mDir, { recursive: true, force: true });
@@ -353,7 +353,7 @@ async function handleCreate(
         declineLabel: "Start fresh",
       });
       if (!keepExisting) {
-        clearGSDPlans(info.path);
+        clearHXPlans(info.path);
         clearedPlans = true;
       }
     }
@@ -585,7 +585,7 @@ async function handleMerge(
     // Gather merge context — full repo diff, not just .hx/
     const diffSummary = diffWorktreeAll(basePath, name);
     const numstat = diffWorktreeNumstat(basePath, name);
-    const hxDiff = getWorktreeGSDDiff(basePath, name);
+    const hxDiff = getWorktreeHXDiff(basePath, name);
     const codeDiff = getWorktreeCodeDiff(basePath, name);
     const commitLog = getWorktreeLog(basePath, name);
 
@@ -605,13 +605,13 @@ async function handleMerge(
     for (const s of numstat) { totalAdded += s.added; totalRemoved += s.removed; }
 
     // Split files into code vs HX for the preview
-    const isGSD = (f: string) => f.startsWith(".hx/");
-    const codeChanges = diffSummary.added.filter(f => !isGSD(f)).length
-      + diffSummary.modified.filter(f => !isGSD(f)).length
-      + diffSummary.removed.filter(f => !isGSD(f)).length;
-    const hxChanges = diffSummary.added.filter(isGSD).length
-      + diffSummary.modified.filter(isGSD).length
-      + diffSummary.removed.filter(isGSD).length;
+    const isHx = (f: string) => f.startsWith(".hx/");
+    const codeChanges = diffSummary.added.filter(f => !isHx(f)).length
+      + diffSummary.modified.filter(f => !isHx(f)).length
+      + diffSummary.removed.filter(f => !isHx(f)).length;
+    const hxChanges = diffSummary.added.filter(isHx).length
+      + diffSummary.modified.filter(isHx).length
+      + diffSummary.removed.filter(isHx).length;
 
     // Format a file line with +/- stats
     const formatFileLine = (prefix: string, file: string): string => {

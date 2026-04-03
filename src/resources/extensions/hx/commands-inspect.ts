@@ -50,9 +50,9 @@ export async function handleInspect(ctx: ExtensionCommandContext): Promise<void>
     const { isDbAvailable, _getAdapter, openDatabase } = await import("./hx-db.js");
 
     if (!isDbAvailable()) {
-      const gsdDir = hxRoot(process.cwd());
-      const dbPath = join(gsdDir, "hx.db");
-      if (!existsSync(gsdDir) || !existsSync(dbPath) || !openDatabase(dbPath)) {
+      const hxDir = hxRoot(process.cwd());
+      const dbPath = join(hxDir, "hx.db");
+      if (!existsSync(hxDir) || !existsSync(dbPath) || !openDatabase(dbPath)) {
         ctx.ui.notify("No HX database available. Run /hx auto to create one.", "info");
         return;
       }

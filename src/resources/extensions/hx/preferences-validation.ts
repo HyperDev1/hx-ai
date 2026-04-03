@@ -2,7 +2,7 @@
  * Validation logic for HX preferences.
  *
  * Pure validation -- no filesystem access, no loading, no merging.
- * Accepts a raw GSDPreferences object and returns a sanitized copy
+ * Accepts a raw HXPreferences object and returns a sanitized copy
  * together with any errors and warnings.
  */
 
@@ -18,20 +18,20 @@ import {
 
   SKILL_ACTIONS,
   type WorkflowMode,
-  type GSDPreferences,
-  type GSDSkillRule,
+  type HXPreferences,
+  type HXSkillRule,
 } from "./preferences-types.js";
 
 const VALID_TOKEN_PROFILES = new Set<TokenProfile>(["budget", "balanced", "quality"]);
 
-export function validatePreferences(preferences: GSDPreferences): {
-  preferences: GSDPreferences;
+export function validatePreferences(preferences: HXPreferences): {
+  preferences: HXPreferences;
   errors: string[];
   warnings: string[];
 } {
   const errors: string[] = [];
   const warnings: string[] = [];
-  const validated: GSDPreferences = {};
+  const validated: HXPreferences = {};
 
   // ─── Unknown Key Detection ──────────────────────────────────────────
   // Common key migration hints for pi-level settings that don't map to HX prefs
@@ -97,7 +97,7 @@ export function validatePreferences(preferences: GSDPreferences): {
   validated.custom_instructions = normalizeStringArray(preferences.custom_instructions);
 
   if (preferences.skill_rules) {
-    const validRules: GSDSkillRule[] = [];
+    const validRules: HXSkillRule[] = [];
     for (const rule of preferences.skill_rules) {
       if (!rule || typeof rule !== "object") {
         errors.push("invalid skill_rules entry");
@@ -108,11 +108,11 @@ export function validatePreferences(preferences: GSDPreferences): {
         errors.push("skill_rules entry missing when");
         continue;
       }
-      const validatedRule: GSDSkillRule = { when };
+      const validatedRule: HXSkillRule = { when };
       for (const action of SKILL_ACTIONS) {
         const values = normalizeStringArray((rule as unknown as Record<string, unknown>)[action]);
         if (values.length > 0) {
-          validatedRule[action as keyof GSDSkillRule] = values as never;
+          validatedRule[action as keyof HXSkillRule] = values as never;
         }
       }
       if (!validatedRule.use && !validatedRule.prefer && !validatedRule.avoid) {
@@ -174,7 +174,7 @@ export function validatePreferences(preferences: GSDPreferences): {
   if (preferences.search_provider !== undefined) {
     const validSearchProviders = new Set(["brave", "tavily", "ollama", "native", "auto"]);
     if (typeof preferences.search_provider === "string" && validSearchProviders.has(preferences.search_provider)) {
-      validated.search_provider = preferences.search_provider as GSDPreferences["search_provider"];
+      validated.search_provider = preferences.search_provider as HXPreferences["search_provider"];
     } else {
       errors.push(`search_provider must be one of: brave, tavily, ollama, native, auto`);
     }
@@ -247,7 +247,7 @@ export function validatePreferences(preferences: GSDPreferences): {
   if (preferences.cmux !== undefined) {
     if (preferences.cmux && typeof preferences.cmux === "object") {
       const cmux = preferences.cmux as Record<string, unknown>;
-      const validatedCmux: NonNullable<GSDPreferences["cmux"]> = {};
+      const validatedCmux: NonNullable<HXPreferences["cmux"]> = {};
       if (cmux.enabled !== undefined) validatedCmux.enabled = !!cmux.enabled;
       if (cmux.notifications !== undefined) validatedCmux.notifications = !!cmux.notifications;
       if (cmux.sidebar !== undefined) validatedCmux.sidebar = !!cmux.sidebar;
@@ -728,7 +728,7 @@ export function validatePreferences(preferences: GSDPreferences): {
   if (preferences.context_selection !== undefined) {
     const validModes = new Set(["full", "smart"]);
     if (typeof preferences.context_selection === "string" && validModes.has(preferences.context_selection)) {
-      validated.context_selection = preferences.context_selection as GSDPreferences["context_selection"];
+      validated.context_selection = preferences.context_selection as HXPreferences["context_selection"];
     } else {
       errors.push(`context_selection must be one of: full, smart`);
     }
@@ -797,7 +797,7 @@ export function validatePreferences(preferences: GSDPreferences): {
   if (preferences.language !== undefined) {
     const validLanguages = new Set(["en", "tr", "de", "fr", "es", "pt", "ja", "ko", "zh", "ru", "ar", "it", "nl", "pl", "uk", "hi"]);
     if (typeof preferences.language === "string" && validLanguages.has(preferences.language)) {
-      validated.language = preferences.language as GSDPreferences["language"];
+      validated.language = preferences.language as HXPreferences["language"];
     } else {
       errors.push(`language must be one of: ${[...validLanguages].join(", ")}`);
     }

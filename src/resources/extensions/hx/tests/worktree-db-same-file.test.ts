@@ -45,9 +45,9 @@ describe("#2823: reconcileWorktreeDb same-file guard", () => {
   });
 
   test("returns zero result when both paths resolve to the same file", () => {
-    const mainGsd = join(tmpDir, "main", ".hx");
-    mkdirSync(mainGsd, { recursive: true });
-    const mainDbPath = join(mainGsd, "hx.db");
+    const mainHx = join(tmpDir, "main", ".hx");
+    mkdirSync(mainHx, { recursive: true });
+    const mainDbPath = join(mainHx, "hx.db");
 
     // Create a real DB at mainDbPath
     openDatabase(mainDbPath);
@@ -64,10 +64,10 @@ describe("#2823: reconcileWorktreeDb same-file guard", () => {
     });
 
     // Create a worktree path that resolves to the same file via symlink
-    const wtGsd = join(tmpDir, "worktree", ".hx");
+    const wtHx = join(tmpDir, "worktree", ".hx");
     mkdirSync(join(tmpDir, "worktree"), { recursive: true });
-    symlinkSync(mainGsd, wtGsd, "junction");
-    const worktreeDbPath = join(wtGsd, "hx.db");
+    symlinkSync(mainHx, wtHx, "junction");
+    const worktreeDbPath = join(wtHx, "hx.db");
 
     // Both paths exist and resolve to the same physical file
     assert.ok(existsSync(mainDbPath), "main DB exists");
@@ -83,9 +83,9 @@ describe("#2823: reconcileWorktreeDb same-file guard", () => {
   });
 
   test("returns zero result when both paths are identical strings", () => {
-    const mainGsd = join(tmpDir, "project", ".hx");
-    mkdirSync(mainGsd, { recursive: true });
-    const dbPath = join(mainGsd, "hx.db");
+    const mainHx = join(tmpDir, "project", ".hx");
+    mkdirSync(mainHx, { recursive: true });
+    const dbPath = join(mainHx, "hx.db");
 
     openDatabase(dbPath);
     insertDecision({
@@ -109,9 +109,9 @@ describe("#2823: reconcileWorktreeDb same-file guard", () => {
 
   test("still reconciles when paths are genuinely different files", () => {
     // Main DB
-    const mainGsd = join(tmpDir, "main", ".hx");
-    mkdirSync(mainGsd, { recursive: true });
-    const mainDbPath = join(mainGsd, "hx.db");
+    const mainHx = join(tmpDir, "main", ".hx");
+    mkdirSync(mainHx, { recursive: true });
+    const mainDbPath = join(mainHx, "hx.db");
 
     openDatabase(mainDbPath);
     insertDecision({
@@ -128,9 +128,9 @@ describe("#2823: reconcileWorktreeDb same-file guard", () => {
     closeDatabase();
 
     // Create a separate worktree DB with different data
-    const wtGsd = join(tmpDir, "worktree", ".hx");
-    mkdirSync(wtGsd, { recursive: true });
-    const worktreeDbPath = join(wtGsd, "hx.db");
+    const wtHx = join(tmpDir, "worktree", ".hx");
+    mkdirSync(wtHx, { recursive: true });
+    const worktreeDbPath = join(wtHx, "hx.db");
 
     openDatabase(worktreeDbPath);
     insertDecision({

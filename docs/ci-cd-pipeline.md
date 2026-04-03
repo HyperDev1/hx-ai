@@ -172,7 +172,7 @@ npm run test:fixtures
 
 ```bash
 # Set your API key, then record
-GSD_FIXTURE_MODE=record GSD_FIXTURE_DIR=./tests/fixtures/recordings \
+HX_FIXTURE_MODE=record HX_FIXTURE_DIR=./tests/fixtures/recordings \
   node --experimental-strip-types tests/fixtures/record.ts
 ```
 

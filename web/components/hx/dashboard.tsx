@@ -14,8 +14,8 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
-  useGSDWorkspaceState,
-  useGSDWorkspaceActions,
+  useHXWorkspaceState,
+  useHXWorkspaceActions,
   buildPromptCommand,
   buildProjectUrl,
   formatDuration,
@@ -111,8 +111,8 @@ interface DashboardProps {
 }
 
 export function Dashboard({ onSwitchView, onExpandTerminal }: DashboardProps = {}) {
-  const state = useGSDWorkspaceState()
-  const { sendCommand } = useGSDWorkspaceActions()
+  const state = useHXWorkspaceState()
+  const { sendCommand } = useHXWorkspaceActions()
   const boot = state.boot
   const workspace = getLiveWorkspaceIndex(state)
   const auto = getLiveAutoDashboard(state)

@@ -108,6 +108,7 @@ export function registerDbTools(pi: ExtensionAPI): void {
   };
 
   pi.registerTool(decisionSaveTool);
+  registerAlias(pi, decisionSaveTool, "hx_save_decision", "hx_decision_save");
 
   // ─── hx_requirement_update (formerly hx_update_requirement) ───────────
 
@@ -193,6 +194,7 @@ export function registerDbTools(pi: ExtensionAPI): void {
   };
 
   pi.registerTool(requirementUpdateTool);
+  registerAlias(pi, requirementUpdateTool, "hx_update_requirement", "hx_requirement_update");
 
   // ─── hx_summary_save (formerly hx_save_summary) ──────────────────────
 
@@ -286,6 +288,7 @@ export function registerDbTools(pi: ExtensionAPI): void {
   };
 
   pi.registerTool(summarySaveTool);
+  registerAlias(pi, summarySaveTool, "hx_save_summary", "hx_summary_save");
 
   // ─── hx_milestone_generate_id (formerly hx_generate_milestone_id) ────
 
@@ -369,6 +372,7 @@ export function registerDbTools(pi: ExtensionAPI): void {
   };
 
   pi.registerTool(milestoneGenerateIdTool);
+  registerAlias(pi, milestoneGenerateIdTool, "hx_generate_milestone_id", "hx_milestone_generate_id");
 
   // ─── hx_plan_milestone (hx_milestone_plan alias) ─────────────────────
 
@@ -459,6 +463,7 @@ export function registerDbTools(pi: ExtensionAPI): void {
   };
 
   pi.registerTool(planMilestoneTool);
+  registerAlias(pi, planMilestoneTool, "hx_milestone_plan", "hx_plan_milestone");
 
   // ─── hx_plan_slice (hx_slice_plan alias) ─────────────────────────────
 
@@ -535,6 +540,7 @@ export function registerDbTools(pi: ExtensionAPI): void {
   };
 
   pi.registerTool(planSliceTool);
+  registerAlias(pi, planSliceTool, "hx_slice_plan", "hx_plan_slice");
 
   // ─── hx_plan_task (hx_task_plan alias) ───────────────────────────────
 
@@ -604,6 +610,7 @@ export function registerDbTools(pi: ExtensionAPI): void {
   };
 
   pi.registerTool(planTaskTool);
+  registerAlias(pi, planTaskTool, "hx_task_plan", "hx_plan_task");
 
   // ─── hx_task_complete (hx_complete_task alias) ────────────────────────
 
@@ -684,6 +691,7 @@ export function registerDbTools(pi: ExtensionAPI): void {
   };
 
   pi.registerTool(taskCompleteTool);
+  registerAlias(pi, taskCompleteTool, "hx_complete_task", "hx_task_complete");
 
   // ─── hx_slice_complete (hx_complete_slice alias) ─────────────────────
 
@@ -796,6 +804,7 @@ export function registerDbTools(pi: ExtensionAPI): void {
   };
 
   pi.registerTool(sliceCompleteTool);
+  registerAlias(pi, sliceCompleteTool, "hx_complete_slice", "hx_slice_complete");
 
   // ─── hx_complete_milestone ────────────────────────────────────────────
 
@@ -866,6 +875,7 @@ export function registerDbTools(pi: ExtensionAPI): void {
   };
 
   pi.registerTool(milestoneCompleteTool);
+  registerAlias(pi, milestoneCompleteTool, "hx_milestone_complete", "hx_complete_milestone");
 
   // ─── hx_validate_milestone (hx_milestone_validate alias) ─────────────
 
@@ -934,6 +944,7 @@ export function registerDbTools(pi: ExtensionAPI): void {
   };
 
   pi.registerTool(milestoneValidateTool);
+  registerAlias(pi, milestoneValidateTool, "hx_milestone_validate", "hx_validate_milestone");
 
   // ─── hx_replan_slice (hx_slice_replan alias) ─────────────────────────
 
@@ -1013,6 +1024,7 @@ export function registerDbTools(pi: ExtensionAPI): void {
   };
 
   pi.registerTool(replanSliceTool);
+  registerAlias(pi, replanSliceTool, "hx_slice_replan", "hx_replan_slice");
 
   // ─── hx_reassess_roadmap (hx_roadmap_reassess alias) ─────────────────
 
@@ -1100,6 +1112,7 @@ export function registerDbTools(pi: ExtensionAPI): void {
   };
 
   pi.registerTool(reassessRoadmapTool);
+  registerAlias(pi, reassessRoadmapTool, "hx_roadmap_reassess", "hx_reassess_roadmap");
 
   // ─── hx_save_gate_result ──────────────────────────────────────────────
 

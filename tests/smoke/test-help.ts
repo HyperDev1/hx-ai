@@ -1,7 +1,7 @@
 import { execFileSync } from "child_process";
 
-const binary = process.env.GSD_SMOKE_BINARY || "npx";
-const args = process.env.GSD_SMOKE_BINARY
+const binary = process.env.HX_SMOKE_BINARY || "npx";
+const args = process.env.HX_SMOKE_BINARY
   ? ["--help"]
   : ["hx-pi", "--help"];
 

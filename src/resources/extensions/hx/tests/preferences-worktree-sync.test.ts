@@ -25,7 +25,7 @@ test("#2684: preferences files are NOT in ROOT_STATE_FILES (forward-only sync)",
   const block = src.slice(arrayStart, arrayEnd);
 
   // Project preferences must NOT be in ROOT_STATE_FILES — they are handled separately
-  // in syncGsdStateToWorktree() (forward-only, additive). Including it in
+  // in syncHxStateToWorktree() (forward-only, additive). Including it in
   // ROOT_STATE_FILES would cause syncWorktreeStateBack() to overwrite the
   // authoritative project root copy (#2684).
   const entries = block.split("\n")
@@ -57,33 +57,33 @@ test("copyPlanningArtifacts prefers canonical PREFERENCES.md with lowercase fall
   );
 });
 
-test("syncGsdStateToWorktree copies canonical PREFERENCES.md", async () => {
+test("syncHxStateToWorktree copies canonical PREFERENCES.md", async () => {
   // Functional test: create a mock source and destination, call the sync
   const srcBase = mkdtempSync(join(tmpdir(), "hx-wt-prefs-src-"));
   const dstBase = mkdtempSync(join(tmpdir(), "hx-wt-prefs-dst-"));
-  const srcGsd = join(srcBase, ".hx");
-  const dstGsd = join(dstBase, ".hx");
-  mkdirSync(srcGsd, { recursive: true });
-  mkdirSync(dstGsd, { recursive: true });
+  const srcHx = join(srcBase, ".hx");
+  const dstHx = join(dstBase, ".hx");
+  mkdirSync(srcHx, { recursive: true });
+  mkdirSync(dstHx, { recursive: true });
 
   try {
     // Write a canonical PREFERENCES.md in source
     writeFileSync(
-      join(srcGsd, "PREFERENCES.md"),
+      join(srcHx, "PREFERENCES.md"),
       "---\nversion: 1\n---\n\npost_unit_hooks:\n  - name: notify\n    command: echo done\n",
     );
 
-    // Import and call syncGsdStateToWorktree
-    const { syncGsdStateToWorktree } = await import("../auto-worktree.ts");
-    syncGsdStateToWorktree(srcBase, dstBase);
+    // Import and call syncHxStateToWorktree
+    const { syncHxStateToWorktree } = await import("../auto-worktree.ts");
+    syncHxStateToWorktree(srcBase, dstBase);
 
     // Verify PREFERENCES.md was copied
     assert.ok(
-      existsSync(join(dstGsd, "PREFERENCES.md")),
+      existsSync(join(dstHx, "PREFERENCES.md")),
       "PREFERENCES.md should be copied to worktree",
     );
 
-    const content = readFileSync(join(dstGsd, "PREFERENCES.md"), "utf-8");
+    const content = readFileSync(join(dstHx, "PREFERENCES.md"), "utf-8");
     assert.ok(
       content.includes("post_unit_hooks"),
       "copied PREFERENCES.md should contain the hooks config",
@@ -94,24 +94,24 @@ test("syncGsdStateToWorktree copies canonical PREFERENCES.md", async () => {
   }
 });
 
-test("syncGsdStateToWorktree falls back to legacy lowercase preferences.md", async () => {
+test("syncHxStateToWorktree falls back to legacy lowercase preferences.md", async () => {
   const srcBase = mkdtempSync(join(tmpdir(), "hx-wt-prefs-legacy-src-"));
   const dstBase = mkdtempSync(join(tmpdir(), "hx-wt-prefs-legacy-dst-"));
-  const srcGsd = join(srcBase, ".hx");
-  const dstGsd = join(dstBase, ".hx");
-  mkdirSync(srcGsd, { recursive: true });
-  mkdirSync(dstGsd, { recursive: true });
+  const srcHx = join(srcBase, ".hx");
+  const dstHx = join(dstBase, ".hx");
+  mkdirSync(srcHx, { recursive: true });
+  mkdirSync(dstHx, { recursive: true });
 
   try {
     writeFileSync(
-      join(srcGsd, "preferences.md"),
+      join(srcHx, "preferences.md"),
       "---\nversion: 1\n---\n\ngit:\n  auto_push: true\n",
     );
 
-    const { syncGsdStateToWorktree } = await import("../auto-worktree.ts");
-    const result = syncGsdStateToWorktree(srcBase, dstBase);
+    const { syncHxStateToWorktree } = await import("../auto-worktree.ts");
+    const result = syncHxStateToWorktree(srcBase, dstBase);
 
-    const copiedEntries = readdirSync(dstGsd)
+    const copiedEntries = readdirSync(dstHx)
       .filter((name) => name === "PREFERENCES.md" || name === "preferences.md");
 
     assert.ok(

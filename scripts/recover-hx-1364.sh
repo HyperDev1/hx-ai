@@ -88,18 +88,18 @@ fi
 
 section "── Step 1: Detect .hx/ directory ────────────────────────────────────"
 
-GSD_DIR="$REPO_ROOT/.hx"
-GSD_IS_SYMLINK=false
+HX_DIR="$REPO_ROOT/.hx"
+HX_IS_SYMLINK=false
 
-if [[ ! -e "$GSD_DIR" ]]; then
+if [[ ! -e "$HX_DIR" ]]; then
   ok ".hx/ does not exist in this repo — not affected."
   exit 0
 fi
 
-if [[ -L "$GSD_DIR" ]]; then
+if [[ -L "$HX_DIR" ]]; then
   # Scenario C: migration succeeded (symlink in place) but git index was never
   # cleaned — tracked .hx/* files still appear as deleted through the symlink.
-  GSD_IS_SYMLINK=true
+  HX_IS_SYMLINK=true
   warn ".hx/ is a symlink — checking for stale git index entries (Scenario C)..."
 else
   info ".hx/ is a real directory (Scenario A/B)."
@@ -111,35 +111,35 @@ section "── Step 2: Check .gitignore for .hx entry ────────�
 
 GITIGNORE="$REPO_ROOT/.gitignore"
 
-if [[ ! -f "$GITIGNORE" ]] && ! $GSD_IS_SYMLINK; then
+if [[ ! -f "$GITIGNORE" ]] && ! $HX_IS_SYMLINK; then
   ok ".gitignore does not exist — not affected."
   exit 0
 fi
 
 # Look for a bare ".hx" line (not a comment, not a sub-path like .hx/)
-GSD_IGNORE_LINE=""
+HX_IGNORE_LINE=""
 if [[ -f "$GITIGNORE" ]]; then
   while IFS= read -r line; do
     trimmed="${line#"${line%%[![:space:]]*}"}"
     trimmed="${trimmed%"${trimmed##*[![:space:]]}"}"
     if [[ "$trimmed" == ".hx" ]] && [[ "${trimmed:0:1}" != "#" ]]; then
-      GSD_IGNORE_LINE="$trimmed"
+      HX_IGNORE_LINE="$trimmed"
       break
     fi
   done < "$GITIGNORE"
 fi
 
-if $GSD_IS_SYMLINK; then
+if $HX_IS_SYMLINK; then
   # Symlink layout: .hx SHOULD be ignored (it's external state).
   # Missing = needs adding. Present = correct.
-  if [[ -z "$GSD_IGNORE_LINE" ]]; then
+  if [[ -z "$HX_IGNORE_LINE" ]]; then
     warn '".hx" missing from .gitignore — will add (migration complete, .hx/ is external).'
   else
     ok '".hx" already in .gitignore — correct for external-state layout.'
   fi
 else
   # Real-directory layout: .hx should NOT be ignored.
-  if [[ -z "$GSD_IGNORE_LINE" ]]; then
+  if [[ -z "$HX_IGNORE_LINE" ]]; then
     ok '".hx" not found in .gitignore — .gitignore not affected.'
   else
     warn '".hx" found in .gitignore — this is the bad pattern from #1364.'
@@ -156,12 +156,12 @@ DELETED_FILES="$(git ls-files --deleted -- '.hx/*' 2>/dev/null || true)"
 # Files tracked in HEAD right now
 TRACKED_IN_HEAD="$(git ls-tree -r --name-only HEAD -- '.hx/' 2>/dev/null || true)"
 
-if $GSD_IS_SYMLINK; then
+if $HX_IS_SYMLINK; then
   # Scenario C: migration succeeded. Files are safe via symlink.
   # Only index entries can be stale — no need to scan commit history.
   if [[ -z "$TRACKED_IN_HEAD" ]] && [[ -z "$DELETED_FILES" ]]; then
     ok "No stale index entries found — symlink layout is healthy."
-    if [[ -z "$GSD_IGNORE_LINE" ]]; then
+    if [[ -z "$HX_IGNORE_LINE" ]]; then
       info "Add .hx to .gitignore manually to complete the migration."
     fi
     exit 0
@@ -176,7 +176,7 @@ else
 
   if [[ -z "$TRACKED_IN_HEAD" ]] && [[ -z "$DELETED_FILES" ]] && [[ -z "$DELETED_FROM_HISTORY" ]]; then
     ok "No .hx/ files tracked in this repo — not affected by #1364."
-    if [[ -n "$GSD_IGNORE_LINE" ]]; then
+    if [[ -n "$HX_IGNORE_LINE" ]]; then
       warn '".hx" is still in .gitignore but there is nothing to restore.'
     fi
     exit 0
@@ -200,7 +200,7 @@ else
   fi
 
   if [[ -n "$TRACKED_IN_HEAD" ]] && [[ -z "$DELETED_FILES" ]]; then
-    if [[ -z "$GSD_IGNORE_LINE" ]]; then
+    if [[ -z "$HX_IGNORE_LINE" ]]; then
       ok "No action needed — .hx/ is tracked in HEAD and .gitignore is clean."
       exit 0
     fi
@@ -216,7 +216,7 @@ DAMAGE_COMMIT=""
 CLEAN_COMMIT=""
 RESTORABLE=""
 
-if $GSD_IS_SYMLINK; then
+if $HX_IS_SYMLINK; then
   info "Scenario C: symlink layout — skipping commit history scan (no file restore needed)."
 else
   # Find the commit where ".hx" was first added to .gitignore
@@ -260,7 +260,7 @@ fi
 
 # ─── Step 5: Clean index (Scenario C) or restore deleted files (Scenario A/B) ─
 
-if $GSD_IS_SYMLINK; then
+if $HX_IS_SYMLINK; then
   section "── Step 5: Clean stale git index entries ───────────────────────────────"
 
   info "Running: git rm -r --cached --ignore-unmatch .hx/ ..."
@@ -302,9 +302,9 @@ fi
 
 section "── Step 6: Fix .gitignore ───────────────────────────────────────────────"
 
-if $GSD_IS_SYMLINK; then
+if $HX_IS_SYMLINK; then
   # Scenario C: .hx IS external — it should be in .gitignore.  Add if missing.
-  if [[ -z "$GSD_IGNORE_LINE" ]]; then
+  if [[ -z "$HX_IGNORE_LINE" ]]; then
     info 'Adding ".hx" to .gitignore (migration complete — .hx/ is external state)...'
     if $DRY_RUN; then
       echo -e "  ${YELLOW}(dry-run)${RESET} Would append: .hx"
@@ -317,7 +317,7 @@ if $GSD_IS_SYMLINK; then
   fi
 else
   # Scenario A/B: .hx is a real tracked directory — remove the bad ignore line.
-  if [[ -z "$GSD_IGNORE_LINE" ]]; then
+  if [[ -z "$HX_IGNORE_LINE" ]]; then
     ok '".hx" not in .gitignore — nothing to fix.'
   else
     info 'Removing bare ".hx" line from .gitignore...'
@@ -343,7 +343,7 @@ if ! $DRY_RUN; then
   if [[ -z "$CHANGED" ]]; then
     ok "No staged changes — working tree was already clean."
   else
-    if $GSD_IS_SYMLINK; then
+    if $HX_IS_SYMLINK; then
       # Scenario C: the git rm --cached already staged the index cleanup.
       # Only stage .gitignore — adding .hx/ would fail (now gitignored).
       git add .gitignore 2>/dev/null || true
@@ -366,7 +366,7 @@ else
   if (( FINAL_STAGED > 0 )); then
     echo -e "${GREEN}Recovery complete. Commit with:${RESET}"
     echo ""
-    if $GSD_IS_SYMLINK; then
+    if $HX_IS_SYMLINK; then
       echo "  git commit -m \"fix: clean stale .hx/ index entries after external-state migration\""
     else
       echo "  git commit -m \"fix: restore .hx/ files deleted by #1364 regression\""

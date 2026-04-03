@@ -30,8 +30,8 @@ function cleanupDir(dir: string): void {
 describe('ensure-db-open', () => {
   test('ensureDbOpen: creates DB from Markdown', async () => {
     const tmpDir = makeTmpDir();
-    const gsdDir = path.join(tmpDir, ".hx");
-    fs.mkdirSync(gsdDir, { recursive: true });
+    const hxDir = path.join(tmpDir, ".hx");
+    fs.mkdirSync(hxDir, { recursive: true });
 
     // Write a minimal DECISIONS.md so migration has content
     const decisionsContent = `# Decisions
@@ -40,10 +40,10 @@ describe('ensure-db-open', () => {
   |---|------|-------|----------|--------|-----------|-----------|
   | D001 | M001 | architecture | Use SQLite | SQLite | Sync API | Yes |
   `;
-    fs.writeFileSync(path.join(gsdDir, 'DECISIONS.md'), decisionsContent);
+    fs.writeFileSync(path.join(hxDir, 'DECISIONS.md'), decisionsContent);
 
     // Verify no DB file exists yet
-    const dbPath = path.join(gsdDir, 'hx.db');
+    const dbPath = path.join(hxDir, 'hx.db');
     assert.ok(!fs.existsSync(dbPath), 'DB file should not exist before ensureDbOpen');
 
     // Close any previously open DB
@@ -106,11 +106,11 @@ describe('ensure-db-open', () => {
 
   test('ensureDbOpen: opens existing DB', async () => {
     const tmpDir = makeTmpDir();
-    const gsdDir = path.join(tmpDir, ".hx");
-    fs.mkdirSync(gsdDir, { recursive: true });
+    const hxDir = path.join(tmpDir, ".hx");
+    fs.mkdirSync(hxDir, { recursive: true });
 
     // Create a DB file first
-    const dbPath = path.join(gsdDir, 'hx.db');
+    const dbPath = path.join(hxDir, 'hx.db');
     const { openDatabase } = await import('../hx-db.ts');
     openDatabase(dbPath);
     closeDatabase();
@@ -138,8 +138,8 @@ describe('ensure-db-open', () => {
 
   test('ensureDbOpen: empty .hx/ creates empty DB (#2510)', async () => {
     const tmpDir = makeTmpDir();
-    const gsdDir = path.join(tmpDir, ".hx");
-    fs.mkdirSync(gsdDir, { recursive: true });
+    const hxDir = path.join(tmpDir, ".hx");
+    fs.mkdirSync(hxDir, { recursive: true });
     // .hx/ exists but no DECISIONS.md, REQUIREMENTS.md, or milestones/
 
     try { closeDatabase(); } catch { /* ok */ }
@@ -150,7 +150,7 @@ describe('ensure-db-open', () => {
       const { ensureDbOpen } = await import('../bootstrap/dynamic-tools.ts');
       const result = await ensureDbOpen();
       assert.ok(result === true, 'ensureDbOpen should create empty DB for fresh .hx/');
-      assert.ok(fs.existsSync(path.join(gsdDir, 'hx.db')), 'DB file should be created');
+      assert.ok(fs.existsSync(path.join(hxDir, 'hx.db')), 'DB file should be created');
       assert.ok(isDbAvailable(), 'DB should be available');
     } finally {
       process.cwd = origCwd;

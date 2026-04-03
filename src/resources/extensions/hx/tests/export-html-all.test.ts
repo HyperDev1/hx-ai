@@ -12,8 +12,8 @@ test("handleExport --html --all generates reports for milestones missing from th
   const { loadReportsIndex } = await import("../reports.js");
 
   const tmp = join(tmpdir(), `hx-export-all-test-${Date.now()}`);
-  const gsdDir = join(tmp, ".hx");
-  const reportsDir = join(gsdDir, "reports");
+  const hxDir = join(tmp, ".hx");
+  const reportsDir = join(hxDir, "reports");
   mkdirSync(reportsDir, { recursive: true });
 
   // No existing reports — loadReportsIndex returns null
@@ -83,7 +83,7 @@ test("handleExport --html --all sets milestone kind based on status", async () =
 });
 
 test("export completions include --html and --html --all", async () => {
-  const { registerGSDCommand } = await import("../commands.js");
+  const { registerHXCommand } = await import("../commands.js");
 
   const commands = new Map<string, any>();
   const pi = {
@@ -94,7 +94,7 @@ test("export completions include --html and --html --all", async () => {
     sendMessage() {},
   };
 
-  registerGSDCommand(pi as any);
+  registerHXCommand(pi as any);
   const hx = commands.get("hx");
   assert.ok(hx, "should register /hx command");
 

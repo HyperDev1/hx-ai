@@ -34,7 +34,7 @@ const TAB_LABELS = [
   "0 Export",
 ];
 
-export class GSDVisualizerOverlay {
+export class HXVisualizerOverlay {
   private tui: { requestRender: () => void };
   private theme: Theme;
   private onClose: () => void;

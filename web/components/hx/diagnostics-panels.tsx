@@ -15,8 +15,8 @@ import type {
 import { cn } from "@/lib/utils"
 import {
   formatCost,
-  useGSDWorkspaceActions,
-  useGSDWorkspaceState,
+  useHXWorkspaceActions,
+  useHXWorkspaceState,
 } from "@/lib/hx-workspace-store"
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -134,8 +134,8 @@ function AnomalyRow({ anomaly }: { anomaly: ForensicAnomaly }) {
 }
 
 export function ForensicsPanel() {
-  const workspace = useGSDWorkspaceState()
-  const { loadForensicsDiagnostics } = useGSDWorkspaceActions()
+  const workspace = useHXWorkspaceState()
+  const { loadForensicsDiagnostics } = useHXWorkspaceActions()
   const state = workspace.commandSurface.diagnostics.forensics
   const data = state.data as ForensicReport | null
   const busy = state.phase === "loading"
@@ -268,8 +268,8 @@ function IssueRow({ issue }: { issue: DoctorIssue }) {
 }
 
 export function DoctorPanel() {
-  const workspace = useGSDWorkspaceState()
-  const { loadDoctorDiagnostics, applyDoctorFixes } = useGSDWorkspaceActions()
+  const workspace = useHXWorkspaceState()
+  const { loadDoctorDiagnostics, applyDoctorFixes } = useHXWorkspaceActions()
   const state = workspace.commandSurface.diagnostics.doctor
   const data = state.data as DoctorReport | null
   const busy = state.phase === "loading"
@@ -392,8 +392,8 @@ function SuggestionRow({ suggestion }: { suggestion: SkillHealSuggestion }) {
 }
 
 export function SkillHealthPanel() {
-  const workspace = useGSDWorkspaceState()
-  const { loadSkillHealthDiagnostics } = useGSDWorkspaceActions()
+  const workspace = useHXWorkspaceState()
+  const { loadSkillHealthDiagnostics } = useHXWorkspaceActions()
   const state = workspace.commandSurface.diagnostics.skillHealth
   const data = state.data as SkillHealthReport | null
   const busy = state.phase === "loading"

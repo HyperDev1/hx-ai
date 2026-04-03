@@ -15,7 +15,7 @@ export interface SessionItem {
  * Tree view provider that lists HX session files from the same directory
  * as the currently active session.
  */
-export class GsdSessionTreeProvider implements vscode.TreeDataProvider<SessionItem>, vscode.Disposable {
+export class HxSessionTreeProvider implements vscode.TreeDataProvider<SessionItem>, vscode.Disposable {
 	public static readonly viewId = "hx-sessions";
 
 	private readonly _onDidChangeTreeData = new vscode.EventEmitter<void>();

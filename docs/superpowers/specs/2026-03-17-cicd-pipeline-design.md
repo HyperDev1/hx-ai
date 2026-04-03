@@ -212,15 +212,15 @@ class FixtureProvider implements Provider {
 
 Key integration details:
 - **Streaming:** Fixture replay simulates streaming by yielding saved response chunks with minimal delay. This exercises the same consumer code paths as real streaming.
-- **Registration:** When `GSD_FIXTURE_MODE` is set, the fixture provider wraps the configured real provider. No changes to provider selection logic needed.
+- **Registration:** When `HX_FIXTURE_MODE` is set, the fixture provider wraps the configured real provider. No changes to provider selection logic needed.
 - **Provider-agnostic:** Fixtures are captured at the `Provider` interface level (above HTTP transport), so they work regardless of which underlying provider was used during recording.
 
 ### Modes
 
 | Mode | Trigger | Behavior |
 |------|---------|----------|
-| **Record** | `GSD_FIXTURE_MODE=record GSD_FIXTURE_DIR=./fixtures` | Wraps real provider, saves request/response pairs |
-| **Replay** | `GSD_FIXTURE_MODE=replay GSD_FIXTURE_DIR=./fixtures` | Returns saved responses, zero API calls |
+| **Record** | `HX_FIXTURE_MODE=record HX_FIXTURE_DIR=./fixtures` | Wraps real provider, saves request/response pairs |
+| **Replay** | `HX_FIXTURE_MODE=replay HX_FIXTURE_DIR=./fixtures` | Returns saved responses, zero API calls |
 | **Off** | Default (no env vars) | Normal operation, no interception |
 
 ### Fixture Format
@@ -326,8 +326,8 @@ All test files use `.ts` with `--experimental-strip-types` for consistency with 
 {
   "test:smoke": "node --experimental-strip-types tests/smoke/run.ts",
   "test:fixtures": "node --experimental-strip-types tests/fixtures/run.ts",
-  "test:fixtures:record": "GSD_FIXTURE_MODE=record node --experimental-strip-types tests/fixtures/record.ts",
-  "test:live": "GSD_LIVE_TESTS=1 node --experimental-strip-types tests/live/run.ts",
+  "test:fixtures:record": "HX_FIXTURE_MODE=record node --experimental-strip-types tests/fixtures/record.ts",
+  "test:live": "HX_LIVE_TESTS=1 node --experimental-strip-types tests/live/run.ts",
   "pipeline:version-stamp": "node scripts/version-stamp.mjs",
   "docker:build-runtime": "docker build --target runtime -t ghcr.io/hx-build/hx-pi .",
   "docker:build-builder": "docker build --target builder -t ghcr.io/hx-build/hx-ci-builder ."

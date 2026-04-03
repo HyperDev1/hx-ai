@@ -1,20 +1,20 @@
 {
-  "name": "@gsd-build/engine-darwin-x64",
+  "name": "@hx-build/engine-darwin-x64",
   "version": "2.58.0",
-  "description": "GSD native engine binary for macOS Intel",
+  "description": "HX native engine binary for macOS Intel",
   "os": [
     "darwin"
   ],
   "cpu": [
     "x64"
   ],
-  "main": "gsd_engine.node",
+  "main": "hx_engine.node",
   "files": [
-    "gsd_engine.node"
+    "hx_engine.node"
   ],
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gsd-build/gsd-2.git"
+    "url": "git+https://github.com/hyperlabai/hx.git"
   }
 }

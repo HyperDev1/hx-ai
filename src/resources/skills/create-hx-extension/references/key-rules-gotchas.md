@@ -25,7 +25,7 @@ Non-negotiable rules and common gotchas when building HX extensions.
 - Extension errors are logged but don't crash HX — tool_call handler errors fail-safe (block the tool)
 </common_patterns>
 
-<gsd_paths>
+<hx_paths>
 **HX extension paths:**
 - Global: `~/.hx/agent/extensions/*.ts`
 - Global (subdir): `~/.hx/agent/extensions/*/index.ts`
@@ -33,4 +33,4 @@ Non-negotiable rules and common gotchas when building HX extensions.
 - Project-local (subdir): `.hx/extensions/*/index.ts`
 
 The upstream pi docs reference `~/.pi` paths — HX uses `~/.hx` everywhere instead.
-</gsd_paths>
+</hx_paths>

@@ -36,7 +36,7 @@ import {
   readSessionStatus,
   removeSessionStatus,
 } from "../session-status-io.ts";
-import type { GSDPreferences } from "../preferences.ts";
+import type { HXPreferences } from "../preferences.ts";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -50,7 +50,7 @@ function cleanup(base: string): void {
   try { rmSync(base, { recursive: true, force: true }); } catch { /* */ }
 }
 
-function makePrefs(ceiling?: number): GSDPreferences {
+function makePrefs(ceiling?: number): HXPreferences {
   return {
     parallel: {
       enabled: true,

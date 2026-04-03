@@ -62,7 +62,7 @@ function toolSummary(toolName: string, toolInput: Record<string, unknown>): { la
  * TreeDataProvider that shows real-time tool executions from the HX agent.
  * Listens to tool_execution_start/end and agent_start/end events.
  */
-export class GsdActivityFeedProvider implements vscode.TreeDataProvider<ActivityItem>, vscode.Disposable {
+export class HxActivityFeedProvider implements vscode.TreeDataProvider<ActivityItem>, vscode.Disposable {
 	public static readonly viewId = "hx-activity";
 
 	private readonly _onDidChangeTreeData = new vscode.EventEmitter<void>();

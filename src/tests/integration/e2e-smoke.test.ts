@@ -48,7 +48,7 @@ type RunResult = {
  * @param env     Additional / override environment variables
  * @param cwd     Working directory for the child process (default: projectRoot)
  */
-function runGsd(
+function runHx(
   args: string[],
   timeoutMs = 8_000,
   env: NodeJS.ProcessEnv = {},
@@ -102,7 +102,7 @@ function createTempGitRepo(prefix: string): string {
 // ---------------------------------------------------------------------------
 
 test("hx --version outputs a semver version string and exits 0", async () => {
-  const result = await runGsd(["--version"]);
+  const result = await runHx(["--version"]);
 
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
   assert.ok(!result.timedOut, "process should not time out");
@@ -121,7 +121,7 @@ test("hx --version outputs a semver version string and exits 0", async () => {
 // ---------------------------------------------------------------------------
 
 test("hx --help outputs usage information and exits 0", async () => {
-  const result = await runGsd(["--help"]);
+  const result = await runHx(["--help"]);
 
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
   assert.ok(!result.timedOut, "process should not time out");
@@ -155,7 +155,7 @@ test("hx --help outputs usage information and exits 0", async () => {
 // ---------------------------------------------------------------------------
 
 test("hx config --help outputs help and exits 0", async () => {
-  const result = await runGsd(["config", "--help"]);
+  const result = await runHx(["config", "--help"]);
 
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
   assert.ok(!result.timedOut, "process should not time out");
@@ -175,7 +175,7 @@ test("hx config --help outputs help and exits 0", async () => {
 // ---------------------------------------------------------------------------
 
 test("hx update --help outputs help and exits 0", async () => {
-  const result = await runGsd(["update", "--help"]);
+  const result = await runHx(["update", "--help"]);
 
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
   assert.ok(!result.timedOut, "process should not time out");
@@ -192,7 +192,7 @@ test("hx update --help outputs help and exits 0", async () => {
 // ---------------------------------------------------------------------------
 
 test("hx --list-models runs without crashing", async () => {
-  const result = await runGsd(["--list-models"]);
+  const result = await runHx(["--list-models"]);
 
   assert.ok(!result.timedOut, "hx --list-models should exit within the timeout");
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
@@ -223,7 +223,7 @@ test("hx --list-models runs without crashing", async () => {
 // ---------------------------------------------------------------------------
 
 test("hx --mode text --print does not segfault or throw unhandled errors", { skip: !process.env.ANTHROPIC_API_KEY && !process.env.OPENAI_API_KEY ? "no API key available — print mode requires a configured provider" : undefined }, async () => {
-  const result = await runGsd(
+  const result = await runHx(
     ["--mode", "text", "--print", "echo hello"],
     15_000,
   );
@@ -284,7 +284,7 @@ test("hx --mode text --print does not segfault or throw unhandled errors", { ski
 // ---------------------------------------------------------------------------
 
 test("hx headless --help outputs help and exits 0", async () => {
-  const result = await runGsd(["headless", "--help"]);
+  const result = await runHx(["headless", "--help"]);
 
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
   assert.ok(!result.timedOut, "process should not time out");
@@ -307,7 +307,7 @@ test("hx headless --help outputs help and exits 0", async () => {
 // ---------------------------------------------------------------------------
 
 test("hx sessions --help outputs sessions-specific help and exits 0", async () => {
-  const result = await runGsd(["sessions", "--help"]);
+  const result = await runHx(["sessions", "--help"]);
 
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
   assert.ok(!result.timedOut, "process should not time out");
@@ -330,7 +330,7 @@ test("hx sessions --help outputs sessions-specific help and exits 0", async () =
 test("hx with no TTY exits 1 with clean terminal-required error", async () => {
   // Running with piped stdin (non-TTY) and no subcommand/flags triggers
   // interactive mode which requires a TTY
-  const result = await runGsd([], 15_000);
+  const result = await runHx([], 15_000);
 
   assert.ok(!result.timedOut, "process should not hang");
   assert.strictEqual(result.code, 1, `expected exit 1, got ${result.code}`);
@@ -354,7 +354,7 @@ test("hx with no TTY exits 1 with clean terminal-required error", async () => {
 test("hx with unknown flags does not crash", async () => {
   // Unknown flags are silently ignored by the arg parser.
   // With --help appended, we get a clean exit path to test.
-  const result = await runGsd(["--some-unknown-flag", "--help"]);
+  const result = await runHx(["--some-unknown-flag", "--help"]);
 
   assert.ok(!result.timedOut, "process should not time out");
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
@@ -368,7 +368,7 @@ test("hx with unknown flags does not crash", async () => {
 // ---------------------------------------------------------------------------
 
 test("hx -v is equivalent to --version", async () => {
-  const result = await runGsd(["-v"]);
+  const result = await runHx(["-v"]);
 
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
   assert.ok(!result.timedOut, "process should not time out");
@@ -386,7 +386,7 @@ test("hx -v is equivalent to --version", async () => {
 // ---------------------------------------------------------------------------
 
 test("hx -h is equivalent to --help", async () => {
-  const result = await runGsd(["-h"]);
+  const result = await runHx(["-h"]);
 
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
   assert.ok(!result.timedOut, "process should not time out");
@@ -411,7 +411,7 @@ test("hx headless without .hx/ directory exits 1 with clean error", async (t) =>
 
   t.after(() => { rmSync(tmpDir, { recursive: true, force: true }); });
 
-  const result = await runGsd(["headless"], 10_000, {}, tmpDir);
+  const result = await runHx(["headless"], 10_000, {}, tmpDir);
 
   assert.ok(!result.timedOut, "process should not hang");
   assert.strictEqual(result.code, 1, `expected exit 1, got ${result.code}`);
@@ -434,7 +434,7 @@ test("hx headless new-milestone without --context exits 1", async (t) => {
 
   t.after(() => { rmSync(tmpDir, { recursive: true, force: true }); });
 
-  const result = await runGsd(["headless", "new-milestone"], 10_000, {}, tmpDir);
+  const result = await runHx(["headless", "new-milestone"], 10_000, {}, tmpDir);
 
   assert.ok(!result.timedOut, "process should not hang");
   assert.strictEqual(result.code, 1, `expected exit 1, got ${result.code}`);
@@ -457,7 +457,7 @@ test("hx headless --timeout with invalid value exits 1", async (t) => {
 
   t.after(() => { rmSync(tmpDir, { recursive: true, force: true }); });
 
-  const result = await runGsd(
+  const result = await runHx(
     ["headless", "--timeout", "not-a-number", "auto"],
     10_000,
     {},
@@ -485,7 +485,7 @@ test("hx headless --timeout with negative value exits 1", async (t) => {
 
   t.after(() => { rmSync(tmpDir, { recursive: true, force: true }); });
 
-  const result = await runGsd(
+  const result = await runHx(
     ["headless", "--timeout", "-5000", "auto"],
     10_000,
     {},
@@ -514,7 +514,7 @@ test("hx headless query returns JSON from the built CLI", async (t) => {
   // Cold packaged startup in a fresh temp repo is now regularly >10s because
   // the built CLI loads bundled TS resources through jiti before answering.
   // This command is still healthy; it just needs a realistic timeout budget.
-  const result = await runGsd(["headless", "query"], 30_000, {}, tmpDir);
+  const result = await runHx(["headless", "query"], 30_000, {}, tmpDir);
 
   assert.ok(!result.timedOut, "process should not hang");
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
@@ -533,7 +533,7 @@ test("hx worktree list loads the built worktree CLI without module errors", asyn
 
   // Cold packaged startup in a fresh temp repo is now regularly >10s because
   // the built CLI loads bundled TS resources through jiti before listing.
-  const result = await runGsd(["worktree", "list"], 30_000, {}, tmpDir);
+  const result = await runHx(["worktree", "list"], 30_000, {}, tmpDir);
 
   assert.ok(!result.timedOut, "process should not hang");
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
@@ -555,7 +555,7 @@ test("hx worktree list loads the built worktree CLI without module errors", asyn
 // ---------------------------------------------------------------------------
 
 test("hx --help lists all documented subcommands", async () => {
-  const result = await runGsd(["--help"]);
+  const result = await runHx(["--help"]);
 
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
   const output = stripAnsi(result.stdout);
@@ -574,7 +574,7 @@ test("hx --help lists all documented subcommands", async () => {
 // ---------------------------------------------------------------------------
 
 test("hx --help lists all key flags", async () => {
-  const result = await runGsd(["--help"]);
+  const result = await runHx(["--help"]);
 
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
   const output = stripAnsi(result.stdout);
@@ -608,7 +608,7 @@ test("hx --help lists all key flags", async () => {
 // ---------------------------------------------------------------------------
 
 test("hx --version ignores trailing arguments", async () => {
-  const result = await runGsd(["--version", "--help", "--list-models"]);
+  const result = await runHx(["--version", "--help", "--list-models"]);
 
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
   assert.ok(!result.timedOut, "process should not time out");
@@ -629,7 +629,7 @@ test("hx --version ignores trailing arguments", async () => {
 test("hx headless help (positional) exits cleanly", async () => {
   // "help" as a positional is treated as a quick command by headless mode.
   // Without .hx/ it should fail, but with --help flag it should succeed.
-  const result = await runGsd(["headless", "--help"]);
+  const result = await runHx(["headless", "--help"]);
 
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
   assert.ok(!result.timedOut, "process should not time out");

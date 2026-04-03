@@ -7,25 +7,25 @@ import { mkdtempSync, existsSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
-import { writeGSDDirectory } from '../migrate/writer.ts';
+import { writeHXDirectory } from '../migrate/writer.ts';
 import { generatePreview } from '../migrate/preview.ts';
 import { parseRoadmap, parsePlan } from '../parsers-legacy.ts';
 import { parseSummary } from '../files.ts';
 import { deriveState } from '../state.ts';
 import { invalidateAllCaches } from '../cache.ts';
 import type {
-  GSDProject,
-  GSDMilestone,
-  GSDSlice,
-  GSDTask,
-  GSDRequirement,
+  HXProject,
+  HXMilestone,
+  HXSlice,
+  HXTask,
+  HXRequirement,
 } from '../migrate/types.ts';
 import { describe, test, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 
 // ─── Fixture Builders ──────────────────────────────────────────────────────
 
-function makeTask(id: string, title: string, done: boolean, hasSummary: boolean): GSDTask {
+function makeTask(id: string, title: string, done: boolean, hasSummary: boolean): HXTask {
   return {
     id,
     title,
@@ -46,9 +46,9 @@ function makeTask(id: string, title: string, done: boolean, hasSummary: boolean)
 
 function makeSlice(
   id: string, title: string, done: boolean,
-  tasks: GSDTask[], depends: string[],
+  tasks: HXTask[], depends: string[],
   hasSummary: boolean,
-): GSDSlice {
+): HXSlice {
   return {
     id,
     title,
@@ -71,7 +71,7 @@ function makeSlice(
   };
 }
 
-function buildIncompleteProject(): GSDProject {
+function buildIncompleteProject(): HXProject {
   const t01 = makeTask('T01', 'Setup Database', true, true);
   const t02 = makeTask('T02', 'Add Auth Middleware', true, true);
   const s01 = makeSlice('S01', 'Auth Foundation', true, [t01, t02], [], true);
@@ -79,7 +79,7 @@ function buildIncompleteProject(): GSDProject {
   const t03 = makeTask('T03', 'Build Dashboard UI', false, false);
   const s02 = makeSlice('S02', 'Dashboard', false, [t03], ['S01'], false);
 
-  const milestone: GSDMilestone = {
+  const milestone: HXMilestone = {
     id: 'M001',
     title: 'MVP Launch',
     vision: 'Ship the minimum viable product',
@@ -89,7 +89,7 @@ function buildIncompleteProject(): GSDProject {
     boundaryMap: [],
   };
 
-  const requirements: GSDRequirement[] = [
+  const requirements: HXRequirement[] = [
     { id: 'R001', title: 'User Authentication', class: 'core-capability', status: 'validated', description: 'Users must authenticate.', source: 'stakeholder', primarySlice: 'S01' },
     { id: 'R002', title: 'Dashboard View', class: 'core-capability', status: 'active', description: 'Dashboard shows data.', source: 'stakeholder', primarySlice: 'S02' },
     { id: 'R003', title: 'Export to PDF', class: 'nice-to-have', status: 'deferred', description: 'PDF export.', source: 'inferred', primarySlice: 'none yet' },
@@ -104,11 +104,11 @@ function buildIncompleteProject(): GSDProject {
   };
 }
 
-function buildCompleteProject(): GSDProject {
+function buildCompleteProject(): HXProject {
   const t01 = makeTask('T01', 'Only Task', true, true);
   const s01 = makeSlice('S01', 'Only Slice', true, [t01], [], true);
 
-  const milestone: GSDMilestone = {
+  const milestone: HXMilestone = {
     id: 'M001',
     title: 'Complete Milestone',
     vision: 'Everything done',
@@ -136,7 +136,7 @@ test('Scenario 1: Incomplete project — write, parse, deriveState', async () =>
     const base = mkdtempSync(join(tmpdir(), 'hx-writer-int-'));
     try {
       const project = buildIncompleteProject();
-      const result = await writeGSDDirectory(project, base);
+      const result = await writeHXDirectory(project, base);
 
       // (a) Key files exist
       console.log('  --- file existence ---');
@@ -256,7 +256,7 @@ test('Scenario 2: Fully complete project — deriveState phase', async () => {
     const base = mkdtempSync(join(tmpdir(), 'hx-writer-int-complete-'));
     try {
       const project = buildCompleteProject();
-      await writeGSDDirectory(project, base);
+      await writeHXDirectory(project, base);
 
       // Null research should NOT produce a file
       const m = join(base, '.hx', 'milestones', 'M001');

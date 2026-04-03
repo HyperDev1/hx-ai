@@ -7,7 +7,7 @@
  *
  * Covers:
  * 1. resolveProjectRoot() returns the real project, not ~
- * 2. gsdRoot() from the resolved project root finds project .hx, not ~/.hx
+ * 2. hxRoot() from the resolved project root finds project .hx, not ~/.hx
  * 3. The parallel/ directory would be created under project .hx
  * 4. session-status writes target the correct location
  * 5. orchestrator.json would be written to project .hx
@@ -28,12 +28,12 @@ function findWorktreeSegment(normalizedPath) {
   const directMarker = "/.hx/worktrees/";
   const idx = normalizedPath.indexOf(directMarker);
   if (idx !== -1) {
-    return { gsdIdx: idx, afterWorktrees: idx + directMarker.length };
+    return { hxIdx: idx, afterWorktrees: idx + directMarker.length };
   }
   const symlinkRe = /\/\.hx\/projects\/[a-f0-9]+\/worktrees\//;
   const match = normalizedPath.match(symlinkRe);
   if (match && match.index !== undefined) {
-    return { gsdIdx: match.index, afterWorktrees: match.index + match[0].length };
+    return { hxIdx: match.index, afterWorktrees: match.index + match[0].length };
   }
   return null;
 }
@@ -82,8 +82,8 @@ function normalizePathForCompare(path) {
 
 function resolveProjectRoot(basePath) {
   // Layer 1: If the coordinator passed the real project root, use it.
-  if (process.env.GSD_PROJECT_ROOT) {
-    return process.env.GSD_PROJECT_ROOT;
+  if (process.env.HX_PROJECT_ROOT) {
+    return process.env.HX_PROJECT_ROOT;
   }
 
   const normalizedPath = basePath.replaceAll("\\", "/");
@@ -91,14 +91,14 @@ function resolveProjectRoot(basePath) {
   if (!seg) return basePath;
 
   const sepChar = basePath.includes("\\") ? "\\" : "/";
-  const gsdMarker = `${sepChar}.hx${sepChar}`;
-  const gsdIdx = basePath.indexOf(gsdMarker);
-  const candidate = gsdIdx !== -1
-    ? basePath.slice(0, gsdIdx)
-    : basePath.slice(0, seg.gsdIdx);
-  const gsdHome = normalizePathForCompare(process.env.GSD_HOME || join(homedir(), ".hx"));
-  const candidateGsdPath = normalizePathForCompare(join(candidate, ".hx"));
-  if (candidateGsdPath === gsdHome || candidateGsdPath.startsWith(gsdHome + "/")) {
+  const hxMarker = `${sepChar}.hx${sepChar}`;
+  const hxIdx = basePath.indexOf(hxMarker);
+  const candidate = hxIdx !== -1
+    ? basePath.slice(0, hxIdx)
+    : basePath.slice(0, seg.hxIdx);
+  const hxHome = normalizePathForCompare(process.env.HX_HOME || join(homedir(), ".hx"));
+  const candidateHxPath = normalizePathForCompare(join(candidate, ".hx"));
+  if (candidateHxPath === hxHome || candidateHxPath.startsWith(hxHome + "/")) {
     const realRoot = resolveProjectRootFromGitFile(basePath);
     if (realRoot) return realRoot;
     return basePath;
@@ -106,8 +106,8 @@ function resolveProjectRoot(basePath) {
   return candidate;
 }
 
-// Simplified gsdRoot — matches paths.ts probeGsdRoot logic
-function gsdRoot(basePath) {
+// Simplified hxRoot — matches paths.ts probeHxRoot logic
+function hxRoot(basePath) {
   const local = join(basePath, ".hx");
   if (existsSync(local)) return local;
   return local; // fallback
@@ -133,23 +133,23 @@ function validateDirectory(dirPath) {
 
 const HASH = "abc123def456";
 const TEST_ROOT = mkdtempSync(join(tmpdir(), "hx-verify-integration-"));
-const USER_GSD = process.env.GSD_HOME || join(TEST_ROOT, ".hx");
+const USER_HX = process.env.HX_HOME || join(TEST_ROOT, ".hx");
 const USER_HOME = homedir();
-const PROJECT_GSD_STORAGE = `${USER_GSD}/projects/${HASH}`;
+const PROJECT_HX_STORAGE = `${USER_HX}/projects/${HASH}`;
 const PROJECT_DIR = mkdtempSync(join(tmpdir(), "myproject-"));
-const PROJECT_GSD_LINK = `${PROJECT_DIR}/.hx`;
+const PROJECT_HX_LINK = `${PROJECT_DIR}/.hx`;
 const PROJECT_REAL = normalizePathForCompare(PROJECT_DIR);
 let PROJECT_STORAGE_REAL = "";
 
-process.env.GSD_HOME = USER_GSD;
+process.env.HX_HOME = USER_HX;
 
 console.log("=== Setup ===\n");
 
-mkdirSync(`${PROJECT_GSD_STORAGE}/worktrees`, { recursive: true });
-mkdirSync(`${PROJECT_GSD_STORAGE}/milestones`, { recursive: true });
+mkdirSync(`${PROJECT_HX_STORAGE}/worktrees`, { recursive: true });
+mkdirSync(`${PROJECT_HX_STORAGE}/milestones`, { recursive: true });
 mkdirSync(PROJECT_DIR, { recursive: true });
-symlinkSync(PROJECT_GSD_STORAGE, PROJECT_GSD_LINK);
-PROJECT_STORAGE_REAL = normalizePathForCompare(PROJECT_GSD_STORAGE);
+symlinkSync(PROJECT_HX_STORAGE, PROJECT_HX_LINK);
+PROJECT_STORAGE_REAL = normalizePathForCompare(PROJECT_HX_STORAGE);
 
 execSync("git init -b main", { cwd: PROJECT_DIR, stdio: "pipe" });
 execSync('git config user.name "Test"', { cwd: PROJECT_DIR, stdio: "pipe" });
@@ -179,26 +179,26 @@ console.log(`  Resolved project root: ${projectRoot}`);
 test("resolveProjectRoot returns real project root", projectRoot, PROJECT_REAL);
 test("resolveProjectRoot does NOT return home dir", projectRoot !== USER_HOME, true);
 
-console.log("\n=== Test 2: gsdRoot finds project .hx ===\n");
+console.log("\n=== Test 2: hxRoot finds project .hx ===\n");
 
-const hx = gsdRoot(projectRoot);
-console.log(`  gsdRoot result: ${hx}`);
-test("gsdRoot points to project .hx", hx, `${PROJECT_REAL}/.hx`);
+const hx = hxRoot(projectRoot);
+console.log(`  hxRoot result: ${hx}`);
+test("hxRoot points to project .hx", hx, `${PROJECT_REAL}/.hx`);
 
 // Verify it's a symlink to the right place
-const gsdReal = realpathSync(hx);
-console.log(`  gsdRoot resolves to: ${gsdReal}`);
-test("gsdRoot resolves to project storage", gsdReal, PROJECT_STORAGE_REAL);
-test("gsdRoot does NOT resolve to user-level ~/.hx", gsdReal !== USER_GSD, true);
+const hxReal = realpathSync(hx);
+console.log(`  hxRoot resolves to: ${hxReal}`);
+test("hxRoot resolves to project storage", hxReal, PROJECT_STORAGE_REAL);
+test("hxRoot does NOT resolve to user-level ~/.hx", hxReal !== USER_HX, true);
 
 console.log("\n=== Test 3: parallel/ directory targets project .hx ===\n");
 
 const parallelDir = join(hx, "parallel");
 console.log(`  Parallel dir would be: ${parallelDir}`);
-const parallelReal = join(gsdReal, "parallel");
+const parallelReal = join(hxReal, "parallel");
 console.log(`  Resolves physically to: ${parallelReal}`);
 test("parallel dir is under project .hx", parallelDir.startsWith(PROJECT_REAL), true);
-test("parallel dir is NOT under ~/.hx root", !parallelDir.startsWith(USER_GSD) || parallelDir.startsWith(`${USER_GSD}/projects/`), true);
+test("parallel dir is NOT under ~/.hx root", !parallelDir.startsWith(USER_HX) || parallelDir.startsWith(`${USER_HX}/projects/`), true);
 
 // Actually create it and verify
 mkdirSync(parallelDir, { recursive: true });
@@ -218,8 +218,8 @@ writeFileSync(orchestratorPath, JSON.stringify({ active: true }));
 test("orchestrator.json written to project .hx", existsSync(orchestratorPath), true);
 
 // Verify nothing leaked to user-level ~/.hx root
-const userParallelDir = join(USER_GSD, "parallel");
-const userOrchestratorPath = join(USER_GSD, "orchestrator.json");
+const userParallelDir = join(USER_HX, "parallel");
+const userOrchestratorPath = join(USER_HX, "orchestrator.json");
 test("NO parallel/ dir at user-level ~/.hx root", !existsSync(userParallelDir), true);
 test("NO orchestrator.json at user-level ~/.hx root", !existsSync(userOrchestratorPath), true);
 
@@ -232,12 +232,12 @@ test("validateDirectory blocks with 'blocked' severity", homeValidation.severity
 const projectValidation = validateDirectory(PROJECT_DIR);
 test("validateDirectory allows project dir", projectValidation.safe, true);
 
-console.log("\n=== Test 6: GSD_PROJECT_ROOT env var path ===\n");
+console.log("\n=== Test 6: HX_PROJECT_ROOT env var path ===\n");
 
-process.env.GSD_PROJECT_ROOT = PROJECT_DIR;
+process.env.HX_PROJECT_ROOT = PROJECT_DIR;
 const envResult = resolveProjectRoot(workerCwd);
-test("GSD_PROJECT_ROOT short-circuits resolution", envResult, PROJECT_DIR);
-delete process.env.GSD_PROJECT_ROOT;
+test("HX_PROJECT_ROOT short-circuits resolution", envResult, PROJECT_DIR);
+delete process.env.HX_PROJECT_ROOT;
 
 console.log("\n=== Test 7: Non-worktree paths unaffected ===\n");
 
@@ -254,12 +254,12 @@ if (failed > 0) {
 } else {
   console.log("\n✅ ALL INTEGRATION TESTS PASSED");
   console.log("  - resolveProjectRoot returns real project, not ~");
-  console.log("  - gsdRoot finds project .hx through symlink");
+  console.log("  - hxRoot finds project .hx through symlink");
   console.log("  - parallel/ dir created in project .hx, not ~/.hx");
   console.log("  - session status writes land in correct location");
   console.log("  - orchestrator.json lands in correct location");
   console.log("  - validateDirectory blocks ~ as fallback safety net");
-  console.log("  - GSD_PROJECT_ROOT env var works as primary layer");
+  console.log("  - HX_PROJECT_ROOT env var works as primary layer");
   console.log("  - Non-worktree paths are unaffected by the fix");
   process.exit(0);
 }

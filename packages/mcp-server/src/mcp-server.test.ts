@@ -520,12 +520,12 @@ describe('SessionManager', () => {
 // ---------------------------------------------------------------------------
 
 describe('SessionManager.resolveCLIPath', () => {
-  const originalGsdPath = process.env['HX_CLI_PATH'];
+  const originalHxPath = process.env['HX_CLI_PATH'];
   const originalPath = process.env['PATH'];
 
   afterEach(() => {
-    if (originalGsdPath !== undefined) {
-      process.env['HX_CLI_PATH'] = originalGsdPath;
+    if (originalHxPath !== undefined) {
+      process.env['HX_CLI_PATH'] = originalHxPath;
     } else {
       delete process.env['HX_CLI_PATH'];
     }

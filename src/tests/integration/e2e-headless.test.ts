@@ -44,7 +44,7 @@ type RunResult = {
 /**
  * Spawn `node dist/loader.js ...args` and collect output.
  */
-function runGsd(
+function runHx(
   args: string[],
   timeoutMs = 30_000,
   env: NodeJS.ProcessEnv = {},
@@ -82,7 +82,7 @@ function runGsd(
  * Spawn a child process with the ability to send signals mid-flight.
  * Returns both the child and a promise that resolves with the result.
  */
-function spawnGsd(
+function spawnHx(
   args: string[],
   timeoutMs = 30_000,
   env: NodeJS.ProcessEnv = {},
@@ -164,7 +164,7 @@ test("headless --output-format json emits a single HeadlessJsonResult on stdout"
   // --max-restarts 0 prevents retry loops which would emit multiple JSON results.
   // --timeout 2000 ensures the process completes quickly.
   // Will timeout/error (no API key) but JSON batch mode should emit one HeadlessJsonResult.
-  const result = await runGsd(
+  const result = await runHx(
     ["headless", "--output-format", "json", "--timeout", "2000", "--max-restarts", "0", "auto"],
     45_000,  // generous harness timeout — process needs ~4-6s (2s timeout + startup + cleanup)
     {},
@@ -215,7 +215,7 @@ test("headless exits with code 11 after SIGINT", async (t) => {
 
   // Spawn with long timeout and max-restarts 0 so the process stays alive
   // waiting for completion while we send SIGINT.
-  const { child, result: resultPromise } = spawnGsd(
+  const { child, result: resultPromise } = spawnHx(
     ["headless", "--timeout", "60000", "--max-restarts", "0", "--context-text", "Test context for SIGINT", "new-milestone"],
     30_000,
     {},
@@ -279,7 +279,7 @@ test("headless --output-format stream-json emits NDJSON on stdout", async (t) =>
   t.after(() => { rmSync(tmpDir, { recursive: true, force: true }); });
 
   // --max-restarts 0 to prevent retry loops that extend runtime.
-  const result = await runGsd(
+  const result = await runHx(
     ["headless", "--output-format", "stream-json", "--timeout", "2000", "--max-restarts", "0", "auto"],
     45_000,  // generous harness timeout
     {},
@@ -326,7 +326,7 @@ test("headless --resume with nonexistent ID exits 1 with descriptive error", asy
   const tmpDir = createTempWithHx("hx-e2e-resume-bad-");
   t.after(() => { rmSync(tmpDir, { recursive: true, force: true }); });
 
-  const result = await runGsd(
+  const result = await runHx(
     ["headless", "--resume", "nonexistent-id-xyz", "--max-restarts", "0", "auto"],
     30_000,
     {},
@@ -356,7 +356,7 @@ test("headless --output-format with invalid value exits 1", async (t) => {
   const tmpDir = createTempWithHx("hx-e2e-bad-format-");
   t.after(() => { rmSync(tmpDir, { recursive: true, force: true }); });
 
-  const result = await runGsd(
+  const result = await runHx(
     ["headless", "--output-format", "invalid-format", "auto"],
     15_000,
     {},

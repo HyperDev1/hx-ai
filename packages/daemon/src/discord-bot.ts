@@ -297,14 +297,14 @@ export class DiscordBot {
         break;
       }
       case 'hx-start':
-        this.handleGsdStart(interaction).catch((err) => {
+        this.handleHxStart(interaction).catch((err) => {
           this.logger.warn('hx-start handler error', {
             error: err instanceof Error ? err.message : String(err),
           });
         });
         break;
       case 'hx-stop':
-        this.handleGsdStop(interaction).catch((err) => {
+        this.handleHxStop(interaction).catch((err) => {
           this.logger.warn('hx-stop handler error', {
             error: err instanceof Error ? err.message : String(err),
           });
@@ -343,7 +343,7 @@ export class DiscordBot {
   // Private: /hx-start handler
   // ---------------------------------------------------------------------------
 
-  private async handleGsdStart(interaction: import('discord.js').ChatInputCommandInteraction): Promise<void> {
+  private async handleHxStart(interaction: import('discord.js').ChatInputCommandInteraction): Promise<void> {
     await interaction.deferReply({ ephemeral: true });
     this.logger.info('hx-start: scanning projects');
 
@@ -426,7 +426,7 @@ export class DiscordBot {
   // Private: /hx-stop handler
   // ---------------------------------------------------------------------------
 
-  private async handleGsdStop(interaction: import('discord.js').ChatInputCommandInteraction): Promise<void> {
+  private async handleHxStop(interaction: import('discord.js').ChatInputCommandInteraction): Promise<void> {
     await interaction.deferReply({ ephemeral: true });
     this.logger.info('hx-stop: listing sessions');
 

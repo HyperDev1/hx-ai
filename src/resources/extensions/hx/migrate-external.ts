@@ -11,7 +11,7 @@ import { existsSync, lstatSync, mkdirSync, readdirSync, realpathSync, renameSync
 import { join } from "node:path";
 import { externalHxRoot } from "./repo-identity.js";
 import { getErrorMessage } from "./error-utils.js";
-import { hasGitTrackedGsdFiles } from "./gitignore.js";
+import { hasGitTrackedHxFiles } from "./gitignore.js";
 import { GIT_NO_PROMPT_ENV } from "./git-constants.js";
 
 export interface MigrationResult {
@@ -34,16 +34,16 @@ export interface MigrationResult {
  * 3. On failure: rename `.hx.migrating` back to `.hx` (rollback)
  */
 export function migrateToExternalState(basePath: string): MigrationResult {
-  const localGsd = join(basePath, ".hx");
+  const localHx = join(basePath, ".hx");
 
   // Skip if doesn't exist
-  if (!existsSync(localGsd)) {
+  if (!existsSync(localHx)) {
     return { migrated: false };
   }
 
   // Skip if already a symlink
   try {
-    const stat = lstatSync(localGsd);
+    const stat = lstatSync(localHx);
     if (stat.isSymbolicLink()) {
       return { migrated: false };
     }
@@ -56,14 +56,14 @@ export function migrateToExternalState(basePath: string): MigrationResult {
 
   // Skip if .hx/ contains git-tracked files — the project intentionally
   // keeps .hx/ in version control and migration would destroy that.
-  if (hasGitTrackedGsdFiles(basePath)) {
+  if (hasGitTrackedHxFiles(basePath)) {
     return { migrated: false };
   }
 
   // Skip if .hx/worktrees/ has active worktree directories (#1337).
   // On Windows, active git worktrees hold OS-level directory handles that
   // prevent rename/delete. Attempting migration causes EBUSY and data loss.
-  const worktreesDir = join(localGsd, "worktrees");
+  const worktreesDir = join(localHx, "worktrees");
   if (existsSync(worktreesDir)) {
     try {
       const entries = readdirSync(worktreesDir, { withFileTypes: true });
@@ -88,12 +88,12 @@ export function migrateToExternalState(basePath: string): MigrationResult {
     // open (VS Code watchers, antivirus on-access scan). Fall back to
     // copy+delete (#1292).
     try {
-      renameSync(localGsd, migratingPath);
+      renameSync(localHx, migratingPath);
     } catch (renameErr: any) {
       if (renameErr?.code === "EPERM" || renameErr?.code === "EBUSY") {
         try {
-          cpSync(localGsd, migratingPath, { recursive: true, force: true });
-          rmSync(localGsd, { recursive: true, force: true });
+          cpSync(localHx, migratingPath, { recursive: true, force: true });
+          rmSync(localHx, { recursive: true, force: true });
         } catch (copyErr) {
           return { migrated: false, error: `Migration rename/copy failed: ${copyErr instanceof Error ? copyErr.message : String(copyErr)}` };
         }
@@ -122,27 +122,27 @@ export function migrateToExternalState(basePath: string): MigrationResult {
     }
 
     // Create symlink .hx -> external path
-    symlinkSync(externalPath, localGsd, "junction");
+    symlinkSync(externalPath, localHx, "junction");
 
     // Verify the symlink resolves correctly before removing the backup (#1377).
     // On Windows, junction creation can silently succeed but resolve to the wrong
     // target, or the external dir may not be accessible. If verification fails,
     // restore from the backup.
     try {
-      const resolved = realpathSync(localGsd);
+      const resolved = realpathSync(localHx);
       const resolvedExternal = realpathSync(externalPath);
       if (resolved !== resolvedExternal) {
         // Symlink points to wrong target — restore backup
-        try { rmSync(localGsd, { force: true }); } catch { /* may not exist */ }
-        renameSync(migratingPath, localGsd);
+        try { rmSync(localHx, { force: true }); } catch { /* may not exist */ }
+        renameSync(migratingPath, localHx);
         return { migrated: false, error: `Migration verification failed: symlink resolves to ${resolved}, expected ${resolvedExternal}` };
       }
       // Verify we can read through the symlink
-      readdirSync(localGsd);
+      readdirSync(localHx);
     } catch (verifyErr) {
       // Symlink broken or unreadable — restore backup
-      try { rmSync(localGsd, { force: true }); } catch { /* may not exist */ }
-      try { renameSync(migratingPath, localGsd); } catch { /* best-effort restore */ }
+      try { rmSync(localHx, { force: true }); } catch { /* may not exist */ }
+      try { renameSync(migratingPath, localHx); } catch { /* best-effort restore */ }
       return { migrated: false, error: `Migration verification failed: ${getErrorMessage(verifyErr)}` };
     }
 
@@ -168,8 +168,8 @@ export function migrateToExternalState(basePath: string): MigrationResult {
   } catch (err) {
     // Rollback: rename .hx.migrating back to .hx
     try {
-      if (existsSync(migratingPath) && !existsSync(localGsd)) {
-        renameSync(migratingPath, localGsd);
+      if (existsSync(migratingPath) && !existsSync(localHx)) {
+        renameSync(migratingPath, localHx);
       }
     } catch {
       // Rollback failed -- leave .hx.migrating for doctor to detect
@@ -187,14 +187,14 @@ export function migrateToExternalState(basePath: string): MigrationResult {
  * Moves `.hx.migrating` back to `.hx` if `.hx` doesn't exist.
  */
 export function recoverFailedMigration(basePath: string): boolean {
-  const localGsd = join(basePath, ".hx");
+  const localHx = join(basePath, ".hx");
   const migratingPath = join(basePath, ".hx.migrating");
 
   if (!existsSync(migratingPath)) return false;
-  if (existsSync(localGsd)) return false; // both exist -- ambiguous, don't touch
+  if (existsSync(localHx)) return false; // both exist -- ambiguous, don't touch
 
   try {
-    renameSync(migratingPath, localGsd);
+    renameSync(migratingPath, localHx);
     return true;
   } catch {
     return false;

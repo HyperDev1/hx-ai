@@ -24,7 +24,7 @@ import {
 import { cn } from "@/lib/utils"
 import { useProjectStoreManager } from "@/lib/project-store-manager"
 import {
-  useGSDWorkspaceState,
+  useHXWorkspaceState,
   getLiveWorkspaceIndex,
   getLiveAutoDashboard,
   formatCost,
@@ -56,7 +56,7 @@ import {
 type ProjectDetectionKind = "active-hx" | "empty-hx" | "v1-legacy" | "brownfield" | "blank"
 
 interface ProjectDetectionSignals {
-  hasGsdFolder: boolean
+  hasHxFolder: boolean
   hasPlanningFolder: boolean
   hasGitRepo: boolean
   hasPackageJson: boolean
@@ -348,7 +348,7 @@ export function ProjectsPanel({
 
   const [newProjectOpen, setNewProjectOpen] = useState(false)
   const [changeRootOpen, setChangeRootOpen] = useState(false)
-  const workspaceState = useGSDWorkspaceState()
+  const workspaceState = useHXWorkspaceState()
 
   const handleProjectCreated = useCallback(
     (newProject: ProjectMetadata) => {
@@ -522,7 +522,7 @@ export function ProjectsPanel({
 
 // ─── Active project inline summary (compact for panel card) ────────────
 
-function ActiveProjectSummary({ workspaceState }: { workspaceState: ReturnType<typeof useGSDWorkspaceState> }) {
+function ActiveProjectSummary({ workspaceState }: { workspaceState: ReturnType<typeof useHXWorkspaceState> }) {
   const workspace = getLiveWorkspaceIndex(workspaceState)
   const dashboard = getLiveAutoDashboard(workspaceState)
   const currentSlice = getCurrentSlice(workspace)

@@ -232,7 +232,7 @@ export async function showProjectInit(
   }
 
   // ── Step 9: Bootstrap .hx/ ────────────────────────────────────────────────
-  bootstrapGsdDirectory(basePath, prefs, signals);
+  bootstrapHxDirectory(basePath, prefs, signals);
 
   // Ensure .gitignore
   ensureGitignore(basePath);
@@ -411,7 +411,7 @@ async function customizeAdvancedPrefs(
 
 // ─── Bootstrap ──────────────────────────────────────────────────────────────────
 
-function bootstrapGsdDirectory(
+function bootstrapHxDirectory(
   basePath: string,
   prefs: ProjectPreferences,
   signals: ProjectSignals,

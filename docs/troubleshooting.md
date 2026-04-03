@@ -342,7 +342,7 @@ Doctor rebuilds `STATE.md` from plan and roadmap files on disk and fixes detecte
 
 ### "HX database is not available"
 
-**Symptoms:** `gsd_decision_save` (or its alias `gsd_save_decision`), `gsd_requirement_update` (or `gsd_update_requirement`), or `gsd_summary_save` (or `gsd_save_summary`) fail with this error.
+**Symptoms:** `hx_decision_save` (or its alias `hx_save_decision`), `hx_requirement_update` (or `hx_update_requirement`), or `hx_summary_save` (or `hx_save_summary`) fail with this error.
 
 **Cause:** The SQLite database wasn't initialized. This happens in manual `/hx` sessions (non-auto mode) on versions before v2.29.
 

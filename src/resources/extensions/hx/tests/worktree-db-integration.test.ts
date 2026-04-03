@@ -68,9 +68,9 @@ describe('worktree-db-integration', async () => {
       tempDirs.push(tempDir);
 
       // Seed a hx.db in the main repo
-      const gsdDir = join(tempDir, ".hx");
-      mkdirSync(gsdDir, { recursive: true });
-      const mainDbPath = join(gsdDir, "hx.db");
+      const hxDir = join(tempDir, ".hx");
+      mkdirSync(hxDir, { recursive: true });
+      const mainDbPath = join(hxDir, "hx.db");
       openDatabase(mainDbPath);
       closeDatabase();
 

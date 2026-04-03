@@ -426,9 +426,9 @@ export async function saveArtifactToDb(
     const db = await import('./hx-db.js');
 
     // Guard against path traversal before any reads/writes
-    const gsdDir = resolve(basePath, '.hx');
+    const hxDir = resolve(basePath, '.hx');
     const fullPath = resolve(basePath, '.hx', opts.path);
-    if (!fullPath.startsWith(gsdDir)) {
+    if (!fullPath.startsWith(hxDir)) {
       throw new HXError(HX_IO_ERROR, `saveArtifactToDb: path escapes .hx/ directory: ${opts.path}`);
     }
 

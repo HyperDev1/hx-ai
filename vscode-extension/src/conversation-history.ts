@@ -20,8 +20,8 @@ interface ConversationMessage {
  * current HX session using the get_messages RPC call. Shows tool calls,
  * thinking blocks, search/filter, and fork-from-here actions.
  */
-export class GsdConversationHistoryPanel implements vscode.Disposable {
-	private static currentPanel: GsdConversationHistoryPanel | undefined;
+export class HxConversationHistoryPanel implements vscode.Disposable {
+	private static currentPanel: HxConversationHistoryPanel | undefined;
 
 	private readonly panel: vscode.WebviewPanel;
 	private readonly client: HxClient;
@@ -30,13 +30,13 @@ export class GsdConversationHistoryPanel implements vscode.Disposable {
 	static createOrShow(
 		extensionUri: vscode.Uri,
 		client: HxClient,
-	): GsdConversationHistoryPanel {
+	): HxConversationHistoryPanel {
 		const column = vscode.window.activeTextEditor?.viewColumn ?? vscode.ViewColumn.One;
 
-		if (GsdConversationHistoryPanel.currentPanel) {
-			GsdConversationHistoryPanel.currentPanel.panel.reveal(column);
-			void GsdConversationHistoryPanel.currentPanel.refresh();
-			return GsdConversationHistoryPanel.currentPanel;
+		if (HxConversationHistoryPanel.currentPanel) {
+			HxConversationHistoryPanel.currentPanel.panel.reveal(column);
+			void HxConversationHistoryPanel.currentPanel.refresh();
+			return HxConversationHistoryPanel.currentPanel;
 		}
 
 		const panel = vscode.window.createWebviewPanel(
@@ -49,13 +49,13 @@ export class GsdConversationHistoryPanel implements vscode.Disposable {
 			},
 		);
 
-		GsdConversationHistoryPanel.currentPanel = new GsdConversationHistoryPanel(
+		HxConversationHistoryPanel.currentPanel = new HxConversationHistoryPanel(
 			panel,
 			extensionUri,
 			client,
 		);
-		void GsdConversationHistoryPanel.currentPanel.refresh();
-		return GsdConversationHistoryPanel.currentPanel;
+		void HxConversationHistoryPanel.currentPanel.refresh();
+		return HxConversationHistoryPanel.currentPanel;
 	}
 
 	private constructor(
@@ -105,7 +105,7 @@ export class GsdConversationHistoryPanel implements vscode.Disposable {
 	}
 
 	dispose(): void {
-		GsdConversationHistoryPanel.currentPanel = undefined;
+		HxConversationHistoryPanel.currentPanel = undefined;
 		this.panel.dispose();
 		for (const d of this.disposables) {
 			d.dispose();

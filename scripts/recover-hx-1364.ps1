@@ -103,18 +103,18 @@ if ($DryRun) {
 
 Write-Section "── Step 1: Detect .hx/ directory ─────────────────────────────────"
 
-$gsdDir = Join-Path $repoRoot '.hx'
-$GsdIsSymlink = $false
+$hxDir = Join-Path $repoRoot '.hx'
+$HxIsSymlink = $false
 
-if (-not (Test-Path $gsdDir)) {
+if (-not (Test-Path $hxDir)) {
     Write-Ok ".hx/ does not exist in this repo — not affected."
     exit 0
 }
 
-if (Test-ReparsePoint $gsdDir) {
+if (Test-ReparsePoint $hxDir) {
     # Scenario C: migration succeeded (symlink/junction in place) but git index was never
     # cleaned — tracked .hx/* files still appear as deleted through the reparse point.
-    $GsdIsSymlink = $true
+    $HxIsSymlink = $true
     Write-Warn ".hx/ is a symlink/junction — checking for stale git index entries (Scenario C)..."
 } else {
     Write-Info ".hx/ is a real directory (Scenario A/B)."
@@ -126,31 +126,31 @@ Write-Section "── Step 2: Check .gitignore for .hx entry ──────�
 
 $gitignorePath = Join-Path $repoRoot '.gitignore'
 
-if (-not (Test-Path $gitignorePath) -and -not $GsdIsSymlink) {
+if (-not (Test-Path $gitignorePath) -and -not $HxIsSymlink) {
     Write-Ok ".gitignore does not exist — not affected."
     exit 0
 }
 
 $gitignoreLines = @()
-$gsdIgnoreLine  = $null
+$hxIgnoreLine  = $null
 if (Test-Path $gitignorePath) {
     $gitignoreLines = Get-Content $gitignorePath -Encoding UTF8
-    $gsdIgnoreLine  = $gitignoreLines | Where-Object {
+    $hxIgnoreLine  = $gitignoreLines | Where-Object {
         $trimmed = $_.Trim()
         $trimmed -eq '.hx' -and -not $trimmed.StartsWith('#')
     } | Select-Object -First 1
 }
 
-if ($GsdIsSymlink) {
+if ($HxIsSymlink) {
     # Symlink layout: .hx SHOULD be ignored (it's external state).
-    if (-not $gsdIgnoreLine) {
+    if (-not $hxIgnoreLine) {
         Write-Warn '".hx" missing from .gitignore — will add (migration complete, .hx/ is external).'
     } else {
         Write-Ok '".hx" already in .gitignore — correct for external-state layout.'
     }
 } else {
     # Real-directory layout: .hx should NOT be ignored.
-    if (-not $gsdIgnoreLine) {
+    if (-not $hxIgnoreLine) {
         Write-Ok '".hx" not found in .gitignore — .gitignore not affected.'
     } else {
         Write-Warn '".hx" found in .gitignore — this is the bad pattern from #1364.'
@@ -170,12 +170,12 @@ $trackedInHeadRaw = Invoke-Git @('ls-tree', '-r', '--name-only', 'HEAD', '--', '
 $trackedInHead = if ($trackedInHeadRaw) { $trackedInHeadRaw -split "`n" | Where-Object { $_ } } else { @() }
 
 $deletedFromHistory = @()
-if ($GsdIsSymlink) {
+if ($HxIsSymlink) {
     # Scenario C: migration succeeded. Files are safe via reparse point.
     # Only index entries can be stale — no need to scan commit history.
     if ($trackedInHead.Count -eq 0 -and $deletedFiles.Count -eq 0) {
         Write-Ok "No stale index entries found — symlink/junction layout is healthy."
-        if (-not $gsdIgnoreLine) {
+        if (-not $hxIgnoreLine) {
             Write-Info "Add .hx to .gitignore manually to complete the migration."
         }
         exit 0
@@ -193,7 +193,7 @@ if ($GsdIsSymlink) {
     # Nothing was ever tracked in any scenario
     if ($trackedInHead.Count -eq 0 -and $deletedFiles.Count -eq 0 -and $deletedFromHistory.Count -eq 0) {
         Write-Ok "No .hx/ files tracked in this repo — not affected by #1364."
-        if ($gsdIgnoreLine) {
+        if ($hxIgnoreLine) {
             Write-Warn '".hx" is still in .gitignore but there is nothing to restore.'
         }
         exit 0
@@ -220,7 +220,7 @@ if ($GsdIsSymlink) {
 
     # HEAD has files and working tree is clean — only .gitignore needs fixing
     if ($trackedInHead.Count -gt 0 -and $deletedFiles.Count -eq 0) {
-        if (-not $gsdIgnoreLine) {
+        if (-not $hxIgnoreLine) {
             Write-Ok "No action needed — .hx/ is tracked in HEAD and .gitignore is clean."
             exit 0
         }
@@ -236,7 +236,7 @@ $damageCommit   = $null
 $cleanCommit    = $null
 $restorableFiles = @()
 
-if ($GsdIsSymlink) {
+if ($HxIsSymlink) {
     Write-Info "Scenario C: symlink/junction layout — skipping commit history scan (no file restore needed)."
 } else {
     Write-Info "Scanning git log to find when .hx was added to .gitignore..."
@@ -287,7 +287,7 @@ if ($GsdIsSymlink) {
 
 # ── Step 5: Clean index (Scenario C) or restore deleted files (Scenario A/B) ─
 
-if ($GsdIsSymlink) {
+if ($HxIsSymlink) {
     Write-Section "── Step 5: Clean stale git index entries ───────────────────────────"
 
     Write-Info "Running: git rm -r --cached --ignore-unmatch .hx/ ..."
@@ -330,9 +330,9 @@ if ($GsdIsSymlink) {
 
 Write-Section "── Step 6: Fix .gitignore ──────────────────────────────────────────"
 
-if ($GsdIsSymlink) {
+if ($HxIsSymlink) {
     # Scenario C: .hx IS external — it should be in .gitignore.  Add if missing.
-    if (-not $gsdIgnoreLine) {
+    if (-not $hxIgnoreLine) {
         Write-Info 'Adding ".hx" to .gitignore (migration complete — .hx/ is external state)...'
         if ($DryRun) {
             Write-Host "  (dry-run) Would append: .hx" -ForegroundColor Yellow
@@ -346,7 +346,7 @@ if ($GsdIsSymlink) {
     }
 } else {
     # Scenario A/B: .hx is a real tracked directory — remove the bad ignore line.
-    if (-not $gsdIgnoreLine) {
+    if (-not $hxIgnoreLine) {
         Write-Ok '".hx" not in .gitignore — nothing to fix.'
     } else {
         Write-Info 'Removing bare ".hx" line from .gitignore...'
@@ -372,7 +372,7 @@ if (-not $DryRun) {
     if (-not $changed) {
         Write-Ok "No staged changes — working tree was already clean."
     } else {
-        if ($GsdIsSymlink) {
+        if ($HxIsSymlink) {
             # Scenario C: git rm --cached already staged the index cleanup.
             # Only stage .gitignore — adding .hx/ would fail (now gitignored).
             Invoke-Git @('add', '.gitignore') -AllowFailure | Out-Null
@@ -398,7 +398,7 @@ if ($DryRun) {
     if ($finalStaged.Count -gt 0) {
         Write-Host "Recovery complete. Commit with:" -ForegroundColor Green
         Write-Host ""
-        if ($GsdIsSymlink) {
+        if ($HxIsSymlink) {
             Write-Host '  git commit -m "fix: clean stale .hx/ index entries after external-state migration"'
         } else {
             Write-Host '  git commit -m "fix: restore .hx/ files deleted by #1364 regression"'

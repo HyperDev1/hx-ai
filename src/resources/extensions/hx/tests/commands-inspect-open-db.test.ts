@@ -19,9 +19,9 @@ test("/hx inspect opens existing database when it was not yet opened in session"
     fs.rmSync(tmp, { recursive: true, force: true });
   });
 
-  const gsdDir = path.join(tmp, ".hx");
-  fs.mkdirSync(gsdDir, { recursive: true });
-  const dbPath = path.join(gsdDir, "hx.db");
+  const hxDir = path.join(tmp, ".hx");
+  fs.mkdirSync(hxDir, { recursive: true });
+  const dbPath = path.join(hxDir, "hx.db");
 
   assert.equal(openDatabase(dbPath), true);
   closeDatabase();

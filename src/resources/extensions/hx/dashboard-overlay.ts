@@ -47,7 +47,7 @@ function unitLabel(type: string): string {
 }
 
 
-export class GSDDashboardOverlay {
+export class HXDashboardOverlay {
   private tui: { requestRender: () => void };
   private theme: Theme;
   private onClose: () => void;

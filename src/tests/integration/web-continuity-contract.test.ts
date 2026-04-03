@@ -10,7 +10,7 @@ const COMMAND_TIMEOUT_MS = 90_000;
 const VISIBILITY_REFRESH_THRESHOLD_MS = 30_000;
 
 // ---------------------------------------------------------------------------
-// Inline routing harness — mirrors GSDWorkspaceStore logic for the
+// Inline routing harness — mirrors HXWorkspaceStore logic for the
 // four continuity/safety mechanisms under test.
 // ---------------------------------------------------------------------------
 

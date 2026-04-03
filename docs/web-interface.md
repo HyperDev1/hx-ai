@@ -40,7 +40,7 @@ The web interface is built with Next.js and communicates with the HX backend via
 Key components:
 - `ProjectBridgeService` — per-project command routing and SSE subscription
 - `getProjectBridgeServiceForCwd()` — registry returning distinct instances per project path
-- `resolveProjectCwd()` — reads `?project=` from request URL or falls back to `GSD_WEB_PROJECT_CWD`
+- `resolveProjectCwd()` — reads `?project=` from request URL or falls back to `HX_WEB_PROJECT_CWD`
 
 ## Configuration
 
@@ -50,7 +50,7 @@ The web server binds to `localhost:3000` by default. Use `--host`, `--port`, and
 
 | Variable | Description |
 |----------|-------------|
-| `GSD_WEB_PROJECT_CWD` | Default project path when `?project=` is not specified |
+| `HX_WEB_PROJECT_CWD` | Default project path when `?project=` is not specified |
 
 ## Node v24 Compatibility
 

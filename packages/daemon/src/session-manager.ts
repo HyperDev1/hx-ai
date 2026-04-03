@@ -277,7 +277,7 @@ export class SessionManager extends EventEmitter {
   /**
    * Resolve the HX CLI path.
    *
-   * 1. GSD_CLI_PATH env var (highest priority)
+   * 1. HX_CLI_PATH env var (highest priority)
    * 2. `which hx` → resolve to the actual dist/cli.js
    */
   static resolveCLIPath(): string {

@@ -9,7 +9,7 @@ import { readdirSync, readFileSync, existsSync } from "node:fs";
 import { join, basename } from "node:path";
 import { homedir } from "node:os";
 
-const gsdHome = process.env.HX_HOME || join(homedir(), ".hx");
+const hxHome = process.env.HX_HOME || join(homedir(), ".hx");
 import type { Rule } from "./ttsr-manager.js";
 import { splitFrontmatter, parseFrontmatterMap } from "../shared/frontmatter.js";
 
@@ -61,7 +61,7 @@ function scanDir(dir: string): Rule[] {
  * Project rules override global rules with the same name.
  */
 export function loadRules(cwd: string): Rule[] {
-	const globalDir = join(gsdHome, "agent", "rules");
+	const globalDir = join(hxHome, "agent", "rules");
 	const projectDir = join(cwd, ".hx", "rules");
 
 	const globalRules = scanDir(globalDir);

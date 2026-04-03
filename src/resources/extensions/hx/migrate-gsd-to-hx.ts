@@ -142,7 +142,7 @@ export function migrateGlobalGsdToHx(): GsdToHxMigrationResult {
  * Migrates both the current project's `.gsd/` → `.hx/` and
  * global `~/.gsd/agent/` → `~/.hx/agent/` state.
  */
-export async function handleGsdToHxMigration(ctx: import("@hyperlab/hx-coding-agent").ExtensionCommandContext): Promise<void> {
+export async function handleLegacyMigration(ctx: import("@hyperlab/hx-coding-agent").ExtensionCommandContext): Promise<void> {
   const basePath = process.cwd();
   const gsdPath = join(basePath, ".gsd");
   const hxPath = join(basePath, ".hx");

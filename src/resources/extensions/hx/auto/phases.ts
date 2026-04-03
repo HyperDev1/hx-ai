@@ -976,12 +976,12 @@ export async function runUnitPhase(
   s.lastBaselineCharCount = undefined;
   if (deps.isDbAvailable()) {
     try {
-      const { inlineGsdRootFile } = await importExtensionModule<typeof import("../auto-prompts.js")>(import.meta.url, "../auto-prompts.js");
+      const { inlineHxRootFile } = await importExtensionModule<typeof import("../auto-prompts.js")>(import.meta.url, "../auto-prompts.js");
       const [decisionsContent, requirementsContent, projectContent] =
         await Promise.all([
-          inlineGsdRootFile(s.basePath, "decisions.md", "Decisions"),
-          inlineGsdRootFile(s.basePath, "requirements.md", "Requirements"),
-          inlineGsdRootFile(s.basePath, "project.md", "Project"),
+          inlineHxRootFile(s.basePath, "decisions.md", "Decisions"),
+          inlineHxRootFile(s.basePath, "requirements.md", "Requirements"),
+          inlineHxRootFile(s.basePath, "project.md", "Project"),
         ]);
       s.lastBaselineCharCount =
         (decisionsContent?.length ?? 0) +

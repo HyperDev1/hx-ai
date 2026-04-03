@@ -1,20 +1,20 @@
 import * as vscode from "vscode";
 import { HxClient, ThinkingLevel } from "./hx-client.js";
 import { registerChatParticipant } from "./chat-participant.js";
-import { GsdSidebarProvider } from "./sidebar.js";
-import { GsdFileDecorationProvider } from "./file-decorations.js";
-import { GsdBashTerminal } from "./bash-terminal.js";
-import { GsdSessionTreeProvider } from "./session-tree.js";
-import { GsdConversationHistoryPanel } from "./conversation-history.js";
-import { GsdSlashCompletionProvider } from "./slash-completion.js";
-import { GsdCodeLensProvider } from "./code-lens.js";
-import { GsdActivityFeedProvider } from "./activity-feed.js";
+import { HxSidebarProvider } from "./sidebar.js";
+import { HxFileDecorationProvider } from "./file-decorations.js";
+import { HxBashTerminal } from "./bash-terminal.js";
+import { HxSessionTreeProvider } from "./session-tree.js";
+import { HxConversationHistoryPanel } from "./conversation-history.js";
+import { HxSlashCompletionProvider } from "./slash-completion.js";
+import { HxCodeLensProvider } from "./code-lens.js";
+import { HxActivityFeedProvider } from "./activity-feed.js";
 
 let client: HxClient | undefined;
-let sidebarProvider: GsdSidebarProvider | undefined;
-let fileDecorations: GsdFileDecorationProvider | undefined;
-let sessionTreeProvider: GsdSessionTreeProvider | undefined;
-let activityFeedProvider: GsdActivityFeedProvider | undefined;
+let sidebarProvider: HxSidebarProvider | undefined;
+let fileDecorations: HxFileDecorationProvider | undefined;
+let sessionTreeProvider: HxSessionTreeProvider | undefined;
+let activityFeedProvider: HxActivityFeedProvider | undefined;
 
 function requireConnected(): boolean {
 	if (!client?.isConnected) {
@@ -91,17 +91,17 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// -- Sidebar -----------------------------------------------------------
 
-	sidebarProvider = new GsdSidebarProvider(context.extensionUri, client);
+	sidebarProvider = new HxSidebarProvider(context.extensionUri, client);
 	context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider(
-			GsdSidebarProvider.viewId,
+			HxSidebarProvider.viewId,
 			sidebarProvider,
 		),
 	);
 
 	// -- File decorations --------------------------------------------------
 
-	fileDecorations = new GsdFileDecorationProvider(client);
+	fileDecorations = new HxFileDecorationProvider(client);
 	context.subscriptions.push(
 		fileDecorations,
 		vscode.window.registerFileDecorationProvider(fileDecorations),
@@ -109,23 +109,23 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// -- Bash terminal -----------------------------------------------------
 
-	const bashTerminal = new GsdBashTerminal(client);
+	const bashTerminal = new HxBashTerminal(client);
 	context.subscriptions.push(bashTerminal);
 
 	// -- Session tree view -------------------------------------------------
 
-	sessionTreeProvider = new GsdSessionTreeProvider(client);
+	sessionTreeProvider = new HxSessionTreeProvider(client);
 	context.subscriptions.push(
 		sessionTreeProvider,
-		vscode.window.registerTreeDataProvider(GsdSessionTreeProvider.viewId, sessionTreeProvider),
+		vscode.window.registerTreeDataProvider(HxSessionTreeProvider.viewId, sessionTreeProvider),
 	);
 
 	// -- Activity feed -----------------------------------------------------
 
-	activityFeedProvider = new GsdActivityFeedProvider(client);
+	activityFeedProvider = new HxActivityFeedProvider(client);
 	context.subscriptions.push(
 		activityFeedProvider,
-		vscode.window.registerTreeDataProvider(GsdActivityFeedProvider.viewId, activityFeedProvider),
+		vscode.window.registerTreeDataProvider(HxActivityFeedProvider.viewId, activityFeedProvider),
 	);
 
 	// -- Progress notifications --------------------------------------------
@@ -222,7 +222,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// -- Slash command completion ------------------------------------------
 
-	const slashCompletion = new GsdSlashCompletionProvider(client);
+	const slashCompletion = new HxSlashCompletionProvider(client);
 	context.subscriptions.push(
 		slashCompletion,
 		vscode.languages.registerCompletionItemProvider(
@@ -241,7 +241,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// -- Code lens "Ask HX" -----------------------------------------------
 
-	const codeLensProvider = new GsdCodeLensProvider(client);
+	const codeLensProvider = new HxCodeLensProvider(client);
 	context.subscriptions.push(
 		codeLensProvider,
 		vscode.languages.registerCodeLensProvider(
@@ -582,7 +582,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	context.subscriptions.push(
 		vscode.commands.registerCommand("hx.showHistory", () => {
 			if (!requireConnected()) return;
-			GsdConversationHistoryPanel.createOrShow(context.extensionUri, client!);
+			HxConversationHistoryPanel.createOrShow(context.extensionUri, client!);
 		}),
 	);
 

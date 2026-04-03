@@ -194,8 +194,8 @@ assert.ok(
 );
 
 assert.ok(
-  dataSrc.includes("resolveGsdRootFile"),
-  "uses resolveGsdRootFile for KNOWLEDGE path",
+  dataSrc.includes("resolveHxRootFile"),
+  "uses resolveHxRootFile for KNOWLEDGE path",
 );
 
 // Interface fields
@@ -313,8 +313,8 @@ const overlaySrc = readFileSync(overlayPath, "utf-8");
 console.log("\n=== visualizer-overlay.ts source contracts ===");
 
 assert.ok(
-  overlaySrc.includes("export class GSDVisualizerOverlay"),
-  "exports GSDVisualizerOverlay class",
+  overlaySrc.includes("export class HXVisualizerOverlay"),
+  "exports HXVisualizerOverlay class",
 );
 
 assert.ok(
@@ -434,8 +434,8 @@ assert.ok(
 );
 
 assert.ok(
-  coreHandlerSrc.includes("GSDVisualizerOverlay"),
-  "core.ts imports GSDVisualizerOverlay",
+  coreHandlerSrc.includes("HXVisualizerOverlay"),
+  "core.ts imports HXVisualizerOverlay",
 );
 
 assert.ok(

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { registerGSDCommand } from "../commands.ts";
+import { registerHXCommand } from "../commands.ts";
 
 function createMockPi() {
   const commands = new Map<string, any>();
@@ -33,10 +33,10 @@ function createMockCtx() {
 
 test("/hx update appears in subcommand completions", () => {
   const pi = createMockPi();
-  registerGSDCommand(pi as any);
+  registerHXCommand(pi as any);
 
-  const hx = pi.commands.get("hx");
-  assert.ok(hxCmd, "registerGSDCommand should register /hx");
+  const hxCmd = pi.commands.get("hx");
+  assert.ok(hxCmd, "registerHXCommand should register /hx");
 
   const completions = hxCmd.getArgumentCompletions("update");
   const updateEntry = completions.find((c: any) => c.value === "update");
@@ -46,17 +46,17 @@ test("/hx update appears in subcommand completions", () => {
 
 test("/hx update appears in help description", () => {
   const pi = createMockPi();
-  registerGSDCommand(pi as any);
+  registerHXCommand(pi as any);
 
-  const hx = pi.commands.get("hx");
+  const hxCmd = pi.commands.get("hx");
   assert.ok(hxCmd?.description?.includes("update"), "description should mention update");
 });
 
 test("/hx update is listed in completions with correct description", () => {
   const pi = createMockPi();
-  registerGSDCommand(pi as any);
+  registerHXCommand(pi as any);
 
-  const hx = pi.commands.get("hx");
+  const hxCmd = pi.commands.get("hx");
   const completions = hxCmd.getArgumentCompletions("");
   const updateEntry = completions.find((c: any) => c.value === "update");
   assert.ok(updateEntry, "update should appear in full completion list");

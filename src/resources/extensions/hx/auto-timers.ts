@@ -10,7 +10,7 @@ import type { ExtensionAPI, ExtensionContext } from "@hyperlab/hx-coding-agent";
 import { readUnitRuntimeRecord, writeUnitRuntimeRecord } from "./unit-runtime.js";
 import { isDbAvailable, getMilestoneSlices, getSliceTasks } from "./hx-db.js";
 import { resolveAutoSupervisorConfig } from "./preferences.js";
-import type { GSDPreferences } from "./preferences.js";
+import type { HXPreferences } from "./preferences.js";
 import { computeBudgets, resolveExecutorContextWindow } from "./context-budget.js";
 import {
   getInFlightToolCount,
@@ -31,7 +31,7 @@ export interface SupervisionContext {
   pi: ExtensionAPI;
   unitType: string;
   unitId: string;
-  prefs: GSDPreferences | undefined;
+  prefs: HXPreferences | undefined;
   buildSnapshotOpts: () => CloseoutOptions & Record<string, unknown>;
   buildRecoveryContext: () => RecoveryContext;
   pauseAuto: (ctx?: ExtensionContext, pi?: ExtensionAPI) => Promise<void>;

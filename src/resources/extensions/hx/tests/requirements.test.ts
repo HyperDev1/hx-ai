@@ -5,7 +5,7 @@ import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { deriveState } from "../state.ts";
-import { runGSDDoctor } from "../doctor.ts";
+import { runHXDoctor } from "../doctor.ts";
 
 describe('requirements', () => {
   test('requirement counts parser', () => {
@@ -91,7 +91,7 @@ describe('requirements', () => {
   });
 
   test('doctor flags orphaned active requirement', async () => {
-    const report = await runGSDDoctor(base);
+    const report = await runHXDoctor(base);
     assert.ok(report.issues.some(issue => issue.code === "active_requirement_missing_owner"), "doctor flags missing owner");
   });
 

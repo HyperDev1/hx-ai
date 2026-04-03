@@ -16,7 +16,7 @@ import { join } from 'node:path';
 const DIST_TEST = new URL('../dist-test/', import.meta.url).href;
 
 // Absolute paths to compiled @hx/* entry points
-const GSD_ALIASES = {
+const HX_ALIASES = {
   '@hyperlab/hx-coding-agent': new URL('../dist-test/packages/pi-coding-agent/src/index.js', import.meta.url).href,
   '@hyperlab/hx-ai/oauth':     new URL('../dist-test/packages/pi-ai/src/utils/oauth/index.js', import.meta.url).href,
   '@hyperlab/hx-ai':           new URL('../dist-test/packages/pi-ai/src/index.js', import.meta.url).href,
@@ -27,8 +27,8 @@ const GSD_ALIASES = {
 
 export function resolve(specifier, context, nextResolve) {
   // 1. @hx/* bare imports → compiled dist-test counterpart
-  if (specifier in GSD_ALIASES) {
-    return nextResolve(GSD_ALIASES[specifier], context);
+  if (specifier in HX_ALIASES) {
+    return nextResolve(HX_ALIASES[specifier], context);
   }
 
   // 2. .ts relative imports inside dist-test → .js

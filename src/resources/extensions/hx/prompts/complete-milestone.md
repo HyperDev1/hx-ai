@@ -29,7 +29,7 @@ Then:
 **If ANY verification failure was recorded in steps 3, 4, or 5, you MUST follow the failure path below. Do NOT proceed to step 9.**
 
 **Failure path** (verification failed):
-- Do NOT call `gsd_complete_milestone` — the milestone must not be marked as complete.
+- Do NOT call `hx_complete_milestone` — the milestone must not be marked as complete.
 - Do NOT update `.hx/PROJECT.md` to reflect completion.
 - Do NOT update `.hx/REQUIREMENTS.md` to mark requirements as validated.
 - Write a clear summary of what failed and why to help the next attempt.
@@ -37,7 +37,7 @@ Then:
 
 **Success path** (all verifications passed — continue with steps 9–13):
 
-9. **Persist completion through `gsd_complete_milestone`.** Call it with the parameters below. The tool updates the milestone status in the DB, renders `{{milestoneSummaryPath}}`, and validates all slices are complete before proceeding.
+9. **Persist completion through `hx_complete_milestone`.** Call it with the parameters below. The tool updates the milestone status in the DB, renders `{{milestoneSummaryPath}}`, and validates all slices are complete before proceeding.
 
    **Required parameters:**
    - `milestoneId` (string) — Milestone ID (e.g. M001)
@@ -55,7 +55,7 @@ Then:
    **Optional parameters:**
    - `followUps` (string) — Follow-up items for future milestones
    - `deviations` (string) — Deviations from the original plan
-10. For each requirement whose status changed in step 8, call `gsd_requirement_update` with the requirement ID and updated `status` and `validation` fields — the tool regenerates `.hx/REQUIREMENTS.md` automatically.
+10. For each requirement whose status changed in step 8, call `hx_requirement_update` with the requirement ID and updated `status` and `validation` fields — the tool regenerates `.hx/REQUIREMENTS.md` automatically.
 11. Update `.hx/PROJECT.md` to reflect milestone completion and current project state.
 12. Review all slice summaries for cross-cutting lessons, patterns, or gotchas that emerged during this milestone. Append any non-obvious, reusable insights to `.hx/KNOWLEDGE.md`.
 13. Do not commit manually — the system auto-commits your changes after this unit completes.

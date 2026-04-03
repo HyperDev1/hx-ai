@@ -22,7 +22,7 @@ describe("rewrite-docs circuit breaker persistence (#2203)", () => {
 
   beforeEach(() => {
     tempBase = mkdtempSync(join(tmpdir(), "hx-rewrite-test-"));
-    // Create .hx/ directory so gsdRoot resolves to it
+    // Create .hx/ directory so hxRoot resolves to it
     mkdirSync(join(tempBase, ".hx", "runtime"), { recursive: true });
   });
 

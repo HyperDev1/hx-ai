@@ -410,7 +410,7 @@ function parseDiffNameStatus(entries: { status: string; path: string }[]): Workt
  * Diff the .hx/ directory between the worktree branch and main branch.
  * Returns a summary of added, modified, and removed HX artifacts.
  */
-export function diffWorktreeGSD(basePath: string, name: string): WorktreeDiffSummary {
+export function diffWorktreeHX(basePath: string, name: string): WorktreeDiffSummary {
   const branch = worktreeBranchName(name);
   const mainBranch = nativeDetectMainBranch(basePath);
 
@@ -456,7 +456,7 @@ export function diffWorktreeNumstat(basePath: string, name: string): FileLineSta
  * Get the full diff content for .hx/ between the worktree branch and main.
  * Returns the raw unified diff for LLM consumption.
  */
-export function getWorktreeGSDDiff(basePath: string, name: string): string {
+export function getWorktreeHXDiff(basePath: string, name: string): string {
   const branch = worktreeBranchName(name);
   const mainBranch = nativeDetectMainBranch(basePath);
 

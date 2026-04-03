@@ -106,11 +106,11 @@ let _consecutiveCompleteBootstraps = 0;
 const MAX_CONSECUTIVE_COMPLETE_BOOTSTRAPS = 2;
 
 async function openProjectDbIfPresent(basePath: string): Promise<void> {
-  const gsdDbPath = resolveProjectRootDbPath(basePath);
-  if (!existsSync(gsdDbPath) || isDbAvailable()) return;
+  const hxDbPath = resolveProjectRootDbPath(basePath);
+  if (!existsSync(hxDbPath) || isDbAvailable()) return;
 
   try {
-    openDatabase(gsdDbPath);
+    openDatabase(hxDbPath);
   } catch (err) {
     process.stderr.write(
       `hx-db: failed to open existing database: ${(err as Error).message}\n`,
@@ -181,14 +181,14 @@ export async function bootstrapAutoSession(
 
     // ── HX → HX migration — silent rename in auto-mode ──────────────
     if (!existsSync(join(base, ".hx")) && existsSync(join(base, ".hx"))) {
-      const { migrateProjectGsdToHx, migrateGlobalGsdToHx } = await import("./migrate-gsd-to-hx.js");
-      const gsdResult = migrateProjectGsdToHx(base);
-      if (gsdResult.migrated) {
+      const { migrateProjectGsdToHx: migrateProject, migrateGlobalGsdToHx: migrateGlobal } = await import("./migrate-gsd-to-hx.js");
+      const hxResult = migrateProject(base);
+      if (hxResult.migrated) {
         const { _clearHxRootCache } = await import("./paths.js");
         _clearHxRootCache();
         ctx.ui.notify("Migrated .hx/ → .hx/", "info");
       }
-      migrateGlobalGsdToHx();
+      migrateGlobal();
     }
 
     // Migrate legacy in-project .hx/ to external state directory.
@@ -211,9 +211,9 @@ export async function bootstrapAutoSession(
     if (manageGitignore !== false) untrackRuntimeFiles(base);
 
     // Bootstrap .hx/ if it doesn't exist
-    const gsdDir = join(base, ".hx");
-    if (!existsSync(gsdDir)) {
-      mkdirSync(join(gsdDir, "milestones"), { recursive: true });
+    const hxDir = join(base, ".hx");
+    if (!existsSync(hxDir)) {
+      mkdirSync(join(hxDir, "milestones"), { recursive: true });
       try {
         nativeAddAll(base);
         nativeCommit(base, "chore: init hx");
@@ -537,7 +537,7 @@ export async function bootstrapAutoSession(
     // ── Auto-worktree setup ──
     s.originalBasePath = base;
 
-    const isUnderGsdWorktrees = (p: string): boolean => {
+    const isUnderHxWorktrees = (p: string): boolean => {
       // Direct layout: /.hx/worktrees/
       const marker = `${pathSep}.hx${pathSep}worktrees${pathSep}`;
       if (p.includes(marker)) return true;
@@ -554,7 +554,7 @@ export async function bootstrapAutoSession(
       s.currentMilestoneId &&
       shouldUseWorktreeIsolation() &&
       !detectWorktreeName(base) &&
-      !isUnderGsdWorktrees(base)
+      !isUnderHxWorktrees(base)
     ) {
       buildResolver().enterMilestone(s.currentMilestoneId, {
         notify: ctx.ui.notify.bind(ctx.ui),
@@ -566,14 +566,14 @@ export async function bootstrapAutoSession(
     }
 
     // ── DB lifecycle ──
-    const gsdDbPath = resolveProjectRootDbPath(s.basePath);
-    const gsdDirPath = join(s.basePath, ".hx");
-    if (existsSync(gsdDirPath) && !existsSync(gsdDbPath)) {
-      const hasDecisions = existsSync(join(gsdDirPath, "DECISIONS.md"));
-      const hasRequirements = existsSync(join(gsdDirPath, "REQUIREMENTS.md"));
-      const hasMilestones = existsSync(join(gsdDirPath, "milestones"));
+    const hxDbPath = resolveProjectRootDbPath(s.basePath);
+    const hxDirPath = join(s.basePath, ".hx");
+    if (existsSync(hxDirPath) && !existsSync(hxDbPath)) {
+      const hasDecisions = existsSync(join(hxDirPath, "DECISIONS.md"));
+      const hasRequirements = existsSync(join(hxDirPath, "REQUIREMENTS.md"));
+      const hasMilestones = existsSync(join(hxDirPath, "milestones"));
       try {
-        openDatabase(gsdDbPath);
+        openDatabase(hxDbPath);
         if (hasDecisions || hasRequirements || hasMilestones) {
           const { migrateFromMarkdown } = await import("./md-importer.js");
           migrateFromMarkdown(s.basePath);
@@ -584,9 +584,9 @@ export async function bootstrapAutoSession(
         );
       }
     }
-    if (existsSync(gsdDbPath) && !isDbAvailable()) {
+    if (existsSync(hxDbPath) && !isDbAvailable()) {
       try {
-        openDatabase(gsdDbPath);
+        openDatabase(hxDbPath);
       } catch (err) {
         process.stderr.write(
           `hx-db: failed to open existing database: ${(err as Error).message}\n`,
@@ -599,7 +599,7 @@ export async function bootstrapAutoSession(
     // auto-mode starts but every hx_task_complete / hx_slice_complete
     // call returns "db_unavailable", triggering artifact-retry which
     // re-dispatches the same task — producing an infinite loop (#2419).
-    if (existsSync(gsdDbPath) && !isDbAvailable()) {
+    if (existsSync(hxDbPath) && !isDbAvailable()) {
       ctx.ui.notify(
         "SQLite database exists but failed to open. Auto-mode cannot proceed without a working database provider. " +
           "Check for corrupt hx.db or missing native SQLite bindings.",

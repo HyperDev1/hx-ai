@@ -9,7 +9,7 @@ import type { HxClient, SlashCommand } from "./hx-client.js";
  * Commands are fetched from the running agent via get_commands RPC and
  * cached so the list remains available between keystrokes.
  */
-export class GsdSlashCompletionProvider
+export class HxSlashCompletionProvider
 	implements vscode.CompletionItemProvider, vscode.Disposable
 {
 	private cachedCommands: SlashCommand[] = [];

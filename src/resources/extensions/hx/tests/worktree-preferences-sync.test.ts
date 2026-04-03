@@ -4,8 +4,8 @@
  * Verifies that canonical PREFERENCES.md is seeded into auto-mode worktrees,
  * while legacy lowercase preferences.md remains supported:
  *
- *   1. syncGsdStateToWorktree() forward-syncs PREFERENCES.md (additive only)
- *   2. syncGsdStateToWorktree() still accepts legacy lowercase preferences.md
+ *   1. syncHxStateToWorktree() forward-syncs PREFERENCES.md (additive only)
+ *   2. syncHxStateToWorktree() still accepts legacy lowercase preferences.md
  *   3. syncWorktreeStateBack() does NOT overwrite project root PREFERENCES.md
  */
 
@@ -24,7 +24,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 
 import {
-  syncGsdStateToWorktree,
+  syncHxStateToWorktree,
   syncWorktreeStateBack,
 } from "../auto-worktree.ts";
 
@@ -58,7 +58,7 @@ const PREFS_CONTENT = [
   '  - use: "frontend-design"',
 ].join("\n");
 
-test("#2684: syncGsdStateToWorktree forward-syncs PREFERENCES.md when missing from worktree", (t) => {
+test("#2684: syncHxStateToWorktree forward-syncs PREFERENCES.md when missing from worktree", (t) => {
   const mainBase = makeTempDir("main");
   const wtBase = makeTempDir("wt");
   t.after(() => cleanup(mainBase, wtBase));
@@ -69,7 +69,7 @@ test("#2684: syncGsdStateToWorktree forward-syncs PREFERENCES.md when missing fr
   // Worktree has .hx/ but no preferences file
   mkdirSync(join(wtBase, ".hx"), { recursive: true });
 
-  const result = syncGsdStateToWorktree(mainBase, wtBase);
+  const result = syncHxStateToWorktree(mainBase, wtBase);
 
   assert.ok(
     existsSync(join(wtBase, ".hx", "PREFERENCES.md")),
@@ -86,7 +86,7 @@ test("#2684: syncGsdStateToWorktree forward-syncs PREFERENCES.md when missing fr
   );
 });
 
-test("syncGsdStateToWorktree still accepts legacy lowercase preferences.md", (t) => {
+test("syncHxStateToWorktree still accepts legacy lowercase preferences.md", (t) => {
   const mainBase = makeTempDir("main");
   const wtBase = makeTempDir("wt");
   t.after(() => cleanup(mainBase, wtBase));
@@ -94,7 +94,7 @@ test("syncGsdStateToWorktree still accepts legacy lowercase preferences.md", (t)
   writeFile(mainBase, ".hx/preferences.md", PREFS_CONTENT);
   mkdirSync(join(wtBase, ".hx"), { recursive: true });
 
-  const result = syncGsdStateToWorktree(mainBase, wtBase);
+  const result = syncHxStateToWorktree(mainBase, wtBase);
 
   const copiedEntries = readdirSync(join(wtBase, ".hx"))
     .filter((name) => name === "PREFERENCES.md" || name === "preferences.md");
@@ -109,7 +109,7 @@ test("syncGsdStateToWorktree still accepts legacy lowercase preferences.md", (t)
   );
 });
 
-test("#2684: syncGsdStateToWorktree does NOT overwrite existing worktree preferences file", (t) => {
+test("#2684: syncHxStateToWorktree does NOT overwrite existing worktree preferences file", (t) => {
   const mainBase = makeTempDir("main");
   const wtBase = makeTempDir("wt");
   t.after(() => cleanup(mainBase, wtBase));
@@ -120,7 +120,7 @@ test("#2684: syncGsdStateToWorktree does NOT overwrite existing worktree prefere
   writeFile(mainBase, ".hx/PREFERENCES.md", rootPrefs);
   writeFile(wtBase, ".hx/PREFERENCES.md", wtPrefs);
 
-  syncGsdStateToWorktree(mainBase, wtBase);
+  syncHxStateToWorktree(mainBase, wtBase);
 
   assert.equal(
     readFileSync(join(wtBase, ".hx", "PREFERENCES.md"), "utf-8"),

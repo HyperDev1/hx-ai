@@ -357,7 +357,7 @@ function buildHeadlessDiscussPrompt(nextId: string, seedContext: string, _basePa
  * Bootstrap a .hx/ project from scratch for headless use.
  * Ensures git repo, .hx/ structure, gitignore, and preferences all exist.
  */
-function bootstrapGsdProject(basePath: string): void {
+function bootstrapHxProject(basePath: string): void {
   if (!nativeIsRepo(basePath) || isInheritedRepo(basePath)) {
     const mainBranch = loadEffectiveHXPreferences()?.preferences?.git?.main_branch || "main";
     nativeInit(basePath, mainBranch);
@@ -387,7 +387,7 @@ export async function showHeadlessMilestoneCreation(
   clearReservedMilestoneIds();
 
   // Ensure .hx/ is bootstrapped
-  bootstrapGsdProject(basePath);
+  bootstrapHxProject(basePath);
 
   // Generate next milestone ID
   const existingIds = findMilestoneIds(basePath);
@@ -986,7 +986,7 @@ export async function showSmartEntry(
   if (!existsSync(hxRoot(basePath))) {
     // .hx/ exists but no .hx/ — offer HX → HX migration
     if (existsSync(join(basePath, ".hx"))) {
-      const { migrateProjectGsdToHx, migrateGlobalGsdToHx } = await import("./migrate-gsd-to-hx.js");
+      const { migrateProjectGsdToHx: migrateProject, migrateGlobalGsdToHx: migrateGlobal } = await import("./migrate-gsd-to-hx.js");
       const doMigrate = await showConfirm(ctx, {
         title: "HX → HX Migration",
         message: "Found a .hx/ directory from a previous HX installation. Migrate it to .hx/?",
@@ -994,7 +994,7 @@ export async function showSmartEntry(
         declineLabel: "Start fresh",
       });
       if (doMigrate) {
-        const result = migrateProjectGsdToHx(basePath);
+        const result = migrateProject(basePath);
         if (result.migrated) {
           _clearHxRootCache();
           ctx.ui.notify("✓ Migrated project .hx/ → .hx/", "info");
@@ -1002,7 +1002,7 @@ export async function showSmartEntry(
           ctx.ui.notify(`Migration failed: ${result.error}`, "error");
         }
         // Also sync global state
-        const globalResult = migrateGlobalGsdToHx();
+        const globalResult = migrateGlobal();
         if (globalResult.migrated) {
           ctx.ui.notify("✓ Synced global credentials from ~/.hx/ → ~/.hx/", "info");
         }

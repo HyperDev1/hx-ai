@@ -22,7 +22,7 @@ import {
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
-import { ensureGitignore, hasGitTrackedGsdFiles } from "../../gitignore.ts";
+import { ensureGitignore, hasGitTrackedHxFiles } from "../../gitignore.ts";
 import { migrateToExternalState } from "../../migrate-external.ts";
 
 // ─── Helpers ─────────────────────────────────────────────────────────
@@ -51,16 +51,16 @@ function cleanup(dir: string): void {
   }
 }
 
-// ─── hasGitTrackedGsdFiles ───────────────────────────────────────────
+// ─── hasGitTrackedHxFiles ───────────────────────────────────────────
 
-test("hasGitTrackedGsdFiles returns false when .hx/ does not exist", (t) => {
+test("hasGitTrackedHxFiles returns false when .hx/ does not exist", (t) => {
   const dir = makeTempRepo();
   t.after(() => { cleanup(dir); });
 
-  assert.equal(hasGitTrackedGsdFiles(dir), false);
+  assert.equal(hasGitTrackedHxFiles(dir), false);
 });
 
-test("hasGitTrackedGsdFiles returns true when .hx/ has tracked files", (t) => {
+test("hasGitTrackedHxFiles returns true when .hx/ has tracked files", (t) => {
   const dir = makeTempRepo();
   t.after(() => { cleanup(dir); });
 
@@ -68,17 +68,17 @@ test("hasGitTrackedGsdFiles returns true when .hx/ has tracked files", (t) => {
   writeFileSync(join(dir, ".hx", "PROJECT.md"), "# Test Project\n");
   git(dir, "add", ".hx/PROJECT.md");
   git(dir, "commit", "-m", "add hx");
-  assert.equal(hasGitTrackedGsdFiles(dir), true);
+  assert.equal(hasGitTrackedHxFiles(dir), true);
 });
 
-test("hasGitTrackedGsdFiles returns false when .hx/ exists but is untracked", (t) => {
+test("hasGitTrackedHxFiles returns false when .hx/ exists but is untracked", (t) => {
   const dir = makeTempRepo();
   t.after(() => { cleanup(dir); });
 
   mkdirSync(join(dir, ".hx"), { recursive: true });
   writeFileSync(join(dir, ".hx", "STATE.md"), "state\n");
   // Not git-added — should return false
-  assert.equal(hasGitTrackedGsdFiles(dir), false);
+  assert.equal(hasGitTrackedHxFiles(dir), false);
 });
 
 // ─── ensureGitignore — tracked .hx/ protection ─────────────────────
@@ -175,7 +175,7 @@ test("ensureGitignore with tracked .hx/ does not cause git to see files as delet
   }
 });
 
-test("hasGitTrackedGsdFiles returns true (fail-safe) when git is not available", (t) => {
+test("hasGitTrackedHxFiles returns true (fail-safe) when git is not available", (t) => {
   const dir = makeTempRepo();
   try {
     // Create and track .hx/ files
@@ -190,7 +190,7 @@ test("hasGitTrackedGsdFiles returns true (fail-safe) when git is not available",
 
     // Should fail safe — assume tracked rather than silently returning false
     // (The index lock causes git ls-files to fail; rev-parse also fails → true)
-    const result = hasGitTrackedGsdFiles(dir);
+    const result = hasGitTrackedHxFiles(dir);
     assert.equal(result, true, "Should return true (fail-safe) when git is unavailable");
   } finally {
     cleanup(dir);

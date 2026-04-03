@@ -77,8 +77,8 @@ import {
   getModelLabel,
   getSessionLabelFromBridge,
   shortenPath,
-  useGSDWorkspaceActions,
-  useGSDWorkspaceState,
+  useHXWorkspaceActions,
+  useHXWorkspaceState,
 } from "@/lib/hx-workspace-store"
 
 // ─── Section metadata ────────────────────────────────────────────────
@@ -318,7 +318,7 @@ function SegmentedControl<T extends string>({
 // ═════════════════════════════════════════════════════════════════════
 
 export function CommandSurface() {
-  const workspace = useGSDWorkspaceState()
+  const workspace = useHXWorkspaceState()
   const {
     closeCommandSurface,
     openCommandSurface,
@@ -361,7 +361,7 @@ export function CommandSurface() {
     loadUndoInfo,
     loadCleanupData,
     loadSteerData,
-  } = useGSDWorkspaceActions()
+  } = useHXWorkspaceActions()
 
   const { commandSurface } = workspace
   const onboarding = workspace.boot?.onboarding ?? null

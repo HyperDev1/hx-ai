@@ -270,8 +270,8 @@ export function parseRequirementsSections(content: string): Requirement[] {
  * Import decisions from DECISIONS.md into the database.
  * Handles supersession chains.
  */
-function importDecisions(gsdDir: string): number {
-  const filePath = resolveHxRootFile(gsdDir, 'DECISIONS');
+function importDecisions(hxDir: string): number {
+  const filePath = resolveHxRootFile(hxDir, 'DECISIONS');
   if (!existsSync(filePath)) return 0;
 
   const content = readFileSync(filePath, 'utf-8');
@@ -287,8 +287,8 @@ function importDecisions(gsdDir: string): number {
 /**
  * Import requirements from REQUIREMENTS.md into the database.
  */
-function importRequirements(gsdDir: string): number {
-  const filePath = resolveHxRootFile(gsdDir, 'REQUIREMENTS');
+function importRequirements(hxDir: string): number {
+  const filePath = resolveHxRootFile(hxDir, 'REQUIREMENTS');
   if (!existsSync(filePath)) return 0;
 
   const content = readFileSync(filePath, 'utf-8');
@@ -312,14 +312,14 @@ const TASK_SUFFIXES = ['PLAN', 'SUMMARY', 'CONTINUE', 'CONTEXT', 'RESEARCH'];
  * Import hierarchy artifacts (roadmaps, plans, summaries, etc.) from the .hx/ tree.
  * Walks milestones → slices → tasks directories.
  */
-function importHierarchyArtifacts(gsdDir: string): number {
+function importHierarchyArtifacts(hxDir: string): number {
   let count = 0;
-  const gsdPath = hxRoot(gsdDir);
+  const hxPath = hxRoot(hxDir);
 
   // Root-level artifacts: PROJECT.md, QUEUE.md
   const rootFiles = ['PROJECT.md', 'QUEUE.md', 'SECRETS-MANIFEST.md'];
   for (const fileName of rootFiles) {
-    const filePath = join(gsdPath, fileName);
+    const filePath = join(hxPath, fileName);
     if (existsSync(filePath)) {
       const content = readFileSync(filePath, 'utf-8');
       const artifactType = fileName.replace('.md', '').replace('-', '_');
@@ -336,8 +336,8 @@ function importHierarchyArtifacts(gsdDir: string): number {
   }
 
   // Walk milestones
-  const milestoneIds = findMilestoneIds(gsdDir);
-  const msDir = milestonesDir(gsdDir);
+  const milestoneIds = findMilestoneIds(hxDir);
+  const msDir = milestonesDir(hxDir);
 
   for (const milestoneId of milestoneIds) {
     // Find the actual milestone directory name (handles legacy naming)
@@ -690,13 +690,13 @@ export function migrateHierarchyToDb(basePath: string): {
  *
  * Missing files are skipped gracefully — no errors produced.
  */
-export function migrateFromMarkdown(gsdDir: string): {
+export function migrateFromMarkdown(hxDir: string): {
   decisions: number;
   requirements: number;
   artifacts: number;
   hierarchy: { milestones: number; slices: number; tasks: number };
 } {
-  const dbPath = join(hxRoot(gsdDir), 'hx.db');
+  const dbPath = join(hxRoot(hxDir), 'hx.db');
 
   // Open DB if not already open
   if (!_getAdapter()) {
@@ -710,25 +710,25 @@ export function migrateFromMarkdown(gsdDir: string): {
 
   transaction(() => {
     try {
-      decisions = importDecisions(gsdDir);
+      decisions = importDecisions(hxDir);
     } catch (err) {
       process.stderr.write(`hx-migrate: skipping decisions import: ${(err as Error).message}\n`);
     }
 
     try {
-      requirements = importRequirements(gsdDir);
+      requirements = importRequirements(hxDir);
     } catch (err) {
       process.stderr.write(`hx-migrate: skipping requirements import: ${(err as Error).message}\n`);
     }
 
     try {
-      artifacts = importHierarchyArtifacts(gsdDir);
+      artifacts = importHierarchyArtifacts(hxDir);
     } catch (err) {
       process.stderr.write(`hx-migrate: skipping artifacts import: ${(err as Error).message}\n`);
     }
 
     try {
-      hierarchy = migrateHierarchyToDb(gsdDir);
+      hierarchy = migrateHierarchyToDb(hxDir);
     } catch (err) {
       process.stderr.write(`hx-migrate: skipping hierarchy migration: ${(err as Error).message}\n`);
     }

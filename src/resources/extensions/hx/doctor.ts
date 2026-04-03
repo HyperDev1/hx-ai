@@ -7,7 +7,7 @@ import { isDbAvailable, getMilestoneSlices, getSliceTasks } from "./hx-db.js";
 import { resolveMilestoneFile, resolveMilestonePath, resolveSliceFile, resolveSlicePath, resolveTaskFile, resolveTasksDir, milestonesDir, hxRoot, relMilestoneFile, relSliceFile, relTaskFile, relSlicePath, relHxRootFile, resolveHxRootFile, relMilestonePath } from "./paths.js";
 import { deriveState, isMilestoneComplete } from "./state.js";
 import { invalidateAllCaches } from "./cache.js";
-import { loadEffectiveHXPreferences, type GSDPreferences } from "./preferences.js";
+import { loadEffectiveHXPreferences, type HXPreferences } from "./preferences.js";
 
 import type { DoctorIssue, DoctorIssueCode, DoctorReport } from "./doctor-types.js";
 import { GLOBAL_STATE_CODES } from "./doctor-types.js";
@@ -52,7 +52,7 @@ export function validateTitle(title: string): string | null {
   return null;
 }
 
-function validatePreferenceShape(preferences: GSDPreferences): string[] {
+function validatePreferenceShape(preferences: HXPreferences): string[] {
   const issues: string[] = [];
   const listFields = ["always_use_skills", "prefer_skills", "avoid_skills", "custom_instructions"] as const;
   for (const field of listFields) {
@@ -321,7 +321,7 @@ export async function readDoctorHistory(basePath: string, lastN = 50): Promise<D
   } catch { return []; }
 }
 
-export async function runGSDDoctor(basePath: string, options?: { fix?: boolean; dryRun?: boolean; scope?: string; fixLevel?: "task" | "all"; isolationMode?: "none" | "worktree" | "branch"; includeBuild?: boolean; includeTests?: boolean }): Promise<DoctorReport> {
+export async function runHXDoctor(basePath: string, options?: { fix?: boolean; dryRun?: boolean; scope?: string; fixLevel?: "task" | "all"; isolationMode?: "none" | "worktree" | "branch"; includeBuild?: boolean; includeTests?: boolean }): Promise<DoctorReport> {
   const issues: DoctorIssue[] = [];
   const fixesApplied: string[] = [];
   const fix = options?.fix === true;

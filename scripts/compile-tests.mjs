@@ -200,7 +200,7 @@ async function main() {
   }
 
   // Ensure dist-test/node_modules exists so resource-loader.ts (which computes
-  // packageRoot from import.meta.url) resolves gsdNodeModules to a real path.
+  // packageRoot from import.meta.url) resolves hxNodeModules to a real path.
   // Without this, initResources creates dangling symlinks in test environments.
   const distNodeModules = join(ROOT, 'dist-test', 'node_modules');
   if (!existsSync(distNodeModules)) {

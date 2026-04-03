@@ -18,8 +18,8 @@ import {
 } from "./paths.js";
 import { resolveSkillDiscoveryMode, resolveInlineLevel, loadEffectiveHXPreferences, resolveAllSkillReferences } from "./preferences.js";
 import { parseRoadmap } from "./parsers-legacy.js";
-import type { GSDState, InlineLevel } from "./types.js";
-import type { GSDPreferences } from "./preferences.js";
+import type { HXState, InlineLevel } from "./types.js";
+import type { HXPreferences } from "./preferences.js";
 import { getLoadedSkills, type Skill } from "@hyperlab/hx-coding-agent";
 import { join, basename } from "node:path";
 import { existsSync } from "node:fs";
@@ -243,7 +243,7 @@ export async function inlineDependencySummaries(
  * Load a well-known .hx/ root file for optional inlining.
  * Handles the existsSync check internally.
  */
-export async function inlineGsdRootFile(
+export async function inlineHxRootFile(
   base: string, filename: string, label: string,
 ): Promise<string | null> {
   const key = filename.replace(/\.md$/i, "").toUpperCase() as "PROJECT" | "DECISIONS" | "QUEUE" | "STATE" | "REQUIREMENTS" | "KNOWLEDGE";
@@ -256,7 +256,7 @@ export async function inlineGsdRootFile(
 
 /**
  * Inline decisions with optional milestone scoping from the DB.
- * Falls back to filesystem via inlineGsdRootFile when DB unavailable or empty.
+ * Falls back to filesystem via inlineHxRootFile when DB unavailable or empty.
  */
 export async function inlineDecisionsFromDb(
   base: string, milestoneId?: string, scope?: string, level?: InlineLevel,
@@ -278,12 +278,12 @@ export async function inlineDecisionsFromDb(
   } catch {
     // DB not available — fall through to filesystem
   }
-  return inlineGsdRootFile(base, "decisions.md", "Decisions");
+  return inlineHxRootFile(base, "decisions.md", "Decisions");
 }
 
 /**
  * Inline requirements with optional slice scoping from the DB.
- * Falls back to filesystem via inlineGsdRootFile when DB unavailable or empty.
+ * Falls back to filesystem via inlineHxRootFile when DB unavailable or empty.
  */
 export async function inlineRequirementsFromDb(
   base: string, sliceId?: string, level?: InlineLevel,
@@ -305,12 +305,12 @@ export async function inlineRequirementsFromDb(
   } catch {
     // DB not available — fall through to filesystem
   }
-  return inlineGsdRootFile(base, "requirements.md", "Requirements");
+  return inlineHxRootFile(base, "requirements.md", "Requirements");
 }
 
 /**
  * Inline project context from the DB.
- * Falls back to filesystem via inlineGsdRootFile when DB unavailable or empty.
+ * Falls back to filesystem via inlineHxRootFile when DB unavailable or empty.
  */
 export async function inlineProjectFromDb(
   base: string,
@@ -327,7 +327,7 @@ export async function inlineProjectFromDb(
   } catch {
     // DB not available — fall through to filesystem
   }
-  return inlineGsdRootFile(base, "project.md", "Project");
+  return inlineHxRootFile(base, "project.md", "Project");
 }
 
 // ─── Skill Activation & Discovery ─────────────────────────────────────────
@@ -381,7 +381,7 @@ function skillMatchesContext(skill: Skill, contextTokens: Set<string>): boolean 
 
 function resolvePreferenceSkillNames(refs: string[], base: string): string[] {
   if (refs.length === 0) return [];
-  const prefs: GSDPreferences = { always_use_skills: refs };
+  const prefs: HXPreferences = { always_use_skills: refs };
   const report = resolveAllSkillReferences(prefs, base);
   return refs.map(ref => {
     const resolution = report.resolutions.get(ref);
@@ -397,7 +397,7 @@ function ruleMatchesContext(when: string, contextTokens: Set<string>): boolean {
 }
 
 function resolveSkillRuleMatches(
-  prefs: GSDPreferences | undefined,
+  prefs: HXPreferences | undefined,
   contextTokens: Set<string>,
   base: string,
 ): { include: string[]; avoid: string[] } {
@@ -414,7 +414,7 @@ function resolveSkillRuleMatches(
 }
 
 function resolvePreferredSkillNames(
-  prefs: GSDPreferences | undefined,
+  prefs: HXPreferences | undefined,
   visibleSkills: Skill[],
   contextTokens: Set<string>,
   base: string,
@@ -450,7 +450,7 @@ export function buildSkillActivationBlock(params: {
   taskTitle?: string;
   extraContext?: string[];
   taskPlanContent?: string | null;
-  preferences?: GSDPreferences;
+  preferences?: HXPreferences;
 }): string {
   const prefs = params.preferences ?? loadEffectiveHXPreferences()?.preferences;
   const contextTokens = tokenizeSkillContext(
@@ -714,7 +714,7 @@ export async function getDependencyTaskSummaryPaths(
  * - All slices are complete (milestone done — no point reassessing)
  */
 export async function checkNeedsReassessment(
-  base: string, mid: string, state: GSDState,
+  base: string, mid: string, state: HXState,
 ): Promise<{ sliceId: string } | null> {
   // DB primary path — fall through to file-based when DB has no data for this milestone
   try {
@@ -768,7 +768,7 @@ export async function checkNeedsReassessment(
  * - UAT result file already exists (idempotent — already ran)
  */
 export async function checkNeedsRunUat(
-  base: string, mid: string, state: GSDState, prefs: GSDPreferences | undefined,
+  base: string, mid: string, state: HXState, prefs: HXPreferences | undefined,
 ): Promise<{ sliceId: string; uatType: UatType } | null> {
   // DB primary path — fall through to file-based when DB has no data for this milestone
   try {
@@ -874,7 +874,7 @@ export async function buildResearchMilestonePrompt(mid: string, midTitle: string
   if (requirementsInline) inlined.push(requirementsInline);
   const decisionsInline = await inlineDecisionsFromDb(base, mid);
   if (decisionsInline) inlined.push(decisionsInline);
-  const knowledgeInlineRM = await inlineGsdRootFile(base, "knowledge.md", "Project Knowledge");
+  const knowledgeInlineRM = await inlineHxRootFile(base, "knowledge.md", "Project Knowledge");
   if (knowledgeInlineRM) inlined.push(knowledgeInlineRM);
   inlined.push(inlineTemplate("research", "Research"));
 
@@ -930,7 +930,7 @@ export async function buildPlanMilestonePrompt(mid: string, midTitle: string, ba
     );
     inlined.push(queueInline);
   }
-  const knowledgeInlinePM = await inlineGsdRootFile(base, "knowledge.md", "Project Knowledge");
+  const knowledgeInlinePM = await inlineHxRootFile(base, "knowledge.md", "Project Knowledge");
   if (knowledgeInlinePM) inlined.push(knowledgeInlinePM);
   inlined.push(inlineTemplate("roadmap", "Roadmap"));
   if (inlineLevel === "full") {
@@ -995,7 +995,7 @@ export async function buildResearchSlicePrompt(
   if (decisionsInline) inlined.push(decisionsInline);
   const requirementsInline = await inlineRequirementsFromDb(base, sid);
   if (requirementsInline) inlined.push(requirementsInline);
-  const knowledgeInlineRS = await inlineGsdRootFile(base, "knowledge.md", "Project Knowledge");
+  const knowledgeInlineRS = await inlineHxRootFile(base, "knowledge.md", "Project Knowledge");
   if (knowledgeInlineRS) inlined.push(knowledgeInlineRS);
   inlined.push(inlineTemplate("research", "Research"));
 
@@ -1052,7 +1052,7 @@ export async function buildPlanSlicePrompt(
     const requirementsInline = await inlineRequirementsFromDb(base, sid, inlineLevel);
     if (requirementsInline) inlined.push(requirementsInline);
   }
-  const knowledgeInlinePS = await inlineGsdRootFile(base, "knowledge.md", "Project Knowledge");
+  const knowledgeInlinePS = await inlineHxRootFile(base, "knowledge.md", "Project Knowledge");
   if (knowledgeInlinePS) inlined.push(knowledgeInlinePS);
   inlined.push(inlineTemplate("plan", "Slice Plan"));
   if (inlineLevel === "full") {
@@ -1262,7 +1262,7 @@ export async function buildCompleteSlicePrompt(
     const requirementsInline = await inlineRequirementsFromDb(base, sid, inlineLevel);
     if (requirementsInline) inlined.push(requirementsInline);
   }
-  const knowledgeInlineCS = await inlineGsdRootFile(base, "knowledge.md", "Project Knowledge");
+  const knowledgeInlineCS = await inlineHxRootFile(base, "knowledge.md", "Project Knowledge");
   if (knowledgeInlineCS) inlined.push(knowledgeInlineCS);
 
   // Inline all task summaries for this slice
@@ -1347,7 +1347,7 @@ export async function buildCompleteMilestonePrompt(
     const projectInline = await inlineProjectFromDb(base);
     if (projectInline) inlined.push(projectInline);
   }
-  const knowledgeInlineCM = await inlineGsdRootFile(base, "knowledge.md", "Project Knowledge");
+  const knowledgeInlineCM = await inlineHxRootFile(base, "knowledge.md", "Project Knowledge");
   if (knowledgeInlineCM) inlined.push(knowledgeInlineCM);
   // Inline milestone context file (milestone-level, not HX root)
   const contextPath = resolveMilestoneFile(base, mid, "CONTEXT");
@@ -1468,7 +1468,7 @@ export async function buildValidateMilestonePrompt(
     const projectInline = await inlineProjectFromDb(base);
     if (projectInline) inlined.push(projectInline);
   }
-  const knowledgeInline = await inlineGsdRootFile(base, "knowledge.md", "Project Knowledge");
+  const knowledgeInline = await inlineHxRootFile(base, "knowledge.md", "Project Knowledge");
   if (knowledgeInline) inlined.push(knowledgeInline);
   // Inline milestone context file
   const contextPath = resolveMilestoneFile(base, mid, "CONTEXT");
@@ -1634,7 +1634,7 @@ export async function buildReassessRoadmapPrompt(
     const decisionsInline = await inlineDecisionsFromDb(base, mid, undefined, inlineLevel);
     if (decisionsInline) inlined.push(decisionsInline);
   }
-  const knowledgeInlineRA = await inlineGsdRootFile(base, "knowledge.md", "Project Knowledge");
+  const knowledgeInlineRA = await inlineHxRootFile(base, "knowledge.md", "Project Knowledge");
   if (knowledgeInlineRA) inlined.push(knowledgeInlineRA);
 
   const inlinedContext = capPreamble(`## Inlined Context (preloaded — do not re-read these files)\n\n${inlined.join("\n\n---\n\n")}`);

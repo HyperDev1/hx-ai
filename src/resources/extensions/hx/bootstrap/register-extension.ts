@@ -1,6 +1,6 @@
 import type { ExtensionAPI, ExtensionCommandContext } from "@hyperlab/hx-coding-agent";
 
-import { registerGSDCommand } from "../commands.js";
+import { registerHXCommand } from "../commands.js";
 import { registerExitCommand } from "../exit-command.js";
 import { registerWorktreeCommand } from "../worktree-command.js";
 import { registerDbTools } from "./db-tools.js";
@@ -28,19 +28,19 @@ export function handleRecoverableExtensionProcessError(err: Error): boolean {
 }
 
 function installEpipeGuard(): void {
-  if (!process.listeners("uncaughtException").some((listener) => listener.name === "_gsdEpipeGuard")) {
-    const _gsdEpipeGuard = (err: Error): void => {
+  if (!process.listeners("uncaughtException").some((listener) => listener.name === "_hxEpipeGuard")) {
+    const _hxEpipeGuard = (err: Error): void => {
       if (handleRecoverableExtensionProcessError(err)) {
         return;
       }
       throw err;
     };
-    process.on("uncaughtException", _gsdEpipeGuard);
+    process.on("uncaughtException", _hxEpipeGuard);
   }
 }
 
-export function registerGsdExtension(pi: ExtensionAPI): void {
-  registerGSDCommand(pi);
+export function registerHxExtension(pi: ExtensionAPI): void {
+  registerHXCommand(pi);
   registerWorktreeCommand(pi);
   registerExitCommand(pi);
 

@@ -21,11 +21,11 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { hxRoot } from "./paths.js";
 import { createWorktree, worktreePath } from "./worktree-manager.js";
-import { autoWorktreeBranch, runWorktreePostCreateHook, syncGsdStateToWorktree } from "./auto-worktree.js";
+import { autoWorktreeBranch, runWorktreePostCreateHook, syncHxStateToWorktree } from "./auto-worktree.js";
 import { nativeBranchExists } from "./native-git-bridge.js";
 import { readIntegrationBranch } from "./git-service.js";
 import { resolveParallelConfig } from "./preferences.js";
-import type { GSDPreferences } from "./preferences.js";
+import type { HXPreferences } from "./preferences.js";
 import type { ParallelConfig } from "./types.js";
 import {
   writeSessionStatus,
@@ -327,7 +327,7 @@ export function getWorkerStatuses(basePath?: string): WorkerInfo[] {
  */
 export async function prepareParallelStart(
   basePath: string,
-  _prefs: GSDPreferences | undefined,
+  _prefs: HXPreferences | undefined,
 ): Promise<ParallelCandidates & { orphans?: Array<{ milestoneId: string; pid: number; alive: boolean }> }> {
   // Detect orphaned sessions before eligibility analysis
   const sessions = readAllSessionStatuses(basePath);
@@ -354,7 +354,7 @@ export async function prepareParallelStart(
 export async function startParallel(
   basePath: string,
   milestoneIds: string[],
-  prefs: GSDPreferences | undefined,
+  prefs: HXPreferences | undefined,
 ): Promise<{ started: string[]; errors: Array<{ mid: string; error: string }> }> {
   // Prevent workers from spawning nested parallel sessions
   if (process.env.HX_PARALLEL_WORKER) {
@@ -510,7 +510,7 @@ function createMilestoneWorktree(basePath: string, milestoneId: string): string 
   // Copy .hx/ planning artifacts (milestones, CONTEXT, ROADMAP, etc.) from the
   // project root into the worktree. Without this, workers for newly-planned
   // milestones can't find their roadmap and exit immediately (#2184 Bug 4).
-  syncGsdStateToWorktree(basePath, info.path);
+  syncHxStateToWorktree(basePath, info.path);
 
   return info.path;
 }
@@ -543,7 +543,7 @@ export function spawnWorker(
   if (worker.process) return true; // already spawned
 
   // Resolve the HX CLI binary path
-  const binPath = resolveGsdBin();
+  const binPath = resolveHxBin();
   if (!binPath) return false;
 
   let child: ChildProcess;
@@ -682,7 +682,7 @@ export function spawnWorker(
  * Uses HX_BIN_PATH env var (set by loader.ts) or falls back to
  * finding the binary relative to the current module.
  */
-function resolveGsdBin(): string | null {
+function resolveHxBin(): string | null {
   // HX_BIN_PATH is set by loader.ts to the absolute path of dist/loader.js
   if (process.env.HX_BIN_PATH && existsSync(process.env.HX_BIN_PATH)) {
     return process.env.HX_BIN_PATH;

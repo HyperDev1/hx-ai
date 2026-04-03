@@ -131,9 +131,9 @@ describe("complete-milestone", () => {
       "prompt contains 'Verification Gate' section",
     );
 
-    // Failure path must block gsd_complete_milestone
+    // Failure path must block hx_complete_milestone
     assert.ok(
-      prompt.includes("Do NOT call `gsd_complete_milestone`"),
+      prompt.includes("Do NOT call `hx_complete_milestone`"),
       "failure path explicitly blocks calling the completion tool",
     );
 

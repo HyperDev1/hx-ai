@@ -12,7 +12,7 @@
 import { readdirSync, existsSync, realpathSync, Dirent } from "node:fs";
 import { join, dirname, normalize } from "node:path";
 import { spawnSync } from "node:child_process";
-import { nativeScanGsdTree, type GsdTreeEntry } from "./native-parser-bridge.js";
+import { nativeScanHxTree, type HxTreeEntry } from "./native-parser-bridge.js";
 import { DIR_CACHE_MAX } from "./constants.js";
 
 // ─── Directory Listing Cache ──────────────────────────────────────────────────
@@ -24,17 +24,17 @@ const dirListCache = new Map<string, string[]>();
 // When the native module is available, scan the entire .hx/ tree in one call
 // and serve directory listings from memory instead of individual readdirSync calls.
 
-let nativeTreeCache: Map<string, GsdTreeEntry[]> | null = null;
+let nativeTreeCache: Map<string, HxTreeEntry[]> | null = null;
 let nativeTreeBase: string | null = null;
 
-function getNativeTree(gsdDir: string): Map<string, GsdTreeEntry[]> | null {
-  if (nativeTreeCache && nativeTreeBase === gsdDir) return nativeTreeCache;
+function getNativeTree(hxDir: string): Map<string, HxTreeEntry[]> | null {
+  if (nativeTreeCache && nativeTreeBase === hxDir) return nativeTreeCache;
 
-  const entries = nativeScanGsdTree(gsdDir);
+  const entries = nativeScanHxTree(hxDir);
   if (!entries) return null;
 
   // Build a map of parent directory -> entries
-  const tree = new Map<string, GsdTreeEntry[]>();
+  const tree = new Map<string, HxTreeEntry[]>();
   for (const entry of entries) {
     const parts = entry.path.split('/');
     const parentPath = parts.slice(0, -1).join('/');
@@ -44,17 +44,17 @@ function getNativeTree(gsdDir: string): Map<string, GsdTreeEntry[]> | null {
   }
 
   nativeTreeCache = tree;
-  nativeTreeBase = gsdDir;
+  nativeTreeBase = hxDir;
   return tree;
 }
 
 /**
  * Convert a native tree lookup into a relative key for the tree map.
- * Returns the relative path from the gsdDir, or null if the path isn't under gsdDir.
+ * Returns the relative path from the hxDir, or null if the path isn't under hxDir.
  */
-function nativeTreeKey(dirPath: string, gsdDir: string): string | null {
-  if (!dirPath.startsWith(gsdDir)) return null;
-  const rel = dirPath.slice(gsdDir.length).replace(/^\//, '');
+function nativeTreeKey(dirPath: string, hxDir: string): string | null {
+  if (!dirPath.startsWith(hxDir)) return null;
+  const rel = dirPath.slice(hxDir.length).replace(/^\//, '');
   return rel || '.';
 }
 

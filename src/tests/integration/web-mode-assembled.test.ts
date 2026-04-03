@@ -1026,10 +1026,10 @@ test("assembled slash-command behavior keeps built-ins safe while preserving HX 
   assert.equal(hxSurface.status, null);
 
   // /hx auto is a passthrough subcommand — reaches the bridge as a prompt
-  const gsdPrompt = await submitBrowserInput("/hx auto");
-  assert.equal(gsdPrompt.outcome.kind, "prompt");
-  assert.equal(gsdPrompt.status, 200);
-  assert.equal(gsdPrompt.body.command, "prompt");
+  const hxPrompt = await submitBrowserInput("/hx auto");
+  assert.equal(hxPrompt.outcome.kind, "prompt");
+  assert.equal(hxPrompt.status, 200);
+  assert.equal(hxPrompt.body.command, "prompt");
 
   const sentTypes = bridgeCommands.map((command) => command.type);
   assert.deepEqual(

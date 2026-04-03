@@ -1,0 +1,13 @@
+# Decisions Register
+
+<!-- Append-only. Never edit or remove existing rows.
+     To reverse a decision, add a new row that supersedes it.
+     Read this file at the start of any planning or research phase. -->
+
+| # | When | Scope | Decision | Choice | Rationale | Revisable? | Made By |
+|---|------|-------|----------|--------|-----------|------------|---------|
+| D001 | M001-df6x5t | arch | How to handle the GSD backward-compat migration code | Preserve migrate-gsd-to-hx.ts untouched | This file handles .gsd/ → .hx/ directory migration for existing users upgrading from the old GSD binary. Renaming it would break the migration path. | Yes | collaborative |
+| D002 | M001-df6x5t | scope | How to handle native platform package names (@gsd-build/engine-*) | Rename in source only, no npm registry publish | npm registry operations are out of scope for this rename milestone. Source files get @hyperlab/engine-* names but no actual publish happens. | Yes | collaborative |
+| D003 | M001-df6x5t/S01 | scope | Whether packages/native gsd_engine binary path strings are in S01 scope | Exclude gsd_engine binary path strings from S01; defer to S04 (Native Rust Engine) | The gsd_engine strings in packages/native/src/native.ts are binary artifact file names (gsd_engine.*.node), not TypeScript type names. These belong to R004/R008 (native engine rename) which S04 owns. S01 only renames the TS-side type declaration batchParseGsdFiles in the interface. | Yes | agent |
+| D004 | M001/S01/T02 | rename-strategy | How to handle native runtime call string that cannot be excluded by the T02 verification grep pattern | Keep (native as Record&lt;string, Function&gt;).batchParseGsdFiles( unchanged in hx-parser/index.ts line 83 until S04 renames the Rust binary; accept count=1 in verification | The Rust binary still exports batchParseGsdFiles. Renaming the runtime call string would cause a runtime crash. The verification exclusion pattern native\.batchParseGsdFiles was designed to exclude this call but doesn't match the cast syntax. Correctness trumps grep count. S04 will rename both the binary and this call string together. | Yes | agent |
+| D005 | M001-df6x5t/S04 planning | M001-df6x5t/S04 | What npm scope to use for native platform packages (@gsd-build/engine-* replacement) | Use @hx-build/engine-* (not @hyperlab/engine-*) | native.ts line 39 already uses `@hx-build/engine-${packageSuffix}` as the require path. The platform package.json names must match this exact scope for the runtime loader to find them. D002 originally said @hyperlab but the codebase already chose @hx-build. | Yes | agent |

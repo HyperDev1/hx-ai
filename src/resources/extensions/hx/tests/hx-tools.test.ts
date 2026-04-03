@@ -2,7 +2,7 @@ import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 // hx-tools — Structured LLM tool tests
 //
-// Tests the three registered tools: gsd_decision_save, gsd_requirement_update, gsd_summary_save.
+// Tests the three registered tools: hx_decision_save, hx_requirement_update, hx_summary_save.
 // Each tool is tested via direct function invocation against an in-memory DB.
 
 import * as path from 'node:path';
@@ -49,7 +49,7 @@ function cleanupDir(dir: string): void {
  */
 
 describe('hx-tools', () => {
-  test('gsd_decision_save', async () => {
+  test('hx_decision_save', async () => {
     const tmpDir = makeTmpDir();
     try {
       const dbPath = path.join(tmpDir, '.hx', 'hx.db');
@@ -114,7 +114,7 @@ describe('hx-tools', () => {
     }
   });
 
-  test('gsd_requirement_update', async () => {
+  test('hx_requirement_update', async () => {
     const tmpDir = makeTmpDir();
     try {
       const dbPath = path.join(tmpDir, '.hx', 'hx.db');
@@ -179,7 +179,7 @@ describe('hx-tools', () => {
     }
   });
 
-  test('gsd_summary_save', async () => {
+  test('hx_summary_save', async () => {
     const tmpDir = makeTmpDir();
     try {
       const dbPath = path.join(tmpDir, '.hx', 'hx.db');

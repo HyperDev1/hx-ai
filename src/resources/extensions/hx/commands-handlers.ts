@@ -16,7 +16,7 @@ import {
   formatDoctorIssuesForPrompt,
   formatDoctorReport,
   formatDoctorReportJson,
-  runGSDDoctor,
+  runHXDoctor,
   selectDoctorScope,
   filterDoctorIssues,
 } from "./doctor.js";
@@ -56,7 +56,7 @@ export async function handleDoctor(args: string, ctx: ExtensionCommandContext, p
   const requestedScope = mode === "doctor" ? parts[0] : parts[1];
   const scope = await selectDoctorScope(projectRoot(), requestedScope);
   const effectiveScope = mode === "audit" ? requestedScope : scope;
-  const report = await runGSDDoctor(projectRoot(), {
+  const report = await runHXDoctor(projectRoot(), {
     fix: mode === "fix" || mode === "heal" || dryRun,
     dryRun,
     scope: effectiveScope,
@@ -153,9 +153,9 @@ export async function handleCapture(args: string, ctx: ExtensionCommandContext):
   const basePath = process.cwd();
 
   // Ensure .hx/ exists — capture should work even without a milestone
-  const gsdDir = hxRoot(basePath);
-  if (!existsSync(gsdDir)) {
-    mkdirSync(gsdDir, { recursive: true });
+  const hxDir = hxRoot(basePath);
+  if (!existsSync(hxDir)) {
+    mkdirSync(hxDir, { recursive: true });
   }
 
   const id = appendCapture(basePath, text);

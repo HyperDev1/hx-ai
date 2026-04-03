@@ -96,13 +96,13 @@ const BASELINE_PATTERNS = [
  *   - `.hx/` doesn't exist
  *   - No tracked files found under `.hx/`
  */
-export function hasGitTrackedGsdFiles(basePath: string): boolean {
-  const localGsd = join(basePath, ".hx");
+export function hasGitTrackedHxFiles(basePath: string): boolean {
+  const localHx = join(basePath, ".hx");
 
   // If .hx doesn't exist or is already a symlink, no tracked files concern
-  if (!existsSync(localGsd)) return false;
+  if (!existsSync(localHx)) return false;
   try {
-    if (lstatSync(localGsd).isSymbolicLink()) return false;
+    if (lstatSync(localHx).isSymbolicLink()) return false;
   } catch {
     return false;
   }
@@ -163,7 +163,7 @@ export function ensureGitignore(
 
   // Determine which patterns to apply. If .hx/ has tracked files,
   // exclude the ".hx" pattern to prevent deleting tracked state.
-  const hxIsTracked = hasGitTrackedGsdFiles(basePath);
+  const hxIsTracked = hasGitTrackedHxFiles(basePath);
   const patternsToApply = hxIsTracked
     ? BASELINE_PATTERNS.filter((p) => p !== ".hx")
     : BASELINE_PATTERNS;

@@ -26,8 +26,8 @@ import assert from 'node:assert/strict';
 
 describe('session-lock-multipath', async () => {
 
-  // ─── 1. Lock dir registry tracks gsdDir on acquisition ──────────────────
-  console.log('\n=== 1. Lock dir registry tracks gsdDir on acquisition ===');
+  // ─── 1. Lock dir registry tracks hxDir on acquisition ──────────────────
+  console.log('\n=== 1. Lock dir registry tracks hxDir on acquisition ===');
   {
     const base = mkdtempSync(join(tmpdir(), 'hx-multipath-'));
     mkdirSync(join(base, ".hx"), { recursive: true });
@@ -37,8 +37,8 @@ describe('session-lock-multipath', async () => {
       assert.ok(result.acquired, 'lock acquired');
 
       const registered = _getRegisteredLockDirs();
-      const gsdDir = hxRoot(base);
-      assert.ok(registered.includes(gsdDir), 'gsdDir is registered in lock dir registry');
+      const hxDir = hxRoot(base);
+      assert.ok(registered.includes(hxDir), 'hxDir is registered in lock dir registry');
 
       releaseSessionLock(base);
 
@@ -103,10 +103,10 @@ describe('session-lock-multipath', async () => {
       acquireSessionLock(base); // re-entrant
 
       const registered = _getRegisteredLockDirs();
-      const gsdDir = hxRoot(base);
+      const hxDir = hxRoot(base);
       // Should only appear once (Set deduplication)
-      const count = registered.filter(d => d === gsdDir).length;
-      assert.deepStrictEqual(count, 1, 'gsdDir registered exactly once after re-entrant acquisition');
+      const count = registered.filter(d => d === hxDir).length;
+      assert.deepStrictEqual(count, 1, 'hxDir registered exactly once after re-entrant acquisition');
 
       releaseSessionLock(base);
     } finally {
@@ -133,8 +133,8 @@ describe('session-lock-multipath', async () => {
       assert.ok(r2.acquired, 'second base lock acquired');
 
       const registered = _getRegisteredLockDirs();
-      const gsd2 = hxRoot(base2);
-      assert.ok(registered.includes(gsd2), 'second gsdDir is registered');
+      const hx2 = hxRoot(base2);
+      assert.ok(registered.includes(hx2), 'second hxDir is registered');
 
       releaseSessionLock(base2);
     } finally {

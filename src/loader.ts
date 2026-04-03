@@ -12,7 +12,7 @@ const hxRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const args = process.argv.slice(2)
 const firstArg = args[0]
 
-// Read package.json once — reused for version, banner, and GSD_VERSION below
+// Read package.json once — reused for version, banner, and HX_VERSION below
 let hxVersion = '0.0.0'
 try {
   const pkg = JSON.parse(readFileSync(join(hxRoot, 'package.json'), 'utf-8'))
@@ -98,7 +98,7 @@ process.env.HX_ENV = hxEnv
 process.title = hxEnv === 'production' ? 'hx' : `hx [${hxEnv}]`
 
 // Print branded banner on first launch (before ~/.hx/ exists).
-// Set GSD_FIRST_RUN_BANNER so cli.ts skips the duplicate welcome screen.
+// Set HX_FIRST_RUN_BANNER so cli.ts skips the duplicate welcome screen.
 if (!existsSync(appRoot)) {
   const cyan  = '\x1b[36m'
   const green = '\x1b[32m'

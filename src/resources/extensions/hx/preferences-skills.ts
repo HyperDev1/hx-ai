@@ -11,7 +11,7 @@ import { isAbsolute, join } from "node:path";
 import { statSync } from "node:fs";
 
 import type {
-  GSDPreferences,
+  HXPreferences,
   SkillDiscoveryMode,
   SkillResolution,
   SkillResolutionReport,
@@ -20,7 +20,7 @@ import { validatePreferences } from "./preferences-validation.js";
 import { loadEffectiveHXPreferences } from "./preferences.js";
 
 // Re-export types so existing consumers of ./preferences-skills.js keep working
-export type { GSDSkillRule, SkillDiscoveryMode, SkillResolution, SkillResolutionReport } from "./preferences-types.js";
+export type { HXSkillRule, SkillDiscoveryMode, SkillResolution, SkillResolutionReport } from "./preferences-types.js";
 
 /**
  * Known skill directories, in priority order.
@@ -105,7 +105,7 @@ export function resolveSkillReference(ref: string, cwd: string): SkillResolution
  * Resolve all skill references in a preferences object.
  * Caches resolution per reference string to avoid redundant filesystem scans.
  */
-export function resolveAllSkillReferences(preferences: GSDPreferences, cwd: string): SkillResolutionReport {
+export function resolveAllSkillReferences(preferences: HXPreferences, cwd: string): SkillResolutionReport {
   const validated = validatePreferences(preferences).preferences;
   preferences = validated;
 

@@ -4,7 +4,7 @@ import assert from "node:assert/strict"
 const {
   derivePendingWorkflowCommandLabel,
   executeWorkflowActionInPowerMode,
-  navigateToGSDView,
+  navigateToHXView,
 } = await import("../../../web/lib/workflow-action-execution.ts")
 
 test("derivePendingWorkflowCommandLabel prefers the latest input line while a command is in flight", () => {
@@ -29,7 +29,7 @@ test("derivePendingWorkflowCommandLabel falls back to the command type when no i
   assert.equal(label, "/abort")
 })
 
-test("navigateToGSDView dispatches the shared browser navigation event", (t) => {
+test("navigateToHXView dispatches the shared browser navigation event", (t) => {
   const originalWindow = (globalThis as { window?: EventTarget }).window
   const fakeWindow = new EventTarget()
   const seen: string[] = []
@@ -42,7 +42,7 @@ test("navigateToGSDView dispatches the shared browser navigation event", (t) => 
 
   t.after(() => { ;(globalThis as { window?: EventTarget }).window = originalWindow });
 
-  navigateToGSDView("power")
+  navigateToHXView("power")
 
   assert.deepEqual(seen, ["power"])
 })

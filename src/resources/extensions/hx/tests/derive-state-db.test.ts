@@ -102,7 +102,7 @@ const REQUIREMENTS_CONTENT = `# Requirements
 
 describe('derive-state-db', async () => {
 
-  // ─── Test 1: DB-backed deriveState produces identical GSDState ─────────
+  // ─── Test 1: DB-backed deriveState produces identical HXState ─────────
   test('derive-state-db: DB path matches file path', async () => {
     const base = createFixtureBase();
     try {
@@ -1027,18 +1027,18 @@ describe('derive-state-db', async () => {
   });
 
   // ─── Queued milestone row not clobbered by later plan (#2416 root cause) ──
-  test('derive-state-db: queued milestone row survives gsd_plan_milestone INSERT OR IGNORE', async () => {
+  test('derive-state-db: queued milestone row survives hx_plan_milestone INSERT OR IGNORE', async () => {
     try {
       openDatabase(':memory:');
 
-      // Simulates gsd_milestone_generate_id inserting a minimal queued row
+      // Simulates hx_milestone_generate_id inserting a minimal queued row
       insertMilestone({ id: 'M001', status: 'queued' });
 
       const before = getAllMilestones();
       assert.equal(before.length, 1, 'queued-row: one row after generate_id');
       assert.equal(before[0]!.status, 'queued', 'queued-row: status is queued');
 
-      // Simulates gsd_plan_milestone calling insertMilestone (INSERT OR IGNORE)
+      // Simulates hx_plan_milestone calling insertMilestone (INSERT OR IGNORE)
       insertMilestone({ id: 'M001', title: 'Planned Title', status: 'active' });
 
       const after = getAllMilestones();

@@ -18,7 +18,7 @@ import type {
 
 import { deriveState } from "./state.js";
 import { parseUnitId } from "./unit-id.js";
-import type { GSDState } from "./types.js";
+import type { HXState } from "./types.js";
 import { getManifestStatus } from "./files.js";
 export { inlinePriorMilestoneSummary } from "./files.js";
 import { collectSecretsFromManifest } from "../get-secrets-from-user.js";
@@ -60,7 +60,7 @@ import {
   getIsolationMode,
 } from "./preferences.js";
 import { sendDesktopNotification } from "./notifications.js";
-import type { GSDPreferences } from "./preferences.js";
+import type { HXPreferences } from "./preferences.js";
 import {
   type BudgetAlertLevel,
   getBudgetAlertLevel,
@@ -91,7 +91,7 @@ import {
   restoreHookState,
   clearPersistedHookState,
 } from "./post-unit-hooks.js";
-import { runGSDDoctor, rebuildState } from "./doctor.js";
+import { runHXDoctor, rebuildState } from "./doctor.js";
 import {
   preDispatchHealthGate,
   recordHealthSnapshot,
@@ -1181,7 +1181,7 @@ export async function startAuto(
       });
     }
     try {
-      const report = await runGSDDoctor(s.basePath, { fix: true });
+      const report = await runHXDoctor(s.basePath, { fix: true });
       if (report.fixesApplied.length > 0) {
         ctx.ui.notify(
           `Resume: applied ${report.fixesApplied.length} fix(es) to state.`,
@@ -1293,7 +1293,7 @@ function updateProgressWidget(
   ctx: ExtensionContext,
   unitType: string,
   unitId: string,
-  state: GSDState,
+  state: HXState,
 ): void {
   const badge = s.currentUnitRouting?.tier
     ? ({ light: "L", standard: "S", heavy: "H" }[s.currentUnitRouting.tier] ??
@@ -1329,7 +1329,7 @@ function ensurePreconditions(
   unitType: string,
   unitId: string,
   base: string,
-  state: GSDState,
+  state: HXState,
 ): void {
   const { milestone: mid, slice: sid } = parseUnitId(unitId);
 

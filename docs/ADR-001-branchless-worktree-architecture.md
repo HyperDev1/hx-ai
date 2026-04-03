@@ -23,7 +23,7 @@ Documented in the auto-stop architecture doc as "The Branch-Switching Problem."
 
 `.hx/` is gitignored (line 52 of `.gitignore`: `.hx/`). Planning artifacts (roadmaps, plans, summaries, decisions, requirements) live in `.hx/milestones/` but are invisible to git. When multiple branches or worktrees operate from the same repo, they share a single `.hx/` directory on disk. Branch A's M001 roadmap overwrites Branch B's M001 roadmap. HX reads corrupted state, shows wrong milestone as complete, or enters infinite dispatch loops.
 
-The codebase has a contradictory workaround: `smartStage()` (git-service.ts:304-352) force-adds `GSD_DURABLE_PATHS` (milestones/, DECISIONS.md, PROJECT.md, REQUIREMENTS.md, QUEUE.md) despite the `.gitignore`. This means `.hx/milestones/` IS partially tracked on some branches but the gitignore claims otherwise. The code fights the configuration.
+The codebase has a contradictory workaround: `smartStage()` (git-service.ts:304-352) force-adds `HX_DURABLE_PATHS` (milestones/, DECISIONS.md, PROJECT.md, REQUIREMENTS.md, QUEUE.md) despite the `.gitignore`. This means `.hx/milestones/` IS partially tracked on some branches but the gitignore claims otherwise. The code fights the configuration.
 
 **3. Merge/conflict code complexity**
 
@@ -167,7 +167,7 @@ No conflict categorization. No runtime file stripping. No `.hx/` special handlin
 
 ### What `smartStage()` Becomes
 
-The force-add of `GSD_DURABLE_PATHS` is no longer needed — planning artifacts are not gitignored, so `git add -A` picks them up naturally. The function reduces to:
+The force-add of `HX_DURABLE_PATHS` is no longer needed — planning artifacts are not gitignored, so `git add -A` picks them up naturally. The function reduces to:
 
 1. `git add -A`
 2. `git reset HEAD -- <runtime paths>` (unstage runtime files)
@@ -243,7 +243,7 @@ This architecture was stress-tested by three independent models:
 
 **GPT-5.4 (Codex)** read the full codebase and confirmed the model is sound. Identified that `smartStage()` already force-adds durable paths (validating the tracked-artifact approach) and that `resolveMainWorktreeRoot` in PR #487 is architecturally wrong (adopted — PR to be closed).
 
-**Codebase analysis** confirmed `.hx/milestones/` is already partially tracked on `main` despite the `.gitignore`, that `GSD_DURABLE_PATHS` exists as a code-level acknowledgment that planning artifacts should be tracked, and that the README already documents the correct runtime-only gitignore pattern.
+**Codebase analysis** confirmed `.hx/milestones/` is already partially tracked on `main` despite the `.gitignore`, that `HX_DURABLE_PATHS` exists as a code-level acknowledgment that planning artifacts should be tracked, and that the README already documents the correct runtime-only gitignore pattern.
 
 ### Codex (GPT-5.4) Dissent — "No Slice Branches Is a Redesign"
 

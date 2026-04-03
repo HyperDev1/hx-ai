@@ -102,10 +102,10 @@ test("completed-units.json is cleared on milestone transition (functional)", () 
   const tempDir = realpathSync(mkdtempSync(join(tmpdir(), "hx-cu-reset-")));
   try {
     // Create .hx directory with a populated completed-units.json
-    const gsdDir = join(tempDir, ".hx");
-    mkdirSync(gsdDir, { recursive: true });
+    const hxDir = join(tempDir, ".hx");
+    mkdirSync(hxDir, { recursive: true });
 
-    const completedKeysPath = join(gsdDir, "completed-units.json");
+    const completedKeysPath = join(hxDir, "completed-units.json");
     const staleEntries = [
       "context-gather/M001",
       "roadmap-plan/M001",

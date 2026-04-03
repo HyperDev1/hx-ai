@@ -12,9 +12,9 @@ set -e
 #   4. Signal forwarding — exec into the final process
 # ──────────────────────────────────────────────
 
-GSD_USER="hx"
-GSD_HOME="/home/${GSD_USER}"
-GSD_DIR="${GSD_HOME}/.hx"
+HX_USER="hx"
+HX_HOME="/home/${HX_USER}"
+HX_DIR="${HX_HOME}/.hx"
 
 # ── 1. UID/GID Remapping ────────────────────────────────
 # Accept PUID/PGID from the environment so the container
@@ -24,24 +24,24 @@ GSD_DIR="${GSD_HOME}/.hx"
 PUID="${PUID:-1000}"
 PGID="${PGID:-1000}"
 
-CURRENT_UID=$(id -u "${GSD_USER}")
-CURRENT_GID=$(id -g "${GSD_USER}")
+CURRENT_UID=$(id -u "${HX_USER}")
+CURRENT_GID=$(id -g "${HX_USER}")
 
 REMAPPED=0
 
 if [ "${PGID}" != "${CURRENT_GID}" ]; then
-    groupmod -o -g "${PGID}" "${GSD_USER}"
+    groupmod -o -g "${PGID}" "${HX_USER}"
     REMAPPED=1
 fi
 
 if [ "${PUID}" != "${CURRENT_UID}" ]; then
-    usermod -o -u "${PUID}" "${GSD_USER}"
+    usermod -o -u "${PUID}" "${HX_USER}"
     REMAPPED=1
 fi
 
 # Fix ownership only when UID/GID actually changed
 if [ "${REMAPPED}" -eq 1 ]; then
-    chown -R "${PUID}:${PGID}" "${GSD_HOME}"
+    chown -R "${PUID}:${PGID}" "${HX_HOME}"
     chown "${PUID}:${PGID}" /workspace
 fi
 
@@ -50,24 +50,24 @@ fi
 # path doesn't exist. We need these to be files, so touch
 # them before Docker gets a chance to mangle things.
 
-mkdir -p "${GSD_DIR}"
+mkdir -p "${HX_DIR}"
 
-if [ ! -f "${GSD_DIR}/settings.json" ]; then
-    echo '{}' > "${GSD_DIR}/settings.json"
+if [ ! -f "${HX_DIR}/settings.json" ]; then
+    echo '{}' > "${HX_DIR}/settings.json"
 fi
 
-chown "${PUID}:${PGID}" "${GSD_DIR}" "${GSD_DIR}/settings.json"
+chown "${PUID}:${PGID}" "${HX_DIR}" "${HX_DIR}/settings.json"
 
 # ── 3. Sentinel-based Bootstrap ─────────────────────────
 # Run first-boot setup exactly once. Subsequent container
 # starts (or restarts) skip this entirely.
 
-SENTINEL="${GSD_DIR}/.bootstrapped"
+SENTINEL="${HX_DIR}/.bootstrapped"
 
 if [ ! -f "${SENTINEL}" ]; then
     if [ -x /usr/local/bin/bootstrap.sh ]; then
         # Run bootstrap as the hx user so files get correct ownership
-        gosu "${GSD_USER}" /usr/local/bin/bootstrap.sh
+        gosu "${HX_USER}" /usr/local/bin/bootstrap.sh
     fi
     touch "${SENTINEL}"
     chown "${PUID}:${PGID}" "${SENTINEL}"
@@ -78,4 +78,4 @@ fi
 # as the hx user. exec + gosu = proper PID 1 = proper
 # signal forwarding (SIGTERM, SIGINT, etc.).
 
-exec gosu "${GSD_USER}" "$@"
+exec gosu "${HX_USER}" "$@"

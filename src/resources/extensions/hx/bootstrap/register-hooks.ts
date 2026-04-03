@@ -53,11 +53,11 @@ export function registerHooks(pi: ExtensionAPI): void {
       isFirstSession = false;
     } else {
       try {
-        const gsdBinPath = process.env.HX_BIN_PATH;
-        if (gsdBinPath) {
+        const hxBinPath = process.env.HX_BIN_PATH;
+        if (hxBinPath) {
           const { dirname } = await import("node:path");
           const { printWelcomeScreen } = await import(
-            join(dirname(gsdBinPath), "welcome-screen.js")
+            join(dirname(hxBinPath), "welcome-screen.js")
           ) as { printWelcomeScreen: (opts: { version: string; modelName?: string; provider?: string }) => void };
           printWelcomeScreen({ version: process.env.HX_VERSION || "0.0.0" });
         }

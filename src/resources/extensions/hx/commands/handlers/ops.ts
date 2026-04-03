@@ -178,8 +178,8 @@ Examples:
     return true;
   }
   if (trimmed === "hx-to-hx") {
-    const { handleGsdToHxMigration } = await import("../../migrate-gsd-to-hx.js");
-    await handleGsdToHxMigration(ctx);
+    const { handleLegacyMigration } = await import("../../migrate-gsd-to-hx.js");
+    await handleLegacyMigration(ctx);
     return true;
   }
   if (trimmed === "remote" || trimmed.startsWith("remote ")) {

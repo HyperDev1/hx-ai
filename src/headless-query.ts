@@ -16,20 +16,20 @@
 
 import { createJiti } from '@mariozechner/jiti'
 import { fileURLToPath } from 'node:url'
-import type { GSDState } from './resources/extensions/hx/types.js'
+import type { HXState } from './resources/extensions/hx/types.js'
 import { resolveBundledSourceResource } from './bundled-resource-path.js'
 
 const jiti = createJiti(fileURLToPath(import.meta.url), { interopDefault: true, debug: false })
-const gsdExtensionPath = (...segments: string[]) =>
+const hxExtensionPath = (...segments: string[]) =>
   resolveBundledSourceResource(import.meta.url, 'extensions', 'hx', ...segments)
 
 async function loadExtensionModules() {
-  const stateModule = await jiti.import(gsdExtensionPath('state.ts'), {}) as any
-  const dispatchModule = await jiti.import(gsdExtensionPath('auto-dispatch.ts'), {}) as any
-  const sessionModule = await jiti.import(gsdExtensionPath('session-status-io.ts'), {}) as any
-  const prefsModule = await jiti.import(gsdExtensionPath('preferences.ts'), {}) as any
+  const stateModule = await jiti.import(hxExtensionPath('state.ts'), {}) as any
+  const dispatchModule = await jiti.import(hxExtensionPath('auto-dispatch.ts'), {}) as any
+  const sessionModule = await jiti.import(hxExtensionPath('session-status-io.ts'), {}) as any
+  const prefsModule = await jiti.import(hxExtensionPath('preferences.ts'), {}) as any
   return {
-    deriveState: stateModule.deriveState as (basePath: string) => Promise<GSDState>,
+    deriveState: stateModule.deriveState as (basePath: string) => Promise<HXState>,
     resolveDispatch: dispatchModule.resolveDispatch as (opts: any) => Promise<any>,
     readAllSessionStatuses: sessionModule.readAllSessionStatuses as (basePath: string) => any[],
     loadEffectiveHXPreferences: prefsModule.loadEffectiveHXPreferences as () => any,
@@ -39,7 +39,7 @@ async function loadExtensionModules() {
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 export interface QuerySnapshot {
-  state: GSDState
+  state: HXState
   next: {
     action: 'dispatch' | 'stop' | 'skip'
     unitType?: string

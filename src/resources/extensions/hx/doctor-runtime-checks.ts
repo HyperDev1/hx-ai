@@ -340,9 +340,9 @@ export async function checkRuntimeHealth(
 
   // ── External state symlink health ──────────────────────────────────────
   try {
-    const localGsd = join(basePath, ".hx");
-    if (existsSync(localGsd)) {
-      const stat = lstatSync(localGsd);
+    const localHx = join(basePath, ".hx");
+    if (existsSync(localHx)) {
+      const stat = lstatSync(localHx);
 
       // Check for .hx.migrating (failed migration)
       const migratingPath = join(basePath, ".hx.migrating");
@@ -367,7 +367,7 @@ export async function checkRuntimeHealth(
       // Check symlink target exists
       if (stat.isSymbolicLink()) {
         try {
-          realpathSync(localGsd);
+          realpathSync(localHx);
         } catch {
           issues.push({
             severity: "error",

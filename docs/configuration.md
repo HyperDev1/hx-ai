@@ -155,10 +155,10 @@ Recommended verification order:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `GSD_HOME` | `~/.hx` | Global HX directory. All paths derive from this unless individually overridden. Affects preferences, skills, sessions, and per-project state. (v2.39) |
-| `GSD_PROJECT_ID` | (auto-hash) | Override the automatic project identity hash. Per-project state goes to `$GSD_HOME/projects/<GSD_PROJECT_ID>/` instead of the computed hash. Useful for CI/CD or sharing state across clones of the same repo. (v2.39) |
-| `GSD_STATE_DIR` | `$GSD_HOME` | Per-project state root. Controls where `projects/<repo-hash>/` directories are created. Takes precedence over `GSD_HOME` for project state. |
-| `GSD_CODING_AGENT_DIR` | `$GSD_HOME/agent` | Agent directory containing managed resources, extensions, and auth. Takes precedence over `GSD_HOME` for agent paths. |
+| `HX_HOME` | `~/.hx` | Global HX directory. All paths derive from this unless individually overridden. Affects preferences, skills, sessions, and per-project state. (v2.39) |
+| `HX_PROJECT_ID` | (auto-hash) | Override the automatic project identity hash. Per-project state goes to `$HX_HOME/projects/<HX_PROJECT_ID>/` instead of the computed hash. Useful for CI/CD or sharing state across clones of the same repo. (v2.39) |
+| `HX_STATE_DIR` | `$HX_HOME` | Per-project state root. Controls where `projects/<repo-hash>/` directories are created. Takes precedence over `HX_HOME` for project state. |
+| `HX_CODING_AGENT_DIR` | `$HX_HOME/agent` | Agent directory containing managed resources, extensions, and auth. Takes precedence over `HX_HOME` for agent paths. |
 
 ## All Settings
 

@@ -50,7 +50,7 @@ const SYMBOL_PATTERNS: { languages: string[]; regex: RegExp }[] = [
  * declarations. Clicking the lens sends a brief explanation request to the HX
  * agent for that specific symbol.
  */
-export class GsdCodeLensProvider implements vscode.CodeLensProvider, vscode.Disposable {
+export class HxCodeLensProvider implements vscode.CodeLensProvider, vscode.Disposable {
 	private readonly _onDidChangeCodeLenses = new vscode.EventEmitter<void>();
 	readonly onDidChangeCodeLenses = this._onDidChangeCodeLenses.event;
 

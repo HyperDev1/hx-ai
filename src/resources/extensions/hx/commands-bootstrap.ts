@@ -62,7 +62,7 @@ function filterStartsWith(
     }));
 }
 
-function getGsdArgumentCompletions(prefix: string) {
+function getHxArgumentCompletions(prefix: string) {
   const parts = prefix.trim().split(/\s+/);
 
   if (parts.length <= 1) {
@@ -241,13 +241,13 @@ function getGsdArgumentCompletions(prefix: string) {
   return null;
 }
 
-export function registerLazyGSDCommand(pi: ExtensionAPI): void {
+export function registerLazyHXCommand(pi: ExtensionAPI): void {
   pi.registerCommand("hx", {
     description: "HX — Hyperlab Coding Agent",
-    getArgumentCompletions: getGsdArgumentCompletions,
+    getArgumentCompletions: getHxArgumentCompletions,
     handler: async (args: string, ctx: ExtensionCommandContext) => {
-      const { handleGSDCommand } = await importExtensionModule<typeof import("./commands.js")>(import.meta.url, "./commands.js");
-      await handleGSDCommand(args, ctx, pi);
+      const { handleHXCommand } = await importExtensionModule<typeof import("./commands.js")>(import.meta.url, "./commands.js");
+      await handleHXCommand(args, ctx, pi);
     },
   });
 }

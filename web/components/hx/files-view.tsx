@@ -21,7 +21,7 @@ import {
   Bot,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useGSDWorkspaceState, buildProjectUrl } from "@/lib/hx-workspace-store"
+import { useHXWorkspaceState, buildProjectUrl } from "@/lib/hx-workspace-store"
 import { authFetch } from "@/lib/auth"
 import { FileContentViewer } from "@/components/hx/file-content-viewer"
 import { ChatPane } from "@/components/hx/chat-mode"
@@ -472,12 +472,12 @@ function tabLabel(tab: OpenTab): string {
 type LeftPanel = "tree" | "agent"
 
 export function FilesView() {
-  const workspace = useGSDWorkspaceState()
+  const workspace = useHXWorkspaceState()
   const projectCwd = workspace.boot?.project.cwd
 
   const [activeRoot, setActiveRoot] = useState<RootMode>("hx")
   const [leftPanel, setLeftPanel] = useState<LeftPanel>("tree")
-  const [gsdTree, setGsdTree] = useState<FileNode[] | null>(null)
+  const [hxTree, setHxTree] = useState<FileNode[] | null>(null)
   const [projectTree, setProjectTree] = useState<FileNode[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -522,7 +522,7 @@ export function FilesView() {
   )
 
   // Expanded paths per root, restored from sessionStorage
-  const [gsdExpanded, setGsdExpanded] = useState<Set<string>>(() => loadExpanded(projectCwd, "hx"))
+  const [hxExpanded, setHxExpanded] = useState<Set<string>>(() => loadExpanded(projectCwd, "hx"))
   const [projectExpanded, setProjectExpanded] = useState<Set<string>>(() => loadExpanded(projectCwd, "project"))
 
   // Re-hydrate from storage once projectCwd is available (boot may arrive after first render)
@@ -530,12 +530,12 @@ export function FilesView() {
   useEffect(() => {
     if (!projectCwd || hydratedRef.current) return
     hydratedRef.current = true
-    setGsdExpanded(loadExpanded(projectCwd, "hx"))
+    setHxExpanded(loadExpanded(projectCwd, "hx"))
     setProjectExpanded(loadExpanded(projectCwd, "project"))
   }, [projectCwd])
 
-  const expandedPaths = activeRoot === "hx" ? gsdExpanded : projectExpanded
-  const setExpandedPaths = activeRoot === "hx" ? setGsdExpanded : setProjectExpanded
+  const expandedPaths = activeRoot === "hx" ? hxExpanded : projectExpanded
+  const setExpandedPaths = activeRoot === "hx" ? setHxExpanded : setProjectExpanded
 
   // ── Multi-tab state ──
   const [openTabs, setOpenTabs] = useState<OpenTab[]>([])
@@ -553,8 +553,8 @@ export function FilesView() {
   // The selected path in the tree corresponds to the active tab
   const selectedPath = activeTab?.path ?? null
 
-  const tree = activeRoot === "hx" ? gsdTree : projectTree
-  const treeLoaded = activeRoot === "hx" ? gsdTree !== null : projectTree !== null
+  const tree = activeRoot === "hx" ? hxTree : projectTree
+  const treeLoaded = activeRoot === "hx" ? hxTree !== null : projectTree !== null
 
   const fetchTree = useCallback(async (root: RootMode) => {
     try {
@@ -568,7 +568,7 @@ export function FilesView() {
       const data = await res.json()
       const nodes = data.tree ?? []
       if (root === "hx") {
-        setGsdTree(nodes)
+        setHxTree(nodes)
       } else {
         setProjectTree(nodes)
       }
@@ -609,7 +609,7 @@ export function FilesView() {
 
     // Auto-expand parent dirs
     const parts = path.split("/")
-    const setExpanded = root === "hx" ? setGsdExpanded : setProjectExpanded
+    const setExpanded = root === "hx" ? setHxExpanded : setProjectExpanded
     setExpanded((prev) => {
       const next = new Set(prev)
       for (let i = 1; i < parts.length; i++) {
@@ -676,14 +676,14 @@ export function FilesView() {
   // Process a file open request (used both on mount and on event)
   const processFileOpen = useCallback(async (root: RootMode, path: string) => {
     // Ensure tree is loaded for this root
-    if (root === "hx" && !gsdTree) {
+    if (root === "hx" && !hxTree) {
       fetchTree("hx")
     } else if (root === "project" && !projectTree) {
       fetchTree("project")
     }
 
     await openFileTab(root, path)
-  }, [gsdTree, projectTree, fetchTree, openFileTab])
+  }, [hxTree, projectTree, fetchTree, openFileTab])
 
   // On mount: consume any pending file request that arrived before this component mounted
   const consumedPendingRef = useRef(false)
@@ -792,7 +792,7 @@ export function FilesView() {
   const handleNewFile = useCallback((parentDir: string) => {
     // Ensure parent directory is expanded
     if (parentDir) {
-      const setExpanded = activeRoot === "hx" ? setGsdExpanded : setProjectExpanded
+      const setExpanded = activeRoot === "hx" ? setHxExpanded : setProjectExpanded
       setExpanded((prev) => {
         const next = new Set(prev)
         const parts = parentDir.split("/")
@@ -808,7 +808,7 @@ export function FilesView() {
 
   const handleNewFolder = useCallback((parentDir: string) => {
     if (parentDir) {
-      const setExpanded = activeRoot === "hx" ? setGsdExpanded : setProjectExpanded
+      const setExpanded = activeRoot === "hx" ? setHxExpanded : setProjectExpanded
       setExpanded((prev) => {
         const next = new Set(prev)
         const parts = parentDir.split("/")
@@ -1029,13 +1029,13 @@ export function FilesView() {
   const autoSelectedRef = useRef(false)
   useEffect(() => {
     if (autoSelectedRef.current) return
-    if (!gsdTree || openTabs.length > 0 || consumedPendingRef.current) return
-    const hasStateMd = gsdTree.some((n) => n.name === "STATE.md" && n.type === "file")
+    if (!hxTree || openTabs.length > 0 || consumedPendingRef.current) return
+    const hasStateMd = hxTree.some((n) => n.name === "STATE.md" && n.type === "file")
     if (hasStateMd) {
       autoSelectedRef.current = true
       void openFileTab("hx", "STATE.md")
     }
-  }, [gsdTree, openTabs.length, openFileTab])
+  }, [hxTree, openTabs.length, openFileTab])
 
   // ── Agent file-edit auto-open: watch tool executions for edit/write tools ──
   const lastSeenToolCountRef = useRef(0)
@@ -1054,7 +1054,7 @@ export function FilesView() {
       if (!filePath) continue
 
       // Determine root and relative path
-      const gsdPrefix = ".hx/"
+      const hxPrefix = ".hx/"
       let root: RootMode = "project"
       let relativePath = filePath
 
@@ -1064,9 +1064,9 @@ export function FilesView() {
         if (relativePath.startsWith("/")) relativePath = relativePath.slice(1)
       }
 
-      if (relativePath.startsWith(gsdPrefix)) {
+      if (relativePath.startsWith(hxPrefix)) {
         root = "hx"
-        relativePath = relativePath.slice(gsdPrefix.length)
+        relativePath = relativePath.slice(hxPrefix.length)
       }
 
       const key = tabKey(root, relativePath)
