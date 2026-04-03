@@ -1,0 +1,32 @@
+{
+  "template": "bugfix",
+  "templateName": "Bug Fix",
+  "description": "knowledge ekleme komutunda onay şu şekilde çıktı /var/folders/zz/cfpdlv810hxgyyp3mkdmf5_00000gn/T/pi-clipboard-b34eb293-ff10-4a64-89c3-358b010105ed.png ask user question tool'u ile çıkması gerekiyordu.",
+  "branch": "hx/bugfix/knowledge-ekleme-komutunda-onay-u-ekilde",
+  "phases": [
+    {
+      "name": "triage",
+      "index": 0,
+      "status": "active"
+    },
+    {
+      "name": "fix",
+      "index": 1,
+      "status": "pending"
+    },
+    {
+      "name": "verify",
+      "index": 2,
+      "status": "pending"
+    },
+    {
+      "name": "ship",
+      "index": 3,
+      "status": "pending"
+    }
+  ],
+  "currentPhase": 0,
+  "startedAt": "2026-04-03T15:19:25.531Z",
+  "updatedAt": "2026-04-03T15:19:25.531Z",
+  "artifactDir": "/Users/beratcan/Desktop/GithubProjects/hx-ai/.hx/workflows/bugfixes/260403-3-knowledge-ekleme-komutunda-onay-u-ekilde"
+}

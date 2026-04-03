@@ -27,6 +27,16 @@ Then:
 6. If this slice produced evidence that a requirement changed status (Active → Validated, Active → Deferred, etc.), call `gsd_save_decision` with scope="requirement", decision="{requirement-id}", choice="{new-status}", rationale="{evidence}". Do NOT write `.hx/REQUIREMENTS.md` directly — the engine renders it from the database.
 7. Write `{{sliceSummaryPath}}` (compress all task summaries).
 8. Write `{{sliceUatPath}}` — a concrete UAT script with real test cases derived from the slice plan and task summaries. Include preconditions, numbered steps with expected outcomes, and edge cases. This must NOT be a placeholder or generic template — tailor every test case to what this slice actually built.
+   
+   **You MUST set `## UAT Type` → `UAT mode:` to the correct mode.** Choose based on what the slice built:
+   - `browser-executable` — slice built UI/frontend features that can be verified by navigating to a URL and checking rendered output, clicks, or visual state. The UAT runner will start the dev server automatically and use browser tools. **This is the default for frontend/UI slices.**
+   - `runtime-executable` — slice built backend logic, CLI tools, scripts, or APIs that can be verified by running a command and checking stdout/exit code (e.g. `pytest`, `curl`, `node script.js`).
+   - `artifact-driven` — slice produced only static artifacts (config files, documentation, schemas, migrations) verifiable via file reads and grep.
+   - `live-runtime` — requires a running service stack (multiple services, database, etc.) that goes beyond a single dev server.
+   - `mixed` — some checks are artifact-driven, others require browser or runtime execution.
+   - `human-experience` — subjective UX/design quality checks that no automation can honestly judge.
+   
+   **Never leave UAT mode empty or omit the `## UAT Type` section.** The auto-mode UAT runner depends on this to choose the right execution strategy.
 9. Review task summaries for `key_decisions`. Append any significant decisions to `.hx/DECISIONS.md` if missing.
 10. Review task summaries for patterns, gotchas, or non-obvious lessons learned. If any would save future agents from repeating investigation or hitting the same issues, append them to `.hx/KNOWLEDGE.md`. Only add entries that are genuinely useful — don't pad with obvious observations.
 11. Call `gsd_complete_slice` with milestone_id, slice_id, the slice summary, and the UAT result. Do NOT manually mark the roadmap checkbox — the tool writes to the DB and renders the ROADMAP.md projection automatically.

@@ -25,11 +25,19 @@ You are the UAT runner. Execute every check defined in `{{uatPath}}` as deeply a
 ### Automation rules by mode
 
 - `artifact-driven` — verify with shell commands, scripts, file reads, and artifact structure checks.
-- `browser-executable` — use browser tools to navigate to the target URL and verify expected behavior. Capture screenshots as evidence. Record pass/fail with specific assertions.
+- `browser-executable` — **First, ensure the app is running.** Use `bg_shell` to start the dev server (e.g. `npm run dev`, `next dev`) with `ready_port` set to the expected port (typically 3000). Wait for readiness with `wait_for_ready`. Then use browser tools to navigate and verify. Capture screenshots as evidence. After all checks, kill the dev server with `bg_shell kill`. If the dev server fails to start, mark all browser checks as FAIL with the startup error as evidence.
 - `runtime-executable` — execute the specified command or script. Capture stdout/stderr as evidence. Record pass/fail based on exit code and output.
-- `live-runtime` — exercise the real runtime path. Start or connect to the app/service if needed, use browser/runtime/network checks, and verify observable behavior.
+- `live-runtime` — exercise the real runtime path. Start or connect to the app/service if needed, use browser/runtime/network checks, and verify observable behavior. Use `bg_shell` for any servers that need to run during verification.
 - `mixed` — run all automatable artifact-driven and live-runtime checks. Separate any remaining human-only checks explicitly.
 - `human-experience` — automate setup, preconditions, screenshots, logs, and objective checks, but do **not** invent subjective PASS results. Mark taste-based, experiential, or purely human-judgment checks as `NEEDS-HUMAN`. Use an overall verdict of `PASS` when all automatable checks succeed (even if human-only checks remain as `NEEDS-HUMAN`). Use `PARTIAL` only when automatable checks themselves were inconclusive.
+
+### Server lifecycle for browser-executable and live-runtime
+
+When the UAT mode requires a running server:
+1. **Start:** `bg_shell start` with `type: "server"`, `ready_port: <port>`, and `ready_timeout: 60000`
+2. **Wait:** `bg_shell wait_for_ready` — do NOT proceed until the server is confirmed ready
+3. **Test:** Run all browser/runtime checks
+4. **Cleanup:** `bg_shell kill` the server process when done — do not leave servers running
 
 ### Evidence tools
 

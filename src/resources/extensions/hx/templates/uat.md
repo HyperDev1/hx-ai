@@ -5,7 +5,7 @@
 
 ## UAT Type
 
-- UAT mode: {{artifact-driven | live-runtime | human-experience | mixed}}
+- UAT mode: {{artifact-driven | browser-executable | runtime-executable | live-runtime | human-experience | mixed}}
 - Why this mode is sufficient: {{reason}}
 
 ## Preconditions
