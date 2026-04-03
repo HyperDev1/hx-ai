@@ -1,4 +1,4 @@
-// GSD Extension — Workflow Logger Tests
+// HX Extension — Workflow Logger Tests
 // Tests for the centralized warning/error accumulator.
 
 import { describe, test, beforeEach, afterEach } from "node:test";
@@ -327,7 +327,7 @@ describe("workflow-logger", () => {
 
       logWarning("engine", "test warn");
       assert.equal(written.length, 1);
-      assert.ok(written[0].includes("[gsd:engine] WARN: test warn"));
+      assert.ok(written[0].includes("[hx:engine] WARN: test warn"));
     });
 
     test("writes ERROR prefix to stderr for errors", (t) => {
@@ -338,7 +338,7 @@ describe("workflow-logger", () => {
       t.after(() => { process.stderr.write = orig; });
 
       logError("intercept", "blocked");
-      assert.ok(written[0].includes("[gsd:intercept] ERROR: blocked"));
+      assert.ok(written[0].includes("[hx:intercept] ERROR: blocked"));
     });
 
     test("includes serialized context in stderr output", (t) => {

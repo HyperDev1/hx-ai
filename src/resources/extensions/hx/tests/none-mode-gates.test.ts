@@ -71,7 +71,7 @@ try {
 });
 
 // Test 4: shouldUseWorktreeIsolation returns false for no prefs (default: none)
-// Worktree isolation requires explicit opt-in — default is "none" so GSD
+// Worktree isolation requires explicit opt-in — default is "none" so HX
 // works out of the box without PREFERENCES.md (#2480).
 // Skip if global prefs exist — they override the default and this test
 // cannot control ~/.hx/PREFERENCES.md.

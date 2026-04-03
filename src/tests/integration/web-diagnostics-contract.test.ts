@@ -56,7 +56,7 @@ describe("diagnostics type exports", () => {
 
   it("ForensicReport has all required fields", () => {
     const report: ForensicReport = {
-      gsdVersion: "1.0.0",
+      hxVersion: "1.0.0",
       timestamp: new Date().toISOString(),
       basePath: "/tmp/test",
       activeMilestone: "M001",
@@ -72,7 +72,7 @@ describe("diagnostics type exports", () => {
       journalSummary: null,
       activityLogMeta: null,
     }
-    assert.equal(typeof report.gsdVersion, "string")
+    assert.equal(typeof report.hxVersion, "string")
     assert.equal(typeof report.timestamp, "string")
     assert.deepEqual(report.anomalies, [])
     assert.deepEqual(report.recentUnits, [])
@@ -253,35 +253,35 @@ describe("diagnostics contract state", () => {
 // ─── Block 3: Dispatch→surface pipeline (R103, R104, R105) ──────────────────
 
 describe("diagnostics dispatch→surface pipeline", () => {
-  it("/hx forensics dispatches to gsd-forensics surface", () => {
+  it("/hx forensics dispatches to hx-forensics surface", () => {
     const outcome = dispatchBrowserSlashCommand("/hx forensics", {})
     assert.equal(outcome.kind, "surface")
     if (outcome.kind === "surface") {
-      assert.equal(outcome.surface, "gsd-forensics")
+      assert.equal(outcome.surface, "hx-forensics")
     }
   })
 
-  it("/hx doctor dispatches to gsd-doctor surface", () => {
+  it("/hx doctor dispatches to hx-doctor surface", () => {
     const outcome = dispatchBrowserSlashCommand("/hx doctor", {})
     assert.equal(outcome.kind, "surface")
     if (outcome.kind === "surface") {
-      assert.equal(outcome.surface, "gsd-doctor")
+      assert.equal(outcome.surface, "hx-doctor")
     }
   })
 
-  it("/hx skill-health dispatches to gsd-skill-health surface", () => {
+  it("/hx skill-health dispatches to hx-skill-health surface", () => {
     const outcome = dispatchBrowserSlashCommand("/hx skill-health", {})
     assert.equal(outcome.kind, "surface")
     if (outcome.kind === "surface") {
-      assert.equal(outcome.surface, "gsd-skill-health")
+      assert.equal(outcome.surface, "hx-skill-health")
     }
   })
 
-  it("/hx doctor fix dispatches to gsd-doctor surface with args", () => {
+  it("/hx doctor fix dispatches to hx-doctor surface with args", () => {
     const outcome = dispatchBrowserSlashCommand("/hx doctor fix", {})
     assert.equal(outcome.kind, "surface")
     if (outcome.kind === "surface") {
-      assert.equal(outcome.surface, "gsd-doctor")
+      assert.equal(outcome.surface, "hx-doctor")
     }
   })
 })
@@ -289,19 +289,19 @@ describe("diagnostics dispatch→surface pipeline", () => {
 // ─── Block 4: Surface→section mapping (R103, R104, R105) ────────────────────
 
 describe("diagnostics surface→section mapping", () => {
-  it("gsd-forensics surface maps to gsd-forensics section", () => {
-    const section = commandSurfaceSectionForRequest({ surface: "gsd-forensics" as any } as any)
-    assert.equal(section, "gsd-forensics")
+  it("hx-forensics surface maps to hx-forensics section", () => {
+    const section = commandSurfaceSectionForRequest({ surface: "hx-forensics" as any } as any)
+    assert.equal(section, "hx-forensics")
   })
 
-  it("gsd-doctor surface maps to gsd-doctor section", () => {
-    const section = commandSurfaceSectionForRequest({ surface: "gsd-doctor" as any } as any)
-    assert.equal(section, "gsd-doctor")
+  it("hx-doctor surface maps to hx-doctor section", () => {
+    const section = commandSurfaceSectionForRequest({ surface: "hx-doctor" as any } as any)
+    assert.equal(section, "hx-doctor")
   })
 
-  it("gsd-skill-health surface maps to gsd-skill-health section", () => {
-    const section = commandSurfaceSectionForRequest({ surface: "gsd-skill-health" as any } as any)
-    assert.equal(section, "gsd-skill-health")
+  it("hx-skill-health surface maps to hx-skill-health section", () => {
+    const section = commandSurfaceSectionForRequest({ surface: "hx-skill-health" as any } as any)
+    assert.equal(section, "hx-skill-health")
   })
 })
 

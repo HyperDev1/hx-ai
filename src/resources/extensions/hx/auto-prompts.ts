@@ -790,7 +790,7 @@ export async function checkNeedsRunUat(
         // If the UAT file already contains a verdict, UAT has been run — skip
         if (hasVerdict(uatContent)) return null;
         // Also check the ASSESSMENT file — the run-uat prompt writes the verdict
-        // there (via gsd_summary_save artifact_type:"ASSESSMENT"), not into the
+        // there (via hx_summary_save artifact_type:"ASSESSMENT"), not into the
         // UAT spec file. Without this check the unit re-dispatches indefinitely.
         const assessmentFile = resolveSliceFile(base, mid, sid, "ASSESSMENT");
         if (assessmentFile) {
@@ -1322,7 +1322,7 @@ export async function buildCompleteMilestonePrompt(
     inlined.push(await inlineFile(summaryPath, summaryRel, `${sid} Summary`));
   }
 
-  // Inline root GSD files (skip for minimal — completion can read these if needed)
+  // Inline root HX files (skip for minimal — completion can read these if needed)
   if (inlineLevel !== "minimal") {
     const requirementsInline = await inlineRequirementsFromDb(base, undefined, inlineLevel);
     if (requirementsInline) inlined.push(requirementsInline);
@@ -1333,7 +1333,7 @@ export async function buildCompleteMilestonePrompt(
   }
   const knowledgeInlineCM = await inlineGsdRootFile(base, "knowledge.md", "Project Knowledge");
   if (knowledgeInlineCM) inlined.push(knowledgeInlineCM);
-  // Inline milestone context file (milestone-level, not GSD root)
+  // Inline milestone context file (milestone-level, not HX root)
   const contextPath = resolveMilestoneFile(base, mid, "CONTEXT");
   const contextRel = relMilestoneFile(base, mid, "CONTEXT");
   const contextInline = await inlineFileOptional(contextPath, contextRel, "Milestone Context");
@@ -1443,7 +1443,7 @@ export async function buildValidateMilestonePrompt(
     inlined.push(`### Previous Validation (re-validation round ${remediationRound})\nSource: \`${validationRel}\`\n\n${validationContent.trim()}`);
   }
 
-  // Inline root GSD files
+  // Inline root HX files
   if (inlineLevel !== "minimal") {
     const requirementsInline = await inlineRequirementsFromDb(base, undefined, inlineLevel);
     if (requirementsInline) inlined.push(requirementsInline);
@@ -1793,7 +1793,7 @@ export async function buildGateEvaluatePrompt(
       "## Instructions",
       "",
       "Analyze the slice plan above and answer the gate question.",
-      `Call the \`gsd_save_gate_result\` tool with:`,
+      `Call the \`hx_save_gate_result\` tool with:`,
       `- \`milestoneId\`: "${mid}"`,
       `- \`sliceId\`: "${sid}"`,
       `- \`gateId\`: "${gate.gate_id}"`,

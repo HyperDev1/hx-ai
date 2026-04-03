@@ -1,4 +1,4 @@
-// GSD Extension — Session/Milestone Export
+// HX Extension — Session/Milestone Export
 // Generate shareable reports of milestone work in JSON or markdown format.
 
 import type { ExtensionCommandContext } from "@hyperlab/hx-coding-agent";
@@ -76,7 +76,7 @@ export function writeExportFile(
     const slices = visualizerData?.bySlice ?? aggregateBySlice(units);
 
     const md = [
-      `# GSD Session Report — ${projectName}`,
+      `# HX Session Report — ${projectName}`,
       ``,
       `**Generated**: ${new Date().toISOString()}`,
       `**Units completed**: ${totals.units}`,
@@ -123,13 +123,13 @@ export async function handleExport(args: string, ctx: ExtensionCommandContext, b
       const { basename: bn } = await import("node:path");
       const data = await loadVisualizerData(basePath);
       const projName = basename(basePath);
-      const gsdVersion = process.env.HX_VERSION ?? "0.0.0";
+      const hxVersion = process.env.HX_VERSION ?? "0.0.0";
       const doneMilestones = data.milestones.filter(m => m.status === "complete").length;
 
       const htmlOpts = {
         projectName: projName,
         projectPath: basePath,
-        gsdVersion,
+        hxVersion,
         indexRelPath: "index.html",
       };
 
@@ -171,7 +171,7 @@ export async function handleExport(args: string, ctx: ExtensionCommandContext, b
             kind: ms.status === "complete" ? "milestone" : "manual",
             projectName: projName,
             projectPath: basePath,
-            gsdVersion,
+            hxVersion,
             totalCost: data.totals?.cost ?? 0,
             totalTokens: data.totals?.tokens.total ?? 0,
             totalDuration: data.totals?.duration ?? 0,
@@ -202,7 +202,7 @@ export async function handleExport(args: string, ctx: ExtensionCommandContext, b
           kind: "manual",
           projectName: projName,
           projectPath: basePath,
-          gsdVersion,
+          hxVersion,
           totalCost: data.totals?.cost ?? 0,
           totalTokens: data.totals?.tokens.total ?? 0,
           totalDuration: data.totals?.duration ?? 0,
@@ -268,7 +268,7 @@ export async function handleExport(args: string, ctx: ExtensionCommandContext, b
     const slices = aggregateBySlice(units);
 
     const md = [
-      `# GSD Session Report — ${projectName}`,
+      `# HX Session Report — ${projectName}`,
       ``,
       `**Generated**: ${new Date().toISOString()}`,
       `**Units completed**: ${totals.units}`,

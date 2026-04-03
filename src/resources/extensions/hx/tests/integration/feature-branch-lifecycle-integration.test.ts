@@ -66,14 +66,14 @@ function allBranches(cwd: string): string[] {
  * Returns { repo, featureBranch } with HEAD on the feature branch.
  */
 function createFeatureBranchRepo(featureBranch: string): string {
-  const dir = realpathSync(mkdtempSync(join(tmpdir(), "gsd-fb-lifecycle-")));
+  const dir = realpathSync(mkdtempSync(join(tmpdir(), "hx-fb-lifecycle-")));
   run("git init", dir);
   run("git config user.email test@test.com", dir);
   run("git config user.name Test", dir);
 
   // Initial commit on main
   writeFileSync(join(dir, "README.md"), "# project\n");
-  // Mirror production: GSD runtime dirs are gitignored so autoCommitDirtyState
+  // Mirror production: HX runtime dirs are gitignored so autoCommitDirtyState
   // doesn't pick up the worktrees directory as dirty state (#1127 fix).
   writeFileSync(join(dir, ".gitignore"), ".hx/worktrees/\n");
   mkdirSync(join(dir, ".hx"), { recursive: true });
@@ -183,7 +183,7 @@ describe('feature-branch-lifecycle-integration', async () => {
       // In production, the first dispatch unit (research-milestone) would
       // auto-commit via autoCommitCurrentBranch. But the worktree is created
       // BEFORE any unit runs. So we simulate the pre-worktree state:
-      // GSD bootstraps .hx/ and captureIntegrationBranch commits metadata.
+      // HX bootstraps .hx/ and captureIntegrationBranch commits metadata.
       // The user's dirty files are NOT auto-committed pre-worktree — they
       // stay in the original working directory.
 

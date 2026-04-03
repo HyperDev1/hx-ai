@@ -72,7 +72,7 @@ function ensureCmuxAvailableForEnable(ctx: ExtensionCommandContext): boolean {
   const detected = detectCmuxEnvironment();
   if (detected.available) return true;
   ctx.ui.notify(
-    "cmux not detected. Install it from https://cmux.com and run gsd inside a cmux terminal.",
+    "cmux not detected. Install it from https://cmux.com and run hx inside a cmux terminal.",
     "warning",
   );
   return false;

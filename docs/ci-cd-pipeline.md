@@ -2,14 +2,14 @@
 
 ## Overview
 
-GSD 2 uses a three-stage promotion pipeline that automatically moves merged PRs through **Dev → Test → Prod** environments using npm dist-tags.
+HX 2 uses a three-stage promotion pipeline that automatically moves merged PRs through **Dev → Test → Prod** environments using npm dist-tags.
 
 ```
 PR merged to main
         │
         ▼
    ┌─────────┐    ci.yml passes (build, test, typecheck)
-   │   DEV   │    → publishes gsd-pi@<version>-dev.<sha> with @dev tag
+   │   DEV   │    → publishes hx-pi@<version>-dev.<sha> with @dev tag
    └────┬────┘
         ▼ (automatic if green)
    ┌─────────┐    CLI smoke tests + LLM fixture replay
@@ -29,32 +29,32 @@ Every merged PR is immediately installable:
 
 ```bash
 # Latest dev build (bleeding edge, every merged PR)
-npx gsd-pi@dev
+npx hx-pi@dev
 
 # Test candidate (passed smoke + fixture tests)
-npx gsd-pi@next
+npx hx-pi@next
 
 # Stable production release
-npx gsd-pi@latest    # or just: npx gsd-pi
+npx hx-pi@latest    # or just: npx hx-pi
 ```
 
 ### Using Docker
 
 ```bash
 # Test candidate
-docker run --rm -v $(pwd):/workspace ghcr.io/gsd-build/gsd-pi:next --version
+docker run --rm -v $(pwd):/workspace ghcr.io/hx-build/hx-pi:next --version
 
 # Stable
-docker run --rm -v $(pwd):/workspace ghcr.io/gsd-build/gsd-pi:latest --version
+docker run --rm -v $(pwd):/workspace ghcr.io/hx-build/hx-pi:latest --version
 ```
 
 ### Checking if a Fix Landed
 
 1. Find the PR's merge commit SHA (first 7 chars)
-2. Check if it's in `@dev`: `npm view gsd-pi@dev version`
+2. Check if it's in `@dev`: `npm view hx-pi@dev version`
    - If the version ends in `-dev.<your-sha>`, your PR is in dev
-3. Check if it promoted to `@next`: `npm view gsd-pi@next version`
-4. Check if it's in production: `npm view gsd-pi@latest version`
+3. Check if it promoted to `@next`: `npm view hx-pi@next version`
+4. Check if it's in production: `npm view hx-pi@latest version`
 
 ## For Maintainers
 
@@ -80,7 +80,7 @@ docker run --rm -v $(pwd):/workspace ghcr.io/gsd-build/gsd-pi:latest --version
 CI automatically detects when a PR contains only documentation changes (`.md` files and `docs/` content). When docs-only:
 
 - **Skipped:** `build`, `windows-portability` (no code to compile or test)
-- **Still runs:** `lint` (secret scanning, `.gsd/` check), `docs-check` (prompt injection scan)
+- **Still runs:** `lint` (secret scanning, `.hx/` check), `docs-check` (prompt injection scan)
 
 This saves CI minutes on documentation PRs while still enforcing security checks.
 
@@ -126,12 +126,12 @@ If a broken version reaches production:
 
 ```bash
 # Roll back npm
-npm dist-tag add gsd-pi@<previous-good-version> latest
+npm dist-tag add hx-pi@<previous-good-version> latest
 
 # Roll back Docker
-docker pull ghcr.io/gsd-build/gsd-pi:<previous-good-version>
-docker tag ghcr.io/gsd-build/gsd-pi:<previous-good-version> ghcr.io/gsd-build/gsd-pi:latest
-docker push ghcr.io/gsd-build/gsd-pi:latest
+docker pull ghcr.io/hx-build/hx-pi:<previous-good-version>
+docker tag ghcr.io/hx-build/hx-pi:<previous-good-version> ghcr.io/hx-build/hx-pi:latest
+docker push ghcr.io/hx-build/hx-pi:latest
 ```
 
 For `@dev` or `@next` rollbacks, the next successful merge will overwrite the tag automatically.
@@ -147,14 +147,14 @@ For `@dev` or `@next` rollbacks, the next successful merge will overwrite the ta
 | Secret: `ANTHROPIC_API_KEY` | Prod environment only |
 | Secret: `OPENAI_API_KEY` | Prod environment only |
 | Variable: `RUN_LIVE_TESTS` | `false` (set to `true` to enable live LLM tests) |
-| GHCR | Enabled for the `gsd-build` org |
+| GHCR | Enabled for the `hx-build` org |
 
 ### Docker Images
 
 | Image | Base | Purpose | Tags |
 |-------|------|---------|------|
-| `ghcr.io/gsd-build/gsd-ci-builder` | `node:24-bookworm` | CI build environment with Rust toolchain | `:latest`, `:<date>` |
-| `ghcr.io/gsd-build/gsd-pi` | `node:24-slim` | User-facing runtime | `:latest`, `:next`, `:v<version>` |
+| `ghcr.io/hx-build/hx-ci-builder` | `node:24-bookworm` | CI build environment with Rust toolchain | `:latest`, `:<date>` |
+| `ghcr.io/hx-build/hx-pi` | `node:24-slim` | User-facing runtime | `:latest`, `:next`, `:v<version>` |
 
 The CI builder image is rebuilt automatically when the `Dockerfile` changes. It eliminates ~3-5 min of toolchain setup per CI run.
 

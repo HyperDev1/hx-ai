@@ -1,23 +1,23 @@
 #!/usr/bin/env bash
-# recover-gsd-1364.sh — Recovery script for issue #1364 (Linux / macOS)
+# recover-hx-1364.sh — Recovery script for issue #1364 (Linux / macOS)
 #
 # For Windows use the PowerShell equivalent:
-#   powershell -ExecutionPolicy Bypass -File scripts\recover-gsd-1364.ps1 [-DryRun]
+#   powershell -ExecutionPolicy Bypass -File scripts\recover-hx-1364.ps1 [-DryRun]
 #
-# CRITICAL DATA-LOSS BUG: GSD versions 2.30.0–2.35.x unconditionally added
-# ".gsd" to .gitignore via ensureGitignore(), causing git to report all
-# tracked .gsd/ files as deleted. Fixed in v2.36.0 (PR #1367).
+# CRITICAL DATA-LOSS BUG: HX versions 2.30.0–2.35.x unconditionally added
+# ".hx" to .gitignore via ensureGitignore(), causing git to report all
+# tracked .hx/ files as deleted. Fixed in v2.36.0 (PR #1367).
 # Three residual vectors remain on v2.36.0–v2.38.0 — see PR #1635 for details.
 #
 # This script:
 #   1. Detects whether the repo was affected
 #   2. Finds the last clean commit before the damage
-#   3. Restores all deleted .gsd/ files from that commit
-#   4. Removes the bad ".gsd" line from .gitignore (if .gsd/ is tracked)
+#   3. Restores all deleted .hx/ files from that commit
+#   4. Removes the bad ".hx" line from .gitignore (if .hx/ is tracked)
 #   5. Prints a ready-to-commit summary
 #
 # Usage:
-#   bash scripts/recover-gsd-1364.sh [--dry-run]
+#   bash scripts/recover-hx-1364.sh [--dry-run]
 #
 # Options:
 #   --dry-run   Show what would be done without making any changes
@@ -84,30 +84,30 @@ if $DRY_RUN; then
   warn "DRY-RUN mode — no changes will be made."
 fi
 
-# ─── Step 1: Check if .gsd/ exists ────────────────────────────────────────────
+# ─── Step 1: Check if .hx/ exists ────────────────────────────────────────────
 
-section "── Step 1: Detect .gsd/ directory ────────────────────────────────────"
+section "── Step 1: Detect .hx/ directory ────────────────────────────────────"
 
-GSD_DIR="$REPO_ROOT/.gsd"
+GSD_DIR="$REPO_ROOT/.hx"
 GSD_IS_SYMLINK=false
 
 if [[ ! -e "$GSD_DIR" ]]; then
-  ok ".gsd/ does not exist in this repo — not affected."
+  ok ".hx/ does not exist in this repo — not affected."
   exit 0
 fi
 
 if [[ -L "$GSD_DIR" ]]; then
   # Scenario C: migration succeeded (symlink in place) but git index was never
-  # cleaned — tracked .gsd/* files still appear as deleted through the symlink.
+  # cleaned — tracked .hx/* files still appear as deleted through the symlink.
   GSD_IS_SYMLINK=true
-  warn ".gsd/ is a symlink — checking for stale git index entries (Scenario C)..."
+  warn ".hx/ is a symlink — checking for stale git index entries (Scenario C)..."
 else
-  info ".gsd/ is a real directory (Scenario A/B)."
+  info ".hx/ is a real directory (Scenario A/B)."
 fi
 
-# ─── Step 2: Check if .gsd is in .gitignore ───────────────────────────────────
+# ─── Step 2: Check if .hx is in .gitignore ───────────────────────────────────
 
-section "── Step 2: Check .gitignore for .gsd entry ────────────────────────────"
+section "── Step 2: Check .gitignore for .hx entry ────────────────────────────"
 
 GITIGNORE="$REPO_ROOT/.gitignore"
 
@@ -116,13 +116,13 @@ if [[ ! -f "$GITIGNORE" ]] && ! $GSD_IS_SYMLINK; then
   exit 0
 fi
 
-# Look for a bare ".gsd" line (not a comment, not a sub-path like .gsd/)
+# Look for a bare ".hx" line (not a comment, not a sub-path like .hx/)
 GSD_IGNORE_LINE=""
 if [[ -f "$GITIGNORE" ]]; then
   while IFS= read -r line; do
     trimmed="${line#"${line%%[![:space:]]*}"}"
     trimmed="${trimmed%"${trimmed##*[![:space:]]}"}"
-    if [[ "$trimmed" == ".gsd" ]] && [[ "${trimmed:0:1}" != "#" ]]; then
+    if [[ "$trimmed" == ".hx" ]] && [[ "${trimmed:0:1}" != "#" ]]; then
       GSD_IGNORE_LINE="$trimmed"
       break
     fi
@@ -130,31 +130,31 @@ if [[ -f "$GITIGNORE" ]]; then
 fi
 
 if $GSD_IS_SYMLINK; then
-  # Symlink layout: .gsd SHOULD be ignored (it's external state).
+  # Symlink layout: .hx SHOULD be ignored (it's external state).
   # Missing = needs adding. Present = correct.
   if [[ -z "$GSD_IGNORE_LINE" ]]; then
-    warn '".gsd" missing from .gitignore — will add (migration complete, .gsd/ is external).'
+    warn '".hx" missing from .gitignore — will add (migration complete, .hx/ is external).'
   else
-    ok '".gsd" already in .gitignore — correct for external-state layout.'
+    ok '".hx" already in .gitignore — correct for external-state layout.'
   fi
 else
-  # Real-directory layout: .gsd should NOT be ignored.
+  # Real-directory layout: .hx should NOT be ignored.
   if [[ -z "$GSD_IGNORE_LINE" ]]; then
-    ok '".gsd" not found in .gitignore — .gitignore not affected.'
+    ok '".hx" not found in .gitignore — .gitignore not affected.'
   else
-    warn '".gsd" found in .gitignore — this is the bad pattern from #1364.'
+    warn '".hx" found in .gitignore — this is the bad pattern from #1364.'
   fi
 fi
 
-# ─── Step 3: Find deleted .gsd/ tracked files ─────────────────────────────────
+# ─── Step 3: Find deleted .hx/ tracked files ─────────────────────────────────
 
-section "── Step 3: Find deleted .gsd/ files ───────────────────────────────────"
+section "── Step 3: Find deleted .hx/ files ───────────────────────────────────"
 
 # Files showing as deleted in the working tree (tracked in index but missing)
-DELETED_FILES="$(git ls-files --deleted -- '.gsd/*' 2>/dev/null || true)"
+DELETED_FILES="$(git ls-files --deleted -- '.hx/*' 2>/dev/null || true)"
 
 # Files tracked in HEAD right now
-TRACKED_IN_HEAD="$(git ls-tree -r --name-only HEAD -- '.gsd/' 2>/dev/null || true)"
+TRACKED_IN_HEAD="$(git ls-tree -r --name-only HEAD -- '.hx/' 2>/dev/null || true)"
 
 if $GSD_IS_SYMLINK; then
   # Scenario C: migration succeeded. Files are safe via symlink.
@@ -162,49 +162,49 @@ if $GSD_IS_SYMLINK; then
   if [[ -z "$TRACKED_IN_HEAD" ]] && [[ -z "$DELETED_FILES" ]]; then
     ok "No stale index entries found — symlink layout is healthy."
     if [[ -z "$GSD_IGNORE_LINE" ]]; then
-      info "Add .gsd to .gitignore manually to complete the migration."
+      info "Add .hx to .gitignore manually to complete the migration."
     fi
     exit 0
   fi
   INDEX_COUNT="$(echo "${TRACKED_IN_HEAD:-$DELETED_FILES}" | wc -l | tr -d ' ')"
-  warn "Scenario C: ${INDEX_COUNT} .gsd/ file(s) tracked in git index but inaccessible through symlink."
+  warn "Scenario C: ${INDEX_COUNT} .hx/ file(s) tracked in git index but inaccessible through symlink."
   info "Files are safe in external storage — only the git index needs cleaning."
 else
   # Files deleted via a committed git rm --cached (Scenario B)
-  DELETED_FROM_HISTORY="$(git log --all --diff-filter=D --name-only --format="" -- '.gsd/*' 2>/dev/null \
-    | grep '^\.gsd' | sort -u || true)"
+  DELETED_FROM_HISTORY="$(git log --all --diff-filter=D --name-only --format="" -- '.hx/*' 2>/dev/null \
+    | grep '^\.hx' | sort -u || true)"
 
   if [[ -z "$TRACKED_IN_HEAD" ]] && [[ -z "$DELETED_FILES" ]] && [[ -z "$DELETED_FROM_HISTORY" ]]; then
-    ok "No .gsd/ files tracked in this repo — not affected by #1364."
+    ok "No .hx/ files tracked in this repo — not affected by #1364."
     if [[ -n "$GSD_IGNORE_LINE" ]]; then
-      warn '".gsd" is still in .gitignore but there is nothing to restore.'
+      warn '".hx" is still in .gitignore but there is nothing to restore.'
     fi
     exit 0
   fi
 
   if [[ -n "$TRACKED_IN_HEAD" ]]; then
     TRACKED_COUNT="$(echo "$TRACKED_IN_HEAD" | wc -l | tr -d ' ')"
-    info "Scenario A: ${TRACKED_COUNT} .gsd/ files still tracked in HEAD."
+    info "Scenario A: ${TRACKED_COUNT} .hx/ files still tracked in HEAD."
   elif [[ -n "$DELETED_FROM_HISTORY" ]]; then
     DELETED_HIST_COUNT="$(echo "$DELETED_FROM_HISTORY" | wc -l | tr -d ' ')"
-    warn "Scenario B: ${DELETED_HIST_COUNT} .gsd/ file(s) deleted in a committed change:"
+    warn "Scenario B: ${DELETED_HIST_COUNT} .hx/ file(s) deleted in a committed change:"
     echo "$DELETED_FROM_HISTORY" | head -20 | while IFS= read -r f; do echo "    - $f"; done
     if (( DELETED_HIST_COUNT > 20 )); then echo "    ... and $((DELETED_HIST_COUNT - 20)) more"; fi
   fi
 
   if [[ -n "$DELETED_FILES" ]]; then
     DELETED_COUNT="$(echo "$DELETED_FILES" | wc -l | tr -d ' ')"
-    warn "${DELETED_COUNT} .gsd/ file(s) missing from working tree:"
+    warn "${DELETED_COUNT} .hx/ file(s) missing from working tree:"
     echo "$DELETED_FILES" | head -20 | while IFS= read -r f; do echo "    - $f"; done
     if (( DELETED_COUNT > 20 )); then echo "    ... and $((DELETED_COUNT - 20)) more"; fi
   fi
 
   if [[ -n "$TRACKED_IN_HEAD" ]] && [[ -z "$DELETED_FILES" ]]; then
     if [[ -z "$GSD_IGNORE_LINE" ]]; then
-      ok "No action needed — .gsd/ is tracked in HEAD and .gitignore is clean."
+      ok "No action needed — .hx/ is tracked in HEAD and .gitignore is clean."
       exit 0
     fi
-    info ".gsd/ is tracked in HEAD and working tree is clean — only .gitignore needs fixing."
+    info ".hx/ is tracked in HEAD and working tree is clean — only .gitignore needs fixing."
   fi
 fi
 
@@ -219,23 +219,23 @@ RESTORABLE=""
 if $GSD_IS_SYMLINK; then
   info "Scenario C: symlink layout — skipping commit history scan (no file restore needed)."
 else
-  # Find the commit where ".gsd" was first added to .gitignore
-  # by walking the log and finding the first commit where .gitignore contained ".gsd"
-  info "Scanning git log to find when .gsd was added to .gitignore..."
+  # Find the commit where ".hx" was first added to .gitignore
+  # by walking the log and finding the first commit where .gitignore contained ".hx"
+  info "Scanning git log to find when .hx was added to .gitignore..."
 
-  # Strategy 1: find the first commit that added ".gsd" to .gitignore
+  # Strategy 1: find the first commit that added ".hx" to .gitignore
   while IFS= read -r sha; do
     content="$(git show "${sha}:.gitignore" 2>/dev/null || true)"
-    if echo "$content" | grep -qx '\.gsd' 2>/dev/null; then
+    if echo "$content" | grep -qx '\.hx' 2>/dev/null; then
       DAMAGE_COMMIT="$sha"
       break
     fi
   done < <(git log --format="%H" -- .gitignore)
 
-  # Strategy 2: if .gsd files were committed as deleted, find that commit
+  # Strategy 2: if .hx files were committed as deleted, find that commit
   if [[ -z "$DAMAGE_COMMIT" ]] && [[ -n "${DELETED_FROM_HISTORY:-}" ]]; then
-    info "Searching for the commit that deleted .gsd/ files from the index..."
-    DAMAGE_COMMIT="$(git log --all --diff-filter=D --format="%H" -- '.gsd/*' 2>/dev/null | head -1 || true)"
+    info "Searching for the commit that deleted .hx/ files from the index..."
+    DAMAGE_COMMIT="$(git log --all --diff-filter=D --format="%H" -- '.hx/*' 2>/dev/null | head -1 || true)"
   fi
 
   if [[ -z "$DAMAGE_COMMIT" ]]; then
@@ -248,14 +248,14 @@ else
     info "Restoring from: $CLEAN_COMMIT — $CLEAN_MSG"
   fi
 
-  # Verify the clean commit actually has .gsd/ files
-  RESTORABLE="$(git ls-tree -r --name-only "$CLEAN_COMMIT" -- '.gsd/' 2>/dev/null || true)"
+  # Verify the clean commit actually has .hx/ files
+  RESTORABLE="$(git ls-tree -r --name-only "$CLEAN_COMMIT" -- '.hx/' 2>/dev/null || true)"
   if [[ -z "$RESTORABLE" ]]; then
-    die "No .gsd/ files found in restore point $CLEAN_COMMIT — cannot recover. Check git log manually."
+    die "No .hx/ files found in restore point $CLEAN_COMMIT — cannot recover. Check git log manually."
   fi
 
   RESTORABLE_COUNT="$(echo "$RESTORABLE" | wc -l | tr -d ' ')"
-  ok "Restore point has ${RESTORABLE_COUNT} .gsd/ files available."
+  ok "Restore point has ${RESTORABLE_COUNT} .hx/ files available."
 fi
 
 # ─── Step 5: Clean index (Scenario C) or restore deleted files (Scenario A/B) ─
@@ -263,18 +263,18 @@ fi
 if $GSD_IS_SYMLINK; then
   section "── Step 5: Clean stale git index entries ───────────────────────────────"
 
-  info "Running: git rm -r --cached --ignore-unmatch .gsd/ ..."
-  run "git rm -r --cached --ignore-unmatch .gsd"
+  info "Running: git rm -r --cached --ignore-unmatch .hx/ ..."
+  run "git rm -r --cached --ignore-unmatch .hx"
   if ! $DRY_RUN; then
-    STILL_STALE="$(git ls-files --deleted -- '.gsd/*' 2>/dev/null || true)"
+    STILL_STALE="$(git ls-files --deleted -- '.hx/*' 2>/dev/null || true)"
     if [[ -z "$STILL_STALE" ]]; then
-      ok "Git index cleaned — no stale .gsd/ entries remain."
+      ok "Git index cleaned — no stale .hx/ entries remain."
     else
       warn "$(echo "$STILL_STALE" | wc -l | tr -d ' ') stale entr(ies) still present — may need manual cleanup."
     fi
   fi
 else
-  section "── Step 5: Restore deleted .gsd/ files ────────────────────────────────"
+  section "── Step 5: Restore deleted .hx/ files ────────────────────────────────"
 
   NEEDS_RESTORE=false
   [[ -n "$DELETED_FILES" ]] && NEEDS_RESTORE=true
@@ -283,12 +283,12 @@ else
   if ! $NEEDS_RESTORE; then
     ok "No deleted files to restore — skipping."
   else
-    info "Restoring .gsd/ files from $CLEAN_COMMIT..."
-    run "git checkout \"$CLEAN_COMMIT\" -- .gsd/"
+    info "Restoring .hx/ files from $CLEAN_COMMIT..."
+    run "git checkout \"$CLEAN_COMMIT\" -- .hx/"
     if ! $DRY_RUN; then
-      STILL_MISSING="$(git ls-files --deleted -- '.gsd/*' 2>/dev/null || true)"
+      STILL_MISSING="$(git ls-files --deleted -- '.hx/*' 2>/dev/null || true)"
       if [[ -z "$STILL_MISSING" ]]; then
-        ok "All .gsd/ files restored successfully."
+        ok "All .hx/ files restored successfully."
       else
         MISS_COUNT="$(echo "$STILL_MISSING" | wc -l | tr -d ' ')"
         warn "${MISS_COUNT} file(s) still missing after restore — may need manual recovery:"
@@ -303,33 +303,33 @@ fi
 section "── Step 6: Fix .gitignore ───────────────────────────────────────────────"
 
 if $GSD_IS_SYMLINK; then
-  # Scenario C: .gsd IS external — it should be in .gitignore.  Add if missing.
+  # Scenario C: .hx IS external — it should be in .gitignore.  Add if missing.
   if [[ -z "$GSD_IGNORE_LINE" ]]; then
-    info 'Adding ".gsd" to .gitignore (migration complete — .gsd/ is external state)...'
+    info 'Adding ".hx" to .gitignore (migration complete — .hx/ is external state)...'
     if $DRY_RUN; then
-      echo -e "  ${YELLOW}(dry-run)${RESET} Would append: .gsd"
+      echo -e "  ${YELLOW}(dry-run)${RESET} Would append: .hx"
     else
-      printf '\n# GSD external state (symlink — added by recover-gsd-1364)\n.gsd\n' >> "$GITIGNORE"
-      ok '".gsd" added to .gitignore.'
+      printf '\n# HX external state (symlink — added by recover-hx-1364)\n.hx\n' >> "$GITIGNORE"
+      ok '".hx" added to .gitignore.'
     fi
   else
-    ok '".gsd" already in .gitignore — correct for external-state layout.'
+    ok '".hx" already in .gitignore — correct for external-state layout.'
   fi
 else
-  # Scenario A/B: .gsd is a real tracked directory — remove the bad ignore line.
+  # Scenario A/B: .hx is a real tracked directory — remove the bad ignore line.
   if [[ -z "$GSD_IGNORE_LINE" ]]; then
-    ok '".gsd" not in .gitignore — nothing to fix.'
+    ok '".hx" not in .gitignore — nothing to fix.'
   else
-    info 'Removing bare ".gsd" line from .gitignore...'
+    info 'Removing bare ".hx" line from .gitignore...'
     if $DRY_RUN; then
-      echo -e "  ${YELLOW}(dry-run)${RESET} Would remove line: .gsd"
+      echo -e "  ${YELLOW}(dry-run)${RESET} Would remove line: .hx"
     else
-      # Remove the exact line ".gsd" (not comments, not .gsd/ subdirs)
+      # Remove the exact line ".hx" (not comments, not .hx/ subdirs)
       # Use a temp file for portability (no sed -i on all platforms)
       TMP="$(mktemp)"
-      grep -v '^\.gsd$' "$GITIGNORE" > "$TMP" || true
+      grep -v '^\.hx$' "$GITIGNORE" > "$TMP" || true
       mv "$TMP" "$GITIGNORE"
-      ok '".gsd" line removed from .gitignore.'
+      ok '".hx" line removed from .gitignore.'
     fi
   fi
 fi
@@ -339,18 +339,18 @@ fi
 section "── Step 7: Stage recovery changes ──────────────────────────────────────"
 
 if ! $DRY_RUN; then
-  CHANGED="$(git status --short -- '.gsd/' .gitignore 2>/dev/null || true)"
+  CHANGED="$(git status --short -- '.hx/' .gitignore 2>/dev/null || true)"
   if [[ -z "$CHANGED" ]]; then
     ok "No staged changes — working tree was already clean."
   else
     if $GSD_IS_SYMLINK; then
       # Scenario C: the git rm --cached already staged the index cleanup.
-      # Only stage .gitignore — adding .gsd/ would fail (now gitignored).
+      # Only stage .gitignore — adding .hx/ would fail (now gitignored).
       git add .gitignore 2>/dev/null || true
     else
-      git add .gsd/ .gitignore 2>/dev/null || true
+      git add .hx/ .gitignore 2>/dev/null || true
     fi
-    STAGED_COUNT="$(git diff --cached --name-only -- '.gsd/' .gitignore | wc -l | tr -d ' ')"
+    STAGED_COUNT="$(git diff --cached --name-only -- '.hx/' .gitignore | wc -l | tr -d ' ')"
     ok "${STAGED_COUNT} file(s) staged and ready to commit."
   fi
 fi
@@ -362,21 +362,21 @@ section "── Summary ──────────────────�
 if $DRY_RUN; then
   echo -e "${YELLOW}Dry-run complete. Re-run without --dry-run to apply changes.${RESET}"
 else
-  FINAL_STAGED="$(git diff --cached --name-only -- '.gsd/' .gitignore 2>/dev/null | wc -l | tr -d ' ')"
+  FINAL_STAGED="$(git diff --cached --name-only -- '.hx/' .gitignore 2>/dev/null | wc -l | tr -d ' ')"
   if (( FINAL_STAGED > 0 )); then
     echo -e "${GREEN}Recovery complete. Commit with:${RESET}"
     echo ""
     if $GSD_IS_SYMLINK; then
-      echo "  git commit -m \"fix: clean stale .gsd/ index entries after external-state migration\""
+      echo "  git commit -m \"fix: clean stale .hx/ index entries after external-state migration\""
     else
-      echo "  git commit -m \"fix: restore .gsd/ files deleted by #1364 regression\""
+      echo "  git commit -m \"fix: restore .hx/ files deleted by #1364 regression\""
     fi
     echo ""
     echo "Staged files:"
-    git diff --cached --name-only -- '.gsd/' .gitignore | head -20 | while IFS= read -r f; do
+    git diff --cached --name-only -- '.hx/' .gitignore | head -20 | while IFS= read -r f; do
       echo "  + $f"
     done
-    TOTAL_STAGED="$(git diff --cached --name-only -- '.gsd/' .gitignore | wc -l | tr -d ' ')"
+    TOTAL_STAGED="$(git diff --cached --name-only -- '.hx/' .gitignore | wc -l | tr -d ' ')"
     if (( TOTAL_STAGED > 20 )); then
       echo "  ... and $((TOTAL_STAGED - 20)) more"
     fi

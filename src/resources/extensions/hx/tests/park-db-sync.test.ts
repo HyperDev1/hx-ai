@@ -20,7 +20,7 @@ import {
 } from "../hx-db.ts";
 
 function createBase(): string {
-  const base = mkdtempSync(join(tmpdir(), "gsd-park-db-"));
+  const base = mkdtempSync(join(tmpdir(), "hx-park-db-"));
   mkdirSync(join(base, ".hx", "milestones", "M001"), { recursive: true });
   writeFileSync(
     join(base, ".hx", "milestones", "M001", "M001-CONTEXT.md"),

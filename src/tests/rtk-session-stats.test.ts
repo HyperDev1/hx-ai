@@ -27,7 +27,7 @@ function summary(totalCommands: number, totalInput: number, totalOutput: number,
 }
 
 test("RTK session savings diff from a persisted baseline", () => {
-  const basePath = mkdtempSync(join(tmpdir(), "gsd-rtk-session-stats-"));
+  const basePath = mkdtempSync(join(tmpdir(), "hx-rtk-session-stats-"));
   mkdirSync(join(basePath, ".hx", "runtime"), { recursive: true });
 
   const first = createFakeRtk({
@@ -60,7 +60,7 @@ test("RTK session savings diff from a persisted baseline", () => {
 });
 
 test("RTK session savings baseline resets cleanly when tracking totals go backwards", () => {
-  const basePath = mkdtempSync(join(tmpdir(), "gsd-rtk-session-reset-"));
+  const basePath = mkdtempSync(join(tmpdir(), "hx-rtk-session-reset-"));
   mkdirSync(join(basePath, ".hx", "runtime"), { recursive: true });
 
   const first = createFakeRtk({
@@ -90,13 +90,13 @@ test("RTK session savings baseline resets cleanly when tracking totals go backwa
 });
 
 test("RTK session stats fall back to the managed RTK path when HX_RTK_PATH is unset", () => {
-  const basePath = mkdtempSync(join(tmpdir(), "gsd-rtk-session-managed-"));
+  const basePath = mkdtempSync(join(tmpdir(), "hx-rtk-session-managed-"));
   mkdirSync(join(basePath, ".hx", "runtime"), { recursive: true });
 
   const fake = createFakeRtk({
     "gain --all --format json": { stdout: summary(6, 900, 500, 400) },
   });
-  const managedHome = mkdtempSync(join(tmpdir(), "gsd-rtk-home-"));
+  const managedHome = mkdtempSync(join(tmpdir(), "hx-rtk-home-"));
   const managedDir = join(managedHome, "agent", "bin");
   const managedPath = join(managedDir, process.platform === "win32" ? "rtk.cmd" : "rtk");
   mkdirSync(managedDir, { recursive: true });
@@ -166,7 +166,7 @@ test("formatRtkSavingsLabel produces a compact footer string", () => {
 });
 
 test("clearRtkSessionBaseline removes a stored session entry", () => {
-  const basePath = mkdtempSync(join(tmpdir(), "gsd-rtk-session-clear-"));
+  const basePath = mkdtempSync(join(tmpdir(), "hx-rtk-session-clear-"));
   mkdirSync(join(basePath, ".hx", "runtime"), { recursive: true });
   const fake = createFakeRtk({
     "gain --all --format json": { stdout: summary(3, 300, 200, 100) },

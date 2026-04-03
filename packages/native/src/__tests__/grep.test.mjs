@@ -28,7 +28,7 @@ for (const candidate of candidates) {
 }
 
 if (!native) {
-  console.error("Native addon not found. Run `npm run build:native -w @gsd/native` first.");
+  console.error("Native addon not found. Run `npm run build:native -w @hx/native` first.");
   process.exit(1);
 }
 
@@ -94,7 +94,7 @@ describe("native grep: grep()", () => {
   let tmpDir;
 
   test("returns a promise", async (t) => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "gsd-grep-test-"));
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "hx-grep-test-"));
     t.after(() => fs.rmSync(tmpDir, { recursive: true, force: true }));
 
     fs.writeFileSync(path.join(tmpDir, "file1.txt"), "hello world\n");
@@ -111,7 +111,7 @@ describe("native grep: grep()", () => {
   });
 
   test("searches files on disk", async (t) => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "gsd-grep-test-"));
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "hx-grep-test-"));
     t.after(() => fs.rmSync(tmpDir, { recursive: true, force: true }));
 
     fs.writeFileSync(path.join(tmpDir, "file1.txt"), "hello world\nfoo bar\n");
@@ -133,7 +133,7 @@ describe("native grep: grep()", () => {
   });
 
   test("respects glob filter", async (t) => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "gsd-grep-test-"));
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "hx-grep-test-"));
     t.after(() => fs.rmSync(tmpDir, { recursive: true, force: true }));
 
     fs.writeFileSync(path.join(tmpDir, "code.ts"), "hello typescript\n");
@@ -151,7 +151,7 @@ describe("native grep: grep()", () => {
   });
 
   test("respects maxCount", async (t) => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "gsd-grep-test-"));
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "hx-grep-test-"));
     t.after(() => fs.rmSync(tmpDir, { recursive: true, force: true }));
 
     for (let i = 0; i < 10; i++) {

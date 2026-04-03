@@ -55,7 +55,7 @@ describe("dispatchWorkflow idle-race fix", () => {
   test("discuss slice loop calls waitForIdle after dispatchWorkflow", () => {
     // Verify the discuss-slice loop still has waitForIdle after dispatchWorkflow
     const dispatchIdx = guidedFlowSrc.indexOf(
-      `await dispatchWorkflow(pi, prompt, "gsd-discuss", ctx, "discuss-slice")`,
+      `await dispatchWorkflow(pi, prompt, "hx-discuss", ctx, "discuss-slice")`,
     );
     assert.ok(dispatchIdx !== -1, "discuss-slice dispatch should exist");
     const after = guidedFlowSrc.slice(dispatchIdx, dispatchIdx + 200);

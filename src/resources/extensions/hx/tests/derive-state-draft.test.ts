@@ -19,7 +19,7 @@ function assertEq<T>(actual: T, expected: T, message: string): void {
 // ─── Fixture Helpers ───────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-draft-test-'));
+  const base = mkdtempSync(join(tmpdir(), 'hx-draft-test-'));
   mkdirSync(join(base, '.hx', 'milestones'), { recursive: true });
   return base;
 }

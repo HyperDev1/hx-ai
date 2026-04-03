@@ -102,10 +102,10 @@ function readyOnboardingState(overrides: Record<string, unknown> = {}) {
 }
 
 function makeRecoveryFixture(): { projectCwd: string; sessionsDir: string; cleanup: () => void } {
-  const root = mkdtempSync(join(tmpdir(), "gsd-recovery-contract-"))
+  const root = mkdtempSync(join(tmpdir(), "hx-recovery-contract-"))
   const projectCwd = join(root, "project")
   const sessionsDir = join(root, "sessions")
-  const milestoneDir = join(projectCwd, ".gsd", "milestones", "M001")
+  const milestoneDir = join(projectCwd, ".hx", "milestones", "M001")
   const sliceDir = join(milestoneDir, "slices", "S01")
   const tasksDir = join(sliceDir, "tasks")
 
@@ -150,7 +150,7 @@ function makeRecoveryFixture(): { projectCwd: string; sessionsDir: string; clean
 }
 
 function makeEmptyProjectFixture(): { projectCwd: string; sessionsDir: string; cleanup: () => void } {
-  const root = mkdtempSync(join(tmpdir(), "gsd-recovery-empty-"))
+  const root = mkdtempSync(join(tmpdir(), "hx-recovery-empty-"))
   const projectCwd = join(root, "project")
   const sessionsDir = join(root, "sessions")
   mkdirSync(projectCwd, { recursive: true })

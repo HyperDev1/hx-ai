@@ -169,7 +169,7 @@ Examples:
     await handleMigrate(trimmed.replace(/^migrate\s*/, "").trim(), ctx, pi);
     return true;
   }
-  if (trimmed === "gsd-to-hx") {
+  if (trimmed === "hx-to-hx") {
     const { handleGsdToHxMigration } = await import("../../migrate-gsd-to-hx.js");
     await handleGsdToHxMigration(ctx);
     return true;

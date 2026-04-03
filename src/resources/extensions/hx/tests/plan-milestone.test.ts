@@ -9,7 +9,7 @@ import { handlePlanMilestone } from '../tools/plan-milestone.ts';
 import { parseRoadmap } from '../parsers-legacy.ts';
 
 function makeTmpBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-plan-milestone-'));
+  const base = mkdtempSync(join(tmpdir(), 'hx-plan-milestone-'));
   mkdirSync(join(base, '.hx', 'milestones', 'M001'), { recursive: true });
   return base;
 }
@@ -69,7 +69,7 @@ function validParams() {
 
 test('handlePlanMilestone writes milestone and slice planning state and renders roadmap', async () => {
   const base = makeTmpBase();
-  const dbPath = join(base, '.hx', 'gsd.db');
+  const dbPath = join(base, '.hx', 'hx.db');
   openDatabase(dbPath);
 
   try {
@@ -104,7 +104,7 @@ test('handlePlanMilestone writes milestone and slice planning state and renders 
 
 test('handlePlanMilestone rejects invalid payloads', async () => {
   const base = makeTmpBase();
-  const dbPath = join(base, '.hx', 'gsd.db');
+  const dbPath = join(base, '.hx', 'hx.db');
   openDatabase(dbPath);
 
   try {
@@ -119,7 +119,7 @@ test('handlePlanMilestone rejects invalid payloads', async () => {
 
 test('handlePlanMilestone surfaces render failures and does not clear parse-visible state on failure', async () => {
   const base = makeTmpBase();
-  const dbPath = join(base, '.hx', 'gsd.db');
+  const dbPath = join(base, '.hx', 'hx.db');
   openDatabase(dbPath);
 
   try {
@@ -141,7 +141,7 @@ test('handlePlanMilestone surfaces render failures and does not clear parse-visi
 
 test('handlePlanMilestone clears parse-visible roadmap state after successful render', async () => {
   const base = makeTmpBase();
-  const dbPath = join(base, '.hx', 'gsd.db');
+  const dbPath = join(base, '.hx', 'hx.db');
   openDatabase(dbPath);
 
   try {
@@ -165,7 +165,7 @@ test('handlePlanMilestone clears parse-visible roadmap state after successful re
 
 test('handlePlanMilestone reruns idempotently and updates existing planning state', async () => {
   const base = makeTmpBase();
-  const dbPath = join(base, '.hx', 'gsd.db');
+  const dbPath = join(base, '.hx', 'hx.db');
   openDatabase(dbPath);
 
   try {

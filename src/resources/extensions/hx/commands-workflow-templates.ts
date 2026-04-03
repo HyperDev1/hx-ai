@@ -1,5 +1,5 @@
 /**
- * GSD Workflow Template Commands — /hx start, /hx templates
+ * HX Workflow Template Commands — /hx start, /hx templates
  *
  * Handles the `/hx start [template] [description]` and `/hx templates` commands.
  * Resolves templates by name or auto-detection, then dispatches the workflow prompt.
@@ -238,7 +238,7 @@ export async function handleStart(
     });
 
     pi.sendMessage(
-      { customType: "gsd-workflow-template", content: prompt, display: false },
+      { customType: "hx-workflow-template", content: prompt, display: false },
       { triggerTurn: true },
     );
     return;
@@ -322,7 +322,7 @@ export async function handleStart(
         "  revise          Assess → scope → plan → iterate → review (multi-round)\n" +
         "  security-audit  Scan → triage → remediate → re-scan\n" +
         "  dep-upgrade     Assess → upgrade → fix → verify\n" +
-        "  full-project    Complete GSD with full ceremony\n\n" +
+        "  full-project    Complete HX with full ceremony\n\n" +
         "Examples:\n" +
         "  /hx start bugfix fix login button not responding\n" +
         "  /hx start spike evaluate auth libraries\n" +
@@ -378,14 +378,14 @@ export async function handleStart(
     } else {
       lines.push("Artifact dir: (none — hotfix mode)");
     }
-    lines.push(`Branch:       gsd/${templateId}/${slug}`);
+    lines.push(`Branch:       hx/${templateId}/${slug}`);
     if (issueRef) lines.push(`Issue:        ${issueRef}`);
     lines.push("", "No changes made. Remove --dry-run to execute.");
     ctx.ui.notify(lines.join("\n"), "info");
     return;
   }
 
-  // ─── Route full-project to standard GSD workflow ────────────────────────
+  // ─── Route full-project to standard HX workflow ────────────────────────
 
   if (templateId === "full-project") {
     const root = hxRoot(basePath);
@@ -397,8 +397,8 @@ export async function handleStart(
       // Trigger /hx init by dispatching to the handler
       pi.sendMessage(
         {
-          customType: "gsd-workflow-template",
-          content: "The user wants to start a full GSD project. Run `/hx init` to bootstrap the project, then `/hx auto` to begin execution.",
+          customType: "hx-workflow-template",
+          content: "The user wants to start a full HX project. Run `/hx init` to bootstrap the project, then `/hx auto` to begin execution.",
           display: false,
         },
         { triggerTurn: true },
@@ -428,7 +428,7 @@ export async function handleStart(
   const git = createGitService(basePath);
   const skipBranch = git.prefs.isolation === "none";
   const slug = slugify(description || templateId);
-  const branchName = `gsd/${templateId}/${slug}`;
+  const branchName = `hx/${templateId}/${slug}`;
   let branchCreated = false;
 
   if (!skipBranch) {
@@ -491,7 +491,7 @@ export async function handleStart(
 
   pi.sendMessage(
     {
-      customType: "gsd-workflow-template",
+      customType: "hx-workflow-template",
       content: prompt,
       display: false,
     },

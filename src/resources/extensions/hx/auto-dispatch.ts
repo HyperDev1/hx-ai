@@ -1,7 +1,7 @@
 /**
  * Auto-mode Dispatch Table — declarative phase → unit mapping.
  *
- * Each rule maps a GSD state to the unit type, unit ID, and prompt builder
+ * Each rule maps a HX state to the unit type, unit ID, and prompt builder
  * that should be dispatched. Rules are evaluated in order; the first match wins.
  *
  * This replaces the 130-line if-else chain in dispatchNextUnit with a
@@ -477,7 +477,7 @@ export const DISPATCH_RULES: DispatchRule[] = [
         // Log graph metrics for observability
         const metrics = graphMetrics(graph);
         process.stderr.write(
-          `gsd-reactive: ${mid}/${sid} graph — tasks:${metrics.taskCount} edges:${metrics.edgeCount} ` +
+          `hx-reactive: ${mid}/${sid} graph — tasks:${metrics.taskCount} edges:${metrics.edgeCount} ` +
           `ready:${metrics.readySetSize} dispatching:${selected.length} ambiguous:${metrics.ambiguous}\n`,
         );
 
@@ -511,7 +511,7 @@ export const DISPATCH_RULES: DispatchRule[] = [
         };
       } catch (err) {
         // Non-fatal — fall through to sequential execution
-        process.stderr.write(`gsd-reactive: graph derivation failed: ${(err as Error).message}\n`);
+        process.stderr.write(`hx-reactive: graph derivation failed: ${(err as Error).message}\n`);
         return null;
       }
     },

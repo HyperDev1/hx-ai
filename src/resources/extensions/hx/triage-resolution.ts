@@ -1,5 +1,5 @@
 /**
- * GSD Triage Resolution — Execute triage classifications
+ * HX Triage Resolution — Execute triage classifications
  *
  * Provides resolution executors for each capture classification type:
  *
@@ -96,7 +96,7 @@ export function executeInject(
         // DB insert is best-effort — the markdown write already succeeded,
         // and the reconciliation path in state.ts may pick it up eventually.
         process.stderr.write(
-          `gsd-inject: DB insert for ${newId} failed: ${(dbErr as Error).message}\n`,
+          `hx-inject: DB insert for ${newId} failed: ${(dbErr as Error).message}\n`,
         );
       }
     }
@@ -320,7 +320,7 @@ export function loadReplanCaptures(basePath: string): CaptureEntry[] {
  */
 export function buildQuickTaskPrompt(capture: CaptureEntry): string {
   return [
-    `You are executing a quick one-off task captured during a GSD auto-mode session.`,
+    `You are executing a quick one-off task captured during a HX auto-mode session.`,
     ``,
     `## Quick Task`,
     ``,

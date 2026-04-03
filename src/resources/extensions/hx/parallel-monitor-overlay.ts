@@ -1,5 +1,5 @@
 /**
- * GSD Parallel Monitor Overlay
+ * HX Parallel Monitor Overlay
  *
  * Full-screen TUI overlay showing real-time parallel worker progress.
  * Opened via `/hx parallel watch` or Ctrl+Alt+P.
@@ -382,7 +382,7 @@ export class ParallelMonitorOverlay {
     const aliveCount = this.workers.filter((wk) => wk.alive).length;
     const now = new Date().toLocaleTimeString();
 
-    lines.push(t.bold(t.fg("accent", " GSD Parallel Monitor ")));
+    lines.push(t.bold(t.fg("accent", " HX Parallel Monitor ")));
     lines.push(
       t.fg("muted", `  ${now}  │  ${aliveCount}/${this.workers.length} alive  │  Total: `) +
       t.bold(`$${totalCost.toFixed(2)}`) +

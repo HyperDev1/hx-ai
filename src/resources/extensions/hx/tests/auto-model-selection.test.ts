@@ -13,8 +13,8 @@ function makeTempDir(prefix: string): string {
 test("resolvePreferredModelConfig synthesizes heavy routing ceiling when models section is absent", () => {
   const originalCwd = process.cwd();
   const originalGsdHome = process.env.HX_HOME;
-  const tempProject = makeTempDir("gsd-routing-project-");
-  const tempGsdHome = makeTempDir("gsd-routing-home-");
+  const tempProject = makeTempDir("hx-routing-project-");
+  const tempGsdHome = makeTempDir("hx-routing-home-");
 
   try {
     mkdirSync(join(tempProject, ".hx"), { recursive: true });
@@ -56,8 +56,8 @@ test("resolvePreferredModelConfig synthesizes heavy routing ceiling when models 
 test("resolvePreferredModelConfig falls back to auto start model when heavy tier is absent", () => {
   const originalCwd = process.cwd();
   const originalGsdHome = process.env.HX_HOME;
-  const tempProject = makeTempDir("gsd-routing-project-");
-  const tempGsdHome = makeTempDir("gsd-routing-home-");
+  const tempProject = makeTempDir("hx-routing-project-");
+  const tempGsdHome = makeTempDir("hx-routing-home-");
 
   try {
     mkdirSync(join(tempProject, ".hx"), { recursive: true });
@@ -98,8 +98,8 @@ test("resolvePreferredModelConfig falls back to auto start model when heavy tier
 test("resolvePreferredModelConfig keeps explicit phase models as the ceiling", () => {
   const originalCwd = process.cwd();
   const originalGsdHome = process.env.HX_HOME;
-  const tempProject = makeTempDir("gsd-routing-project-");
-  const tempGsdHome = makeTempDir("gsd-routing-home-");
+  const tempProject = makeTempDir("hx-routing-project-");
+  const tempGsdHome = makeTempDir("hx-routing-home-");
 
   try {
     mkdirSync(join(tempProject, ".hx"), { recursive: true });

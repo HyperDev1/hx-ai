@@ -76,6 +76,6 @@ language:
 #   rtk: false
 ---
 
-# GSD Skill Preferences
+# HX Skill Preferences
 
-See `~/.gsd/agent/extensions/gsd/docs/preferences-reference.md` for full field documentation and examples.
+See `~/.hx/agent/extensions/hx/docs/preferences-reference.md` for full field documentation and examples.

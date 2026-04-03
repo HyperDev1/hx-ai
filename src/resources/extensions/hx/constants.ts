@@ -1,7 +1,7 @@
 /**
- * GSD Extension — Shared Constants
+ * HX Extension — Shared Constants
  *
- * Centralized timeout and cache-size constants used across the GSD extension.
+ * Centralized timeout and cache-size constants used across the HX extension.
  */
 
 // ─── Timeouts ─────────────────────────────────────────────────────────────────

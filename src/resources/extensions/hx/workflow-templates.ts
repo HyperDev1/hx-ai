@@ -1,5 +1,5 @@
 /**
- * GSD Workflow Templates — Registry & Resolution
+ * HX Workflow Templates — Registry & Resolution
  *
  * Loads the workflow template registry and resolves templates by name,
  * alias, or trigger-keyword matching against user input.

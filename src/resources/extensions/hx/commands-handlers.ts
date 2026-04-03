@@ -1,5 +1,5 @@
 /**
- * GSD Command Handlers — fire-and-forget handlers that delegate to other modules.
+ * HX Command Handlers — fire-and-forget handlers that delegate to other modules.
  *
  * Contains: handleDoctor, handleSteer, handleCapture, handleTriage, handleKnowledge,
  * handleRunHook, handleUpdate, handleSkillHealth
@@ -35,10 +35,10 @@ export function dispatchDoctorHeal(pi: ExtensionAPI, scope: string | undefined, 
     doctorCommandSuffix: scope ? ` ${scope}` : "",
   });
 
-  const content = `Read the following GSD workflow protocol and execute exactly.\n\n${workflow}\n\n## Your Task\n\n${prompt}`;
+  const content = `Read the following HX workflow protocol and execute exactly.\n\n${workflow}\n\n## Your Task\n\n${prompt}`;
 
   pi.sendMessage(
-    { customType: "gsd-doctor-heal", content, display: false },
+    { customType: "hx-doctor-heal", content, display: false },
     { triggerTurn: true },
   );
 }
@@ -73,7 +73,7 @@ export async function handleDoctor(args: string, ctx: ExtensionCommandContext, p
     scope: effectiveScope,
     includeWarnings: mode === "audit",
     maxIssues: mode === "audit" ? 50 : 12,
-    title: mode === "audit" ? "GSD doctor audit." : mode === "heal" ? "GSD doctor heal prep." : undefined,
+    title: mode === "audit" ? "HX doctor audit." : mode === "heal" ? "HX doctor heal prep." : undefined,
   });
 
   ctx.ui.notify(reportText, report.ok ? "info" : "warning");
@@ -208,8 +208,8 @@ export async function handleTriage(ctx: ExtensionCommandContext, pi: ExtensionAP
 
   pi.sendMessage(
     {
-      customType: "gsd-triage",
-      content: `Read the following GSD workflow protocol and execute exactly.\n\n${workflow}\n\n## Your Task\n\n${prompt}`,
+      customType: "hx-triage",
+      content: `Read the following HX workflow protocol and execute exactly.\n\n${workflow}\n\n## Your Task\n\n${prompt}`,
       display: false,
     },
     { triggerTurn: true },
@@ -227,7 +227,7 @@ export async function handleSteer(change: string, ctx: ExtensionCommandContext, 
 
   if (isAutoActive()) {
     pi.sendMessage({
-      customType: "gsd-hard-steer",
+      customType: "hx-hard-steer",
       content: [
         "HARD STEER — User override registered.",
         "",
@@ -243,7 +243,7 @@ export async function handleSteer(change: string, ctx: ExtensionCommandContext, 
     ctx.ui.notify(`Override registered: "${change}". Will be applied before next task dispatch.`, "info");
   } else {
     pi.sendMessage({
-      customType: "gsd-hard-steer",
+      customType: "hx-hard-steer",
       content: [
         "HARD STEER — User override registered.",
         "",
@@ -300,7 +300,7 @@ export async function handleKnowledge(args: string, ctx: ExtensionCommandContext
     });
 
     pi.sendMessage(
-      { customType: "gsd-knowledge-refine", content: prompt, display: false },
+      { customType: "hx-knowledge-refine", content: prompt, display: false },
       { triggerTurn: true },
     );
     return;
@@ -351,7 +351,7 @@ export async function handleKnowledge(args: string, ctx: ExtensionCommandContext
     });
 
     pi.sendMessage(
-      { customType: "gsd-knowledge-refine", content: prompt, display: false },
+      { customType: "hx-knowledge-refine", content: prompt, display: false },
       { triggerTurn: true },
     );
     return;
@@ -543,7 +543,7 @@ export async function handleUpdate(ctx: ExtensionCommandContext): Promise<void> 
       stdio: ["ignore", "pipe", "ignore"],
     });
     ctx.ui.notify(
-      `Updated to v${latest}. Restart your GSD session to use the new version.`,
+      `Updated to v${latest}. Restart your HX session to use the new version.`,
       "info",
     );
   } catch {

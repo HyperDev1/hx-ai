@@ -6,7 +6,7 @@ import {
 } from "../shared/rtk-session-stats.js";
 import { loadEffectiveHXPreferences } from "./preferences.js";
 
-const STATUS_KEY = "gsd-rtk";
+const STATUS_KEY = "hx-rtk";
 const REFRESH_INTERVAL_MS = 30_000;
 
 let refreshTimer: ReturnType<typeof setInterval> | null = null;

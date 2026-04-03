@@ -21,7 +21,7 @@ import assert from 'node:assert/strict';
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
 function createTmpDir(suffix: string): string {
-  return mkdtempSync(join(tmpdir(), `gsd-wal-${suffix}-`));
+  return mkdtempSync(join(tmpdir(), `hx-wal-${suffix}-`));
 }
 
 function cleanup(dir: string): void {
@@ -37,7 +37,7 @@ describe('shared-wal', async () => {
     const projectRoot = '/home/user/myproject';
     const worktreePath = join(projectRoot, '.hx', 'worktrees', 'M001');
     const result = resolveProjectRootDbPath(worktreePath);
-    assert.deepStrictEqual(result, join(projectRoot, '.hx', 'gsd.db'),
+    assert.deepStrictEqual(result, join(projectRoot, '.hx', 'hx.db'),
       'worktree path resolves to project root DB');
   }
 
@@ -46,7 +46,7 @@ describe('shared-wal', async () => {
   {
     const projectRoot = '/home/user/myproject';
     const result = resolveProjectRootDbPath(projectRoot);
-    assert.deepStrictEqual(result, join(projectRoot, '.hx', 'gsd.db'),
+    assert.deepStrictEqual(result, join(projectRoot, '.hx', 'hx.db'),
       'project root path stays at project root DB');
   }
 
@@ -56,7 +56,7 @@ describe('shared-wal', async () => {
     const projectRoot = '/home/user/myproject';
     const nestedPath = join(projectRoot, '.hx', 'worktrees', 'M002', 'src', 'lib');
     const result = resolveProjectRootDbPath(nestedPath);
-    assert.deepStrictEqual(result, join(projectRoot, '.hx', 'gsd.db'),
+    assert.deepStrictEqual(result, join(projectRoot, '.hx', 'hx.db'),
       'nested worktree subdir resolves to project root DB');
   }
 
@@ -64,7 +64,7 @@ describe('shared-wal', async () => {
   console.log('\n=== shared-wal: resolve forward-slash path ===');
   {
     const result = resolveProjectRootDbPath('/proj/.hx/worktrees/M001');
-    assert.deepStrictEqual(result, join('/proj', '.hx', 'gsd.db'),
+    assert.deepStrictEqual(result, join('/proj', '.hx', 'hx.db'),
       'forward-slash worktree path resolves correctly');
   }
 

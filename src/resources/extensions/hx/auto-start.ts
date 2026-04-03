@@ -179,14 +179,14 @@ export async function bootstrapAutoSession(
       nativeInit(base, mainBranch);
     }
 
-    // ── GSD → HX migration — silent rename in auto-mode ──────────────
-    if (!existsSync(join(base, ".hx")) && existsSync(join(base, ".gsd"))) {
+    // ── HX → HX migration — silent rename in auto-mode ──────────────
+    if (!existsSync(join(base, ".hx")) && existsSync(join(base, ".hx"))) {
       const { migrateProjectGsdToHx, migrateGlobalGsdToHx } = await import("./migrate-gsd-to-hx.js");
       const gsdResult = migrateProjectGsdToHx(base);
       if (gsdResult.migrated) {
         const { _clearHxRootCache } = await import("./paths.js");
         _clearHxRootCache();
-        ctx.ui.notify("Migrated .gsd/ → .hx/", "info");
+        ctx.ui.notify("Migrated .hx/ → .hx/", "info");
       }
       migrateGlobalGsdToHx();
     }
@@ -216,7 +216,7 @@ export async function bootstrapAutoSession(
       mkdirSync(join(gsdDir, "milestones"), { recursive: true });
       try {
         nativeAddAll(base);
-        nativeCommit(base, "chore: init gsd");
+        nativeCommit(base, "chore: init hx");
       } catch {
         /* nothing to commit */
       }
@@ -580,7 +580,7 @@ export async function bootstrapAutoSession(
         }
       } catch (err) {
         process.stderr.write(
-          `gsd-migrate: auto-migration failed: ${(err as Error).message}\n`,
+          `hx-migrate: auto-migration failed: ${(err as Error).message}\n`,
         );
       }
     }
@@ -596,13 +596,13 @@ export async function bootstrapAutoSession(
 
     // Gate: abort bootstrap if the DB file exists but the provider is
     // still unavailable after both open attempts above. Without this,
-    // auto-mode starts but every gsd_task_complete / gsd_slice_complete
+    // auto-mode starts but every hx_task_complete / hx_slice_complete
     // call returns "db_unavailable", triggering artifact-retry which
     // re-dispatches the same task — producing an infinite loop (#2419).
     if (existsSync(gsdDbPath) && !isDbAvailable()) {
       ctx.ui.notify(
         "SQLite database exists but failed to open. Auto-mode cannot proceed without a working database provider. " +
-          "Check for corrupt gsd.db or missing native SQLite bindings.",
+          "Check for corrupt hx.db or missing native SQLite bindings.",
         "error",
       );
       return releaseLockAndReturn();
@@ -627,7 +627,7 @@ export async function bootstrapAutoSession(
       snapshotSkills();
     }
 
-    ctx.ui.setStatus("gsd-auto", s.stepMode ? "next" : "auto");
+    ctx.ui.setStatus("hx-auto", s.stepMode ? "next" : "auto");
     ctx.ui.setFooter(hideFooter);
     const modeLabel = s.stepMode ? "Step-mode" : "Auto-mode";
     const pendingCount = (state.registry ?? []).filter(

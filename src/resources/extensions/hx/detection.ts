@@ -314,7 +314,7 @@ export function detectProjectState(basePath: string): ProjectDetection {
 // ─── V1 Planning Detection ──────────────────────────────────────────────────────
 
 /**
- * Detect a v1 .planning/ directory with GSD v1 markers.
+ * Detect a v1 .planning/ directory with HX v1 markers.
  * Returns null if no .planning/ directory found.
  */
 export function detectV1Planning(basePath: string): V1Detection | null {
@@ -351,7 +351,7 @@ export function detectV1Planning(basePath: string): V1Detection | null {
   };
 }
 
-// ─── V2 GSD Detection ──────────────────────────────────────────────────────────
+// ─── V2 HX Detection ──────────────────────────────────────────────────────────
 
 function detectV2Gsd(basePath: string): V2Detection | null {
   const hxPath = hxRoot(basePath);
@@ -710,7 +710,7 @@ function detectVerificationCommands(
 // ─── Global Setup Detection ─────────────────────────────────────────────────────
 
 /**
- * Check if global GSD setup exists (has ~/.hx/ with preferences).
+ * Check if global HX setup exists (has ~/.hx/ with preferences).
  */
 export function hasGlobalSetup(): boolean {
   return (

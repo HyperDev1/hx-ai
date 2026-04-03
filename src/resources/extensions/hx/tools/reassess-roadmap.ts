@@ -236,7 +236,7 @@ export async function handleReassessRoadmap(
       });
     } catch (hookErr) {
       process.stderr.write(
-        `gsd: reassess-roadmap post-mutation hook warning: ${(hookErr as Error).message}\n`,
+        `hx: reassess-roadmap post-mutation hook warning: ${(hookErr as Error).message}\n`,
       );
     }
 

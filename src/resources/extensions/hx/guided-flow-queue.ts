@@ -1,5 +1,5 @@
 /**
- * GSD Queue Management — showQueue, reorder, add, and context builder.
+ * HX Queue Management — showQueue, reorder, add, and context builder.
  *
  * Self-contained queue UI extracted from guided-flow.ts.
  * Safe to run while auto-mode is executing — only writes to future milestone
@@ -46,9 +46,9 @@ export async function showQueue(
   basePath: string,
 ): Promise<void> {
   // ── Ensure .hx/ exists ─────────────────────────────────────────────
-  const gsd = hxRoot(basePath);
-  if (!existsSync(gsd)) {
-    ctx.ui.notify("No GSD project found. Run /hx to start one first.", "warning");
+  const hx = hxRoot(basePath);
+  if (!existsSync(hx)) {
+    ctx.ui.notify("No HX project found. Run /hx to start one first.", "warning");
     return;
   }
 
@@ -73,7 +73,7 @@ export async function showQueue(
     if (parkedCount > 0) summaryParts.push(`${parkedCount} parked.`);
 
     const choice = await showNextAction(ctx, {
-      title: "GSD — Queue Management",
+      title: "HX — Queue Management",
       summary: summaryParts,
       actions: [
         {
@@ -170,7 +170,7 @@ export async function showQueueAdd(
   const existingContext = await buildExistingMilestonesContext(basePath, milestoneIds, state);
 
   // ── Determine next milestone ID ─────────────────────────────────────
-  // Note: the LLM will use the gsd_milestone_generate_id tool to get IDs
+  // Note: the LLM will use the hx_milestone_generate_id tool to get IDs
   // at creation time, but we still mention the next ID in the preamble
   // for context about where the sequence is.
   const uniqueEnabled = !!loadEffectiveHXPreferences()?.preferences?.unique_milestone_ids;
@@ -185,7 +185,7 @@ export async function showQueueAdd(
   const completeCount = state.registry.filter(m => m.status === "complete").length;
 
   const preamble = [
-    `Queuing new work onto an existing GSD project.`,
+    `Queuing new work onto an existing HX project.`,
     activePart,
     `${completeCount} milestone(s) complete, ${pendingCount} pending.`,
     `Next available milestone ID: ${nextId}.`,
@@ -205,7 +205,7 @@ export async function showQueueAdd(
 
   pi.sendMessage(
     {
-      customType: "gsd-queue",
+      customType: "hx-queue",
       content: prompt,
       display: false,
     },

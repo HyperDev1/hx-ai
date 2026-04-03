@@ -1,4 +1,4 @@
-// GSD Extension — Workflow Logger
+// HX Extension — Workflow Logger
 // Centralized warning/error accumulator for the workflow engine pipeline.
 // Captures structured entries that the auto-loop can drain after each unit
 // to surface root causes for stuck loops, silent degradation, and blocked writes.
@@ -220,7 +220,7 @@ function _push(
   // Always forward to stderr so terminal watchers see it (see module header for policy)
   const prefix = severity === "error" ? "ERROR" : "WARN";
   const ctxStr = context ? ` ${JSON.stringify(context)}` : "";
-  process.stderr.write(`[gsd:${component}] ${prefix}: ${message}${ctxStr}\n`);
+  process.stderr.write(`[hx:${component}] ${prefix}: ${message}${ctxStr}\n`);
 
   // Buffer for auto-loop to drain
   _buffer.push(entry);
@@ -236,7 +236,7 @@ function _push(
       appendFileSync(join(auditDir, "audit-log.jsonl"), JSON.stringify(entry) + "\n", "utf-8");
     } catch (auditErr) {
       // Best-effort — never let audit write failures bubble up
-      process.stderr.write(`[gsd:audit] failed to persist log entry: ${(auditErr as Error).message}\n`);
+      process.stderr.write(`[hx:audit] failed to persist log entry: ${(auditErr as Error).message}\n`);
     }
   }
 }

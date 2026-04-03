@@ -1,5 +1,5 @@
 /**
- * GSD Preferences Wizard — TUI wizard for configuring GSD preferences.
+ * HX Preferences Wizard — TUI wizard for configuring HX preferences.
  *
  * Contains: handlePrefsWizard, buildCategorySummaries, all configure* functions,
  * serializePreferencesToFrontmatter, yamlSafeString, ensurePreferencesFile,
@@ -84,7 +84,7 @@ export async function handlePrefs(args: string, ctx: ExtensionCommandContext): P
       : `missing: ${canonicalGlobal}`;
     const projectStatus = projectPrefs ? `present: ${projectPrefs.path}` : `missing: ${getProjectHXPreferencesPath()}`;
 
-    const lines = [`GSD skill prefs — global ${globalStatus}; project ${projectStatus}`];
+    const lines = [`HX skill prefs — global ${globalStatus}; project ${projectStatus}`];
 
     const effective = loadEffectiveHXPreferences();
     let hasUnresolved = false;
@@ -229,6 +229,15 @@ export function buildCategorySummaries(prefs: Record<string, unknown>): Record<s
     advancedSummary = `unique IDs: ${uniqueIds ? "on" : "off"}`;
   }
 
+  // Language
+  const lang = prefs.language as string | undefined;
+  const languageNames: Record<string, string> = {
+    en: "English", tr: "Türkçe", de: "Deutsch", fr: "Français", es: "Español",
+    pt: "Português", ja: "日本語", ko: "한국어", zh: "中文", ru: "Русский",
+    ar: "العربية", it: "Italiano", nl: "Nederlands", pl: "Polski", uk: "Українська", hi: "हिन्दी",
+  };
+  const languageSummary = lang ? (languageNames[lang] ?? lang) : "English (default)";
+
   return {
     mode: modeSummary,
     models: modelsSummary,
@@ -238,6 +247,7 @@ export function buildCategorySummaries(prefs: Record<string, unknown>): Record<s
     budget: budgetSummary,
     notifications: notifSummary,
     advanced: advancedSummary,
+    language: languageSummary,
   };
 }
 
@@ -614,6 +624,44 @@ async function configureAdvanced(ctx: ExtensionCommandContext, prefs: Record<str
   }
 }
 
+async function configureLanguage(ctx: ExtensionCommandContext, prefs: Record<string, unknown>): Promise<void> {
+  const current = prefs.language as string | undefined;
+  const languageOptions = [
+    "en — English",
+    "tr — Türkçe",
+    "de — Deutsch",
+    "fr — Français",
+    "es — Español",
+    "pt — Português",
+    "ja — 日本語",
+    "ko — 한국어",
+    "zh — 中文",
+    "ru — Русский",
+    "ar — العربية",
+    "it — Italiano",
+    "nl — Nederlands",
+    "pl — Polski",
+    "uk — Українська",
+    "hi — हिन्दी",
+    "(keep current)",
+  ];
+
+  const currentLabel = current ?? "en";
+  const choice = await ctx.ui.select(
+    `Response language${current ? ` (current: ${currentLabel})` : " (default: en)"}:`,
+    languageOptions,
+  );
+  const choiceStr = typeof choice === "string" ? choice : "";
+  if (choiceStr && choiceStr !== "(keep current)") {
+    const code = choiceStr.split(" — ")[0].trim();
+    if (code === "en") {
+      delete prefs.language;
+    } else {
+      prefs.language = code;
+    }
+  }
+}
+
 // ─── Main wizard with category menu ─────────────────────────────────────────
 
 export async function handlePrefsWizard(
@@ -624,7 +672,7 @@ export async function handlePrefsWizard(
   const existing = scope === "project" ? loadProjectHXPreferences() : loadGlobalHXPreferences();
   const prefs: Record<string, unknown> = existing?.preferences ? { ...existing.preferences } : {};
 
-  ctx.ui.notify(`GSD preferences (${scope}) — pick a category to configure.`, "info");
+  ctx.ui.notify(`HX preferences (${scope}) — pick a category to configure.`, "info");
 
   while (true) {
     const summaries = buildCategorySummaries(prefs);
@@ -636,11 +684,12 @@ export async function handlePrefsWizard(
       `Skills          ${summaries.skills}`,
       `Budget          ${summaries.budget}`,
       `Notifications   ${summaries.notifications}`,
+      `Language        ${summaries.language}`,
       `Advanced        ${summaries.advanced}`,
       `── Save & Exit ──`,
     ];
 
-    const raw = await ctx.ui.select("GSD Preferences", options);
+    const raw = await ctx.ui.select("HX Preferences", options);
     const choice = typeof raw === "string" ? raw : "";
     if (!choice || choice.includes("Save & Exit")) break;
 
@@ -651,6 +700,7 @@ export async function handlePrefsWizard(
     else if (choice.startsWith("Skills"))        await configureSkills(ctx, prefs);
     else if (choice.startsWith("Budget"))        await configureBudget(ctx, prefs);
     else if (choice.startsWith("Notifications")) await configureNotifications(ctx, prefs);
+    else if (choice.startsWith("Language"))      await configureLanguage(ctx, prefs);
     else if (choice.startsWith("Advanced"))      await configureAdvanced(ctx, prefs);
   }
 
@@ -746,6 +796,7 @@ export function serializePreferencesToFrontmatter(prefs: Record<string, unknown>
     "auto_visualize", "auto_report",
     "verification_commands", "verification_auto_fix", "verification_max_retries",
     "search_provider", "context_selection",
+    "language",
   ];
 
   const seen = new Set<string>();
@@ -773,12 +824,12 @@ export async function ensurePreferencesFile(
   if (!existsSync(path)) {
     const template = await loadFile(join(dirname(fileURLToPath(import.meta.url)), "templates", "PREFERENCES.md"));
     if (!template) {
-      ctx.ui.notify("Could not load GSD preferences template.", "error");
+      ctx.ui.notify("Could not load HX preferences template.", "error");
       return;
     }
     await saveFile(path, template);
-    ctx.ui.notify(`Created ${scope} GSD skill preferences at ${path}`, "info");
+    ctx.ui.notify(`Created ${scope} HX skill preferences at ${path}`, "info");
   } else {
-    ctx.ui.notify(`Using existing ${scope} GSD skill preferences at ${path}`, "info");
+    ctx.ui.notify(`Using existing ${scope} HX skill preferences at ${path}`, "info");
   }
 }

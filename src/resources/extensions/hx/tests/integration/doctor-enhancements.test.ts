@@ -8,12 +8,12 @@ import { runGSDDoctor } from "../../doctor.js";
 import { formatDoctorReportJson } from "../../doctor-format.js";
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
-function makeBase(): { base: string; gsd: string; mDir: string } {
-  const base = mkdtempSync(join(tmpdir(), "gsd-doctor-enh-"));
-  const gsd = join(base, ".hx");
-  const mDir = join(gsd, "milestones", "M001");
+function makeBase(): { base: string; hx: string; mDir: string } {
+  const base = mkdtempSync(join(tmpdir(), "hx-doctor-enh-"));
+  const hx = join(base, ".hx");
+  const mDir = join(hx, "milestones", "M001");
   mkdirSync(join(mDir, "slices"), { recursive: true });
-  return { base, gsd, mDir };
+  return { base, hx, mDir };
 }
 
 function writeRoadmap(mDir: string, content: string): void {
@@ -111,11 +111,11 @@ describe('doctor-enhancements', async () => {
 
   // ── 6. Metrics ledger corrupt ───────────────────────────────────────────────
   test('metrics ledger corrupt', async () => {
-    const { base, gsd, mDir } = makeBase();
+    const { base, hx, mDir } = makeBase();
     writeRoadmap(mDir, `# M001: Metrics Test\n\n## Slices\n- [ ] **S01: Slice** \`risk:low\` \`depends:[]\`\n  > After this: done\n`);
     writeSlice(mDir, "S01", "# S01: Slice\n\n**Goal:** G\n**Demo:** D\n\n## Tasks\n- [ ] **T01: Task** `est:10m`\n  Pending.\n");
     // Write invalid metrics.json
-    writeFileSync(join(gsd, "metrics.json"), '{"version":2,"data":[]}');
+    writeFileSync(join(hx, "metrics.json"), '{"version":2,"data":[]}');
 
     const result = await runGSDDoctor(base, { fix: false });
     assert.ok(
@@ -221,13 +221,13 @@ describe('doctor-enhancements', async () => {
 
   // ── 12. Doctor history ───────────────────────────────────────────────────────
   test('doctor history', async () => {
-    const { base, gsd, mDir } = makeBase();
+    const { base, hx, mDir } = makeBase();
     writeRoadmap(mDir, `# M001: History Test\n\n## Slices\n- [ ] **S01: Slice** \`risk:low\` \`depends:[]\`\n  > After this: done\n`);
     writeSlice(mDir, "S01", "# S01: Slice\n\n**Goal:** G\n**Demo:** D\n\n## Tasks\n- [ ] **T01: Task** `est:10m`\n  Pending.\n");
 
     await runGSDDoctor(base, { fix: false });
 
-    const historyPath = join(gsd, "doctor-history.jsonl");
+    const historyPath = join(hx, "doctor-history.jsonl");
     assert.ok(existsSync(historyPath), "doctor-history.jsonl is created after run");
 
     const { readDoctorHistory } = await import("../../doctor.js");

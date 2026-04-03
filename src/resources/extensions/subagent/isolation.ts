@@ -197,7 +197,7 @@ async function applyBaseline(
 	// without accidentally including the parent's dirty state in the delta.
 	await gitSilent(["add", "-A"], worktreeDir);
 	await gitSilent(
-		["commit", "--allow-empty", "-m", "gsd: baseline snapshot"],
+		["commit", "--allow-empty", "-m", "hx: baseline snapshot"],
 		worktreeDir,
 	);
 }
@@ -443,7 +443,7 @@ export async function mergeDeltaPatches(
 	const combined = patches.map((p) => p.content).join("\n");
 	const patchFile = path.join(
 		os.tmpdir(),
-		`gsd-merge-${Date.now()}.patch`,
+		`hx-merge-${Date.now()}.patch`,
 	);
 
 	const appliedPatches: string[] = [];

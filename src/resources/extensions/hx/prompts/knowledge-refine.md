@@ -44,7 +44,7 @@ Show it to the user in their language for confirmation. Show both the English ve
 
 ### Step 6: Save it
 
-Run: `/gsd knowledge --raw <type> <refined English text>`
+Run: `/hx knowledge --raw <type> <refined English text>`
 - Replace `<type>` with rule, pattern, or lesson (the classified or user-specified type).
 - If there are additional fields (why/where/rootCause/fix), the interactive prompts will be skipped in --raw mode, so include the essential context in the entry text itself.
 

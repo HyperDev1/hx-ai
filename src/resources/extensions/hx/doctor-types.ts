@@ -26,7 +26,7 @@ export type DoctorIssueCode =
   | "unresolvable_dependency"
   | "failed_migration"
   | "broken_symlink"
-  | "numbered_gsd_variant"
+  | "numbered_hx_variant"
   // Environment health checks (#1221)
   | "env_node_version"
   | "env_dependencies"
@@ -48,7 +48,7 @@ export type DoctorIssueCode =
   // Git / worktree integrity checks
   | "integration_branch_missing"
   | "worktree_directory_orphaned"
-  // GSD state structural checks
+  // HX state structural checks
   | "circular_slice_dependency"
   | "orphaned_slice_directory"
   | "missing_slice_dir"
@@ -110,7 +110,7 @@ export interface DoctorReport {
   issues: DoctorIssue[];
   fixesApplied: string[];
   /** Per-domain check durations in milliseconds. Present on explicit /hx doctor runs. */
-  timing?: { git: number; runtime: number; environment: number; gsdState: number };
+  timing?: { git: number; runtime: number; environment: number; hxState: number };
 }
 
 export interface DoctorSummary {

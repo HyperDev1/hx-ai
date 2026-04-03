@@ -35,10 +35,10 @@ test("/hx update appears in subcommand completions", () => {
   const pi = createMockPi();
   registerGSDCommand(pi as any);
 
-  const gsd = pi.commands.get("gsd");
-  assert.ok(gsd, "registerGSDCommand should register /hx");
+  const hx = pi.commands.get("hx");
+  assert.ok(hxCmd, "registerGSDCommand should register /hx");
 
-  const completions = gsd.getArgumentCompletions("update");
+  const completions = hxCmd.getArgumentCompletions("update");
   const updateEntry = completions.find((c: any) => c.value === "update");
   assert.ok(updateEntry, "update should appear in completions");
   assert.equal(updateEntry.label, "update");
@@ -48,16 +48,16 @@ test("/hx update appears in help description", () => {
   const pi = createMockPi();
   registerGSDCommand(pi as any);
 
-  const gsd = pi.commands.get("gsd");
-  assert.ok(gsd?.description?.includes("update"), "description should mention update");
+  const hx = pi.commands.get("hx");
+  assert.ok(hxCmd?.description?.includes("update"), "description should mention update");
 });
 
 test("/hx update is listed in completions with correct description", () => {
   const pi = createMockPi();
   registerGSDCommand(pi as any);
 
-  const gsd = pi.commands.get("gsd");
-  const completions = gsd.getArgumentCompletions("");
+  const hx = pi.commands.get("hx");
+  const completions = hxCmd.getArgumentCompletions("");
   const updateEntry = completions.find((c: any) => c.value === "update");
   assert.ok(updateEntry, "update should appear in full completion list");
   assert.ok(

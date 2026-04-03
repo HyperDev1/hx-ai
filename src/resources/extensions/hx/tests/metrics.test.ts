@@ -200,7 +200,7 @@ test("old UnitMetrics without budget fields work with all aggregation functions"
 // ── Disk I/O ─────────────────────────────────────────────────────────────────
 
 test("initMetrics creates ledger, snapshotUnitMetrics persists across resets", () => {
-  const tmpBase = mkdtempSync(join(tmpdir(), "gsd-metrics-test-"));
+  const tmpBase = mkdtempSync(join(tmpdir(), "hx-metrics-test-"));
   mkdirSync(join(tmpBase, ".hx"), { recursive: true });
 
   try {
@@ -255,7 +255,7 @@ test("initMetrics creates ledger, snapshotUnitMetrics persists across resets", (
 // ── snapshotUnitMetrics idempotency ──────────────────────────────────────────
 
 test("snapshotUnitMetrics deduplicates entries with same type+id+startedAt", () => {
-  const tmpBase = mkdtempSync(join(tmpdir(), "gsd-metrics-dedup-"));
+  const tmpBase = mkdtempSync(join(tmpdir(), "hx-metrics-dedup-"));
   mkdirSync(join(tmpBase, ".hx"), { recursive: true });
   try {
     initMetrics(tmpBase);
@@ -300,7 +300,7 @@ test("snapshotUnitMetrics deduplicates entries with same type+id+startedAt", () 
 });
 
 test("snapshotUnitMetrics handles simulated idle-watchdog duplicate pattern", () => {
-  const tmpBase = mkdtempSync(join(tmpdir(), "gsd-metrics-watchdog-"));
+  const tmpBase = mkdtempSync(join(tmpdir(), "hx-metrics-watchdog-"));
   mkdirSync(join(tmpBase, ".hx"), { recursive: true });
   try {
     initMetrics(tmpBase);
@@ -338,7 +338,7 @@ test("snapshotUnitMetrics handles simulated idle-watchdog duplicate pattern", ()
 // ── toolCall block counting ─────────────────────────────────────────────────
 
 test("snapshotUnitMetrics counts toolCall blocks correctly (#1713)", () => {
-  const tmpBase = mkdtempSync(join(tmpdir(), "gsd-metrics-toolcall-"));
+  const tmpBase = mkdtempSync(join(tmpdir(), "hx-metrics-toolcall-"));
   mkdirSync(join(tmpBase, ".hx"), { recursive: true });
 
   try {

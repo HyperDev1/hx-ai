@@ -1,5 +1,5 @@
 /**
- * GSD Auto Mode — Fresh Session Per Unit
+ * HX Auto Mode — Fresh Session Per Unit
  *
  * State machine driven by .hx/ files on disk. Each "unit" of work
  * (plan slice, execute task, complete slice) gets a fresh session via
@@ -259,7 +259,7 @@ export function shouldUseWorktreeIsolation(): boolean {
 
 /**
  * Model captured at auto-mode start. Used to prevent model bleed between
- * concurrent GSD instances sharing the same global settings.json (#650).
+ * concurrent HX instances sharing the same global settings.json (#650).
  * When preferences don't specify a model for a unit type, this ensures
  * the session's original model is re-applied instead of reading from
  * the shared global settings (which another instance may have overwritten).
@@ -527,12 +527,12 @@ function handleLostSessionLock(
   clearCmuxSidebar(loadEffectiveHXPreferences()?.preferences);
   const base = lockBase();
   const lockFilePath = base ? join(hxRoot(base), "auto.lock") : "unknown";
-  const recoverySuggestion = "\nTo recover, run: gsd doctor --fix";
+  const recoverySuggestion = "\nTo recover, run: /hx doctor --fix";
   const message =
     lockStatus?.failureReason === "pid-mismatch"
       ? lockStatus.existingPid
-        ? `Session lock (${lockFilePath}) moved to PID ${lockStatus.existingPid} — another GSD process appears to have taken over. Stopping gracefully.${recoverySuggestion}`
-        : `Session lock (${lockFilePath}) moved to a different process — another GSD process appears to have taken over. Stopping gracefully.${recoverySuggestion}`
+        ? `Session lock (${lockFilePath}) moved to PID ${lockStatus.existingPid} — another HX process appears to have taken over. Stopping gracefully.${recoverySuggestion}`
+        : `Session lock (${lockFilePath}) moved to a different process — another HX process appears to have taken over. Stopping gracefully.${recoverySuggestion}`
       : lockStatus?.failureReason === "missing-metadata"
         ? `Session lock metadata (${lockFilePath}) disappeared, so ownership could not be confirmed. Stopping gracefully.${recoverySuggestion}`
         : lockStatus?.failureReason === "compromised"
@@ -542,8 +542,8 @@ function handleLostSessionLock(
     message,
     "error",
   );
-  ctx?.ui.setStatus("gsd-auto", undefined);
-  ctx?.ui.setWidget("gsd-progress", undefined);
+  ctx?.ui.setStatus("hx-auto", undefined);
+  ctx?.ui.setWidget("hx-progress", undefined);
   ctx?.ui.setFooter(undefined);
 }
 
@@ -569,8 +569,8 @@ function cleanupAfterLoopExit(ctx: ExtensionContext): void {
     /* best-effort — mirror stopAuto cleanup */
   }
 
-  ctx.ui.setStatus("gsd-auto", undefined);
-  ctx.ui.setWidget("gsd-progress", undefined);
+  ctx.ui.setStatus("hx-auto", undefined);
+  ctx.ui.setWidget("hx-progress", undefined);
   ctx.ui.setFooter(undefined);
 
   // Restore CWD out of worktree back to original project root
@@ -814,8 +814,8 @@ export async function stopAuto(
     resetProactiveHealing();
 
     // UI cleanup
-    ctx?.ui.setStatus("gsd-auto", undefined);
-    ctx?.ui.setWidget("gsd-progress", undefined);
+    ctx?.ui.setStatus("hx-auto", undefined);
+    ctx?.ui.setWidget("hx-progress", undefined);
     ctx?.ui.setFooter(undefined);
 
     // Reset all session state in one call
@@ -891,8 +891,8 @@ export async function pauseAuto(
   s.paused = true;
   s.pendingVerificationRetry = null;
   s.verificationRetryCount.clear();
-  ctx?.ui.setStatus("gsd-auto", "paused");
-  ctx?.ui.setWidget("gsd-progress", undefined);
+  ctx?.ui.setStatus("hx-auto", "paused");
+  ctx?.ui.setWidget("hx-progress", undefined);
   ctx?.ui.setFooter(undefined);
   const resumeCmd = s.stepMode ? "/hx next" : "/hx auto";
   ctx?.ui.notify(
@@ -1165,7 +1165,7 @@ export async function startAuto(
 
     registerSigtermHandler(lockBase());
 
-    ctx.ui.setStatus("gsd-auto", s.stepMode ? "next" : "auto");
+    ctx.ui.setStatus("hx-auto", s.stepMode ? "next" : "auto");
     ctx.ui.setFooter(hideFooter);
     ctx.ui.notify(
       s.stepMode ? "Step-mode resumed." : "Auto-mode resumed.",
@@ -1459,7 +1459,7 @@ export async function dispatchHookUnit(
     await pauseAuto(ctx, pi);
   }, hookHardTimeoutMs);
 
-  ctx.ui.setStatus("gsd-auto", s.stepMode ? "next" : "auto");
+  ctx.ui.setStatus("hx-auto", s.stepMode ? "next" : "auto");
   ctx.ui.notify(`Running post-unit hook: ${hookName}`, "info");
 
   // Ensure cwd matches basePath before hook dispatch (#1389)
@@ -1470,7 +1470,7 @@ export async function dispatchHookUnit(
     promptLength: hookPrompt.length,
   });
   pi.sendMessage(
-    { customType: "gsd-auto", content: hookPrompt, display: true },
+    { customType: "hx-auto", content: hookPrompt, display: true },
     { triggerTurn: true },
   );
 

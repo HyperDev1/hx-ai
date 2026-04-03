@@ -12,7 +12,7 @@ import {
 function makeTempDir(prefix: string): string {
   const dir = join(
     tmpdir(),
-    `gsd-health-widget-test-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    `hx-health-widget-test-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
   );
   mkdirSync(dir, { recursive: true });
   return dir;
@@ -64,13 +64,13 @@ test("detectHealthWidgetProjectState: milestone without metrics returns active",
 
 test("buildHealthLines: none state shows onboarding copy", (t) => {
   assert.deepEqual(buildHealthLines(activeData({ projectState: "none" })), [
-    "  GSD  No project loaded — run /hx to start",
+    "  HX  No project loaded — run /hx to start",
   ]);
 });
 
 test("buildHealthLines: initialized state shows continue setup copy", (t) => {
   assert.deepEqual(buildHealthLines(activeData({ projectState: "initialized" })), [
-    "  GSD  Project initialized — run /hx to continue setup",
+    "  HX  Project initialized — run /hx to continue setup",
   ]);
 });
 

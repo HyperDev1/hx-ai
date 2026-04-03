@@ -13,27 +13,27 @@ export type BrowserSlashCommandSurface =
   | "logout"
   | "session"
   | "export"
-  // GSD subcommand surfaces (S02)
-  | "gsd-status"
-  | "gsd-visualize"
-  | "gsd-forensics"
-  | "gsd-doctor"
-  | "gsd-skill-health"
-  | "gsd-knowledge"
-  | "gsd-capture"
-  | "gsd-triage"
-  | "gsd-quick"
-  | "gsd-history"
-  | "gsd-undo"
-  | "gsd-inspect"
-  | "gsd-prefs"
-  | "gsd-config"
-  | "gsd-hooks"
-  | "gsd-mode"
-  | "gsd-steer"
-  | "gsd-export"
-  | "gsd-cleanup"
-  | "gsd-queue"
+  // HX subcommand surfaces (S02)
+  | "hx-status"
+  | "hx-visualize"
+  | "hx-forensics"
+  | "hx-doctor"
+  | "hx-skill-health"
+  | "hx-knowledge"
+  | "hx-capture"
+  | "hx-triage"
+  | "hx-quick"
+  | "hx-history"
+  | "hx-undo"
+  | "hx-inspect"
+  | "hx-prefs"
+  | "hx-config"
+  | "hx-hooks"
+  | "hx-mode"
+  | "hx-steer"
+  | "hx-export"
+  | "hx-cleanup"
+  | "hx-queue"
 
 export type BrowserSlashCommandLocalAction = "clear_terminal" | "refresh_workspace" | "gsd_help"
 
@@ -111,29 +111,29 @@ const SURFACE_COMMANDS = new Map<string, BrowserSlashCommandSurface>([
   ["export", "export"],
 ])
 
-// --- GSD subcommand dispatch (S02) ---
+// --- HX subcommand dispatch (S02) ---
 
 const GSD_SURFACE_SUBCOMMANDS = new Map<string, BrowserSlashCommandSurface>([
-  ["status", "gsd-status"],
-  ["visualize", "gsd-visualize"],
-  ["forensics", "gsd-forensics"],
-  ["doctor", "gsd-doctor"],
-  ["skill-health", "gsd-skill-health"],
-  ["knowledge", "gsd-knowledge"],
-  ["capture", "gsd-capture"],
-  ["triage", "gsd-triage"],
-  ["quick", "gsd-quick"],
-  ["history", "gsd-history"],
-  ["undo", "gsd-undo"],
-  ["inspect", "gsd-inspect"],
-  ["prefs", "gsd-prefs"],
-  ["config", "gsd-config"],
-  ["hooks", "gsd-hooks"],
-  ["mode", "gsd-mode"],
-  ["steer", "gsd-steer"],
-  ["export", "gsd-export"],
-  ["cleanup", "gsd-cleanup"],
-  ["queue", "gsd-queue"],
+  ["status", "hx-status"],
+  ["visualize", "hx-visualize"],
+  ["forensics", "hx-forensics"],
+  ["doctor", "hx-doctor"],
+  ["skill-health", "hx-skill-health"],
+  ["knowledge", "hx-knowledge"],
+  ["capture", "hx-capture"],
+  ["triage", "hx-triage"],
+  ["quick", "hx-quick"],
+  ["history", "hx-history"],
+  ["undo", "hx-undo"],
+  ["inspect", "hx-inspect"],
+  ["prefs", "hx-prefs"],
+  ["config", "hx-config"],
+  ["hooks", "hx-hooks"],
+  ["mode", "hx-mode"],
+  ["steer", "hx-steer"],
+  ["export", "hx-export"],
+  ["cleanup", "hx-cleanup"],
+  ["queue", "hx-queue"],
 ])
 
 const GSD_PASSTHROUGH_SUBCOMMANDS = new Set<string>([
@@ -148,7 +148,7 @@ const GSD_PASSTHROUGH_SUBCOMMANDS = new Set<string>([
   "remote",
 ])
 
-export const GSD_HELP_TEXT = `Available /gsd subcommands:
+export const GSD_HELP_TEXT = `Available /hx subcommands:
 
 Workflow:    next · auto · stop · pause · skip · queue · quick · capture · triage
 Diagnostics: status · visualize · forensics · doctor · skill-health · inspect
@@ -156,7 +156,7 @@ Context:     knowledge · history · undo · discuss
 Settings:    prefs · config · hooks · mode · steer
 Advanced:    export · cleanup · run-hook · migrate · remote
 
-Type /gsd <subcommand> to run. Use /gsd help for this message.`
+Type /hx <subcommand> to run. Use /hx help for this message.`
 
 function dispatchGSDSubcommand(
   input: string,
@@ -168,12 +168,12 @@ function dispatchGSDSubcommand(
   const subcommand = spaceIndex === -1 ? trimmedArgs : trimmedArgs.slice(0, spaceIndex)
   const subArgs = spaceIndex === -1 ? "" : trimmedArgs.slice(spaceIndex + 1).trim()
 
-  // Bare `/gsd` — equivalent to `/gsd next`, pass through to bridge
+  // Bare `/hx` — equivalent to `/hx next`, pass through to bridge
   if (!subcommand) {
     return {
       kind: "prompt",
       input,
-      slashCommandName: "gsd",
+      slashCommandName: "hx",
       command: {
         type: getPromptCommandType(options),
         message: input,
@@ -181,22 +181,22 @@ function dispatchGSDSubcommand(
     }
   }
 
-  // `/gsd help` — render inline help locally
+  // `/hx help` — render inline help locally
   if (subcommand === "help") {
     return {
       kind: "local",
       input,
-      commandName: "gsd",
+      commandName: "hx",
       action: "gsd_help",
     }
   }
 
-  // `/gsd visualize` — navigate to the visualizer view directly
+  // `/hx visualize` — navigate to the visualizer view directly
   if (subcommand === "visualize") {
     return {
       kind: "view-navigate",
       input,
-      commandName: "gsd",
+      commandName: "hx",
       view: "visualize",
     }
   }
@@ -207,7 +207,7 @@ function dispatchGSDSubcommand(
     return {
       kind: "surface",
       input,
-      commandName: "gsd",
+      commandName: "hx",
       surface,
       args: subArgs,
     }
@@ -218,7 +218,7 @@ function dispatchGSDSubcommand(
     return {
       kind: "prompt",
       input,
-      slashCommandName: "gsd",
+      slashCommandName: "hx",
       command: {
         type: getPromptCommandType(options),
         message: input,
@@ -230,7 +230,7 @@ function dispatchGSDSubcommand(
   return {
     kind: "prompt",
     input,
-    slashCommandName: "gsd",
+    slashCommandName: "hx",
     command: {
       type: getPromptCommandType(options),
       message: input,
@@ -341,9 +341,9 @@ export function dispatchBrowserSlashCommand(
     }
   }
 
-  // GSD subcommand dispatch — must precede SURFACE_COMMANDS to avoid
-  // `/gsd export` colliding with the built-in `/export` surface.
-  if (parsed.name === "gsd") {
+  // HX subcommand dispatch — must precede SURFACE_COMMANDS to avoid
+  // `/hx export` colliding with the built-in `/export` surface.
+  if (parsed.name === "hx") {
     return dispatchGSDSubcommand(trimmed, parsed.args, options)
   }
 

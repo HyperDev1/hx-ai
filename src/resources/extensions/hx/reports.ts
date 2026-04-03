@@ -1,5 +1,5 @@
 /**
- * GSD Reports Registry
+ * HX Reports Registry
  *
  * Manages .hx/reports/ — the persistent progression log of HTML snapshots.
  *
@@ -50,7 +50,7 @@ export interface ReportsIndex {
   version: 1;
   projectName: string;
   projectPath: string;
-  gsdVersion: string;
+  hxVersion: string;
   entries: ReportEntry[];
 }
 
@@ -96,7 +96,7 @@ export interface WriteReportSnapshotArgs {
   kind: 'milestone' | 'manual' | 'final';
   projectName: string;
   projectPath: string;
-  gsdVersion: string;
+  hxVersion: string;
   // metrics
   totalCost: number;
   totalTokens: number;
@@ -129,14 +129,14 @@ export function writeReportSnapshot(args: WriteReportSnapshotArgs): string {
     version: 1,
     projectName: args.projectName,
     projectPath: args.projectPath,
-    gsdVersion: args.gsdVersion,
+    hxVersion: args.hxVersion,
     entries: [],
   };
 
   // Keep metadata fresh
   index.projectName = args.projectName;
   index.projectPath = args.projectPath;
-  index.gsdVersion = args.gsdVersion;
+  index.hxVersion = args.hxVersion;
 
   const label = args.milestoneId === 'final'
     ? 'Final Report'
@@ -174,7 +174,7 @@ export function regenerateHtmlIndex(basePath: string, index: ReportsIndex): void
 }
 
 function buildIndexHtml(index: ReportsIndex): string {
-  const { projectName, projectPath, gsdVersion, entries } = index;
+  const { projectName, projectPath, hxVersion, entries } = index;
   const generated = new Date().toISOString();
 
   // Sort oldest → newest for the progression timeline
@@ -277,15 +277,15 @@ function buildIndexHtml(index: ReportsIndex): string {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GSD Reports — ${esc(projectName)}</title>
+<title>HX Reports — ${esc(projectName)}</title>
 <style>${INDEX_CSS}</style>
 </head>
 <body>
 <header>
   <div class="hdr-inner">
     <div class="branding">
-      <span class="logo">GSD</span>
-      <span class="ver">v${esc(gsdVersion)}</span>
+      <span class="logo">HX</span>
+      <span class="ver">v${esc(hxVersion)}</span>
     </div>
     <div class="hdr-meta">
       <h1>${esc(projectName)} <span class="hdr-subtitle">Reports</span></h1>
@@ -324,7 +324,7 @@ function buildIndexHtml(index: ReportsIndex): string {
 
 <footer>
   <div class="ftr-inner">
-    <span class="ftr-brand">GSD v${esc(gsdVersion)}</span>
+    <span class="ftr-brand">HX v${esc(hxVersion)}</span>
     <span class="ftr-sep">—</span>
     <span>${esc(projectName)}</span>
     <span class="ftr-sep">—</span>

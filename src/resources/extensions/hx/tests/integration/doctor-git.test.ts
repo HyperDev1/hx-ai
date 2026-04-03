@@ -526,7 +526,7 @@ describe('doctor-git', async () => {
 
       // Move .hx to an external location and replace with a symlink.
       // This simulates the ~/.hx/projects/<hash> layout where .hx is a symlink.
-      const externalGsd = join(realpathSync(mkdtempSync(join(tmpdir(), "doc-git-symlink-"))), "gsd-data");
+      const externalGsd = join(realpathSync(mkdtempSync(join(tmpdir(), "doc-git-symlink-"))), "hx-data");
       cleanups.push(externalGsd);
       renameSync(join(dir, ".hx"), externalGsd);
       symlinkSync(externalGsd, join(dir, ".hx"));
@@ -624,11 +624,11 @@ describe('doctor-git', async () => {
       const dir = createRepoWithActiveMilestone();
       cleanups.push(dir);
 
-      // Create legacy gsd/M001/S01 branches
-      run("git branch gsd/M001/S01", dir);
-      run("git branch gsd/M001/S02", dir);
-      // Active quick branches share gsd/*/* shape and must NOT be deleted.
-      run("git branch gsd/quick/1-fix-typo", dir);
+      // Create legacy hx/M001/S01 branches
+      run("git branch hx/M001/S01", dir);
+      run("git branch hx/M001/S02", dir);
+      // Active quick branches share hx/*/* shape and must NOT be deleted.
+      run("git branch hx/quick/1-fix-typo", dir);
 
       const detect = await runGSDDoctor(dir);
       const legacyIssues = detect.issues.filter(i => i.code === "legacy_slice_branches");
@@ -639,8 +639,8 @@ describe('doctor-git', async () => {
       assert.ok(fixed.fixesApplied.some(f => f.includes("legacy slice branch")), "fix deletes legacy branches");
 
       // Verify branches are gone
-      const remaining = run("git branch --list gsd/*/*", dir);
-      assert.deepStrictEqual(remaining, "gsd/quick/1-fix-typo", "quick branch preserved; legacy branches removed");
+      const remaining = run("git branch --list hx/*/*", dir);
+      assert.deepStrictEqual(remaining, "hx/quick/1-fix-typo", "quick branch preserved; legacy branches removed");
     });
     } else {
     }

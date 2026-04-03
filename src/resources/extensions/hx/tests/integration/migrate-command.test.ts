@@ -49,7 +49,7 @@ const SAMPLE_REQUIREMENTS = `# Requirements
 
 ### R002 — Output Format
 - Status: validated
-- Description: Output matches GSD format.
+- Description: Output matches HX format.
 `;
 
 const SAMPLE_STATE = `# State
@@ -167,7 +167,7 @@ Depends on foundation work.
 `;
 
 function createCompleteFixture(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-cmd-test-'));
+  const base = mkdtempSync(join(tmpdir(), 'hx-cmd-test-'));
   const planning = join(base, '.planning');
   mkdirSync(planning, { recursive: true });
 
@@ -232,7 +232,7 @@ test('Path resolution: .planning used as-is when already present', () => {
   // ─── Test 3: Validation gating — non-existent path ─────────────────────
 
 test('Validation gating: non-existent path returns invalid', async () => {
-    const fakePath = join(tmpdir(), 'gsd-cmd-nonexistent-' + Date.now(), '.planning');
+    const fakePath = join(tmpdir(), 'hx-cmd-nonexistent-' + Date.now(), '.planning');
     const result = await validatePlanningDirectory(fakePath);
     assert.deepStrictEqual(result.valid, false, 'validation: non-existent path is invalid');
     assert.ok(result.issues.length > 0, 'validation: has issues for non-existent path');
@@ -256,7 +256,7 @@ test('Validation gating: valid fixture passes validation', async () => {
 
 test('Full pipeline: parse → transform → preview → write → deriveState', async () => {
     const base = createCompleteFixture();
-    const writeTarget = mkdtempSync(join(tmpdir(), 'gsd-cmd-write-'));
+    const writeTarget = mkdtempSync(join(tmpdir(), 'hx-cmd-write-'));
     try {
       const planningPath = join(base, '.planning');
 
@@ -314,12 +314,12 @@ test('Full pipeline: parse → transform → preview → write → deriveState',
       assert.ok(result.paths.length > 0, 'pipeline: files written');
 
       // Key files exist
-      const gsd = join(writeTarget, ".hx");
-      assert.ok(existsSync(join(gsd, 'PROJECT.md')), 'pipeline: PROJECT.md written');
-      assert.ok(existsSync(join(gsd, 'STATE.md')), 'pipeline: STATE.md written');
-      assert.ok(existsSync(join(gsd, 'REQUIREMENTS.md')), 'pipeline: REQUIREMENTS.md written');
+      const hx = join(writeTarget, ".hx");
+      assert.ok(existsSync(join(hx, 'PROJECT.md')), 'pipeline: PROJECT.md written');
+      assert.ok(existsSync(join(hx, 'STATE.md')), 'pipeline: STATE.md written');
+      assert.ok(existsSync(join(hx, 'REQUIREMENTS.md')), 'pipeline: REQUIREMENTS.md written');
 
-      const m001 = join(gsd, 'milestones', 'M001');
+      const m001 = join(hx, 'milestones', 'M001');
       assert.ok(existsSync(join(m001, 'M001-ROADMAP.md')), 'pipeline: M001-ROADMAP.md written');
       assert.ok(existsSync(join(m001, 'M001-CONTEXT.md')), 'pipeline: M001-CONTEXT.md written');
 
@@ -345,7 +345,7 @@ test('Full pipeline: parse → transform → preview → write → deriveState',
   // ─── Test 6: .hx/ exists detection ────────────────────────────────────
 
 test('.hx/ exists detection', () => {
-    const base = mkdtempSync(join(tmpdir(), 'gsd-cmd-exists-'));
+    const base = mkdtempSync(join(tmpdir(), 'hx-cmd-exists-'));
     try {
       // No .hx/ yet
       assert.ok(!existsSync(join(base, ".hx")), 'exists-detection: .hx absent initially');

@@ -1,6 +1,6 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-// gsd-tools — Structured LLM tool tests
+// hx-tools — Structured LLM tool tests
 //
 // Tests the three registered tools: gsd_decision_save, gsd_requirement_update, gsd_summary_save.
 // Each tool is tested via direct function invocation against an in-memory DB.
@@ -52,7 +52,7 @@ describe('hx-tools', () => {
   test('gsd_decision_save', async () => {
     const tmpDir = makeTmpDir();
     try {
-      const dbPath = path.join(tmpDir, '.hx', 'gsd.db');
+      const dbPath = path.join(tmpDir, '.hx', 'hx.db');
       openDatabase(dbPath);
       assert.ok(isDbAvailable(), 'DB should be available after open');
 
@@ -117,7 +117,7 @@ describe('hx-tools', () => {
   test('gsd_requirement_update', async () => {
     const tmpDir = makeTmpDir();
     try {
-      const dbPath = path.join(tmpDir, '.hx', 'gsd.db');
+      const dbPath = path.join(tmpDir, '.hx', 'hx.db');
       openDatabase(dbPath);
 
       // Seed a requirement
@@ -182,7 +182,7 @@ describe('hx-tools', () => {
   test('gsd_summary_save', async () => {
     const tmpDir = makeTmpDir();
     try {
-      const dbPath = path.join(tmpDir, '.hx', 'gsd.db');
+      const dbPath = path.join(tmpDir, '.hx', 'hx.db');
       openDatabase(dbPath);
 
       // (c) Summary tool creates artifact row
@@ -266,7 +266,7 @@ describe('hx-tools', () => {
   test('Tool result format', async () => {
     const tmpDir = makeTmpDir();
     try {
-      const dbPath = path.join(tmpDir, '.hx', 'gsd.db');
+      const dbPath = path.join(tmpDir, '.hx', 'hx.db');
       openDatabase(dbPath);
 
       // Verify result follows AgentToolResult interface: {content: [{type: "text", text}], details}

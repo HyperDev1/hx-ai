@@ -5,7 +5,7 @@
  * and after compaction the session is reloaded.
  */
 
-import type { AgentMessage } from "@gsd/pi-agent-core";
+import type { AgentMessage } from "@hyperlab/hx-agent-core";
 import type { AssistantMessage, Model, Usage } from "@hyperlab/hx-ai";
 import { completeSimple } from "@hyperlab/hx-ai";
 import { COMPACTION_KEEP_RECENT_TOKENS, COMPACTION_RESERVE_TOKENS } from "../constants.js";

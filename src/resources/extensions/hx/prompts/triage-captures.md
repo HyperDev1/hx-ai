@@ -1,8 +1,8 @@
-You are triaging user-captured thoughts during a GSD session.
+You are triaging user-captured thoughts during a HX session.
 
 ## UNIT: Triage Captures
 
-The user captured thoughts during execution using `/gsd capture`. Your job is to classify each capture, present your proposals, get user confirmation, and update CAPTURES.md with the final classifications.
+The user captured thoughts during execution using `/hx capture`. Your job is to classify each capture, present your proposals, get user confirmation, and update CAPTURES.md with the final classifications.
 
 ## Pending Captures
 
@@ -48,7 +48,7 @@ For each capture, classify it as one of:
    For captures classified as **note** or **defer**, auto-confirm without asking — these are low-impact.
    For captures classified as **quick-task**, **inject**, or **replan**, ask the user to confirm or choose a different classification.
 
-3. **Update** `.gsd/CAPTURES.md` — for each capture, update its section with the confirmed classification:
+3. **Update** `.hx/CAPTURES.md` — for each capture, update its section with the confirmed classification:
    - Change `**Status:** pending` to `**Status:** resolved`
    - Add `**Classification:** <type>`
    - Add `**Resolution:** <brief description of what will happen>`

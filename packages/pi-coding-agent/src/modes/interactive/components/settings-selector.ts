@@ -1,4 +1,4 @@
-import type { ThinkingLevel } from "@gsd/pi-agent-core";
+import type { ThinkingLevel } from "@hyperlab/hx-agent-core";
 import type { Transport } from "@hyperlab/hx-ai";
 import {
 	Container,

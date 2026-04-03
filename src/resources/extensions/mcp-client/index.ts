@@ -137,7 +137,7 @@ async function getOrConnect(name: string, signal?: AbortSignal): Promise<Client>
 	const config = getServerConfig(name);
 	if (!config) throw new Error(`Unknown MCP server: "${name}". Use mcp_servers to list available servers.`);
 
-	const client = new Client({ name: "gsd", version: "1.0.0" });
+	const client = new Client({ name: "hx", version: "1.0.0" });
 	let transport: StdioClientTransport | StreamableHTTPClientTransport;
 
 	if (config.transport === "stdio" && config.command) {

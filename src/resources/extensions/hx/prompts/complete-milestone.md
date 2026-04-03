@@ -1,4 +1,4 @@
-You are executing GSD auto-mode.
+You are executing HX auto-mode.
 
 ## UNIT: Complete Milestone {{milestoneId}} ("{{milestoneTitle}}")
 
@@ -17,11 +17,11 @@ All relevant context has been preloaded below — the roadmap, all slice summari
 Then:
 1. Use the **Milestone Summary** output template from the inlined context above
 2. {{skillActivation}}
-3. **Verify code changes exist.** Run `git diff --stat HEAD $(git merge-base HEAD main) -- ':!.gsd/'` (or the equivalent for the integration branch). If no non-`.gsd/` files appear in the diff, the milestone produced only planning artifacts and no actual code. Record this as a **verification failure**.
+3. **Verify code changes exist.** Run `git diff --stat HEAD $(git merge-base HEAD main) -- ':!.hx/'` (or the equivalent for the integration branch). If no non-`.hx/` files appear in the diff, the milestone produced only planning artifacts and no actual code. Record this as a **verification failure**.
 4. Verify each **success criterion** from the milestone definition in `{{roadmapPath}}`. For each criterion, confirm it was met with specific evidence from slice summaries, test results, or observable behavior. Record any criterion that was NOT met as a **verification failure**.
 5. Verify the milestone's **definition of done** — all slices are `[x]`, all slice summaries exist, and any cross-slice integration points work correctly. Record any unmet items as a **verification failure**.
 6. If the roadmap includes a **Horizontal Checklist**, verify each item was addressed during the milestone. Note unchecked items in the milestone summary.
-7. Fill the **Decision Re-evaluation** table in the milestone summary. For each key decision from `.gsd/DECISIONS.md` made during this milestone, evaluate whether it is still valid given what was actually built. Flag decisions that should be revisited next milestone.
+7. Fill the **Decision Re-evaluation** table in the milestone summary. For each key decision from `.hx/DECISIONS.md` made during this milestone, evaluate whether it is still valid given what was actually built. Flag decisions that should be revisited next milestone.
 8. Validate **requirement status transitions**. For each requirement that changed status during this milestone, confirm the transition is supported by evidence. Requirements can move between Active, Validated, Deferred, Blocked, or Out of Scope — but only with proof.
 
 ### Verification Gate — STOP if verification failed
@@ -30,8 +30,8 @@ Then:
 
 **Failure path** (verification failed):
 - Do NOT call `gsd_complete_milestone` — the milestone must not be marked as complete.
-- Do NOT update `.gsd/PROJECT.md` to reflect completion.
-- Do NOT update `.gsd/REQUIREMENTS.md` to mark requirements as validated.
+- Do NOT update `.hx/PROJECT.md` to reflect completion.
+- Do NOT update `.hx/REQUIREMENTS.md` to mark requirements as validated.
 - Write a clear summary of what failed and why to help the next attempt.
 - Say: "Milestone {{milestoneId}} verification FAILED — not complete." and stop.
 
@@ -55,9 +55,9 @@ Then:
    **Optional parameters:**
    - `followUps` (string) — Follow-up items for future milestones
    - `deviations` (string) — Deviations from the original plan
-10. For each requirement whose status changed in step 8, call `gsd_requirement_update` with the requirement ID and updated `status` and `validation` fields — the tool regenerates `.gsd/REQUIREMENTS.md` automatically.
-11. Update `.gsd/PROJECT.md` to reflect milestone completion and current project state.
-12. Review all slice summaries for cross-cutting lessons, patterns, or gotchas that emerged during this milestone. Append any non-obvious, reusable insights to `.gsd/KNOWLEDGE.md`.
+10. For each requirement whose status changed in step 8, call `gsd_requirement_update` with the requirement ID and updated `status` and `validation` fields — the tool regenerates `.hx/REQUIREMENTS.md` automatically.
+11. Update `.hx/PROJECT.md` to reflect milestone completion and current project state.
+12. Review all slice summaries for cross-cutting lessons, patterns, or gotchas that emerged during this milestone. Append any non-obvious, reusable insights to `.hx/KNOWLEDGE.md`.
 13. Do not commit manually — the system auto-commits your changes after this unit completes.
 - Say: "Milestone {{milestoneId}} complete."
 

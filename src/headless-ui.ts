@@ -145,8 +145,8 @@ export function summarizeToolArgs(toolName: unknown, toolInput: unknown): string
     case 'browser_navigate':
       return String(input.url ?? '')
     default: {
-      // GSD tools: show milestone/slice/task IDs when present
-      if (name.startsWith('gsd_')) {
+      // HX tools: show milestone/slice/task IDs when present
+      if (name.startsWith('hx_')) {
         return summarizeGsdTool(name, input)
       }
       // Fallback: show first string-valued key up to 60 chars
@@ -160,7 +160,7 @@ export function summarizeToolArgs(toolName: unknown, toolInput: unknown): string
   }
 }
 
-/** Summarize GSD extension tool args into a compact identifier string. */
+/** Summarize HX extension tool args into a compact identifier string. */
 function summarizeGsdTool(name: string, input: Record<string, unknown>): string {
   const parts: string[] = []
   if (input.milestoneId) parts.push(String(input.milestoneId))
@@ -175,7 +175,7 @@ function summarizeGsdTool(name: string, input: Record<string, unknown>): string 
     }
     return id
   }
-  // Fallback for GSD tools without IDs (e.g. gsd_decision_save)
+  // Fallback for HX tools without IDs (e.g. hx_decision_save)
   if (input.decision) {
     const d = String(input.decision)
     return d.length > 60 ? d.slice(0, 57) + '...' : d

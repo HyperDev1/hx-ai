@@ -7,12 +7,12 @@ import test from "node:test";
 import { discoverAgents } from "../../subagent/agents.ts";
 
 function makeProjectRoot(t: test.TestContext): string {
-	const root = mkdtempSync(join(tmpdir(), "gsd-subagent-agents-"));
+	const root = mkdtempSync(join(tmpdir(), "hx-subagent-agents-"));
 	t.after(() => rmSync(root, { recursive: true, force: true }));
 	return root;
 }
 
-function writeAgent(root: string, configDirName: ".hx" | ".gsd" | ".pi", name = "ping"): string {
+function writeAgent(root: string, configDirName: ".hx" | ".hx" | ".pi", name = "ping"): string {
 	const agentsDir = join(root, configDirName, "agents");
 	mkdirSync(agentsDir, { recursive: true });
 	writeFileSync(

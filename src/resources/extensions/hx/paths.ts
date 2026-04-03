@@ -278,7 +278,7 @@ const LEGACY_HX_ROOT_FILES: Record<HXRootFileKey, string> = {
   KNOWLEDGE: "knowledge.md",
 };
 
-// ─── GSD Root Discovery ───────────────────────────────────────────────────────
+// ─── HX Root Discovery ───────────────────────────────────────────────────────
 
 const hxRootCache = new Map<string, string>();
 

@@ -232,7 +232,7 @@ test("formatKeyDashboard includes header and category sections", () => {
   const statuses = getAllKeyStatuses(auth);
   const output = formatKeyDashboard(statuses);
 
-  assert.ok(output.includes("GSD API Key Manager"));
+  assert.ok(output.includes("HX API Key Manager"));
   assert.ok(output.includes("LLM Providers"));
   assert.ok(output.includes("Search Providers"));
   assert.ok(output.includes("Tool Keys"));

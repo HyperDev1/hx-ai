@@ -5,11 +5,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/gsd-build/gsd-2.git"
+    "url": "https://github.com/hx-build/hx-2.git"
   },
-  "homepage": "https://github.com/gsd-build/gsd-2#readme",
+  "homepage": "https://github.com/hx-build/hx-2#readme",
   "bugs": {
-    "url": "https://github.com/gsd-build/gsd-2/issues"
+    "url": "https://github.com/hx-build/hx-2/issues"
   },
   "type": "module",
   "workspaces": [

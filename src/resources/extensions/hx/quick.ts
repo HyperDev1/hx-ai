@@ -1,8 +1,8 @@
 /**
- * GSD Quick Mode — /hx quick <task>
+ * HX Quick Mode — /hx quick <task>
  * Copyright (c) 2026 Jeremy McSpadden <jeremy@fluxlabs.net>
  *
- * Lightweight task execution with GSD guarantees (atomic commits, state
+ * Lightweight task execution with HX guarantees (atomic commits, state
  * tracking) but without the full milestone/slice ceremony.
  *
  * Quick tasks live in `.hx/quick/` and are tracked in STATE.md's
@@ -195,7 +195,7 @@ export async function handleQuick(
   // Create git branch for the quick task
   const gitPrefs = loadEffectiveHXPreferences()?.preferences?.git ?? {};
   const git = new GitServiceImpl(basePath, gitPrefs);
-  const branchName = `gsd/quick/${taskNum}-${slug}`;
+  const branchName = `hx/quick/${taskNum}-${slug}`;
   let originalBranch = git.getCurrentBranch();
 
   let branchCreated = false;
@@ -248,7 +248,7 @@ export async function handleQuick(
 
   pi.sendMessage(
     {
-      customType: "gsd-quick-task",
+      customType: "hx-quick-task",
       content: prompt,
       display: false,
     },

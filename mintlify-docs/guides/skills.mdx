@@ -3,11 +3,11 @@ title: "Skills"
 description: "Specialized instruction sets that provide domain-specific guidance to the LLM."
 ---
 
-Skills are specialized instruction sets that GSD loads when the task matches. They provide domain-specific guidance — coding patterns, framework idioms, testing strategies, and tool usage.
+Skills are specialized instruction sets that HX loads when the task matches. They provide domain-specific guidance — coding patterns, framework idioms, testing strategies, and tool usage.
 
 ## Bundled skills
 
-GSD ships with these skills, installed to `~/.gsd/agent/skills/`:
+HX ships with these skills, installed to `~/.hx/agent/skills/`:
 
 | Skill | Trigger | Description |
 |-------|---------|-------------|
@@ -25,7 +25,7 @@ GSD ships with these skills, installed to `~/.gsd/agent/skills/`:
 
 ## Skill discovery
 
-The `skill_discovery` preference controls how GSD finds skills:
+The `skill_discovery` preference controls how HX finds skills:
 
 | Mode | Behavior |
 |------|----------|
@@ -51,8 +51,8 @@ skill_rules:
 
 ### Resolution order
 
-1. **Bare name** — e.g., `frontend-design` → scans `~/.gsd/agent/skills/` and project skills
-2. **Absolute path** — e.g., `/Users/you/.gsd/agent/skills/my-skill/SKILL.md`
+1. **Bare name** — e.g., `frontend-design` → scans `~/.hx/agent/skills/` and project skills
+2. **Absolute path** — e.g., `/Users/you/.hx/agent/skills/my-skill/SKILL.md`
 3. **Directory path** — looks for `SKILL.md` inside
 
 User skills take precedence over project skills.
@@ -62,7 +62,7 @@ User skills take precedence over project skills.
 Create a directory with a `SKILL.md` file:
 
 ```
-~/.gsd/agent/skills/my-skill/
+~/.hx/agent/skills/my-skill/
   SKILL.md           — instructions for the LLM
   references/        — optional reference files
 ```
@@ -70,17 +70,17 @@ Create a directory with a `SKILL.md` file:
 ### Project-local skills
 
 ```
-.gsd/agent/skills/my-project-skill/
+.hx/agent/skills/my-project-skill/
   SKILL.md
 ```
 
 ## Skill health dashboard
 
 ```
-/gsd skill-health              # overview table
-/gsd skill-health rust-core    # detailed view
-/gsd skill-health --stale 30   # unused for 30+ days
-/gsd skill-health --declining  # falling success rates
+/hx skill-health              # overview table
+/hx skill-health rust-core    # detailed view
+/hx skill-health --stale 30   # unused for 30+ days
+/hx skill-health --declining  # falling success rates
 ```
 
 The dashboard flags:

@@ -1,5 +1,5 @@
 /**
- * Unit tests for GSD Init Wizard — project onboarding flow.
+ * Unit tests for HX Init Wizard — project onboarding flow.
  *
  * Tests the bootstrap logic and preferences file generation
  * without requiring interactive UI (tests the pure functions).
@@ -20,7 +20,7 @@ import { detectProjectState } from "../detection.ts";
 function makeTempDir(prefix: string): string {
   const dir = join(
     tmpdir(),
-    `gsd-init-test-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    `hx-init-test-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
   );
   mkdirSync(dir, { recursive: true });
   return dir;
@@ -79,7 +79,7 @@ test("init-wizard: existing .hx/ with milestones skips init", (t) => {
 });
 
 test("init-wizard: empty .hx/ (no milestones) returns v2-hx-empty", (t) => {
-  const dir = makeTempDir("empty-gsd");
+  const dir = makeTempDir("empty-hx");
   try {
     mkdirSync(join(dir, ".hx", "milestones"), { recursive: true });
 

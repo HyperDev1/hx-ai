@@ -32,8 +32,8 @@ function run(command: string, cwd: string): string {
 }
 
 describe('symlink-numbered-variants', async () => {
-  const base = realpathSync(mkdtempSync(join(tmpdir(), "gsd-symlink-variants-")));
-  const stateDir = realpathSync(mkdtempSync(join(tmpdir(), "gsd-state-variants-")));
+  const base = realpathSync(mkdtempSync(join(tmpdir(), "hx-symlink-variants-")));
+  const stateDir = realpathSync(mkdtempSync(join(tmpdir(), "hx-state-variants-")));
 
   try {
     process.env.HX_STATE_DIR = stateDir;

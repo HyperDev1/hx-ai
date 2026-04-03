@@ -2,18 +2,18 @@
  * Reproduction: Parallel Worktree Path Resolution Escapes to Home Directory
  *
  * This script reproduces the bug where resolveProjectRoot() returns the
- * user's home directory (~) when the project .gsd is a symlink into
- * ~/.gsd/projects/<hash> and worktree isolation is enabled.
+ * user's home directory (~) when the project .hx is a symlink into
+ * ~/.hx/projects/<hash> and worktree isolation is enabled.
  *
  * Layout mimics pi's default:
- *   /root/.gsd/projects/<hash>/          ← user-level GSD storage
- *   /tmp/myproject/.gsd → symlink to ↑   ← project's .gsd
- *   /tmp/myproject/.gsd/worktrees/M001/  ← worktree (logical path through symlink)
+ *   /root/.hx/projects/<hash>/          ← user-level HX storage
+ *   /tmp/myproject/.hx → symlink to ↑   ← project's .hx
+ *   /tmp/myproject/.hx/worktrees/M001/  ← worktree (logical path through symlink)
  *
- * When a worker spawns with cwd = /tmp/myproject/.gsd/worktrees/M001,
- * process.cwd() resolves symlinks → /root/.gsd/projects/<hash>/worktrees/M001.
- * findWorktreeSegment() then matches /.gsd/ at the WRONG boundary (the
- * user-level ~/.gsd), causing resolveProjectRoot() to return /root (home dir).
+ * When a worker spawns with cwd = /tmp/myproject/.hx/worktrees/M001,
+ * process.cwd() resolves symlinks → /root/.hx/projects/<hash>/worktrees/M001.
+ * findWorktreeSegment() then matches /.hx/ at the WRONG boundary (the
+ * user-level ~/.hx), causing resolveProjectRoot() to return /root (home dir).
  */
 
 import { mkdirSync, symlinkSync, existsSync, realpathSync, mkdtempSync } from "node:fs";
@@ -24,14 +24,14 @@ import { homedir, tmpdir } from "node:os";
 // ── Reproduce the exact functions from worktree.ts ──────────────────────
 
 function findWorktreeSegment(normalizedPath) {
-  // Direct layout: /.gsd/worktrees/<name>
-  const directMarker = "/.gsd/worktrees/";
+  // Direct layout: /.hx/worktrees/<name>
+  const directMarker = "/.hx/worktrees/";
   const idx = normalizedPath.indexOf(directMarker);
   if (idx !== -1) {
     return { gsdIdx: idx, afterWorktrees: idx + directMarker.length };
   }
-  // Symlink-resolved layout: /.gsd/projects/<hash>/worktrees/<name>
-  const symlinkRe = /\/\.gsd\/projects\/[a-f0-9]+\/worktrees\//;
+  // Symlink-resolved layout: /.hx/projects/<hash>/worktrees/<name>
+  const symlinkRe = /\/\.hx\/projects\/[a-f0-9]+\/worktrees\//;
   const match = normalizedPath.match(symlinkRe);
   if (match && match.index !== undefined) {
     return { gsdIdx: match.index, afterWorktrees: match.index + match[0].length };
@@ -43,9 +43,9 @@ function resolveProjectRoot(basePath) {
   const normalizedPath = basePath.replaceAll("\\", "/");
   const seg = findWorktreeSegment(normalizedPath);
   if (!seg) return basePath;
-  // Return the original path up to the /.gsd/ boundary
+  // Return the original path up to the /.hx/ boundary
   const sep = basePath.includes("\\") ? "\\" : "/";
-  const gsdMarker = `${sep}.gsd${sep}`;
+  const gsdMarker = `${sep}.hx${sep}`;
   const gsdIdx = basePath.indexOf(gsdMarker);
   if (gsdIdx !== -1) return basePath.slice(0, gsdIdx);
   return basePath.slice(0, seg.gsdIdx);
@@ -54,16 +54,16 @@ function resolveProjectRoot(basePath) {
 // ── Set up the filesystem layout ────────────────────────────────────────
 
 const HASH = "abc123def456";
-const TEST_ROOT = mkdtempSync(join(tmpdir(), "gsd-repro-"));
-const USER_GSD = process.env.GSD_HOME || join(TEST_ROOT, ".gsd");
+const TEST_ROOT = mkdtempSync(join(tmpdir(), "hx-repro-"));
+const USER_GSD = process.env.GSD_HOME || join(TEST_ROOT, ".hx");
 const USER_HOME = homedir();
 const PROJECT_GSD_STORAGE = `${USER_GSD}/projects/${HASH}`;
 const PROJECT_DIR = mkdtempSync(join(tmpdir(), "myproject-"));
-const PROJECT_GSD_LINK = `${PROJECT_DIR}/.gsd`;
+const PROJECT_GSD_LINK = `${PROJECT_DIR}/.hx`;
 
 console.log("=== Setting up filesystem layout ===\n");
 
-// 1. Create user-level GSD structure
+// 1. Create user-level HX structure
 mkdirSync(`${PROJECT_GSD_STORAGE}/worktrees/M001`, { recursive: true });
 mkdirSync(`${PROJECT_GSD_STORAGE}/milestones`, { recursive: true });
 console.log(`Created: ${PROJECT_GSD_STORAGE}/worktrees/M001`);
@@ -72,7 +72,7 @@ console.log(`Created: ${PROJECT_GSD_STORAGE}/worktrees/M001`);
 mkdirSync(PROJECT_DIR, { recursive: true });
 console.log(`Created: ${PROJECT_DIR}`);
 
-// 3. Create symlink: project/.gsd → user-level storage
+// 3. Create symlink: project/.hx → user-level storage
 symlinkSync(PROJECT_GSD_STORAGE, PROJECT_GSD_LINK);
 console.log(`Symlink: ${PROJECT_GSD_LINK} → ${PROJECT_GSD_STORAGE}`);
 
@@ -87,7 +87,7 @@ console.log("\n=== Path Resolution Tests ===\n");
 
 // ── Test 1: Logical path (through symlink) ──────────────────────────────
 
-const logicalPath = `${PROJECT_DIR}/.gsd/worktrees/M001`;
+const logicalPath = `${PROJECT_DIR}/.hx/worktrees/M001`;
 console.log(`Test 1: Logical path (through symlink)`);
 console.log(`  Input:    ${logicalPath}`);
 console.log(`  Expected: ${PROJECT_DIR}`);
@@ -124,22 +124,22 @@ console.log(`  Status:   ${workerBuggy ? "🐛 BUG REPRODUCED — worker would u
 if (workerBuggy) {
   console.log(`\n=== Cascade Analysis ===\n`);
   console.log(`The worker thinks project root is: ${result3}`);
-  console.log(`It would look for .gsd at:         ${result3}/.gsd`);
-  console.log(`That path exists:                   ${existsSync(join(result3, ".gsd"))}`);
+  console.log(`It would look for .hx at:         ${result3}/.hx`);
+  console.log(`That path exists:                   ${existsSync(join(result3, ".hx"))}`);
   
-  if (existsSync(join(result3, ".gsd"))) {
-    const resolvedGsd = realpathSync(join(result3, ".gsd"));
+  if (existsSync(join(result3, ".hx"))) {
+    const resolvedGsd = realpathSync(join(result3, ".hx"));
     console.log(`It resolves to:                    ${resolvedGsd}`);
-    console.log(`\nThis is the USER-LEVEL .gsd directory!`);
+    console.log(`\nThis is the USER-LEVEL .hx directory!`);
     console.log(`The worker would:`);
-    console.log(`  1. Write session status to ~/.gsd/parallel/`);
-    console.log(`  2. Write orchestrator.json to ~/.gsd/`);
+    console.log(`  1. Write session status to ~/.hx/parallel/`);
+    console.log(`  2. Write orchestrator.json to ~/.hx/`);
     console.log(`  3. Potentially git init in ${result3} (the home directory)`);
-    console.log(`  4. Corrupt the user-level GSD configuration`);
+    console.log(`  4. Corrupt the user-level HX configuration`);
   }
 }
 
-// ── Test 5: Verify findWorktreeSegment matches at the wrong /.gsd/ ──────
+// ── Test 5: Verify findWorktreeSegment matches at the wrong /.hx/ ──────
 
 console.log(`\n=== Root Cause Detail ===\n`);
 const seg = findWorktreeSegment(resolvedPath);
@@ -147,16 +147,16 @@ if (seg) {
   console.log(`findWorktreeSegment() matched:`);
   console.log(`  gsdIdx:         ${seg.gsdIdx}`);
   console.log(`  afterWorktrees: ${seg.afterWorktrees}`);
-  console.log(`  Path before /.gsd/: "${resolvedPath.slice(0, seg.gsdIdx)}"`);
+  console.log(`  Path before /.hx/: "${resolvedPath.slice(0, seg.gsdIdx)}"`);
   console.log(`  This is: ${resolvedPath.slice(0, seg.gsdIdx) === USER_HOME ? "THE HOME DIRECTORY (bug!)" : "some other directory"}`);
   
   // Show which regex matched
-  const directMarker = "/.gsd/worktrees/";
+  const directMarker = "/.hx/worktrees/";
   const directIdx = resolvedPath.indexOf(directMarker);
   if (directIdx !== -1) {
-    console.log(`\n  Matched by: direct marker "/.gsd/worktrees/" at index ${directIdx}`);
-    console.log(`  The /.gsd/ it found is at: "${resolvedPath.slice(0, directIdx + 5)}"`);
-    console.log(`  This /.gsd/ is the USER-LEVEL ~/.gsd, not the project .gsd!`);
+    console.log(`\n  Matched by: direct marker "/.hx/worktrees/" at index ${directIdx}`);
+    console.log(`  The /.hx/ it found is at: "${resolvedPath.slice(0, directIdx + 5)}"`);
+    console.log(`  This /.hx/ is the USER-LEVEL ~/.hx, not the project .hx!`);
   } else {
     console.log(`\n  Matched by: symlink regex`);
   }
@@ -168,8 +168,8 @@ console.log(`\n${"=".repeat(60)}`);
 if (workerBuggy) {
   console.log(`\n🐛 BUG CONFIRMED: resolveProjectRoot() returns "${result3}"`);
   console.log(`   when it should return "${PROJECT_DIR}"`);
-  console.log(`   because findWorktreeSegment() matches the /.gsd/ in the`);
-  console.log(`   user-level ~/.gsd path, not the project-level .gsd symlink.`);
+  console.log(`   because findWorktreeSegment() matches the /.hx/ in the`);
+  console.log(`   user-level ~/.hx path, not the project-level .hx symlink.`);
   process.exit(1);
 } else {
   console.log(`\n✅ Bug not reproduced — may be fixed.`);

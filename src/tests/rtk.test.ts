@@ -75,7 +75,7 @@ test("rewriteCommandWithRtk respects the disable flag", () => {
 
 test("rewriteCommandWithRtk falls back to the managed RTK path when HX_RTK_PATH is unset", () => {
   const fake = createFakeRtk({ "git status": "rtk git status" });
-  const managedHome = mkdtempSync(join(tmpdir(), "gsd-rtk-managed-home-"));
+  const managedHome = mkdtempSync(join(tmpdir(), "hx-rtk-managed-home-"));
   const managedDir = join(managedHome, "agent", "bin");
   const managedPath = join(managedDir, process.platform === "win32" ? "rtk.cmd" : "rtk");
 

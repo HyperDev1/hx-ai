@@ -1,4 +1,4 @@
-import type { AgentTool } from "@gsd/pi-agent-core";
+import type { AgentTool } from "@hyperlab/hx-agent-core";
 import type { ImageContent, TextContent } from "@hyperlab/hx-ai";
 import { type Static, Type } from "@sinclair/typebox";
 import { constants } from "fs";

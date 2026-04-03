@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * GSD Parallel Worker Monitor
+ * HX Parallel Worker Monitor
  * 
- * Real-time TUI dashboard for monitoring parallel GSD auto-mode workers.
+ * Real-time TUI dashboard for monitoring parallel HX auto-mode workers.
  * Zero dependencies — uses raw ANSI escape codes, Node.js builtins only.
  * 
  * Usage:
@@ -18,15 +18,15 @@
  *   --heal                Auto-respawn dead workers (opt-in, off by default)
  *   --heal-retries <n>    Max respawn attempts per worker (default: 3)
  *   --heal-cooldown <sec> Seconds between respawn attempts (default: 30)
- *   --dir <path>          Status file directory (default: .gsd/parallel)
+ *   --dir <path>          Status file directory (default: .hx/parallel)
  *   --root <path>         Project root (default: cwd)
  * 
  * Data sources:
- *   .gsd/parallel/M0xx.status.json  — heartbeat, cost, state (written by orchestrator)
- *   .gsd/worktrees/M0xx/.gsd/auto.lock — current unit type + ID (written by worker)
- *   .gsd/worktrees/M0xx/.gsd/gsd.db — task/slice completion (SQLite, queried via cli)
- *   .gsd/parallel/M0xx.stdout.log — NDJSON events (cost extraction, notify messages)
- *   .gsd/parallel/M0xx.stderr.log — error surfacing
+ *   .hx/parallel/M0xx.status.json  — heartbeat, cost, state (written by orchestrator)
+ *   .hx/worktrees/M0xx/.hx/auto.lock — current unit type + ID (written by worker)
+ *   .hx/worktrees/M0xx/.hx/hx.db — task/slice completion (SQLite, queried via cli)
+ *   .hx/parallel/M0xx.stdout.log — NDJSON events (cost extraction, notify messages)
+ *   .hx/parallel/M0xx.stderr.log — error surfacing
  * 
  * Health indicators:
  *   ● green  — PID alive, fresh heartbeat (<30s)
@@ -48,7 +48,7 @@ import { execSync } from 'node:child_process';
 
 const args = process.argv.slice(2);
 const INTERVAL_SEC = parseInt(getArg('--interval', '5'), 10);
-const PARALLEL_DIR = getArg('--dir', '.gsd/parallel');
+const PARALLEL_DIR = getArg('--dir', '.hx/parallel');
 const PROJECT_ROOT = getArg('--root', process.cwd());
 const ONE_SHOT = args.includes('--once');
 const HEAL_MODE = args.includes('--heal');
@@ -122,7 +122,7 @@ function isPidAlive(pid) {
 
 function discoverWorkers() {
   const dir = path.resolve(PROJECT_ROOT, PARALLEL_DIR);
-  const worktreeDir = path.resolve(PROJECT_ROOT, '.gsd/worktrees');
+  const worktreeDir = path.resolve(PROJECT_ROOT, '.hx/worktrees');
   const mids = new Set();
   
   // From status files
@@ -143,7 +143,7 @@ function discoverWorkers() {
   // From worktree directories that have auto.lock (actively running)
   if (fs.existsSync(worktreeDir)) {
     for (const d of fs.readdirSync(worktreeDir)) {
-      if (d.startsWith('M') && fs.existsSync(path.join(worktreeDir, d, '.gsd', 'auto.lock'))) {
+      if (d.startsWith('M') && fs.existsSync(path.join(worktreeDir, d, '.hx', 'auto.lock'))) {
         mids.add(d);
       }
     }
@@ -158,12 +158,12 @@ function readWorkerStatus(mid) {
 }
 
 function readAutoLock(mid) {
-  const lockPath = path.resolve(PROJECT_ROOT, `.gsd/worktrees/${mid}/.gsd/auto.lock`);
+  const lockPath = path.resolve(PROJECT_ROOT, `.hx/worktrees/${mid}/.hx/auto.lock`);
   return readJsonSafe(lockPath);
 }
 
 function querySliceProgress(mid) {
-  const dbPath = path.resolve(PROJECT_ROOT, `.gsd/worktrees/${mid}/.gsd/gsd.db`);
+  const dbPath = path.resolve(PROJECT_ROOT, `.hx/worktrees/${mid}/.hx/hx.db`);
   if (!fs.existsSync(dbPath)) return [];
   
   try {
@@ -274,9 +274,9 @@ function extractCostFromNdjson(mid) {
 
 // ─── Self-Healing ────────────────────────────────────────────────────────────
 
-// Auto-detect the GSD loader path — works across npm global, homebrew, and local installs
+// Auto-detect the HX loader path — works across npm global, homebrew, and local installs
 function findGsdLoader() {
-  // 1. Check if we're running from inside the gsd-2 repo itself
+  // 1. Check if we're running from inside the hx-2 repo itself
   const repoLoader = path.resolve(import.meta.dirname, '..', 'dist', 'loader.js');
   if (fs.existsSync(repoLoader)) return repoLoader;
   
@@ -284,17 +284,17 @@ function findGsdLoader() {
   try {
     const globalRoot = execSync('npm root -g', { encoding: 'utf-8', timeout: 3000 }).trim();
     const candidates = [
-      path.join(globalRoot, 'gsd-pi', 'dist', 'loader.js'),
-      path.join(globalRoot, '@gsd', 'pi', 'dist', 'loader.js'),
+      path.join(globalRoot, 'hx-pi', 'dist', 'loader.js'),
+      path.join(globalRoot, '@hx', 'pi', 'dist', 'loader.js'),
     ];
     for (const c of candidates) {
       if (fs.existsSync(c)) return c;
     }
   } catch { /* skip */ }
   
-  // 3. Try `which gsd` and resolve symlink
+  // 3. Try `which hx` and resolve symlink
   try {
-    const bin = execSync('which gsd', { encoding: 'utf-8', timeout: 3000 }).trim();
+    const bin = execSync('which hx', { encoding: 'utf-8', timeout: 3000 }).trim();
     if (bin) {
       const realBin = fs.realpathSync(bin);
       const loader = path.resolve(path.dirname(realBin), '..', 'dist', 'loader.js');
@@ -312,7 +312,7 @@ const GSD_LOADER = findGsdLoader();
  * Uses nohup + output redirection so the child is fully detached.
  */
 function respawnWorker(mid) {
-  const worktreeDir = path.resolve(PROJECT_ROOT, `.gsd/worktrees/${mid}`);
+  const worktreeDir = path.resolve(PROJECT_ROOT, `.hx/worktrees/${mid}`);
   if (!fs.existsSync(worktreeDir)) return null;
   if (!fs.existsSync(GSD_LOADER)) return null;
   
@@ -515,7 +515,7 @@ function truncate(str, maxLen) {
  * Get recently completed tasks/slices from the worktree DB for the event feed.
  */
 function queryRecentCompletions(mid) {
-  const dbPath = path.resolve(PROJECT_ROOT, `.gsd/worktrees/${mid}/.gsd/gsd.db`);
+  const dbPath = path.resolve(PROJECT_ROOT, `.hx/worktrees/${mid}/.hx/hx.db`);
   if (!fs.existsSync(dbPath)) return [];
   
   try {
@@ -631,7 +631,7 @@ function render(workers) {
   
   // ── Header ──
   buf.push('');
-  const title = ' GSD Parallel Monitor ';
+  const title = ' HX Parallel Monitor ';
   const titlePad = Math.max(0, Math.floor((w - title.length) / 2));
   buf.push(
     `${' '.repeat(titlePad)}${BOLD}${BG.blue}${FG.white}${title}${RESET}`
@@ -651,7 +651,7 @@ function render(workers) {
   if (workers.length === 0) {
     buf.push('');
     buf.push(`  ${FG.yellow}No workers found in ${PARALLEL_DIR}/${RESET}`);
-    buf.push(`  ${DIM}Waiting for .gsd/parallel/*.status.json files...${RESET}`);
+    buf.push(`  ${DIM}Waiting for .hx/parallel/*.status.json files...${RESET}`);
   } else {
     for (const wk of workers) {
       buf.push('');

@@ -1,4 +1,4 @@
-You are a project reorganization assistant for a GSD (Get Shit Done) project. The user wants to rethink their milestone plan — reorder priorities, remove work that's no longer needed, add new milestones, or restructure dependencies.
+You are a project reorganization assistant for a HX (Get Shit Done) project. The user wants to rethink their milestone plan — reorder priorities, remove work that's no longer needed, add new milestones, or restructure dependencies.
 
 ## Current Milestone Landscape
 
@@ -22,7 +22,7 @@ You are a project reorganization assistant for a GSD (Get Shit Done) project. Th
      create and complete; queue management is file-driven until tool support is added. -->
 
 ### Reorder milestones
-Change execution order of pending/active milestones. Write `.gsd/QUEUE-ORDER.json`:
+Change execution order of pending/active milestones. Write `.hx/QUEUE-ORDER.json`:
 ```json
 { "order": ["M003", "M001", "M002"], "updatedAt": "<ISO timestamp>" }
 ```
@@ -79,5 +79,5 @@ If a proposed order would violate constraints, explain the issue and suggest alt
 - Do NOT modify completed milestones — they're done
 - Do NOT park completed milestones — it would corrupt dependency satisfaction
 - Park is preferred over discard when a milestone has any completed work
-- Always persist queue order changes to `.gsd/QUEUE-ORDER.json`
-- After changes, run `git add .gsd/ && git commit -m "docs(gsd): rethink milestone plan"` to persist (rethink runs interactively outside auto-mode, so no system auto-commit)
+- Always persist queue order changes to `.hx/QUEUE-ORDER.json`
+- After changes, run `git add .hx/ && git commit -m "docs(hx): rethink milestone plan"` to persist (rethink runs interactively outside auto-mode, so no system auto-commit)

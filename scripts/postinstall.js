@@ -24,7 +24,7 @@ const RTK_SKIP =
 const RTK_VERSION = '0.33.1'
 const RTK_REPO = 'rtk-ai/rtk'
 const RTK_ENV = { ...process.env, RTK_TELEMETRY_DISABLED: '1' }
-const managedBinDir = join(process.env.GSD_HOME || join(homedir(), '.gsd'), 'agent', 'bin')
+const managedBinDir = join(process.env.HX_HOME || join(homedir(), '.hx'), 'agent', 'bin')
 const managedBinaryPath = join(managedBinDir, platform() === 'win32' ? 'rtk.exe' : 'rtk')
 
 function run(cmd) {
@@ -69,7 +69,7 @@ function sha256File(path) {
 }
 
 async function downloadToFile(url, destination) {
-  const response = await fetch(url, { headers: { 'User-Agent': 'gsd-pi-postinstall' } })
+  const response = await fetch(url, { headers: { 'User-Agent': 'hx-pi-postinstall' } })
   if (!response.ok) {
     throw new Error(`download failed (${response.status}) for ${url}`)
   }
@@ -121,7 +121,7 @@ async function ensureRtkInstalled() {
 
   try {
     const checksumsResponse = await fetch(`${releaseBase}/checksums.txt`, {
-      headers: { 'User-Agent': 'gsd-pi-postinstall' },
+      headers: { 'User-Agent': 'hx-pi-postinstall' },
     })
     if (!checksumsResponse.ok) {
       throw new Error(`failed to fetch RTK checksums (${checksumsResponse.status})`)

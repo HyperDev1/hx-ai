@@ -37,8 +37,8 @@ export function deriveWorkflowAction(input: WorkflowActionInput): WorkflowAction
   // Suppress the action bar to avoid duplicate/confusing buttons.
   if (
     projectDetectionKind &&
-    projectDetectionKind !== "active-gsd" &&
-    projectDetectionKind !== "empty-gsd"
+    projectDetectionKind !== "active-hx" &&
+    projectDetectionKind !== "empty-hx"
   ) {
     return { primary: null, secondaries: [], disabled: true, disabledReason: "Project setup pending", isNewMilestone: false }
   }
@@ -64,28 +64,28 @@ export function deriveWorkflowAction(input: WorkflowActionInput): WorkflowAction
   let isNewMilestone = false
 
   if (autoActive && !autoPaused) {
-    primary = { label: "Stop Auto", command: "/gsd stop", variant: "destructive" }
+    primary = { label: "Stop Auto", command: "/hx stop", variant: "destructive" }
   } else if (autoPaused) {
-    primary = { label: "Resume Auto", command: "/gsd auto", variant: "default" }
+    primary = { label: "Resume Auto", command: "/hx auto", variant: "default" }
   } else {
     // Auto is not active
     if (phase === "complete") {
       // All milestones done — surface a distinct "New Milestone" action
-      primary = { label: "New Milestone", command: "/gsd", variant: "default" }
+      primary = { label: "New Milestone", command: "/hx", variant: "default" }
       isNewMilestone = true
     } else if (phase === "planning") {
-      primary = { label: "Plan", command: "/gsd", variant: "default" }
+      primary = { label: "Plan", command: "/hx", variant: "default" }
     } else if (phase === "executing" || phase === "summarizing") {
-      primary = { label: "Start Auto", command: "/gsd auto", variant: "default" }
+      primary = { label: "Start Auto", command: "/hx auto", variant: "default" }
     } else if (phase === "pre-planning" && !hasMilestones) {
-      primary = { label: "Initialize Project", command: "/gsd", variant: "default" }
+      primary = { label: "Initialize Project", command: "/hx", variant: "default" }
     } else {
-      primary = { label: "Continue", command: "/gsd", variant: "default" }
+      primary = { label: "Continue", command: "/hx", variant: "default" }
     }
 
     // Add "Step" secondary when auto is not active (not for new milestone — no step concept there)
-    if (primary.command !== "/gsd next" && !isNewMilestone) {
-      secondaries.push({ label: "Step", command: "/gsd next" })
+    if (primary.command !== "/hx next" && !isNewMilestone) {
+      secondaries.push({ label: "Step", command: "/hx next" })
     }
   }
 

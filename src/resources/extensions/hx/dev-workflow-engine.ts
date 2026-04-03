@@ -1,8 +1,8 @@
 /**
  * dev-workflow-engine.ts — DevWorkflowEngine implementation.
  *
- * Implements WorkflowEngine by delegating to existing GSD state derivation
- * and dispatch logic. This is the "dev" engine — it wraps the current GSD
+ * Implements WorkflowEngine by delegating to existing HX state derivation
+ * and dispatch logic. This is the "dev" engine — it wraps the current HX
  * auto-mode behavior behind the engine-polymorphic interface.
  */
 
@@ -24,7 +24,7 @@ import { loadEffectiveHXPreferences } from "./preferences.js";
 // ─── Bridge: DispatchAction → EngineDispatchAction ────────────────────────
 
 /**
- * Map a GSD-specific DispatchAction (which carries `matchedRule`, `unitType`,
+ * Map a HX-specific DispatchAction (which carries `matchedRule`, `unitType`,
  * etc.) to the engine-generic EngineDispatchAction discriminated union.
  *
  * Exported for unit testing.
@@ -57,14 +57,14 @@ export class DevWorkflowEngine implements WorkflowEngine {
   readonly engineId = "dev" as const;
 
   async deriveState(basePath: string): Promise<EngineState> {
-    const gsd: GSDState = await deriveState(basePath);
+    const hxState: GSDState = await deriveState(basePath);
     return {
-      phase: gsd.phase,
-      currentMilestoneId: gsd.activeMilestone?.id ?? null,
-      activeSliceId: gsd.activeSlice?.id ?? null,
-      activeTaskId: gsd.activeTask?.id ?? null,
-      isComplete: gsd.phase === "complete",
-      raw: gsd,
+      phase: hxState.phase,
+      currentMilestoneId: hxState.activeMilestone?.id ?? null,
+      activeSliceId: hxState.activeSlice?.id ?? null,
+      activeTaskId: hxState.activeTask?.id ?? null,
+      isComplete: hxState.phase === "complete",
+      raw: hxState,
     };
   }
 
@@ -72,9 +72,9 @@ export class DevWorkflowEngine implements WorkflowEngine {
     state: EngineState,
     context: { basePath: string },
   ): Promise<EngineDispatchAction> {
-    const gsd = state.raw as GSDState;
-    const mid = gsd.activeMilestone?.id ?? "";
-    const midTitle = gsd.activeMilestone?.title ?? "";
+    const hxState = state.raw as GSDState;
+    const mid = hxState.activeMilestone?.id ?? "";
+    const midTitle = hxState.activeMilestone?.title ?? "";
     const loaded = loadEffectiveHXPreferences();
     const prefs = loaded?.preferences ?? undefined;
 
@@ -82,7 +82,7 @@ export class DevWorkflowEngine implements WorkflowEngine {
       basePath: context.basePath,
       mid,
       midTitle,
-      state: gsd,
+      state: hxState,
       prefs,
     };
 
@@ -101,7 +101,7 @@ export class DevWorkflowEngine implements WorkflowEngine {
 
   getDisplayMetadata(state: EngineState): DisplayMetadata {
     return {
-      engineLabel: "GSD Dev",
+      engineLabel: "HX Dev",
       currentPhase: state.phase,
       progressSummary: `${state.currentMilestoneId ?? "no milestone"} / ${state.activeSliceId ?? "—"} / ${state.activeTaskId ?? "—"}`,
       stepCount: null,

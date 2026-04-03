@@ -13,7 +13,7 @@ import type {
 	AgentToolResult,
 	AgentToolUpdateCallback,
 	ThinkingLevel,
-} from "@gsd/pi-agent-core";
+} from "@hyperlab/hx-agent-core";
 import type {
 	Api,
 	AssistantMessageEvent,

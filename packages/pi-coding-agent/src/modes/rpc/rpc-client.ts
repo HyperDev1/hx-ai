@@ -5,7 +5,7 @@
  */
 
 import { type ChildProcess, spawn } from "node:child_process";
-import type { AgentEvent, AgentMessage, ThinkingLevel } from "@gsd/pi-agent-core";
+import type { AgentEvent, AgentMessage, ThinkingLevel } from "@hyperlab/hx-agent-core";
 import type { ImageContent } from "@hyperlab/hx-ai";
 import type { SessionStats } from "../../core/agent-session.js";
 import type { BashResult } from "../../core/bash-executor.js";

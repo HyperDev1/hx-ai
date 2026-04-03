@@ -115,7 +115,7 @@ function listTarEntries(tarballPath: string): Promise<string[]> {
 // ═══════════════════════════════════════════════════════════════════════════
 
 test("npm pack produces tarball with required files", async (t) => {
-  const sandbox = createNpmSandbox("gsd-pack-test-");
+  const sandbox = createNpmSandbox("hx-pack-test-");
   const tarballPath = packTarball(sandbox);
 
   assert.ok(existsSync(tarballPath), "tarball created");
@@ -140,16 +140,16 @@ test("npm pack produces tarball with required files", async (t) => {
   // pkg/package.json must have piConfig
   const pkgJson = readFileSync(join(projectRoot, "pkg", "package.json"), "utf-8");
   const pkg = JSON.parse(pkgJson);
-  assert.equal(pkg.piConfig?.name, "gsd", "pkg/package.json piConfig.name is gsd");
-  assert.equal(pkg.piConfig?.configDir, ".gsd", "pkg/package.json piConfig.configDir is .gsd");
+  assert.equal(pkg.piConfig?.name, "hx", "pkg/package.json piConfig.name is hx");
+  assert.equal(pkg.piConfig?.configDir, ".hx", "pkg/package.json piConfig.configDir is .hx");
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 2. npm pack → install → gsd binary resolves
+// 2. npm pack → install → hx binary resolves
 // ═══════════════════════════════════════════════════════════════════════════
 
-test("tarball installs and gsd binary resolves", async (t) => {
-  const sandbox = createNpmSandbox("gsd-install-test-");
+test("tarball installs and hx binary resolves", async (t) => {
+  const sandbox = createNpmSandbox("hx-install-test-");
   const tarballPath = packTarball(sandbox);
 
   t.after(() => {
@@ -160,10 +160,10 @@ test("tarball installs and gsd binary resolves", async (t) => {
   // Install from tarball into a temp prefix
   runNpmQuiet(["install", "--prefix", sandbox.installPrefix, tarballPath, "--no-save"], sandbox);
 
-  // Verify the gsd bin exists in the installed package
-  const binName = process.platform === "win32" ? "gsd.cmd" : "gsd";
+  // Verify the hx bin exists in the installed package
+  const binName = process.platform === "win32" ? "hx.cmd" : "hx";
   const installedBin = join(sandbox.installPrefix, "node_modules", ".bin", binName);
-  assert.ok(existsSync(installedBin), `gsd binary exists in node_modules/.bin/ (${binName})`);
+  assert.ok(existsSync(installedBin), `hx binary exists in node_modules/.bin/ (${binName})`);
 
   // Verify loader.js is executable (has shebang)
   const installedLoader = join(sandbox.installPrefix, "node_modules", "@hyperlab/hx", "dist", "loader.js");
@@ -180,7 +180,7 @@ test("tarball installs and gsd binary resolves", async (t) => {
     "src",
     "resources",
     "extensions",
-    "gsd",
+    "hx",
     "index.ts",
   );
   assert.ok(existsSync(installedHxExt), "bundled hx extension present in installed package");
@@ -190,8 +190,8 @@ test("tarball installs and gsd binary resolves", async (t) => {
 // 3. Launch → extensions load → no errors on stderr
 // ═══════════════════════════════════════════════════════════════════════════
 
-test("gsd launches and loads extensions without errors", async () => {
-  // Launch gsd with all optional keys set (skip wizard) and capture stderr.
+test("hx launches and loads extensions without errors", async () => {
+  // Launch hx with all optional keys set (skip wizard) and capture stderr.
   // Kill after 5 seconds — we just need to see if extensions load.
   // Assumes build already done.
   const output = await new Promise<string>((resolve) => {
@@ -244,13 +244,13 @@ test("gsd launches and loads extensions without errors", async () => {
   );
 });
 
-test("gsd exits early with a clear message when synced resources are newer than the binary", async (t) => {
-  const fakeHome = mkdtempSync(join(tmpdir(), "gsd-version-skew-"));
-  const fakeAgentDir = join(fakeHome, ".gsd", "agent");
+test("hx exits early with a clear message when synced resources are newer than the binary", async (t) => {
+  const fakeHome = mkdtempSync(join(tmpdir(), "hx-version-skew-"));
+  const fakeAgentDir = join(fakeHome, ".hx", "agent");
   mkdirSync(fakeAgentDir, { recursive: true });
   writeFileSync(
     join(fakeAgentDir, "managed-resources.json"),
-    JSON.stringify({ gsdVersion: "999.0.0" }),
+    JSON.stringify({ hxVersion: "999.0.0" }),
   );
 
   t.after(() => { rmSync(fakeHome, { recursive: true, force: true }); });
@@ -283,6 +283,6 @@ test("gsd exits early with a clear message when synced resources are newer than 
 
   assert.equal(result.code, 1, "startup exits with code 1 on version skew");
   assert.match(result.stderr, /Version mismatch detected/, "prints a friendly skew header");
-  assert.match(result.stderr, /npm install -g @hyperlab/hx@latest|gsd update/, "prints upgrade guidance");
-  assert.doesNotMatch(result.stderr, /\[gsd\] Extension load error/, "fails before extension loading");
+  assert.match(result.stderr, /npm install -g @hyperlab/hx@latest|hx update/, "prints upgrade guidance");
+  assert.doesNotMatch(result.stderr, /\[hx\] Extension load error/, "fails before extension loading");
 });

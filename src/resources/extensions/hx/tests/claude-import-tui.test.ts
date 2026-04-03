@@ -125,7 +125,7 @@ describe(
 		let prefs: Record<string, unknown>;
 
 		before(() => {
-			tempDir = mkdtempSync(join(tmpdir(), 'gsd-tui-test-'));
+			tempDir = mkdtempSync(join(tmpdir(), 'hx-tui-test-'));
 			prefsPath = join(tempDir, 'PREFERENCES.md');
 			prefs = { version: 1 };
 		});

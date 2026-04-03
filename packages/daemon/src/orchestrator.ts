@@ -1,5 +1,5 @@
 /**
- * Orchestrator — LLM-powered agent for the #gsd-control Discord channel.
+ * Orchestrator — LLM-powered agent for the #hx-control Discord channel.
  *
  * Receives Discord messages, maintains conversation history, calls the
  * Anthropic messages API with 5 tool definitions (list_projects, start_session,
@@ -30,7 +30,7 @@ import type { ProjectInfo, ManagedSession } from './types.js';
 import type { Logger } from './logger.js';
 
 // ---------------------------------------------------------------------------
-// OAuth token resolution — reads GSD's auth.json, refreshes if expired
+// OAuth token resolution — reads HX's auth.json, refreshes if expired
 // ---------------------------------------------------------------------------
 
 interface OAuthCredentials {
@@ -44,7 +44,7 @@ const TOKEN_URL = 'https://platform.claude.com/v1/oauth/token';
 const CLIENT_ID = atob('OWQxYzI1MGEtZTYxYi00NGQ5LTg4ZWQtNTk0NGQxOTYyZjVl');
 
 /**
- * Read the Anthropic OAuth access token from GSD's auth.json.
+ * Read the Anthropic OAuth access token from HX's auth.json.
  * If expired, refresh it and write the new credentials back.
  * Falls back to ANTHROPIC_API_KEY env var if no OAuth credential exists.
  */
@@ -254,7 +254,7 @@ export class Orchestrator {
 
   /**
    * Lazily initialise the Anthropic client. Dynamic import handles K007 module resolution.
-   * Resolves auth from GSD's OAuth credentials (auth.json), refreshing if needed.
+   * Resolves auth from HX's OAuth credentials (auth.json), refreshing if needed.
    */
   private async getClient(): Promise<Anthropic> {
     if (this.client) return this.client;

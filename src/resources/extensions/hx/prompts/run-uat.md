@@ -1,4 +1,4 @@
-You are executing GSD auto-mode.
+You are executing HX auto-mode.
 
 ## UNIT: Run UAT — {{milestoneId}}/{{sliceId}}
 

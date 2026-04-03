@@ -1,4 +1,4 @@
-// View renderers for the GSD workflow visualizer overlay.
+// View renderers for the HX workflow visualizer overlay.
 
 import type { Theme } from "@hyperlab/hx-coding-agent";
 import { truncateToWidth, visibleWidth } from "@hyperlab/hx-tui";

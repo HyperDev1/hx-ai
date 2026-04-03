@@ -3,14 +3,14 @@ title: "Working in teams"
 description: "Multi-user workflows with unique milestone IDs, push branches, and shared planning artifacts."
 ---
 
-GSD supports multi-user workflows where several developers work on the same repository concurrently.
+HX supports multi-user workflows where several developers work on the same repository concurrently.
 
 ## Setup
 
 ### 1. Set team mode
 
 ```yaml
-# .gsd/PREFERENCES.md (project-level, committed to git)
+# .hx/PREFERENCES.md (project-level, committed to git)
 ---
 version: 1
 mode: team
@@ -25,15 +25,15 @@ Share planning artifacts while keeping runtime files local:
 
 ```bash
 # Runtime / ephemeral (per-developer)
-.gsd/auto.lock
-.gsd/completed-units.json
-.gsd/STATE.md
-.gsd/metrics.json
-.gsd/activity/
-.gsd/runtime/
-.gsd/worktrees/
-.gsd/milestones/**/continue.md
-.gsd/milestones/**/*-CONTINUE.md
+.hx/auto.lock
+.hx/completed-units.json
+.hx/STATE.md
+.hx/metrics.json
+.hx/activity/
+.hx/runtime/
+.hx/worktrees/
+.hx/milestones/**/continue.md
+.hx/milestones/**/*-CONTINUE.md
 ```
 
 **Shared** (committed): preferences, PROJECT.md, REQUIREMENTS.md, DECISIONS.md, milestones.
@@ -43,20 +43,20 @@ Share planning artifacts while keeping runtime files local:
 ### 3. Commit
 
 ```bash
-git add .gsd/PREFERENCES.md
-git commit -m "chore: enable GSD team workflow"
+git add .hx/PREFERENCES.md
+git commit -m "chore: enable HX team workflow"
 ```
 
 ## `commit_docs: false`
 
-For teams where only some members use GSD:
+For teams where only some members use HX:
 
 ```yaml
 git:
   commit_docs: false
 ```
 
-Adds `.gsd/` to `.gitignore` entirely. The developer gets structured planning without affecting teammates.
+Adds `.hx/` to `.gitignore` entirely. The developer gets structured planning without affecting teammates.
 
 ## Parallel development
 
@@ -69,4 +69,4 @@ depends_on: [M001-eh88as]
 ---
 ```
 
-GSD enforces that dependent milestones complete before starting downstream work.
+HX enforces that dependent milestones complete before starting downstream work.

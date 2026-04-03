@@ -15,7 +15,7 @@ function resolveTsLoaderPath(packageRoot: string): string {
 }
 
 /**
- * Collects cleanup data (GSD branches and snapshot refs) via a child process.
+ * Collects cleanup data (HX branches and snapshot refs) via a child process.
  * Child-process pattern required because native-git-bridge.ts uses .ts imports
  * that need the resolve-ts.mjs loader.
  */
@@ -52,7 +52,7 @@ export async function collectCleanupData(projectCwdOverride?: string): Promise<C
     'const branchList = branches.map(b => ({ name: b, merged: mergedSet.has(b) }));',
     // Get snapshot refs
     'let refs = [];',
-    'try { refs = mod.nativeForEachRef(basePath, "refs/gsd/snapshots/"); } catch {}',
+    'try { refs = mod.nativeForEachRef(basePath, "refs/hx/snapshots/"); } catch {}',
     'const snapshotList = refs.map(r => {',
     '  const parts = r.split(" ");',
     '  return { ref: parts[0] || r, date: parts.length > 1 ? parts.slice(1).join(" ") : "" };',

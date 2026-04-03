@@ -77,7 +77,7 @@ async function generateMilestoneReport(
     (m: { id: string }) => m.id === milestoneId,
   );
   const msTitle = completedMs?.title ?? milestoneId;
-  const gsdVersion = process.env.HX_VERSION ?? "0.0.0";
+  const hxVersion = process.env.HX_VERSION ?? "0.0.0";
   const projName = basename(reportBasePath);
   const doneSlices = snapData.milestones.reduce(
     (acc: number, m: { slices: { done: boolean }[] }) =>
@@ -93,7 +93,7 @@ async function generateMilestoneReport(
     html: generateHtmlReport(snapData, {
       projectName: projName,
       projectPath: reportBasePath,
-      gsdVersion,
+      hxVersion,
       milestoneId,
       indexRelPath: "index.html",
     }),
@@ -102,7 +102,7 @@ async function generateMilestoneReport(
     kind: "milestone",
     projectName: projName,
     projectPath: reportBasePath,
-    gsdVersion,
+    hxVersion,
     totalCost: snapData.totals?.cost ?? 0,
     totalTokens: snapData.totals?.tokens.total ?? 0,
     totalDuration: snapData.totals?.duration ?? 0,
@@ -226,7 +226,7 @@ export async function runPreDispatch(
       "info",
     );
     deps.sendDesktopNotification(
-      "GSD",
+      "HX",
       `Milestone ${s.currentMilestoneId} complete!`,
       "success",
       "milestone",
@@ -384,7 +384,7 @@ export async function runPreDispatch(
         // PR creation (auto_pr) is handled inside mergeMilestoneToMain (#2302)
       }
       deps.sendDesktopNotification(
-        "GSD",
+        "HX",
         "All milestones complete!",
         "success",
         "milestone",
@@ -411,7 +411,7 @@ export async function runPreDispatch(
       const blockerMsg = `Blocked: ${state.blockers.join(", ")}`;
       await deps.stopAuto(ctx, pi, blockerMsg);
       ctx.ui.notify(`${blockerMsg}. Fix and run /hx auto.`, "warning");
-      deps.sendDesktopNotification("GSD", blockerMsg, "error", "attention");
+      deps.sendDesktopNotification("HX", blockerMsg, "error", "attention");
       deps.logCmuxEvent(prefs, blockerMsg, "error");
     } else {
       const ids = incomplete.map((m: { id: string }) => m.id).join(", ");
@@ -488,7 +488,7 @@ export async function runPreDispatch(
       // PR creation (auto_pr) is handled inside mergeMilestoneToMain (#2302)
     }
     deps.sendDesktopNotification(
-      "GSD",
+      "HX",
       `Milestone ${mid} complete!`,
       "success",
       "milestone",
@@ -509,7 +509,7 @@ export async function runPreDispatch(
     const blockerMsg = `Blocked: ${state.blockers.join(", ")}`;
     await closeoutAndStop(ctx, pi, s, deps, blockerMsg);
     ctx.ui.notify(`${blockerMsg}. Fix and run /hx auto.`, "warning");
-    deps.sendDesktopNotification("GSD", blockerMsg, "error", "attention");
+    deps.sendDesktopNotification("HX", blockerMsg, "error", "attention");
     deps.logCmuxEvent(prefs, blockerMsg, "error");
     debugLog("autoLoop", { phase: "exit", reason: "blocked" });
     deps.emitJournalEvent({ ts: new Date().toISOString(), flowId: ic.flowId, seq: ic.nextSeq(), eventType: "terminal", data: { reason: "blocked", blockers: state.blockers } });
@@ -755,7 +755,7 @@ export async function runGuards(
         // 100% — special enforcement logic (halt/pause/warn)
         const msg = `Budget ceiling ${deps.formatCost(budgetCeiling)} reached (spent ${deps.formatCost(totalCost)}).`;
         if (budgetEnforcementAction === "halt") {
-          deps.sendDesktopNotification("GSD", msg, "error", "budget");
+          deps.sendDesktopNotification("HX", msg, "error", "budget");
           await deps.stopAuto(ctx, pi, "Budget ceiling reached");
           debugLog("autoLoop", { phase: "exit", reason: "budget-halt" });
           return { action: "break", reason: "budget-halt" };
@@ -765,21 +765,21 @@ export async function runGuards(
             `${msg} Pausing auto-mode — /hx auto to override and continue.`,
             "warning",
           );
-          deps.sendDesktopNotification("GSD", msg, "warning", "budget");
+          deps.sendDesktopNotification("HX", msg, "warning", "budget");
           deps.logCmuxEvent(prefs, msg, "warning");
           await deps.pauseAuto(ctx, pi);
           debugLog("autoLoop", { phase: "exit", reason: "budget-pause" });
           return { action: "break", reason: "budget-pause" };
         }
         ctx.ui.notify(`${msg} Continuing (enforcement: warn).`, "warning");
-        deps.sendDesktopNotification("GSD", msg, "warning", "budget");
+        deps.sendDesktopNotification("HX", msg, "warning", "budget");
         deps.logCmuxEvent(prefs, msg, "warning");
       } else if (threshold.pct < 100) {
         // Sub-100% — simple notification
         const msg = `${threshold.label}: ${deps.formatCost(totalCost)} / ${deps.formatCost(budgetCeiling)}`;
         ctx.ui.notify(msg, threshold.notifyLevel);
         deps.sendDesktopNotification(
-          "GSD",
+          "HX",
           msg,
           threshold.notifyLevel,
           "budget",
@@ -808,7 +808,7 @@ export async function runGuards(
         "warning",
       );
       deps.sendDesktopNotification(
-        "GSD",
+        "HX",
         `Context ${contextUsage.percent}% — paused`,
         "warning",
         "attention",
@@ -930,7 +930,7 @@ export async function runUnitPhase(
   );
 
   // Status bar + progress widget
-  ctx.ui.setStatus("gsd-auto", "auto");
+  ctx.ui.setStatus("hx-auto", "auto");
   if (mid)
     deps.updateSliceProgressCache(s.basePath, mid, state.activeSlice?.id);
   deps.updateProgressWidget(ctx, unitType, unitId, state);

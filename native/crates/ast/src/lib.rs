@@ -1,4 +1,4 @@
-//! AST-aware structural search and rewrite for GSD.
+//! AST-aware structural search and rewrite for HX.
 #![allow(clippy::needless_pass_by_value)]
 
 pub mod ast;

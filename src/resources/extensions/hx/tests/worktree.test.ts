@@ -36,7 +36,7 @@ function run(command: string, cwd: string): string {
   return execSync(command, { cwd, stdio: ["ignore", "pipe", "pipe"], encoding: "utf-8" }).trim();
 }
 
-const base = mkdtempSync(join(tmpdir(), "gsd-branch-test-"));
+const base = mkdtempSync(join(tmpdir(), "hx-branch-test-"));
 run("git init -b main", base);
 run('git config user.name "Pi Test"', base);
 run('git config user.email "pi@example.com"', base);
@@ -63,18 +63,18 @@ describe('worktree', async () => {
   assert.deepStrictEqual(run("git status --short", base), "", "repo is clean after auto-commit");
 
   console.log("\n=== getSliceBranchName ===");
-  assert.deepStrictEqual(getSliceBranchName("M001", "S01"), "gsd/M001/S01", "branch name format correct");
-  assert.deepStrictEqual(getSliceBranchName("M001", "S01", null), "gsd/M001/S01", "null worktree = plain branch");
-  assert.deepStrictEqual(getSliceBranchName("M001", "S01", "my-wt"), "gsd/my-wt/M001/S01", "worktree-namespaced branch");
+  assert.deepStrictEqual(getSliceBranchName("M001", "S01"), "hx/M001/S01", "branch name format correct");
+  assert.deepStrictEqual(getSliceBranchName("M001", "S01", null), "hx/M001/S01", "null worktree = plain branch");
+  assert.deepStrictEqual(getSliceBranchName("M001", "S01", "my-wt"), "hx/my-wt/M001/S01", "worktree-namespaced branch");
 
   console.log("\n=== parseSliceBranch ===");
-  const plain = parseSliceBranch("gsd/M001/S01");
+  const plain = parseSliceBranch("hx/M001/S01");
   assert.ok(plain !== null, "parses plain branch");
   assert.deepStrictEqual(plain!.worktreeName, null, "plain branch has no worktree name");
   assert.deepStrictEqual(plain!.milestoneId, "M001", "plain branch milestone");
   assert.deepStrictEqual(plain!.sliceId, "S01", "plain branch slice");
 
-  const namespaced = parseSliceBranch("gsd/feature-auth/M001/S01");
+  const namespaced = parseSliceBranch("hx/feature-auth/M001/S01");
   assert.ok(namespaced !== null, "parses worktree-namespaced branch");
   assert.deepStrictEqual(namespaced!.worktreeName, "feature-auth", "worktree name extracted");
   assert.deepStrictEqual(namespaced!.milestoneId, "M001", "namespaced branch milestone");
@@ -87,10 +87,10 @@ describe('worktree', async () => {
   assert.deepStrictEqual(worktreeBranch, null, "worktree/ prefix is not a slice branch");
 
   console.log("\n=== SLICE_BRANCH_RE ===");
-  assert.ok(SLICE_BRANCH_RE.test("gsd/M001/S01"), "regex matches plain branch");
-  assert.ok(SLICE_BRANCH_RE.test("gsd/my-wt/M001/S01"), "regex matches worktree branch");
+  assert.ok(SLICE_BRANCH_RE.test("hx/M001/S01"), "regex matches plain branch");
+  assert.ok(SLICE_BRANCH_RE.test("hx/my-wt/M001/S01"), "regex matches worktree branch");
   assert.ok(!SLICE_BRANCH_RE.test("main"), "regex rejects main");
-  assert.ok(!SLICE_BRANCH_RE.test("gsd/"), "regex rejects bare gsd/");
+  assert.ok(!SLICE_BRANCH_RE.test("hx/"), "regex rejects bare hx/");
   assert.ok(!SLICE_BRANCH_RE.test("worktree/foo"), "regex rejects worktree/foo");
 
   console.log("\n=== detectWorktreeName ===");
@@ -107,7 +107,7 @@ describe('worktree', async () => {
   console.log("\n=== captureIntegrationBranch: records current branch ===");
 
   {
-    const repo = mkdtempSync(join(tmpdir(), "gsd-integ-facade-"));
+    const repo = mkdtempSync(join(tmpdir(), "hx-integ-facade-"));
     run("git init -b main", repo);
     run("git config user.name 'Pi Test'", repo);
     run("git config user.email 'pi@example.com'", repo);
@@ -134,14 +134,14 @@ describe('worktree', async () => {
   console.log("\n=== captureIntegrationBranch: skips slice branches ===");
 
   {
-    const repo = mkdtempSync(join(tmpdir(), "gsd-integ-skip-"));
+    const repo = mkdtempSync(join(tmpdir(), "hx-integ-skip-"));
     run("git init -b main", repo);
     run("git config user.name 'Pi Test'", repo);
     run("git config user.email 'pi@example.com'", repo);
     writeFileSync(join(repo, "README.md"), "init\n");
     run("git add -A && git commit -m init", repo);
 
-    run("git checkout -b gsd/M001/S01", repo);
+    run("git checkout -b hx/M001/S01", repo);
     captureIntegrationBranch(repo, "M001");
 
     assert.deepStrictEqual(readIntegrationBranch(repo, "M001"), null,
@@ -155,7 +155,7 @@ describe('worktree', async () => {
   console.log("\n=== setActiveMilestoneId + getMainBranch ===");
 
   {
-    const repo = mkdtempSync(join(tmpdir(), "gsd-integ-main-"));
+    const repo = mkdtempSync(join(tmpdir(), "hx-integ-main-"));
     run("git init -b main", repo);
     run("git config user.name 'Pi Test'", repo);
     run("git config user.email 'pi@example.com'", repo);
@@ -247,8 +247,8 @@ describe('worktree', async () => {
 
   // Real symlink + git worktree scenario, with deep nested path from cwd
   {
-    const fakeHome = mkdtempSync(join(tmpdir(), "gsd-home-"));
-    const project = realpathSync(mkdtempSync(join(tmpdir(), "gsd-proj-")));
+    const fakeHome = mkdtempSync(join(tmpdir(), "hx-home-"));
+    const project = realpathSync(mkdtempSync(join(tmpdir(), "hx-proj-")));
     const storage = join(fakeHome, ".hx", "projects", "abc123def456");
     mkdirSync(storage, { recursive: true });
     symlinkSync(storage, join(project, ".hx"));

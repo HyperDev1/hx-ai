@@ -1,5 +1,5 @@
 /**
- * GSD Worktree Utilities
+ * HX Worktree Utilities
  *
  * Pure utility functions for worktree name detection, legacy branch name
  * parsing, and integration branch capture.
@@ -55,7 +55,7 @@ export function setActiveMilestoneId(basePath: string, milestoneId: string | nul
  * Called once when auto-mode starts — captures where slice branches should
  * merge back to. No-op if the same branch is already recorded. Updates the
  * record when the user starts from a different branch (#300). Always a no-op
- * if on a GSD slice branch.
+ * if on a HX slice branch.
  */
 export function captureIntegrationBranch(basePath: string, milestoneId: string): void {
   // In a worktree, the base branch is implicit (worktree/<name>).
@@ -93,7 +93,7 @@ function findWorktreeSegment(normalizedPath: string): { gsdIdx: number; afterWor
 
 /**
  * Detect the active worktree name from the current working directory.
- * Returns null if not inside a GSD worktree (.hx/worktrees/<name>/).
+ * Returns null if not inside a HX worktree (.hx/worktrees/<name>/).
  */
 export function detectWorktreeName(basePath: string): string | null {
   const normalizedPath = basePath.replaceAll("\\", "/");
@@ -148,7 +148,7 @@ export function resolveProjectRoot(basePath: string): string {
 
   if (candidateGsdPath === hxHome || candidateGsdPath.startsWith(hxHome + "/")) {
     // The candidate is the home directory (or within it in a way that .hx
-    // maps to the user-level GSD dir). Try to recover the real project root
+    // maps to the user-level HX dir). Try to recover the real project root
     // from the worktree's .git file.
     const realRoot = resolveProjectRootFromGitFile(basePath);
     if (realRoot) return realRoot;
@@ -221,8 +221,8 @@ function normalizePathForCompare(path: string): string {
 /**
  * Get the slice branch name, namespaced by worktree when inside one.
  *
- * In the main tree:     gsd/<milestoneId>/<sliceId>
- * In a worktree:        gsd/<worktreeName>/<milestoneId>/<sliceId>
+ * In the main tree:     hx/<milestoneId>/<sliceId>
+ * In a worktree:        hx/<worktreeName>/<milestoneId>/<sliceId>
  *
  * This prevents branch conflicts when multiple worktrees work on the
  * same milestone/slice IDs — git doesn't allow a branch to be checked
@@ -230,9 +230,9 @@ function normalizePathForCompare(path: string): string {
  */
 export function getSliceBranchName(milestoneId: string, sliceId: string, worktreeName?: string | null): string {
   if (worktreeName) {
-    return `gsd/${worktreeName}/${milestoneId}/${sliceId}`;
+    return `hx/${worktreeName}/${milestoneId}/${sliceId}`;
   }
-  return `gsd/${milestoneId}/${sliceId}`;
+  return `hx/${milestoneId}/${sliceId}`;
 }
 
 /** Re-export for backward compatibility — canonical definition in branch-patterns.ts */
@@ -241,7 +241,7 @@ import { SLICE_BRANCH_RE } from "./branch-patterns.js";
 
 /**
  * Parse a slice branch name into its components.
- * Handles both `gsd/M001/S01` and `gsd/myworktree/M001/S01`.
+ * Handles both `hx/M001/S01` and `hx/myworktree/M001/S01`.
  */
 export function parseSliceBranch(branchName: string): {
   worktreeName: string | null;
@@ -260,7 +260,7 @@ export function parseSliceBranch(branchName: string): {
 // ─── Git-Mutation Functions (delegate to GitServiceImpl) ───────────────────
 
 /**
- * Get the "main" branch for GSD slice operations.
+ * Get the "main" branch for HX slice operations.
  *
  * In the main working tree: returns main/master (the repo's default branch).
  * In a worktree: returns worktree/<name> — the worktree's own base branch.

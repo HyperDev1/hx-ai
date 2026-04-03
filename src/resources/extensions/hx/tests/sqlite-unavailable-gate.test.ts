@@ -47,7 +47,7 @@ const gateMatch = afterDbLifecycle.match(
 
 assertTrue(
   !!gateMatch,
-  "auto-start.ts has a hard abort gate when gsd.db exists but SQLite is still unavailable (#2419)",
+  "auto-start.ts has a hard abort gate when hx.db exists but SQLite is still unavailable (#2419)",
 );
 
 if (gateMatch) {

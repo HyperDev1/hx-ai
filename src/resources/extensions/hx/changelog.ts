@@ -1,7 +1,7 @@
 /**
- * GSD Changelog — Fetch and display categorized release notes from GitHub
+ * HX Changelog — Fetch and display categorized release notes from GitHub
  *
- * Fetches releases from the gsd-build/hx-2 GitHub repository,
+ * Fetches releases from the hx-build/hx-2 GitHub repository,
  * prompts the user for a version filter, and sends raw release notes
  * into the conversation for the LLM to summarize.
  *
@@ -114,7 +114,7 @@ export async function handleChangelog(
   let releases: GitHubRelease[];
   try {
     const response = await fetch(RELEASES_URL, {
-      headers: { "User-Agent": "gsd-changelog" },
+      headers: { "User-Agent": "hx-changelog" },
     });
 
     if (!response.ok) {
@@ -198,7 +198,7 @@ export async function handleChangelog(
     : `for current release ${matched[0].name || matched[0].tag_name}`;
 
   const prompt = [
-    `Here are the raw GSD changelog entries ${versionRange}.`,
+    `Here are the raw HX changelog entries ${versionRange}.`,
     "Summarize the most important changes — group by category (Added, Changed, Fixed, etc.),",
     "keep only the most impactful items (max 5 per category), skip trivial changes,",
     "and include the version where each item appeared. Keep it concise and scannable.",
@@ -207,7 +207,7 @@ export async function handleChangelog(
   ].join("\n");
 
   pi.sendMessage(
-    { customType: "gsd-changelog", content: prompt, display: true },
+    { customType: "hx-changelog", content: prompt, display: true },
     { triggerTurn: true },
   );
 }

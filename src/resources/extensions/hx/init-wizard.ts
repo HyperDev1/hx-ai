@@ -419,17 +419,17 @@ function bootstrapGsdDirectory(
   // Final safety check before writing any files
   assertSafeDirectory(basePath);
 
-  const gsd = hxRoot(basePath);
-  mkdirSync(join(gsd, "milestones"), { recursive: true });
+  const hx = hxRoot(basePath);
+  mkdirSync(join(hx, "milestones"), { recursive: true });
 
   // Write PREFERENCES.md from wizard answers
   const preferencesContent = buildPreferencesFile(prefs);
-  writeFileSync(join(gsd, "PREFERENCES.md"), preferencesContent, "utf-8");
+  writeFileSync(join(hx, "PREFERENCES.md"), preferencesContent, "utf-8");
 
   // Seed CONTEXT.md with detected project signals
   const contextContent = buildContextSeed(signals);
   if (contextContent) {
-    writeFileSync(join(gsd, "CONTEXT.md"), contextContent, "utf-8");
+    writeFileSync(join(hx, "CONTEXT.md"), contextContent, "utf-8");
   }
 }
 

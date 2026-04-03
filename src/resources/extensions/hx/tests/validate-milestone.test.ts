@@ -16,7 +16,7 @@ import { clearParseCache } from "../files.ts";
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
 function makeTmpBase(): string {
-  const base = join(tmpdir(), `gsd-val-test-${randomUUID()}`);
+  const base = join(tmpdir(), `hx-val-test-${randomUUID()}`);
   mkdirSync(join(base, ".hx", "milestones"), { recursive: true });
   return base;
 }
@@ -386,7 +386,7 @@ test("buildLoopRemediationSteps returns steps for validate-milestone", () => {
     assert.ok(result);
     assert.ok(result!.includes("VALIDATION"));
     assert.ok(result!.includes("verdict: pass"));
-    assert.ok(result!.includes("gsd recover"));
+    assert.ok(result!.includes("hx recover"));
   } finally {
     cleanup(base);
   }

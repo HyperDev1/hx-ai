@@ -4,7 +4,7 @@
 name: revise
 version: 1
 requires_project: false
-artifact_dir: .gsd/workflows/revisions/
+artifact_dir: .hx/workflows/revisions/
 </template_meta>
 
 <purpose>

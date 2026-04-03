@@ -1,6 +1,6 @@
 import type { ImageContent } from "@hyperlab/hx-ai";
-import { ImageFormat, parseImage, SamplingFilter } from "@gsd/native/image";
-import type { NativeImageHandle } from "@gsd/native/image";
+import { ImageFormat, parseImage, SamplingFilter } from "@hyperlab/hx-native/image";
+import type { NativeImageHandle } from "@hyperlab/hx-native/image";
 
 export interface ImageResizeOptions {
 	maxWidth?: number; // Default: 2000

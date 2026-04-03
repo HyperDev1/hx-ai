@@ -1,4 +1,4 @@
-// GSD Extension — workflow-manifest unit tests
+// HX Extension — workflow-manifest unit tests
 // Tests writeManifest, readManifest, snapshotState, bootstrapFromManifest.
 
 import test from 'node:test';
@@ -21,7 +21,7 @@ import {
 } from '../workflow-manifest.ts';
 
 function tempDir(): string {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-manifest-'));
+  return fs.mkdtempSync(path.join(os.tmpdir(), 'hx-manifest-'));
 }
 
 function tempDbPath(base: string): string {

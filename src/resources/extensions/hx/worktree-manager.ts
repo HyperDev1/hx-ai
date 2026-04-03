@@ -1,5 +1,5 @@
 /**
- * GSD Worktree Manager
+ * HX Worktree Manager
  *
  * Creates and manages git worktrees under .hx/worktrees/<name>/.
  * Each worktree gets its own branch (worktree/<name>) and a full
@@ -194,7 +194,7 @@ export function createWorktree(basePath: string, name: string, opts: { branch?: 
 }
 
 /**
- * List all GSD-managed worktrees.
+ * List all HX-managed worktrees.
  * Uses native worktree list and filters to those under .hx/worktrees/.
  */
 export function listWorktrees(basePath: string): WorktreeInfo[] {
@@ -341,7 +341,7 @@ export function removeWorktree(
         // The stash is created in the worktree before it's torn down.
         try {
           execFileSync(
-            "git", ["stash", "push", "-m", "gsd: auto-stash submodule changes before worktree teardown"],
+            "git", ["stash", "push", "-m", "hx: auto-stash submodule changes before worktree teardown"],
             { cwd: resolvedWtPath, stdio: ["ignore", "pipe", "pipe"], encoding: "utf-8" },
           );
           logWarning("reconcile", `Stashed uncommitted submodule changes before worktree teardown`, { worktree: name, path: resolvedWtPath });
@@ -408,7 +408,7 @@ function parseDiffNameStatus(entries: { status: string; path: string }[]): Workt
 
 /**
  * Diff the .hx/ directory between the worktree branch and main branch.
- * Returns a summary of added, modified, and removed GSD artifacts.
+ * Returns a summary of added, modified, and removed HX artifacts.
  */
 export function diffWorktreeGSD(basePath: string, name: string): WorktreeDiffSummary {
   const branch = worktreeBranchName(name);

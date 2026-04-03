@@ -1,5 +1,5 @@
 /**
- * Unit tests for GSD Detection — project state and ecosystem detection.
+ * Unit tests for HX Detection — project state and ecosystem detection.
  *
  * Exercises the pure detection functions in detection.ts:
  * - detectProjectState() with various folder layouts
@@ -22,7 +22,7 @@ import {
 function makeTempDir(prefix: string): string {
   const dir = join(
     tmpdir(),
-    `gsd-detection-test-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    `hx-detection-test-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
   );
   mkdirSync(dir, { recursive: true });
   return dir;

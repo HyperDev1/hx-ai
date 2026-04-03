@@ -1,4 +1,4 @@
-// GSD Extension — Undo Last Unit + Targeted State Reset
+// HX Extension — Undo Last Unit + Targeted State Reset
 // handleUndo: Rollback the most recent completed unit (revert git, remove state, uncheck plans).
 // handleUndoTask: Reset a single task's DB status to "pending" and re-render markdown.
 // handleResetSlice: Reset a slice and all its tasks, re-rendering plan + roadmap.
@@ -23,7 +23,7 @@ import { renderPlanCheckboxes, renderRoadmapCheckboxes } from "./markdown-render
 export async function handleUndo(args: string, ctx: ExtensionCommandContext, _pi: ExtensionAPI, basePath: string): Promise<void> {
   const force = args.includes("--force");
 
-  // Find the last GSD-related commit from git activity logs
+  // Find the last HX-related commit from git activity logs
   const activityDir = join(hxRoot(basePath), "activity");
   if (!existsSync(activityDir)) {
     ctx.ui.notify("Nothing to undo — no activity logs found.", "info");
@@ -133,7 +133,7 @@ export async function handleUndo(args: string, ctx: ExtensionCommandContext, _pi
   }
 
   ctx.ui.notify(results.join("\n"), "success");
-  sendDesktopNotification("GSD", `Undone: ${unitType} (${unitId})`, "info", "complete");
+  sendDesktopNotification("HX", `Undone: ${unitType} (${unitId})`, "info", "complete");
 }
 
 // ─── Targeted State Reset ────────────────────────────────────────────────────

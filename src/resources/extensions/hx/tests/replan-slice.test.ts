@@ -27,7 +27,7 @@ function loadPromptFromWorktree(name: string, vars: Record<string, string> = {})
 // ─── Fixture Helpers ───────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-replan-test-'));
+  const base = mkdtempSync(join(tmpdir(), 'hx-replan-test-'));
   mkdirSync(join(base, '.hx', 'milestones'), { recursive: true });
   return base;
 }

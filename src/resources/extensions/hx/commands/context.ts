@@ -57,7 +57,7 @@ export async function guardRemoteSession(
       {
         id: "status",
         label: "View status",
-        description: "Show the current GSD progress dashboard.",
+        description: "Show the current HX progress dashboard.",
         recommended: true,
       },
       {

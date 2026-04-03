@@ -1,4 +1,4 @@
-// GSD Markdown Renderer — DB → Markdown file generation
+// HX Markdown Renderer — DB → Markdown file generation
 //
 // Transforms DB state into correct markdown files on disk.
 // Each render function reads from DB (with disk fallback),

@@ -23,9 +23,9 @@
 | `.github/workflows/cleanup-dev-versions.yml` | Weekly scheduled cleanup of old `-dev.` npm versions |
 | `scripts/version-stamp.mjs` | Reads `package.json` version, appends `-dev.<sha>`, writes back |
 | `tests/smoke/run.ts` | Smoke test runner — discovers and executes all smoke tests |
-| `tests/smoke/test-version.ts` | Verify `gsd --version` outputs valid semver |
-| `tests/smoke/test-help.ts` | Verify `gsd --help` exits 0 and contains expected output |
-| `tests/smoke/test-init.ts` | Verify `gsd init` creates expected files in a temp dir |
+| `tests/smoke/test-version.ts` | Verify `hx --version` outputs valid semver |
+| `tests/smoke/test-help.ts` | Verify `hx --help` exits 0 and contains expected output |
+| `tests/smoke/test-init.ts` | Verify `hx init` creates expected files in a temp dir |
 | `tests/fixtures/provider.ts` | `FixtureProvider` — wraps `ApiProvider`, records/replays turns |
 | `tests/fixtures/run.ts` | Fixture test runner — loads recordings, replays via `FixtureProvider` |
 | `tests/fixtures/record.ts` | Recording helper — runs a session with `GSD_FIXTURE_MODE=record` |
@@ -103,7 +103,7 @@ git commit -m "feat(ci): add version stamp script for dev publishes"
 ```dockerfile
 # ──────────────────────────────────────────────
 # Stage 1: CI Builder
-# Image: ghcr.io/gsd-build/gsd-ci-builder
+# Image: ghcr.io/hx-build/hx-ci-builder
 # Used by: pipeline.yml Dev stage
 # ──────────────────────────────────────────────
 FROM node:22-bookworm AS builder
@@ -124,40 +124,40 @@ RUN node --version && rustc --version && cargo --version
 
 # ──────────────────────────────────────────────
 # Stage 2: Runtime
-# Image: ghcr.io/gsd-build/gsd-pi
+# Image: ghcr.io/hx-build/hx-pi
 # Used by: end users via docker run
 # ──────────────────────────────────────────────
 FROM node:22-slim AS runtime
 
-# Git is required for GSD's git operations
+# Git is required for HX's git operations
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Install GSD globally — version is controlled by the build arg
+# Install HX globally — version is controlled by the build arg
 ARG GSD_VERSION=latest
-RUN npm install -g gsd-pi@${GSD_VERSION}
+RUN npm install -g hx-pi@${GSD_VERSION}
 
 # Default working directory for user projects
 WORKDIR /workspace
 
-ENTRYPOINT ["gsd"]
+ENTRYPOINT ["hx"]
 CMD ["--help"]
 ```
 
 - [ ] **Step 2: Verify builder stage builds**
 
-Run: `docker build --target builder -t gsd-ci-builder-test .`
+Run: `docker build --target builder -t hx-ci-builder-test .`
 Expected: Completes successfully (may take 5-10 min first time)
 
 - [ ] **Step 3: Verify runtime stage builds**
 
-Run: `docker build --target runtime -t gsd-pi-test .`
+Run: `docker build --target runtime -t hx-pi-test .`
 Expected: Completes successfully
 
 - [ ] **Step 4: Verify runtime image works**
 
-Run: `docker run --rm gsd-pi-test --version`
+Run: `docker run --rm hx-pi-test --version`
 Expected: Outputs a version string
 
 - [ ] **Step 5: Commit**
@@ -225,16 +225,16 @@ if (failed > 0) process.exit(1);
 
 ```typescript
 // tests/smoke/test-version.ts
-// Verifies that `gsd --version` outputs valid semver-like string.
+// Verifies that `hx --version` outputs valid semver-like string.
 // When GSD_SMOKE_BINARY is set (CI), uses that binary directly.
-// Otherwise falls back to npx gsd-pi.
+// Otherwise falls back to npx hx-pi.
 
 import { execFileSync } from "child_process";
 
 const bin = process.env.GSD_SMOKE_BINARY;
 const output = bin
   ? execFileSync(bin, ["--version"], { encoding: "utf8", timeout: 30_000 }).trim()
-  : execFileSync("npx", ["gsd-pi", "--version"], { encoding: "utf8", timeout: 30_000 }).trim();
+  : execFileSync("npx", ["hx-pi", "--version"], { encoding: "utf8", timeout: 30_000 }).trim();
 
 if (!/^\d+\.\d+\.\d+/.test(output)) {
   console.error(`Unexpected version output: "${output}"`);
@@ -248,16 +248,16 @@ console.log(`version: ${output}`);
 
 ```typescript
 // tests/smoke/test-help.ts
-// Verifies that `gsd --help` exits 0 and contains expected keywords.
+// Verifies that `hx --help` exits 0 and contains expected keywords.
 
 import { execFileSync } from "child_process";
 
 const bin = process.env.GSD_SMOKE_BINARY;
 const output = bin
   ? execFileSync(bin, ["--help"], { encoding: "utf8", timeout: 30_000 })
-  : execFileSync("npx", ["gsd-pi", "--help"], { encoding: "utf8", timeout: 30_000 });
+  : execFileSync("npx", ["hx-pi", "--help"], { encoding: "utf8", timeout: 30_000 });
 
-const requiredKeywords = ["gsd", "usage"];
+const requiredKeywords = ["hx", "usage"];
 for (const keyword of requiredKeywords) {
   if (!output.toLowerCase().includes(keyword)) {
     console.error(`Missing keyword "${keyword}" in help output`);
@@ -272,18 +272,18 @@ console.log("help output OK");
 
 ```typescript
 // tests/smoke/test-init.ts
-// Verifies that `gsd init` creates expected files in a temp directory.
+// Verifies that `hx init` creates expected files in a temp directory.
 
 import { execFileSync } from "child_process";
 import { mkdtempSync, existsSync, rmSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
 
-const tmp = mkdtempSync(join(tmpdir(), "gsd-smoke-init-"));
+const tmp = mkdtempSync(join(tmpdir(), "hx-smoke-init-"));
 
 try {
   const bin = process.env.GSD_SMOKE_BINARY;
-  const args = bin ? [bin, "init"] : ["npx", "gsd-pi", "init"];
+  const args = bin ? [bin, "init"] : ["npx", "hx-pi", "init"];
   execFileSync(args[0], args.slice(1), {
     encoding: "utf8",
     cwd: tmp,
@@ -291,9 +291,9 @@ try {
     env: { ...process.env, GSD_NON_INTERACTIVE: "1" },
   });
 
-  // Check that .gsd directory was created
-  if (!existsSync(join(tmp, ".gsd"))) {
-    console.error("Expected .gsd/ directory not found after init");
+  // Check that .hx directory was created
+  if (!existsSync(join(tmp, ".hx"))) {
+    console.error("Expected .hx/ directory not found after init");
     process.exit(1);
   }
 
@@ -484,7 +484,7 @@ export class FixtureReplayer {
 }
 ```
 
-Note: This provider implements the core recording/replay data structures and utilities. Wiring it into the `pi-ai` registry as a drop-in `ApiProvider` (via `registerApiProvider()` from `packages/pi-ai/src/api-registry.ts`) requires importing `@gsd/pi-ai` internals, which couples tests to the build output. This integration is deferred to a follow-up task after the pipeline is operational. The current implementation validates fixture format, turn sequencing, and replay correctness independently.
+Note: This provider implements the core recording/replay data structures and utilities. Wiring it into the `pi-ai` registry as a drop-in `ApiProvider` (via `registerApiProvider()` from `packages/pi-ai/src/api-registry.ts`) requires importing `@hx/pi-ai` internals, which couples tests to the build output. This integration is deferred to a follow-up task after the pipeline is operational. The current implementation validates fixture format, turn sequencing, and replay correctness independently.
 
 - [ ] **Step 2: Verify the file has no syntax errors**
 
@@ -947,8 +947,8 @@ Add to `package.json` `scripts`:
 "test:fixtures:record": "GSD_FIXTURE_MODE=record node --experimental-strip-types tests/fixtures/record.ts",
 "test:live": "GSD_LIVE_TESTS=1 node --experimental-strip-types tests/live/run.ts",
 "pipeline:version-stamp": "node scripts/version-stamp.mjs",
-"docker:build-runtime": "docker build --target runtime -t ghcr.io/gsd-build/gsd-pi .",
-"docker:build-builder": "docker build --target builder -t ghcr.io/gsd-build/gsd-ci-builder ."
+"docker:build-runtime": "docker build --target runtime -t ghcr.io/hx-build/hx-pi .",
+"docker:build-builder": "docker build --target builder -t ghcr.io/hx-build/hx-ci-builder ."
 ```
 
 - [ ] **Step 5: Verify live tests skip without env var**
@@ -997,7 +997,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/gsd-build/gsd-ci-builder:latest  # Pin to date tag after first build
+      image: ghcr.io/hx-build/hx-ci-builder:latest  # Pin to date tag after first build
     environment: dev
     outputs:
       dev-version: ${{ steps.stamp.outputs.version }}
@@ -1037,8 +1037,8 @@ jobs:
         run: |
           mkdir /tmp/smoke-test && cd /tmp/smoke-test
           npm init -y
-          npm install gsd-pi@dev
-          npx gsd --version
+          npm install hx-pi@dev
+          npx hx --version
 
   # ─── TEST STAGE ────────────────────────────────────────────
   test-verify:
@@ -1059,7 +1059,7 @@ jobs:
           registry-url: "https://registry.npmjs.org"
 
       - name: Install published dev package globally
-        run: npm install -g gsd-pi@dev
+        run: npm install -g hx-pi@dev
 
       - name: Install dev dependencies for test runners
         run: npm ci
@@ -1067,13 +1067,13 @@ jobs:
       - name: Run CLI smoke tests
         run: npm run test:smoke
         env:
-          GSD_SMOKE_BINARY: gsd  # Use globally installed binary, not npx
+          GSD_SMOKE_BINARY: hx  # Use globally installed binary, not npx
 
       - name: Run fixture replay tests
         run: npm run test:fixtures
 
       - name: Promote to @next
-        run: npm dist-tag add gsd-pi@${{ needs.dev-publish.outputs.dev-version }} next
+        run: npm dist-tag add hx-pi@${{ needs.dev-publish.outputs.dev-version }} next
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -1082,11 +1082,11 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           docker build --target runtime \
             --build-arg GSD_VERSION=${{ needs.dev-publish.outputs.dev-version }} \
-            -t ghcr.io/gsd-build/gsd-pi:next \
-            -t ghcr.io/gsd-build/gsd-pi:${{ needs.dev-publish.outputs.dev-version }} \
+            -t ghcr.io/hx-build/hx-pi:next \
+            -t ghcr.io/hx-build/hx-pi:${{ needs.dev-publish.outputs.dev-version }} \
             .
-          docker push ghcr.io/gsd-build/gsd-pi:next
-          docker push ghcr.io/gsd-build/gsd-pi:${{ needs.dev-publish.outputs.dev-version }}
+          docker push ghcr.io/hx-build/hx-pi:next
+          docker push ghcr.io/hx-build/hx-pi:${{ needs.dev-publish.outputs.dev-version }}
 
   # ─── PROD STAGE ────────────────────────────────────────────
   prod-release:
@@ -1117,16 +1117,16 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
       - name: Promote to @latest
-        run: npm dist-tag add gsd-pi@${{ needs.dev-publish.outputs.dev-version }} latest
+        run: npm dist-tag add hx-pi@${{ needs.dev-publish.outputs.dev-version }} latest
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Tag and push Docker images
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker pull ghcr.io/gsd-build/gsd-pi:${{ needs.dev-publish.outputs.dev-version }}
-          docker tag ghcr.io/gsd-build/gsd-pi:${{ needs.dev-publish.outputs.dev-version }} ghcr.io/gsd-build/gsd-pi:latest
-          docker push ghcr.io/gsd-build/gsd-pi:latest
+          docker pull ghcr.io/hx-build/hx-pi:${{ needs.dev-publish.outputs.dev-version }}
+          docker tag ghcr.io/hx-build/hx-pi:${{ needs.dev-publish.outputs.dev-version }} ghcr.io/hx-build/hx-pi:latest
+          docker push ghcr.io/hx-build/hx-pi:latest
 
       - name: Create GitHub Release
         run: |
@@ -1140,8 +1140,8 @@ jobs:
         run: |
           mkdir /tmp/prod-smoke && cd /tmp/prod-smoke
           npm init -y
-          npm install gsd-pi@latest
-          npx gsd --version
+          npm install hx-pi@latest
+          npx hx --version
 
   # ─── CI BUILDER IMAGE (conditional) ────────────────────────
   update-builder:
@@ -1164,16 +1164,16 @@ jobs:
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           docker build --target builder \
-            -t ghcr.io/gsd-build/gsd-ci-builder:latest \
-            -t ghcr.io/gsd-build/gsd-ci-builder:${{ steps.tag.outputs.date }} \
+            -t ghcr.io/hx-build/hx-ci-builder:latest \
+            -t ghcr.io/hx-build/hx-ci-builder:${{ steps.tag.outputs.date }} \
             .
-          docker push ghcr.io/gsd-build/gsd-ci-builder:latest
-          docker push ghcr.io/gsd-build/gsd-ci-builder:${{ steps.tag.outputs.date }}
+          docker push ghcr.io/hx-build/hx-ci-builder:latest
+          docker push ghcr.io/hx-build/hx-ci-builder:${{ steps.tag.outputs.date }}
 
       - name: Verify builder image
         run: |
-          docker run --rm ghcr.io/gsd-build/gsd-ci-builder:latest node --version
-          docker run --rm ghcr.io/gsd-build/gsd-ci-builder:latest rustc --version
+          docker run --rm ghcr.io/hx-build/hx-ci-builder:latest node --version
+          docker run --rm ghcr.io/hx-build/hx-ci-builder:latest rustc --version
 ```
 
 - [ ] **Step 2: Validate YAML syntax**
@@ -1222,7 +1222,7 @@ jobs:
 
       - name: Remove old dev versions
         run: |
-          VERSIONS=$(npm view gsd-pi versions --json 2>/dev/null || echo "[]")
+          VERSIONS=$(npm view hx-pi versions --json 2>/dev/null || echo "[]")
 
           DEV_VERSIONS=$(echo "$VERSIONS" | node -e "
             const stdin = require('fs').readFileSync('/dev/stdin', 'utf8');
@@ -1242,7 +1242,7 @@ jobs:
           THIRTY_DAYS_MS=2592000000
 
           for VERSION in $DEV_VERSIONS; do
-            PUBLISH_TIME=$(npm view "gsd-pi@$VERSION" time --json 2>/dev/null || echo "")
+            PUBLISH_TIME=$(npm view "hx-pi@$VERSION" time --json 2>/dev/null || echo "")
 
             if [ -n "$PUBLISH_TIME" ]; then
               AGE_MS=$(node -e "
@@ -1251,10 +1251,10 @@ jobs:
               " 2>/dev/null || echo "0")
 
               if [ "$AGE_MS" -gt "$THIRTY_DAYS_MS" ]; then
-                echo "Unpublishing gsd-pi@$VERSION"
-                npm unpublish "gsd-pi@$VERSION" || echo "Failed to unpublish $VERSION"
+                echo "Unpublishing hx-pi@$VERSION"
+                npm unpublish "hx-pi@$VERSION" || echo "Failed to unpublish $VERSION"
               else
-                echo "Keeping gsd-pi@$VERSION (within 30 days)"
+                echo "Keeping hx-pi@$VERSION (within 30 days)"
               fi
             fi
           done
@@ -1316,7 +1316,7 @@ console.log(`Recordings will be saved to: ${dir}`);
 console.log("");
 console.log("To record a fixture:");
 console.log("1. Set GSD_FIXTURE_MODE=record in your environment");
-console.log("2. Run your GSD session normally");
+console.log("2. Run your HX session normally");
 console.log("3. The FixtureProvider will intercept and save all LLM calls");
 console.log("4. Review the generated JSON in the recordings directory");
 console.log("5. Commit the fixture to version control");
@@ -1395,7 +1395,7 @@ These steps require repo admin access and cannot be automated:
    - `RUN_LIVE_TESTS` → `false` by default on `prod` (set to `true` to enable)
 
 4. **Enable GHCR:**
-   - Ensure GitHub Container Registry is enabled for the `gsd-build` org
+   - Ensure GitHub Container Registry is enabled for the `hx-build` org
 
 5. **Test the pipeline end-to-end:**
    - Merge a test PR to `main`

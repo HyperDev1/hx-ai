@@ -545,9 +545,9 @@ export function buildLoopRemediationSteps(
     case "execute-task": {
       if (!mid || !sid || !tid) break;
       return [
-        `   1. Run \`gsd undo-task ${tid}\` to reset the task state`,
+        `   1. Run \`/hx undo-task ${tid}\` to reset the task state`,
         `   2. Resume auto-mode — it will re-execute the task`,
-        `   3. If the task keeps failing, run \`gsd recover\` to rebuild DB state from disk`,
+        `   3. If the task keeps failing, run \`hx recover\` to rebuild DB state from disk`,
       ].join("\n");
     }
     case "plan-slice":
@@ -559,16 +559,16 @@ export function buildLoopRemediationSteps(
           : relSliceFile(base, mid, sid, "RESEARCH");
       return [
         `   1. Write ${artifactRel} manually (or with the LLM in interactive mode)`,
-        `   2. Run \`gsd recover\` to rebuild DB state from disk`,
+        `   2. Run \`hx recover\` to rebuild DB state from disk`,
         `   3. Resume auto-mode`,
       ].join("\n");
     }
     case "complete-slice": {
       if (!mid || !sid) break;
       return [
-        `   1. Run \`gsd reset-slice ${sid}\` to reset the slice and all its tasks`,
+        `   1. Run \`/hx reset-slice ${sid}\` to reset the slice and all its tasks`,
         `   2. Resume auto-mode — it will re-execute incomplete tasks and re-complete the slice`,
-        `   3. If the slice keeps failing, run \`gsd recover\` to rebuild DB state from disk`,
+        `   3. If the slice keeps failing, run \`hx recover\` to rebuild DB state from disk`,
       ].join("\n");
     }
     case "validate-milestone": {
@@ -576,7 +576,7 @@ export function buildLoopRemediationSteps(
       const artifactRel = relMilestoneFile(base, mid, "VALIDATION");
       return [
         `   1. Write ${artifactRel} with verdict: pass`,
-        `   2. Run \`gsd recover\` to rebuild DB state from disk`,
+        `   2. Run \`hx recover\` to rebuild DB state from disk`,
         `   3. Resume auto-mode`,
       ].join("\n");
     }

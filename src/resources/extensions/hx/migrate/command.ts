@@ -6,7 +6,7 @@
  * All business logic lives in the pipeline modules (S01–S03).
  *
  * After a successful write, offers an agent-driven review that audits the
- * output for GSD-2 standards compliance.
+ * output for HX-2 standards compliance.
  */
 
 import type { ExtensionAPI, ExtensionCommandContext } from "@hyperlab/hx-coding-agent";

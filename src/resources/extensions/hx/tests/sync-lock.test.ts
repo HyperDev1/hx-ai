@@ -1,4 +1,4 @@
-// GSD Extension — sync-lock unit tests
+// HX Extension — sync-lock unit tests
 // Tests acquireSyncLock() and releaseSyncLock().
 
 import test from 'node:test';
@@ -9,7 +9,7 @@ import * as os from 'node:os';
 import { acquireSyncLock, releaseSyncLock } from '../sync-lock.ts';
 
 function tempDir(): string {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-sync-lock-'));
+  return fs.mkdtempSync(path.join(os.tmpdir(), 'hx-sync-lock-'));
 }
 
 function cleanupDir(dirPath: string): void {

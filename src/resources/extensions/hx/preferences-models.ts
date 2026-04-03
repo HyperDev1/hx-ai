@@ -150,7 +150,7 @@ export function validateModelId(modelId: string): boolean {
 }
 
 /**
- * Update the models section of the global GSD preferences file.
+ * Update the models section of the global HX preferences file.
  * Performs a safe read-modify-write: reads current content, updates the models
  * YAML block, and writes back. Creates the file if it doesn't exist.
  */

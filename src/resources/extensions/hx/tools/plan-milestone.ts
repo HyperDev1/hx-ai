@@ -281,7 +281,7 @@ export async function handlePlanMilestone(
     });
   } catch (hookErr) {
     process.stderr.write(
-      `gsd: plan-milestone post-mutation hook warning: ${(hookErr as Error).message}\n`,
+      `hx: plan-milestone post-mutation hook warning: ${(hookErr as Error).message}\n`,
     );
   }
 

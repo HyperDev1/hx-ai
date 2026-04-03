@@ -56,27 +56,27 @@ const ALL_KNOWN_UNIT_TYPES = [
 // #2865: discuss dispatches must NOT alias to plan unitTypes
 // ═══════════════════════════════════════════════════════════════════════════
 
-test("#2865: no dispatchWorkflow with gsd-discuss customType uses plan-milestone", () => {
-  // Match dispatchWorkflow calls where "gsd-discuss" appears before "plan-milestone"
+test("#2865: no dispatchWorkflow with hx-discuss customType uses plan-milestone", () => {
+  // Match dispatchWorkflow calls where "hx-discuss" appears before "plan-milestone"
   // in the same call (the 5 args are on consecutive lines).
   const blocks = guidedFlowSrc.split(/dispatchWorkflow\(/);
   for (const block of blocks) {
     const callEnd = block.indexOf(");");
     if (callEnd === -1) continue;
     const call = block.slice(0, callEnd);
-    if (call.includes('"gsd-discuss"') && call.includes('"plan-milestone"')) {
+    if (call.includes('"hx-discuss"') && call.includes('"plan-milestone"')) {
       assert.fail(`Discuss dispatch should not use plan-milestone: ...dispatchWorkflow(${call.slice(0, 120).trim()}...`);
     }
   }
 });
 
-test("#2865: no dispatchWorkflow with gsd-discuss customType uses plan-slice", () => {
+test("#2865: no dispatchWorkflow with hx-discuss customType uses plan-slice", () => {
   const blocks = guidedFlowSrc.split(/dispatchWorkflow\(/);
   for (const block of blocks) {
     const callEnd = block.indexOf(");");
     if (callEnd === -1) continue;
     const call = block.slice(0, callEnd);
-    if (call.includes('"gsd-discuss"') && call.includes('"plan-slice"')) {
+    if (call.includes('"hx-discuss"') && call.includes('"plan-slice"')) {
       assert.fail(`Discuss slice dispatch should not use plan-slice: ...dispatchWorkflow(${call.slice(0, 120).trim()}...`);
     }
   }

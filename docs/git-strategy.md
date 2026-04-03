@@ -1,20 +1,20 @@
 # Git Strategy
 
-GSD uses git for milestone isolation and sequential commits within each milestone. You choose an **isolation mode** that controls where work happens. The strategy is fully automated — you don't need to manage branches manually.
+HX uses git for milestone isolation and sequential commits within each milestone. You choose an **isolation mode** that controls where work happens. The strategy is fully automated — you don't need to manage branches manually.
 
 ## Isolation Modes
 
-GSD supports three isolation modes, configured via the `git.isolation` preference:
+HX supports three isolation modes, configured via the `git.isolation` preference:
 
 | Mode | Working Directory | Branch | Best For |
 |------|-------------------|--------|----------|
-| `worktree` (default) | `.gsd/worktrees/<MID>/` | `milestone/<MID>` | Most projects — full file isolation between milestones |
+| `worktree` (default) | `.hx/worktrees/<MID>/` | `milestone/<MID>` | Most projects — full file isolation between milestones |
 | `branch` | Project root | `milestone/<MID>` | Submodule-heavy repos where worktrees don't work well |
 | `none` | Project root | Current branch (no milestone branch) | Hot-reload workflows where file isolation breaks dev tooling |
 
 ### `worktree` Mode (Default)
 
-Each milestone gets its own git worktree at `.gsd/worktrees/<MID>/` on a `milestone/<MID>` branch. All execution happens inside the worktree. On completion, the worktree is squash-merged to main as one clean commit. The worktree and branch are then cleaned up.
+Each milestone gets its own git worktree at `.hx/worktrees/<MID>/` on a `milestone/<MID>` branch. All execution happens inside the worktree. On completion, the worktree is squash-merged to main as one clean commit. The worktree and branch are then cleaned up.
 
 This provides full file isolation — changes in a milestone can't interfere with your main working copy.
 
@@ -26,7 +26,7 @@ Use this when worktrees cause problems — submodule-heavy repos, repos with har
 
 ### `none` Mode
 
-Work happens directly on your current branch. No worktree, no milestone branch. GSD still commits sequentially with conventional commit messages, but there's no branch isolation.
+Work happens directly on your current branch. No worktree, no milestone branch. HX still commits sequentially with conventional commit messages, but there's no branch isolation.
 
 Use this for hot-reload workflows where file isolation breaks dev tooling (e.g., file watchers that only see the project root), or for small projects where branch overhead isn't worth it.
 
@@ -75,16 +75,16 @@ Each worktree operates on its own branch with its own commit history. Merges hap
 
 ### Commit Format
 
-Commits use conventional commit format with GSD metadata in trailers:
+Commits use conventional commit format with HX metadata in trailers:
 
 ```
 feat: core type definitions
 
-GSD-Task: M001/S01/T01
+HX-Task: M001/S01/T01
 
 feat: markdown parser for plan files
 
-GSD-Task: M001/S01/T02
+HX-Task: M001/S01/T02
 ```
 
 ## Worktree Management
@@ -95,8 +95,8 @@ These features apply only in **worktree mode**.
 
 Auto mode creates and manages worktrees automatically:
 
-1. When a milestone starts, a worktree is created at `.gsd/worktrees/<MID>/` on branch `milestone/<MID>`
-2. Planning artifacts from `.gsd/milestones/` are copied into the worktree
+1. When a milestone starts, a worktree is created at `.hx/worktrees/<MID>/` on branch `milestone/<MID>`
+2. Planning artifacts from `.hx/milestones/` are copied into the worktree
 3. All execution happens inside the worktree
 4. On milestone completion, the worktree is squash-merged to the integration branch
 5. The worktree and branch are removed
@@ -148,7 +148,7 @@ git:
   pre_merge_check: false      # pre-merge validation
   commit_type: feat           # override commit type prefix
   main_branch: main           # primary branch name
-  commit_docs: true           # commit .gsd/ to git
+  commit_docs: true           # commit .hx/ to git
   isolation: worktree         # "worktree", "branch", or "none"
   auto_pr: false              # create PR on milestone completion
   pr_target_branch: develop   # PR target branch (default: main)
@@ -156,7 +156,7 @@ git:
 
 ### Automatic Pull Requests
 
-For teams using Gitflow or branch-based workflows, GSD can automatically create a pull request when a milestone completes:
+For teams using Gitflow or branch-based workflows, HX can automatically create a pull request when a milestone completes:
 
 ```yaml
 git:
@@ -170,18 +170,18 @@ This pushes the milestone branch and creates a PR targeting `develop` (or whiche
 
 ### `commit_docs: false`
 
-When set to `false`, GSD adds `.gsd/` to `.gitignore` and keeps all planning artifacts local-only. Useful for teams where only some members use GSD, or when company policy requires a clean repository.
+When set to `false`, HX adds `.hx/` to `.gitignore` and keeps all planning artifacts local-only. Useful for teams where only some members use HX, or when company policy requires a clean repository.
 
 ## Self-Healing
 
-GSD includes automatic recovery for common git issues:
+HX includes automatic recovery for common git issues:
 
 - **Detached HEAD** — automatically reattaches to the correct branch
 - **Stale lock files** — removes `index.lock` files from crashed processes
 - **Orphaned worktrees** — detects and offers to clean up abandoned worktrees (worktree mode only)
 
-Run `/gsd doctor` to check git health manually.
+Run `/hx doctor` to check git health manually.
 
 ## Native Git Operations
 
-Since v2.16, GSD uses libgit2 via native bindings for read-heavy operations in the dispatch hot path. This eliminates ~70 process spawns per dispatch cycle, improving auto-mode throughput.
+Since v2.16, HX uses libgit2 via native bindings for read-heavy operations in the dispatch hot path. This eliminates ~70 process spawns per dispatch cycle, improving auto-mode throughput.

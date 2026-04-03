@@ -1,6 +1,6 @@
-# recover-gsd-1668.ps1 — Recovery script for issue #1668 (Windows)
+# recover-hx-1668.ps1 — Recovery script for issue #1668 (Windows)
 #
-# GSD v2.39.x deleted the milestone branch and worktree directory when a
+# HX v2.39.x deleted the milestone branch and worktree directory when a
 # merge failed due to the repo using `master` as its default branch (not
 # `main`). The commits were never merged — they are orphaned in the git
 # object store and can be recovered via git reflog or git fsck.
@@ -8,22 +8,22 @@
 # This script:
 #   1. Searches git reflog for the deleted milestone branch (fastest path)
 #   2. Falls back to git fsck --unreachable to find orphaned commits
-#   3. Ranks candidates by recency and GSD commit message patterns
+#   3. Ranks candidates by recency and HX commit message patterns
 #   4. Creates a recovery branch at the identified commit
 #   5. Reports what was found and how to complete the merge manually
 #
 # Usage:
-#   powershell -ExecutionPolicy Bypass -File scripts\recover-gsd-1668.ps1 [-MilestoneId <ID>] [-DryRun] [-Auto]
+#   powershell -ExecutionPolicy Bypass -File scripts\recover-hx-1668.ps1 [-MilestoneId <ID>] [-DryRun] [-Auto]
 #
 # Options:
-#   -MilestoneId <ID>   GSD milestone ID (e.g. M001-g2nalq).
+#   -MilestoneId <ID>   HX milestone ID (e.g. M001-g2nalq).
 #   -DryRun             Show what would be done without making any changes.
 #   -Auto               Pick best candidate automatically (no prompts).
 #
 # Requirements: git >= 2.23, PowerShell >= 5.1, Git for Windows
 #
-# Affected versions: GSD 2.39.x
-# Fixed in: GSD 2.40.1 (PR #1669)
+# Affected versions: HX 2.39.x
+# Fixed in: HX 2.40.1 (PR #1669)
 
 [CmdletBinding()]
 param(
@@ -188,7 +188,7 @@ if (-not $reflogFoundSha) {
         $score = 0
         if ($MilestoneId -and ($commitMsg + $commitBody) -match [regex]::Escape($MilestoneId)) { $score += 100 }
         if ($commitMsg -match '^feat\([A-Z][0-9]+') { $score += 50 }
-        if (($commitMsg + $commitBody) -match 'milestone/|complete-milestone|GSD|slice') { $score += 20 }
+        if (($commitMsg + $commitBody) -match 'milestone/|complete-milestone|HX|slice') { $score += 20 }
 
         $weekAgo = (Get-Date).AddDays(-7).ToUnixTimeSeconds()
         if ($commitDate -gt $weekAgo) { $score += 10 }
@@ -212,7 +212,7 @@ if (-not $reflogFoundSha) {
 
     $sortedCandidates = $candidates | Sort-Object -Property Score -Descending | Select-Object -First 10
 
-    Info "Top candidates (scored by recency and GSD message patterns):"
+    Info "Top candidates (scored by recency and HX message patterns):"
     Write-Host ""
     $num = 1
     foreach ($c in $sortedCandidates) {
@@ -295,9 +295,9 @@ if (-not $DryRun) {
 
 if (-not $DryRun) {
     Section "── Step 6: Verify recovery branch ──────────────────────────────────────"
-    $fileList = & git ls-tree -r --name-only $recoveryBranch 2>/dev/null | Where-Object { $_ -notmatch '^\.gsd/' }
+    $fileList = & git ls-tree -r --name-only $recoveryBranch 2>/dev/null | Where-Object { $_ -notmatch '^\.hx/' }
     $fileCount = @($fileList).Count
-    Info "Files recoverable (excluding .gsd/ state files): $fileCount"
+    Info "Files recoverable (excluding .hx/ state files): $fileCount"
     $fileList | Select-Object -First 30 | ForEach-Object { Write-Host "  $_" }
     if ($fileCount -gt 30) { Dim "  ... and $($fileCount - 30) more" }
 }
@@ -334,6 +334,6 @@ Write-Host ""
 Write-Host "  4. Clean up after verifying:"
 Write-Host "     git branch -D $recoveryBranch"
 Write-Host ""
-Write-Host "Note: update GSD to v2.40.1+ to prevent this from recurring." -ForegroundColor DarkGray
-Write-Host "      PR: https://github.com/gsd-build/gsd-2/pull/1669" -ForegroundColor DarkGray
+Write-Host "Note: update HX to v2.40.1+ to prevent this from recurring." -ForegroundColor DarkGray
+Write-Host "      PR: https://github.com/hx-build/hx-2/pull/1669" -ForegroundColor DarkGray
 Write-Host ""

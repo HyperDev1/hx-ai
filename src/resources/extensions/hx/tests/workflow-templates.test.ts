@@ -1,4 +1,4 @@
-// GSD Workflow Templates — Unit Tests
+// HX Workflow Templates — Unit Tests
 //
 // Tests registry loading, template resolution, auto-detection, and listing.
 

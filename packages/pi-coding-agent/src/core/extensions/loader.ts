@@ -10,7 +10,7 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createJiti } from "@mariozechner/jiti";
-import * as _bundledPiAgentCore from "@gsd/pi-agent-core";
+import * as _bundledPiAgentCore from "@hyperlab/hx-agent-core";
 import * as _bundledPiAi from "@hyperlab/hx-ai";
 import * as _bundledPiAiOauth from "@hyperlab/hx-ai/oauth";
 import type { KeyId } from "@hyperlab/hx-tui";
@@ -57,7 +57,7 @@ import type {
  */
 const STATIC_BUNDLED_MODULES: Record<string, unknown> = {
 	"@sinclair/typebox": _bundledTypebox,
-	"@gsd/pi-agent-core": _bundledPiAgentCore,
+	"@hyperlab/hx-agent-core": _bundledPiAgentCore,
 	"@hyperlab/hx-tui": _bundledPiTui,
 	"@hyperlab/hx-ai": _bundledPiAi,
 	"@hyperlab/hx-ai/oauth": _bundledPiAiOauth,
@@ -324,7 +324,7 @@ function getAliases(): Record<string, string> {
 		...autoDiscovered,
 		// Manual entries for workspace packages and packages needing special resolution
 		"@hyperlab/hx-coding-agent": packageIndex,
-		"@gsd/pi-agent-core": resolveWorkspaceOrImport("agent/dist/index.js", "@gsd/pi-agent-core"),
+		"@hyperlab/hx-agent-core": resolveWorkspaceOrImport("agent/dist/index.js", "@hyperlab/hx-agent-core"),
 		"@hyperlab/hx-tui": resolveWorkspaceOrImport("tui/dist/index.js", "@hyperlab/hx-tui"),
 		"@hyperlab/hx-ai": resolveWorkspaceOrImport("ai/dist/index.js", "@hyperlab/hx-ai"),
 		"@hyperlab/hx-ai/oauth": resolveWorkspaceOrImport("ai/dist/oauth.js", "@hyperlab/hx-ai/oauth"),
@@ -332,7 +332,7 @@ function getAliases(): Record<string, string> {
 		"yaml": yamlRoot,
 		// Aliases for external PI ecosystem packages that import from the original scope
 		"@mariozechner/pi-coding-agent": packageIndex,
-		"@mariozechner/pi-agent-core": resolveWorkspaceOrImport("agent/dist/index.js", "@gsd/pi-agent-core"),
+		"@mariozechner/pi-agent-core": resolveWorkspaceOrImport("agent/dist/index.js", "@hyperlab/hx-agent-core"),
 		"@mariozechner/pi-tui": resolveWorkspaceOrImport("tui/dist/index.js", "@hyperlab/hx-tui"),
 		"@mariozechner/pi-ai": resolveWorkspaceOrImport("ai/dist/index.js", "@hyperlab/hx-ai"),
 		"@mariozechner/pi-ai/oauth": resolveWorkspaceOrImport("ai/dist/oauth.js", "@hyperlab/hx-ai/oauth"),

@@ -1,5 +1,5 @@
 /**
- * complete-task handler — the core operation behind gsd_complete_task.
+ * complete-task handler — the core operation behind hx_complete_task.
  *
  * Validates inputs, writes task row to DB in a transaction, then (outside
  * the transaction) renders SUMMARY.md to disk, toggles the plan checkbox,
@@ -173,7 +173,7 @@ export async function handleCompleteTask(
 
     const existingTask = getTask(params.milestoneId, params.sliceId, params.taskId);
     if (existingTask && isClosedStatus(existingTask.status)) {
-      guardError = `task ${params.taskId} is already complete — use gsd_task_reopen first if you need to redo it`;
+      guardError = `task ${params.taskId} is already complete — use hx_task_reopen first if you need to redo it`;
       return;
     }
 
@@ -282,7 +282,7 @@ export async function handleCompleteTask(
     });
   } catch (hookErr) {
     process.stderr.write(
-      `gsd: complete-task post-mutation hook warning: ${(hookErr as Error).message}\n`,
+      `hx: complete-task post-mutation hook warning: ${(hookErr as Error).message}\n`,
     );
   }
 

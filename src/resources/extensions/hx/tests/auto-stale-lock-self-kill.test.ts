@@ -8,7 +8,7 @@ import { writeLock, readCrashLock, clearLock } from "../crash-recovery.ts";
 import { checkRemoteAutoSession, stopAutoRemote } from "../auto.ts";
 
 function makeTmpProject(): string {
-  const dir = mkdtempSync(join(tmpdir(), "gsd-stale-lock-test-"));
+  const dir = mkdtempSync(join(tmpdir(), "hx-stale-lock-test-"));
   mkdirSync(join(dir, ".hx"), { recursive: true });
   return dir;
 }

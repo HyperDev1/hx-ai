@@ -1,5 +1,5 @@
 /**
- * GSD Rethink — Conversational project reorganization.
+ * HX Rethink — Conversational project reorganization.
  *
  * Collects a snapshot of all milestones (status, dependencies, slice progress,
  * queue order) and dispatches a prompt that turns Claude into a reorganization
@@ -35,7 +35,7 @@ export async function handleRethink(
   const basePath = process.cwd();
   const root = hxRoot(basePath);
   if (!existsSync(root)) {
-    ctx.ui.notify("No GSD project found. Run /hx init first.", "warning");
+    ctx.ui.notify("No HX project found. Run /hx init first.", "warning");
     return;
   }
 
@@ -59,7 +59,7 @@ export async function handleRethink(
   });
 
   pi.sendMessage(
-    { customType: "gsd-rethink", content, display: false },
+    { customType: "hx-rethink", content, display: false },
     { triggerTurn: true },
   );
 }

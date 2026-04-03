@@ -26,7 +26,7 @@ import type { GSDState } from '../types.ts';
 // ─── Fixture Helpers ───────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-crossval-'));
+  const base = mkdtempSync(join(tmpdir(), 'hx-crossval-'));
   mkdirSync(join(base, '.hx', 'milestones'), { recursive: true });
   return base;
 }

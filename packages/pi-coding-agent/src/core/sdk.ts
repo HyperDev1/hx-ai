@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { Agent, type AgentMessage, type ThinkingLevel } from "@gsd/pi-agent-core";
+import { Agent, type AgentMessage, type ThinkingLevel } from "@hyperlab/hx-agent-core";
 import type { Message, Model } from "@hyperlab/hx-ai";
 import { getAgentDir, getDocsPath } from "../config.js";
 import { AgentSession } from "./agent-session.js";

@@ -19,8 +19,8 @@ function makeTmp(name: string): string {
 }
 
 function buildScaffold(base: string) {
-  const gsd = join(base, ".hx");
-  const m = join(gsd, "milestones", "M001");
+  const hx = join(base, ".hx");
+  const m = join(hx, "milestones", "M001");
   const s = join(m, "slices", "S01", "tasks");
   mkdirSync(s, { recursive: true });
 

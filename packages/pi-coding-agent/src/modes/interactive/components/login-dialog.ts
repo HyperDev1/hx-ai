@@ -1,4 +1,4 @@
-// GSD Login Dialog Component — OAuth login flow UI
+// HX Login Dialog Component — OAuth login flow UI
 // Copyright (c) 2026 Jeremy McSpadden <jeremy@fluxlabs.net>
 import { getOAuthProviders } from "@hyperlab/hx-ai/oauth";
 import { Container, type Focusable, getEditorKeybindings, Input, Spacer, Text, truncateToWidth, type TUI } from "@hyperlab/hx-tui";

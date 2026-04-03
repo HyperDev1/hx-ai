@@ -50,7 +50,7 @@ function requireDb() {
  *
  * Note: rows returned from raw queries are plain objects with TEXT columns for
  * JSON arrays. We parse them into typed Row objects using the same logic as
- * gsd-db helper functions.
+ * hx-db helper functions.
  */
 export function snapshotState(): StateManifest {
   const db = requireDb();

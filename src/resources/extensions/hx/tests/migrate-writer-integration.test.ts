@@ -133,15 +133,15 @@ function buildCompleteProject(): GSDProject {
   // ─── Scenario 1: Incomplete project ────────────────────────────────────
 
 test('Scenario 1: Incomplete project — write, parse, deriveState', async () => {
-    const base = mkdtempSync(join(tmpdir(), 'gsd-writer-int-'));
+    const base = mkdtempSync(join(tmpdir(), 'hx-writer-int-'));
     try {
       const project = buildIncompleteProject();
       const result = await writeGSDDirectory(project, base);
 
       // (a) Key files exist
       console.log('  --- file existence ---');
-      const gsd = join(base, ".hx");
-      const m = join(gsd, 'milestones', 'M001');
+      const hx = join(base, ".hx");
+      const m = join(hx, 'milestones', 'M001');
 
       assert.ok(existsSync(join(m, 'M001-ROADMAP.md')), 'incomplete: M001-ROADMAP.md exists');
       assert.ok(existsSync(join(m, 'M001-CONTEXT.md')), 'incomplete: M001-CONTEXT.md exists');
@@ -150,10 +150,10 @@ test('Scenario 1: Incomplete project — write, parse, deriveState', async () =>
       assert.ok(existsSync(join(m, 'slices', 'S02', 'S02-PLAN.md')), 'incomplete: S02-PLAN.md exists');
       assert.ok(existsSync(join(m, 'slices', 'S01', 'S01-SUMMARY.md')), 'incomplete: S01-SUMMARY.md exists');
       assert.ok(!existsSync(join(m, 'slices', 'S02', 'S02-SUMMARY.md')), 'incomplete: S02-SUMMARY.md NOT written (null)');
-      assert.ok(existsSync(join(gsd, 'REQUIREMENTS.md')), 'incomplete: REQUIREMENTS.md exists');
-      assert.ok(existsSync(join(gsd, 'PROJECT.md')), 'incomplete: PROJECT.md exists');
-      assert.ok(existsSync(join(gsd, 'DECISIONS.md')), 'incomplete: DECISIONS.md exists');
-      assert.ok(existsSync(join(gsd, 'STATE.md')), 'incomplete: STATE.md exists');
+      assert.ok(existsSync(join(hx, 'REQUIREMENTS.md')), 'incomplete: REQUIREMENTS.md exists');
+      assert.ok(existsSync(join(hx, 'PROJECT.md')), 'incomplete: PROJECT.md exists');
+      assert.ok(existsSync(join(hx, 'DECISIONS.md')), 'incomplete: DECISIONS.md exists');
+      assert.ok(existsSync(join(hx, 'STATE.md')), 'incomplete: STATE.md exists');
 
       // Task files
       assert.ok(existsSync(join(m, 'slices', 'S01', 'tasks', 'T01-PLAN.md')), 'incomplete: T01-PLAN.md exists');
@@ -253,7 +253,7 @@ test('Scenario 1: Incomplete project — write, parse, deriveState', async () =>
   // ─── Scenario 2: Fully complete project ────────────────────────────────
 
 test('Scenario 2: Fully complete project — deriveState phase', async () => {
-    const base = mkdtempSync(join(tmpdir(), 'gsd-writer-int-complete-'));
+    const base = mkdtempSync(join(tmpdir(), 'hx-writer-int-complete-'));
     try {
       const project = buildCompleteProject();
       await writeGSDDirectory(project, base);

@@ -5,7 +5,7 @@
  * a summary of the branch being left so context isn't lost.
  */
 
-import type { AgentMessage } from "@gsd/pi-agent-core";
+import type { AgentMessage } from "@hyperlab/hx-agent-core";
 import type { Model } from "@hyperlab/hx-ai";
 import { completeSimple } from "@hyperlab/hx-ai";
 import { COMPACTION_RESERVE_TOKENS } from "../constants.js";

@@ -1,4 +1,4 @@
-// GSD Extension — Desktop Notification Helper
+// HX Extension — Desktop Notification Helper
 // Cross-platform desktop notifications for auto-mode events.
 
 import { execFileSync } from "node:child_process";

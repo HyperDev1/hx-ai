@@ -1,10 +1,10 @@
 /**
- * Stream adapter: bridges the Claude Agent SDK into GSD's streamSimple contract.
+ * Stream adapter: bridges the Claude Agent SDK into HX's streamSimple contract.
  *
  * The SDK runs the full agentic loop (multi-turn, tool execution, compaction)
  * in one call. This adapter translates the SDK's streaming output into
  * AssistantMessageEvents for TUI rendering, then strips tool-call blocks from
- * the final AssistantMessage so GSD's agent loop doesn't try to dispatch them.
+ * the final AssistantMessage so HX's agent loop doesn't try to dispatch them.
  */
 
 import type {
@@ -75,7 +75,7 @@ function getClaudePath(): string {
 // ---------------------------------------------------------------------------
 
 /**
- * Extract the last user prompt text from GSD's context messages.
+ * Extract the last user prompt text from HX's context messages.
  * The SDK manages its own conversation history — we only send
  * the latest user message as the prompt.
  */
@@ -132,7 +132,7 @@ export function makeStreamExhaustedErrorMessage(model: string, lastTextContent: 
 // ---------------------------------------------------------------------------
 
 /**
- * GSD streamSimple function that delegates to the Claude Agent SDK.
+ * HX streamSimple function that delegates to the Claude Agent SDK.
  *
  * Emits AssistantMessageEvent deltas for real-time TUI rendering
  * (thinking, text, tool calls). The final AssistantMessage has tool-call
@@ -174,7 +174,7 @@ async function pumpSdkMessages(
 			}) => AsyncIterable<SDKMessage>;
 		};
 
-		// Bridge GSD's AbortSignal to SDK's AbortController
+		// Bridge HX's AbortSignal to SDK's AbortController
 		const controller = new AbortController();
 		if (options?.signal) {
 			options.signal.addEventListener("abort", () => controller.abort(), { once: true });
@@ -354,7 +354,7 @@ async function pumpSdkMessages(
 		}
 
 		// Generator exhaustion without a terminal result is a stream interruption,
-		// not a successful completion. Emitting an error lets GSD classify it as a
+		// not a successful completion. Emitting an error lets HX classify it as a
 		// transient provider failure instead of advancing auto-mode state.
 		const fallback = makeStreamExhaustedErrorMessage(modelId, lastTextContent);
 		stream.push({ type: "error", reason: "error", error: fallback });

@@ -10,7 +10,7 @@ import { invalidateAllCaches } from "../cache.ts";
 import type { GSDState } from "../types.ts";
 
 function makeTmpBase(): string {
-  const base = join(tmpdir(), `gsd-test-reassess-${randomUUID()}`);
+  const base = join(tmpdir(), `hx-test-reassess-${randomUUID()}`);
   mkdirSync(join(base, ".hx", "milestones", "M001", "slices", "S01", "tasks"), { recursive: true });
   mkdirSync(join(base, ".hx", "milestones", "M001", "slices", "S02", "tasks"), { recursive: true });
   return base;

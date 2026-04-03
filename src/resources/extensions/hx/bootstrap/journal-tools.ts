@@ -5,12 +5,12 @@ import { queryJournal } from "../journal.js";
 
 export function registerJournalTools(pi: ExtensionAPI): void {
   pi.registerTool({
-    name: "gsd_journal_query",
+    name: "hx_journal_query",
     label: "Query Journal",
     description:
       "Query the structured event journal for auto-mode iterations. " +
       "Returns matching journal entries filtered by flow ID, unit ID, rule name, event type, or time range.",
-    promptSnippet: "Query the GSD event journal with filters (flowId, unitId, rule, eventType, time range, limit)",
+    promptSnippet: "Query the HX event journal with filters (flowId, unitId, rule, eventType, time range, limit)",
     promptGuidelines: [
       "Filter by flowId to trace all events from a single auto-mode iteration.",
       "Filter by unitId to reconstruct the causal chain for a specific milestone/slice/task.",
@@ -51,7 +51,7 @@ export function registerJournalTools(pi: ExtensionAPI): void {
         };
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
-        process.stderr.write(`gsd-journal: hx_journal_query tool failed: ${msg}\n`);
+        process.stderr.write(`hx-journal: hx_journal_query tool failed: ${msg}\n`);
         return {
           content: [{ type: "text" as const, text: `Error querying journal: ${msg}` }],
           details: { operation: "journal_query", error: msg } as any,

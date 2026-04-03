@@ -1,5 +1,5 @@
 /**
- * GSD Skill Catalog — Curated skill packs mapped to tech stacks.
+ * HX Skill Catalog — Curated skill packs mapped to tech stacks.
  *
  * Each pack maps a detected (or user-chosen) tech stack to a skills.sh
  * repo + specific skill names.  The init wizard uses this catalog to
@@ -957,7 +957,7 @@ export function isPackInstalled(pack: SkillPack): boolean {
  *   Installs essential packs only (find-skills, skill-creator, etc.).
  *   Stack-specific skills are deferred — once the LLM establishes a design
  *   and creates project files (package.json, firebase.json, etc.), brownfield
- *   detection will pick them up on the next `gsd init` or via auto-mode
+ *   detection will pick them up on the next `hx init` or via auto-mode
  *   skill discovery.
  *
  * Returns the list of installed pack labels.
@@ -1006,7 +1006,7 @@ export async function runSkillInstallStep(
 
     const totalSkills = toInstall.reduce((n, p) => n + p.skills.length, 0);
     const choice = await showNextAction(ctx, {
-      title: "GSD — Install Skills",
+      title: "HX — Install Skills",
       summary: summaryLines,
       actions: [
         {
@@ -1045,9 +1045,9 @@ export async function runSkillInstallStep(
 
     const totalSkills = essentials.reduce((n, p) => n + p.skills.length, 0);
     const choice = await showNextAction(ctx, {
-      title: "GSD — Install Essential Skills",
+      title: "HX — Install Essential Skills",
       summary: [
-        "GSD will install essential agent skills (skill discovery, authoring,",
+        "HX will install essential agent skills (skill discovery, authoring,",
         "browser automation, document handling).",
         "",
         "Stack-specific skills (React, Swift, Python, etc.) will be recommended",

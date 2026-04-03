@@ -170,21 +170,21 @@ export async function handleFast(args: string, ctx: ExtensionCommandContext): Pr
 
   if (trimmed === "on") {
     await writeGlobalServiceTier(ctx, "priority");
-    ctx.ui.setStatus("gsd-fast", formatServiceTierFooterStatus("priority", ctx.model?.id));
+    ctx.ui.setStatus("hx-fast", formatServiceTierFooterStatus("priority", ctx.model?.id));
     ctx.ui.notify("Service tier set to priority (2x cost, faster responses). Only affects gpt-5.4 models, regardless of provider.", "info");
     return;
   }
 
   if (trimmed === "off") {
     await writeGlobalServiceTier(ctx, undefined);
-    ctx.ui.setStatus("gsd-fast", undefined);
+    ctx.ui.setStatus("hx-fast", undefined);
     ctx.ui.notify("Service tier disabled.", "info");
     return;
   }
 
   if (trimmed === "flex") {
     await writeGlobalServiceTier(ctx, "flex");
-    ctx.ui.setStatus("gsd-fast", formatServiceTierFooterStatus("flex", ctx.model?.id));
+    ctx.ui.setStatus("hx-fast", formatServiceTierFooterStatus("flex", ctx.model?.id));
     ctx.ui.notify("Service tier set to flex (0.5x cost, slower responses). Only affects gpt-5.4 models, regardless of provider.", "info");
     return;
   }

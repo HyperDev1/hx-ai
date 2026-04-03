@@ -7,7 +7,7 @@ import * as crypto from "node:crypto";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { AgentMessage } from "@gsd/pi-agent-core";
+import type { AgentMessage } from "@hyperlab/hx-agent-core";
 import type { AssistantMessage, ImageContent, Message, Model, OAuthProviderId } from "@hyperlab/hx-ai";
 import type {
 	AutocompleteItem,
@@ -2480,7 +2480,7 @@ export class InteractiveMode {
 			let msg = "No editor configured. Set $VISUAL or $EDITOR environment variable.";
 			if (process.env.TERM_PROGRAM === "iTerm.app") {
 				msg +=
-					"\n\nTip: If you meant to open the GSD dashboard (Ctrl+Alt+G), set Left Option Key to" +
+					"\n\nTip: If you meant to open the HX dashboard (Ctrl+Alt+G), set Left Option Key to" +
 					" \"Esc+\" in iTerm2 → Profiles → Keys. With the default \"Normal\" setting," +
 					" Ctrl+Alt+G sends Ctrl+G instead.";
 			}

@@ -1,13 +1,13 @@
-//! GSD `.gsd/` directory file parser.
+//! HX `.hx/` directory file parser.
 //!
 //! Parses markdown files containing YAML-like frontmatter, section headings,
-//! and structured content used by GSD's planning system (roadmaps, plans,
+//! and structured content used by HX's planning system (roadmaps, plans,
 //! summaries, continue files).
 //!
 //! Key operations:
 //! - `parseFrontmatter`: split frontmatter from body, parse YAML-like key-value pairs
 //! - `extractSection`: extract content under a specific heading
-//! - `batchParseGsdFiles`: walk a `.gsd/` tree and parse all `.md` files in parallel
+//! - `batchParseGsdFiles`: walk a `.hx/` tree and parse all `.md` files in parallel
 //! - `parseRoadmapFile`: parse structured roadmap data from content
 
 use std::path::Path;
@@ -36,7 +36,7 @@ pub struct SectionResult {
     pub found: bool,
 }
 
-/// A single parsed GSD file from batch parsing.
+/// A single parsed HX file from batch parsing.
 #[napi(object)]
 pub struct ParsedGsdFile {
     /// Relative path from the base directory.
@@ -724,7 +724,7 @@ pub fn extract_all_sections(content: String, level: Option<u32>) -> String {
     sections_to_json(&sections)
 }
 
-/// Batch-parse all `.md` files in a `.gsd/` directory tree.
+/// Batch-parse all `.md` files in a `.hx/` directory tree.
 ///
 /// Reads all markdown files under the given directory, parses frontmatter
 /// and extracts all level-2 sections for each file. Returns all results
@@ -835,7 +835,7 @@ pub fn parse_roadmap_file(content: String) -> NativeRoadmap {
     parse_roadmap_internal(&content)
 }
 
-// ─── GSD Tree Scanner ───────────────────────────────────────────────────────
+// ─── HX Tree Scanner ───────────────────────────────────────────────────────
 
 #[napi(object)]
 pub struct GsdTreeEntry {

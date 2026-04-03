@@ -1,5 +1,5 @@
 /**
- * GSD Forensics — Post-mortem investigation of auto-mode failures
+ * HX Forensics — Post-mortem investigation of auto-mode failures
  *
  * Programmatically scans activity logs, metrics, crash locks, and doctor
  * diagnostics for anomalies, then hands a structured report to the LLM
@@ -86,7 +86,7 @@ interface JournalSummary {
 }
 
 interface ForensicReport {
-  gsdVersion: string;
+  hxVersion: string;
   timestamp: string;
   basePath: string;
   activeMilestone: string | null;
@@ -114,17 +114,17 @@ Before offering to create a GitHub issue, you MUST search for existing issues an
 
 1. **Search closed issues** for similar keywords from your diagnosis:
    \`\`\`
-   gh issue list --repo gsd-build/hx-2 --state closed --search "<keywords from root cause>" --limit 20
+   gh issue list --repo hx-build/hx-2 --state closed --search "<keywords from root cause>" --limit 20
    \`\`\`
 
 2. **Search open PRs** that might contain the fix:
    \`\`\`
-   gh pr list --repo gsd-build/hx-2 --state open --search "<keywords>" --limit 10
+   gh pr list --repo hx-build/hx-2 --state open --search "<keywords>" --limit 10
    \`\`\`
 
 3. **Search merged PRs** that may have already fixed this:
    \`\`\`
-   gh pr list --repo gsd-build/hx-2 --state merged --search "<keywords>" --limit 10
+   gh pr list --repo hx-build/hx-2 --state merged --search "<keywords>" --limit 10
    \`\`\`
 
 ### Analysis
@@ -139,7 +139,7 @@ For each result, compare it against your root-cause diagnosis:
 If you find potential matches, present them to the user:
 
 1. **"Already fixed by PR #X — skip issue creation"** — when a merged PR or closed issue clearly addresses the same root cause. Explain why you believe it matches.
-2. **"Add my findings to existing issue #Y"** — when an open issue exists for the same bug. Use \`gh issue comment #Y --repo gsd-build/hx-2\` to add forensic evidence.
+2. **"Add my findings to existing issue #Y"** — when an open issue exists for the same bug. Use \`gh issue comment #Y --repo hx-build/hx-2\` to add forensic evidence.
 3. **"Create new issue anyway"** — when existing results do not cover this specific failure.
 
 Only proceed to issue creation if no matches were found OR the user explicitly chooses "Create new issue anyway".
@@ -183,7 +183,7 @@ export async function handleForensics(
   const basePath = process.cwd();
   const root = hxRoot(basePath);
   if (!existsSync(root)) {
-    ctx.ui.notify("No GSD state found. Run /hx auto first.", "warning");
+    ctx.ui.notify("No HX state found. Run /hx auto first.", "warning");
     return;
   }
 
@@ -227,27 +227,27 @@ export async function handleForensics(
   const report = await buildForensicReport(basePath);
   const savedPath = saveForensicReport(basePath, report, problemDescription);
 
-  // Derive GSD source dir for prompt — fall back to ~/.hx/agent/extensions/hx/
+  // Derive HX source dir for prompt — fall back to ~/.hx/agent/extensions/hx/
   // when import.meta.url resolves to the npm-global install path (Windows).
-  let gsdSourceDir = dirname(fileURLToPath(import.meta.url));
-  if (!existsSync(join(gsdSourceDir, "prompts"))) {
+  let hxSourceDir = dirname(fileURLToPath(import.meta.url));
+  if (!existsSync(join(hxSourceDir, "prompts"))) {
     const hxHome = process.env.HX_HOME || join(homedir(), ".hx");
-    const fallback = join(hxHome, "agent", "extensions", "gsd");
-    if (existsSync(join(fallback, "prompts"))) gsdSourceDir = fallback;
+    const fallback = join(hxHome, "agent", "extensions", "hx");
+    if (existsSync(join(fallback, "prompts"))) hxSourceDir = fallback;
   }
 
   const forensicData = formatReportForPrompt(report);
   const content = loadPrompt("forensics", {
     problemDescription,
     forensicData,
-    gsdSourceDir,
+    hxSourceDir,
     dedupSection,
   });
 
   ctx.ui.notify(`Forensic report saved: ${relative(basePath, savedPath)}`, "info");
 
   pi.sendMessage(
-    { customType: "gsd-forensics", content, display: false },
+    { customType: "hx-forensics", content, display: false },
     { triggerTurn: true },
   );
 }
@@ -304,10 +304,10 @@ export async function buildForensicReport(basePath: string): Promise<ForensicRep
     }
   }
 
-  // 8. GSD version — use HX_VERSION env var set by the loader at startup.
+  // 8. HX version — use HX_VERSION env var set by the loader at startup.
   // Extensions run from ~/.hx/agent/extensions/hx/ at runtime, so path-traversal
   // from import.meta.url would resolve to ~/package.json (wrong on every system).
-  const gsdVersion = process.env.HX_VERSION || "unknown";
+  const hxVersion = process.env.HX_VERSION || "unknown";
 
   // 9. Scan journal for flow timeline and structured events
   const journalSummary = scanJournalForForensics(basePath);
@@ -326,7 +326,7 @@ export async function buildForensicReport(basePath: string): Promise<ForensicRep
   detectJournalAnomalies(journalSummary, anomalies);
 
   return {
-    gsdVersion,
+    hxVersion,
     timestamp: new Date().toISOString(),
     basePath,
     activeMilestone,
@@ -630,7 +630,7 @@ function detectTimeouts(traces: UnitTrace[], anomalies: ForensicAnomaly[]): void
     // Check for timeout-recovery custom messages in tool calls
     const hasTimeout = ut.trace.toolCalls.some(tc =>
       tc.name === "sendmessage" &&
-      JSON.stringify(tc.input).includes("gsd-auto-timeout-recovery"),
+      JSON.stringify(tc.input).includes("hx-auto-timeout-recovery"),
     );
     // Check for timeout keywords in last reasoning
     const reasoningTimeout = ut.trace.lastReasoning &&
@@ -789,10 +789,10 @@ function saveForensicReport(basePath: string, report: ForensicReport, problemDes
   const redact = (s: string) => redactForGitHub(s, basePath);
 
   const sections: string[] = [
-    `# GSD Forensic Report`,
+    `# HX Forensic Report`,
     ``,
     `**Generated:** ${report.timestamp}`,
-    `**GSD Version:** ${report.gsdVersion}`,
+    `**HX Version:** ${report.hxVersion}`,
     `**Active Milestone:** ${report.activeMilestone ?? "none"}`,
     `**Active Slice:** ${report.activeSlice ?? "none"}`,
     `**Active Worktree:** ${report.activeWorktree ?? "none"}`,
@@ -1010,7 +1010,7 @@ function formatReportForPrompt(report: ForensicReport): string {
 
   // Completed keys count
   sections.push(`### Completed Keys: ${report.completedKeys.length}`);
-  sections.push(`### GSD Version: ${report.gsdVersion}`);
+  sections.push(`### HX Version: ${report.hxVersion}`);
   sections.push(`### Active Milestone: ${report.activeMilestone ?? "none"}`);
   sections.push(`### Active Slice: ${report.activeSlice ?? "none"}`);
   if (report.activeWorktree) {

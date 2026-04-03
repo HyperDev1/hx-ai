@@ -17,7 +17,7 @@ import {
 import { handleReassessRoadmap } from '../tools/reassess-roadmap.ts';
 
 function makeTmpBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-reassess-'));
+  const base = mkdtempSync(join(tmpdir(), 'hx-reassess-'));
   mkdirSync(join(base, '.hx', 'milestones', 'M001', 'slices', 'S01'), { recursive: true });
   mkdirSync(join(base, '.hx', 'milestones', 'M001', 'slices', 'S02'), { recursive: true });
   mkdirSync(join(base, '.hx', 'milestones', 'M001', 'slices', 'S03'), { recursive: true });
@@ -74,7 +74,7 @@ function validReassessParams() {
 
 test('handleReassessRoadmap rejects invalid payloads (missing milestoneId)', async () => {
   const base = makeTmpBase();
-  openDatabase(join(base, '.hx', 'gsd.db'));
+  openDatabase(join(base, '.hx', 'hx.db'));
 
   try {
     seedMilestoneWithSlices();
@@ -89,7 +89,7 @@ test('handleReassessRoadmap rejects invalid payloads (missing milestoneId)', asy
 
 test('handleReassessRoadmap rejects missing milestone', async () => {
   const base = makeTmpBase();
-  openDatabase(join(base, '.hx', 'gsd.db'));
+  openDatabase(join(base, '.hx', 'hx.db'));
 
   try {
     // No milestone seeded
@@ -103,7 +103,7 @@ test('handleReassessRoadmap rejects missing milestone', async () => {
 
 test('handleReassessRoadmap rejects structural violation: modifying a completed slice', async () => {
   const base = makeTmpBase();
-  openDatabase(join(base, '.hx', 'gsd.db'));
+  openDatabase(join(base, '.hx', 'hx.db'));
 
   try {
     seedMilestoneWithSlices({ s01Status: 'complete', s02Status: 'pending', s03Status: 'pending' });
@@ -127,7 +127,7 @@ test('handleReassessRoadmap rejects structural violation: modifying a completed 
 
 test('handleReassessRoadmap rejects structural violation: removing a completed slice', async () => {
   const base = makeTmpBase();
-  openDatabase(join(base, '.hx', 'gsd.db'));
+  openDatabase(join(base, '.hx', 'hx.db'));
 
   try {
     seedMilestoneWithSlices({ s01Status: 'complete', s02Status: 'pending', s03Status: 'pending' });
@@ -151,7 +151,7 @@ test('handleReassessRoadmap rejects structural violation: removing a completed s
 
 test('handleReassessRoadmap succeeds when modifying only pending slices', async () => {
   const base = makeTmpBase();
-  openDatabase(join(base, '.hx', 'gsd.db'));
+  openDatabase(join(base, '.hx', 'hx.db'));
 
   try {
     seedMilestoneWithSlices({ s01Status: 'complete', s02Status: 'pending', s03Status: 'pending' });
@@ -210,7 +210,7 @@ test('handleReassessRoadmap succeeds when modifying only pending slices', async 
 
 test('handleReassessRoadmap cache invalidation: getMilestoneSlices reflects mutations', async () => {
   const base = makeTmpBase();
-  openDatabase(join(base, '.hx', 'gsd.db'));
+  openDatabase(join(base, '.hx', 'hx.db'));
 
   try {
     seedMilestoneWithSlices({ s01Status: 'complete', s02Status: 'pending', s03Status: 'pending' });
@@ -241,7 +241,7 @@ test('handleReassessRoadmap cache invalidation: getMilestoneSlices reflects muta
 
 test('handleReassessRoadmap is idempotent: calling twice with same params succeeds', async () => {
   const base = makeTmpBase();
-  openDatabase(join(base, '.hx', 'gsd.db'));
+  openDatabase(join(base, '.hx', 'hx.db'));
 
   try {
     seedMilestoneWithSlices({ s01Status: 'complete', s02Status: 'pending', s03Status: 'pending' });
@@ -266,7 +266,7 @@ test('handleReassessRoadmap is idempotent: calling twice with same params succee
 
 test('handleReassessRoadmap rejects slice with status "done" (alias for complete)', async () => {
   const base = makeTmpBase();
-  openDatabase(join(base, '.hx', 'gsd.db'));
+  openDatabase(join(base, '.hx', 'hx.db'));
 
   try {
     seedMilestoneWithSlices({ s01Status: 'done', s02Status: 'pending', s03Status: 'pending' });
@@ -290,7 +290,7 @@ test('handleReassessRoadmap rejects slice with status "done" (alias for complete
 
 test('handleReassessRoadmap returns structured error payloads with actionable messages', async () => {
   const base = makeTmpBase();
-  openDatabase(join(base, '.hx', 'gsd.db'));
+  openDatabase(join(base, '.hx', 'hx.db'));
 
   try {
     seedMilestoneWithSlices({ s01Status: 'complete', s02Status: 'complete', s03Status: 'pending' });

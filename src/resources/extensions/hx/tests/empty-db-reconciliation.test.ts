@@ -21,7 +21,7 @@ import {
 } from "../hx-db.ts";
 
 test("deriveState populates empty DB from disk milestones (#2631)", async () => {
-  const base = mkdtempSync(join(tmpdir(), "gsd-empty-db-"));
+  const base = mkdtempSync(join(tmpdir(), "hx-empty-db-"));
   mkdirSync(join(base, ".hx", "milestones", "M001"), { recursive: true });
 
   try {
@@ -59,7 +59,7 @@ test("deriveState populates empty DB from disk milestones (#2631)", async () => 
 });
 
 test("deriveState does NOT insert ghost milestones into DB (#2631 guard)", async () => {
-  const base = mkdtempSync(join(tmpdir(), "gsd-empty-db-"));
+  const base = mkdtempSync(join(tmpdir(), "hx-empty-db-"));
   // Create a ghost milestone directory (empty — no CONTEXT, no ROADMAP)
   mkdirSync(join(base, ".hx", "milestones", "M001"), { recursive: true });
 

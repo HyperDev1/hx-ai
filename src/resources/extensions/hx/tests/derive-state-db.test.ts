@@ -19,7 +19,7 @@ import {
 // ─── Fixture Helpers ───────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-derive-db-'));
+  const base = mkdtempSync(join(tmpdir(), 'hx-derive-db-'));
   mkdirSync(join(base, '.hx', 'milestones'), { recursive: true });
   return base;
 }

@@ -1,4 +1,4 @@
-// GSD Extension — workflow-events unit tests
+// HX Extension — workflow-events unit tests
 // Tests appendEvent, readEvents, findForkPoint, compactMilestoneEvents.
 
 import test from 'node:test';
@@ -15,7 +15,7 @@ import {
 } from '../workflow-events.ts';
 
 function tempDir(): string {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-events-'));
+  return fs.mkdtempSync(path.join(os.tmpdir(), 'hx-events-'));
 }
 
 function cleanupDir(dirPath: string): void {

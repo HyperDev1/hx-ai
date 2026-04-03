@@ -1,4 +1,4 @@
-// Native GSD Parser Bridge
+// Native HX Parser Bridge
 // Provides drop-in replacements for the JS parsing functions in files.ts,
 // backed by the Rust native parser for better performance on large projects.
 //

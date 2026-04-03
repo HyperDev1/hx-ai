@@ -120,7 +120,7 @@ interface TerminalSpawnSpec {
 }
 
 const ALLOWED_TERMINAL_COMMANDS = new Set([
-  "gsd",
+  "hx",
   process.env.SHELL || "/bin/zsh",
   "/bin/bash",
   "/bin/zsh",
@@ -142,7 +142,7 @@ function resolveTerminalSpawnSpec(cwd: string, command?: string, commandArgs: st
     };
   }
 
-  if (command === "gsd") {
+  if (command === "hx") {
     try {
       const cliEntry = resolveGsdCliEntry({
         packageRoot: process.env.GSD_WEB_PACKAGE_ROOT || process.cwd(),
@@ -156,11 +156,11 @@ function resolveTerminalSpawnSpec(cwd: string, command?: string, commandArgs: st
       return {
         executable: cliEntry.command,
         args: cliEntry.args,
-        label: "gsd",
+        label: "hx",
       };
     } catch (error) {
       console.warn(
-        "[pty] Falling back to PATH-resolved gsd:",
+        "[pty] Falling back to PATH-resolved hx:",
         error instanceof Error ? error.message : String(error),
       );
     }
@@ -285,7 +285,7 @@ export function getOrCreateSession(sessionId: string, projectCwd?: string, comma
   const spawnSpec = resolveTerminalSpawnSpec(cwd, command, commandArgs);
   console.log("[pty] Spawning command:", spawnSpec.label, "cwd:", cwd, "node-pty:", nodePtyRoot);
 
-  // Build a clean env — remove GSD-specific vars that would confuse a shell
+  // Build a clean env — remove HX-specific vars that would confuse a shell
   const cleanEnv: Record<string, string> = {};
   for (const [key, value] of Object.entries(process.env)) {
     if (value !== undefined && !key.startsWith("GSD_WEB_")) {

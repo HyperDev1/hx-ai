@@ -30,8 +30,8 @@ function makeTmp(name: string): string {
  * reconciliation issue codes.
  */
 function buildScaffold(base: string) {
-  const gsd = join(base, ".hx");
-  const m = join(gsd, "milestones", "M001");
+  const hx = join(base, ".hx");
+  const m = join(hx, "milestones", "M001");
   const s = join(m, "slices", "S01", "tasks");
   mkdirSync(s, { recursive: true });
 
@@ -123,8 +123,8 @@ test("legacy roadmap fallback: future slices are treated as pending, active slic
   // Force the legacy parser branch.
   try { closeDatabase(); } catch { /* noop */ }
 
-  const gsd = join(tmp, ".hx");
-  const m = join(gsd, "milestones", "M001");
+  const hx = join(tmp, ".hx");
+  const m = join(hx, "milestones", "M001");
   const s01 = join(m, "slices", "S01", "tasks");
   mkdirSync(s01, { recursive: true });
 
@@ -181,8 +181,8 @@ test("fixLevel:all — delimiter_in_title still fixable", async (t) => {
   const tmp = makeTmp("delimiter-fix");
   t.after(() => rmSync(tmp, { recursive: true, force: true }));
 
-  const gsd = join(tmp, ".hx");
-  const m = join(gsd, "milestones", "M001");
+  const hx = join(tmp, ".hx");
+  const m = join(hx, "milestones", "M001");
   const s = join(m, "slices", "S01", "tasks");
   mkdirSync(s, { recursive: true });
 

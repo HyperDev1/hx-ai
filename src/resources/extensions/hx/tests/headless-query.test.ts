@@ -1,5 +1,5 @@
 /**
- * Tests for `gsd headless query` — single JSON snapshot command.
+ * Tests for `hx headless query` — single JSON snapshot command.
  *
  * Validates that the snapshot contains state, next dispatch preview,
  * and parallel worker costs in one response.
@@ -18,7 +18,7 @@ import { invalidateStateCache } from '../state.ts'
 // ─── Fixture Helpers ────────────────────────────────────────────────────────
 
 function createFixture(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-query-test-'))
+  const base = mkdtempSync(join(tmpdir(), 'hx-query-test-'))
   mkdirSync(join(base, '.hx', 'milestones'), { recursive: true })
   return base
 }

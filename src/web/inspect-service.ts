@@ -5,8 +5,8 @@ import { resolveBridgeRuntimeConfig } from "./bridge-service.ts"
 import type { InspectData } from "../../web/lib/remaining-command-types.ts"
 
 /**
- * Collects project inspection data by reading gsd-db.json directly.
- * No child process needed — gsd-db.json is plain JSON with no .js imports.
+ * Collects project inspection data by reading hx-db.json directly.
+ * No child process needed — hx-db.json is plain JSON with no .js imports.
  */
 export async function collectInspectData(projectCwdOverride?: string): Promise<InspectData> {
   const config = resolveBridgeRuntimeConfig(undefined, projectCwdOverride)

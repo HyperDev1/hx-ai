@@ -4,7 +4,7 @@
 name: spike
 version: 1
 requires_project: false
-artifact_dir: .gsd/workflows/spikes/
+artifact_dir: .hx/workflows/spikes/
 </template_meta>
 
 <purpose>

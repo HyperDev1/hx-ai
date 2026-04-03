@@ -9,7 +9,7 @@
  * - Branch summarization abort coordination
  */
 
-import type { Agent } from "@gsd/pi-agent-core";
+import type { Agent } from "@hyperlab/hx-agent-core";
 import type { AssistantMessage, Model } from "@hyperlab/hx-ai";
 import { isContextOverflow } from "@hyperlab/hx-ai";
 import {

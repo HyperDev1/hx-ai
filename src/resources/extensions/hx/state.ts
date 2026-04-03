@@ -1,4 +1,4 @@
-// GSD Extension — State Derivation
+// HX Extension — State Derivation
 // DB-primary state derivation with filesystem fallback for unmigrated projects.
 // Pure TypeScript, zero Pi dependencies.
 
@@ -185,7 +185,7 @@ export async function getActiveMilestoneId(basePath: string): Promise<string | n
 }
 
 /**
- * Reconstruct GSD state from DB (primary) or filesystem (fallback).
+ * Reconstruct HX state from DB (primary) or filesystem (fallback).
  * STATE.md is a rendered cache of this output.
  *
  * When DB is available, queries milestone/slice/task tables directly.
@@ -269,7 +269,7 @@ function extractContextTitle(content: string | null, fallback: string): string {
 // ─── DB-backed State Derivation ────────────────────────────────────────────
 
 /**
- * Derive GSD state from the milestones/slices/tasks DB tables.
+ * Derive HX state from the milestones/slices/tasks DB tables.
  * Flag files (PARKED, VALIDATION, CONTINUE, REPLAN, REPLAN-TRIGGER, CONTEXT-DRAFT)
  * are still checked on the filesystem since they aren't in DB tables.
  * Requirements also stay file-based via parseRequirementCounts().
@@ -284,7 +284,7 @@ export async function deriveStateFromDb(basePath: string): Promise<GSDState> {
   // Incremental disk→DB sync: milestone directories created outside the DB
   // write path (via /hx queue, manual mkdir, or complete-milestone writing the
   // next CONTEXT.md) are never inserted by the initial migration guard in
-  // auto-start.ts because that guard only runs when gsd.db doesn't exist yet.
+  // auto-start.ts because that guard only runs when hx.db doesn't exist yet.
   // Reconcile here so deriveStateFromDb never silently misses queued milestones.
   // insertMilestone uses INSERT OR IGNORE, so this is safe to call every time.
   const dbIdSet = new Set(allMilestones.map(m => m.id));
@@ -665,13 +665,13 @@ export async function deriveStateFromDb(basePath: string): Promise<GSDState> {
       try {
         updateTaskStatus(activeMilestone.id, activeSlice.id, t.id, "complete");
         process.stderr.write(
-          `gsd-reconcile: task ${activeMilestone.id}/${activeSlice.id}/${t.id} had SUMMARY on disk but DB status was "${t.status}" — updated to "complete" (#2514)\n`,
+          `hx-reconcile: task ${activeMilestone.id}/${activeSlice.id}/${t.id} had SUMMARY on disk but DB status was "${t.status}" — updated to "complete" (#2514)\n`,
         );
         reconciled = true;
       } catch (e) {
         // DB write failed — continue with stale status rather than crash
         process.stderr.write(
-          `gsd-reconcile: failed to update task ${t.id}: ${(e as Error).message}\n`,
+          `hx-reconcile: failed to update task ${t.id}: ${(e as Error).message}\n`,
         );
       }
     }
@@ -1328,7 +1328,7 @@ export async function _deriveStateImpl(basePath: string): Promise<GSDState> {
     if (summaryPath && existsSync(summaryPath)) {
       t.done = true;
       process.stderr.write(
-        `gsd-reconcile: task ${activeMilestone.id}/${activeSlice.id}/${t.id} has SUMMARY on disk but plan shows incomplete — marking done (#2514)\n`,
+        `hx-reconcile: task ${activeMilestone.id}/${activeSlice.id}/${t.id} has SUMMARY on disk but plan shows incomplete — marking done (#2514)\n`,
       );
     }
   }

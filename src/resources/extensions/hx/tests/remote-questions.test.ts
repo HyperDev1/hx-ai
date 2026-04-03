@@ -489,7 +489,7 @@ test("formatForTelegram single-question produces inline keyboard", () => {
 
   const msg = formatForTelegram(prompt);
   assert.equal(msg.parse_mode, "HTML");
-  assert.ok(msg.text.includes("<b>GSD needs your input</b>"));
+  assert.ok(msg.text.includes("<b>HX needs your input</b>"));
   assert.ok(msg.text.includes("<b>Confirm</b>"));
   assert.ok(msg.reply_markup, "single-question should have inline keyboard");
   assert.equal(msg.reply_markup!.inline_keyboard.length, 2, "should have 2 button rows");

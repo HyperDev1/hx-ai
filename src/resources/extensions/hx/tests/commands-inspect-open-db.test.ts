@@ -10,7 +10,7 @@ import { closeDatabase, openDatabase } from "../hx-db.ts";
 test("/hx inspect opens existing database when it was not yet opened in session", async (t) => {
   closeDatabase();
 
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "gsd-inspect-db-"));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "hx-inspect-db-"));
   const prevCwd = process.cwd();
 
   t.after(() => {
@@ -21,7 +21,7 @@ test("/hx inspect opens existing database when it was not yet opened in session"
 
   const gsdDir = path.join(tmp, ".hx");
   fs.mkdirSync(gsdDir, { recursive: true });
-  const dbPath = path.join(gsdDir, "gsd.db");
+  const dbPath = path.join(gsdDir, "hx.db");
 
   assert.equal(openDatabase(dbPath), true);
   closeDatabase();
@@ -41,6 +41,6 @@ test("/hx inspect opens existing database when it was not yet opened in session"
 
   assert.equal(notifications.length, 1);
   assert.equal(notifications[0].level, "info");
-  assert.match(notifications[0].message, /=== GSD Database Inspect ===/);
-  assert.doesNotMatch(notifications[0].message, /No GSD database available/);
+  assert.match(notifications[0].message, /=== HX Database Inspect ===/);
+  assert.doesNotMatch(notifications[0].message, /No HX database available/);
 });

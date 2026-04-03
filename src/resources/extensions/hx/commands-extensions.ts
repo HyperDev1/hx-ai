@@ -1,5 +1,5 @@
 /**
- * GSD Extensions Command — /hx extensions
+ * HX Extensions Command — /hx extensions
  *
  * Manage the extension registry: list, enable, disable, info.
  * Self-contained — no imports outside the extensions tree (extensions are loaded
@@ -181,7 +181,7 @@ function handleList(ctx: ExtensionCommandContext): void {
     );
 
     if (!enabled) {
-      lines.push(`  ↳ gsd extensions enable ${m.id}`);
+      lines.push(`  ↳ /hx extensions enable ${m.id}`);
     }
   }
 
@@ -215,7 +215,7 @@ function handleEnable(id: string | undefined, ctx: ExtensionCommandContext): voi
     registry.entries[id] = { id, enabled: true, source: "bundled" };
   }
   saveRegistry(registry);
-  ctx.ui.notify(`Enabled "${id}". Restart GSD to activate.`, "info");
+  ctx.ui.notify(`Enabled "${id}". Restart HX to activate.`, "info");
 }
 
 function handleDisable(id: string | undefined, reason: string, ctx: ExtensionCommandContext): void {
@@ -258,7 +258,7 @@ function handleDisable(id: string | undefined, reason: string, ctx: ExtensionCom
     };
   }
   saveRegistry(registry);
-  ctx.ui.notify(`Disabled "${id}". Restart GSD to deactivate.`, "info");
+  ctx.ui.notify(`Disabled "${id}". Restart HX to deactivate.`, "info");
 }
 
 function handleInfo(id: string | undefined, ctx: ExtensionCommandContext): void {

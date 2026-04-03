@@ -1,6 +1,6 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-// gsd-inspect — Tests for /hx inspect output formatting
+// hx-inspect — Tests for /hx inspect output formatting
 //
 // Tests the pure formatInspectOutput function with known data.
 

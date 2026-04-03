@@ -1,5 +1,5 @@
 /**
- * GSD Guided Flow — Smart Entry Wizard
+ * HX Guided Flow — Smart Entry Wizard
  *
  * One function: showSmartEntry(). Reads state from disk, shows a contextual
  * wizard via showNextAction(), and dispatches through HX-WORKFLOW.md.
@@ -56,7 +56,7 @@ import { getErrorMessage } from "./error-utils.js";
 
 /**
  * Generate the next milestone ID, accounting for reserved IDs, and reserve it.
- * Ensures any preview ID shown in the UI matches what `gsd_milestone_generate_id`
+ * Ensures any preview ID shown in the UI matches what `hx_milestone_generate_id`
  * will later return.
  */
 function nextMilestoneIdReserved(existingIds: string[], uniqueEnabled: boolean): string {
@@ -219,7 +219,7 @@ type UIContext = ExtensionContext;
 async function dispatchWorkflow(
   pi: ExtensionAPI,
   note: string,
-  customType = "gsd-run",
+  customType = "hx-run",
   ctx?: ExtensionContext,
   unitType?: string,
 ): Promise<void> {
@@ -250,7 +250,7 @@ async function dispatchWorkflow(
   pi.sendMessage(
     {
       customType,
-      content: `Read the following GSD workflow protocol and execute exactly.\n\n${workflow}\n\n## Your Task\n\n${note}`,
+      content: `Read the following HX workflow protocol and execute exactly.\n\n${workflow}\n\n## Your Task\n\n${note}`,
       display: false,
     },
     { triggerTurn: true },
@@ -405,7 +405,7 @@ export async function showHeadlessMilestoneCreation(
   pendingAutoStart = { ctx, pi, basePath, milestoneId: nextId };
 
   // Dispatch — headless milestone creation is a planning activity
-  await dispatchWorkflow(pi, prompt, "gsd-run", ctx, "plan-milestone");
+  await dispatchWorkflow(pi, prompt, "hx-run", ctx, "plan-milestone");
 }
 
 
@@ -518,7 +518,7 @@ export async function showDiscuss(
 ): Promise<void> {
   // Guard: no .hx/ project
   if (!existsSync(hxRoot(basePath))) {
-    ctx.ui.notify("No GSD project found. Run /hx to start one first.", "warning");
+    ctx.ui.notify("No HX project found. Run /hx to start one first.", "warning");
     return;
   }
 
@@ -583,7 +583,7 @@ export async function showDiscuss(
         ? `${basePrompt}\n\n## Prior Discussion (Draft Seed)\n\n${draftContent}`
         : basePrompt;
       pendingAutoStart = { ctx, pi, basePath, milestoneId: mid, step: false };
-      await dispatchWorkflow(pi, seed, "gsd-discuss", ctx, "discuss-milestone");
+      await dispatchWorkflow(pi, seed, "hx-discuss", ctx, "discuss-milestone");
     } else if (choice === "discuss_fresh") {
       const discussMilestoneTemplates = inlineTemplate("context", "Context");
       const structuredQuestionsAvailable = pi.getActiveTools().includes("ask_user_questions") ? "true" : "false";
@@ -591,13 +591,13 @@ export async function showDiscuss(
       await dispatchWorkflow(pi, loadPrompt("guided-discuss-milestone", {
         milestoneId: mid, milestoneTitle, inlinedTemplates: discussMilestoneTemplates, structuredQuestionsAvailable,
         commitInstruction: buildDocsCommitInstruction(`docs(${mid}): milestone context from discuss`),
-      }), "gsd-discuss", ctx, "discuss-milestone");
+      }), "hx-discuss", ctx, "discuss-milestone");
     } else if (choice === "skip_milestone") {
       const milestoneIds = findMilestoneIds(basePath);
       const uniqueMilestoneIds = !!loadEffectiveHXPreferences()?.preferences?.unique_milestone_ids;
       const nextId = nextMilestoneIdReserved(milestoneIds, uniqueMilestoneIds);
       pendingAutoStart = { ctx, pi, basePath, milestoneId: nextId, step: false };
-      await dispatchWorkflow(pi, buildDiscussPrompt(nextId, `New milestone ${nextId}.`, basePath), "gsd-run", ctx, "discuss-milestone");
+      await dispatchWorkflow(pi, buildDiscussPrompt(nextId, `New milestone ${nextId}.`, basePath), "hx-run", ctx, "discuss-milestone");
     }
     return;
   }
@@ -727,7 +727,7 @@ export async function showDiscuss(
     }
 
     const prompt = await buildDiscussSlicePrompt(mid, chosen.id, chosen.title, basePath, { rediscuss: isRediscuss });
-    await dispatchWorkflow(pi, prompt, "gsd-discuss", ctx, "discuss-slice");
+    await dispatchWorkflow(pi, prompt, "hx-discuss", ctx, "discuss-slice");
 
     // Wait for the discuss session to finish, then loop back to the picker
     await ctx.waitForIdle();
@@ -805,7 +805,7 @@ async function dispatchDiscussForMilestone(
   const prompt = draftContent
     ? `${basePrompt}\n\n## Prior Discussion (Draft Seed)\n\n${draftContent}`
     : basePrompt;
-  await dispatchWorkflow(pi, prompt, "gsd-discuss", ctx, "discuss-milestone");
+  await dispatchWorkflow(pi, prompt, "hx-discuss", ctx, "discuss-milestone");
 }
 
 // ─── Smart Entry Point ────────────────────────────────────────────────────────
@@ -945,7 +945,7 @@ async function handleMilestoneActions(
     await dispatchWorkflow(pi, buildDiscussPrompt(nextId,
       `New milestone ${nextId}.`,
       basePath
-    ), "gsd-run", ctx, "discuss-milestone");
+    ), "hx-run", ctx, "discuss-milestone");
     return true;
   }
 
@@ -984,12 +984,12 @@ export async function showSmartEntry(
 
   // ── Detection preamble — run before any bootstrap ────────────────────
   if (!existsSync(hxRoot(basePath))) {
-    // .gsd/ exists but no .hx/ — offer GSD → HX migration
-    if (existsSync(join(basePath, ".gsd"))) {
+    // .hx/ exists but no .hx/ — offer HX → HX migration
+    if (existsSync(join(basePath, ".hx"))) {
       const { migrateProjectGsdToHx, migrateGlobalGsdToHx } = await import("./migrate-gsd-to-hx.js");
       const doMigrate = await showConfirm(ctx, {
-        title: "GSD → HX Migration",
-        message: "Found a .gsd/ directory from a previous GSD installation. Migrate it to .hx/?",
+        title: "HX → HX Migration",
+        message: "Found a .hx/ directory from a previous HX installation. Migrate it to .hx/?",
         confirmLabel: "Migrate",
         declineLabel: "Start fresh",
       });
@@ -997,14 +997,14 @@ export async function showSmartEntry(
         const result = migrateProjectGsdToHx(basePath);
         if (result.migrated) {
           _clearHxRootCache();
-          ctx.ui.notify("✓ Migrated project .gsd/ → .hx/", "info");
+          ctx.ui.notify("✓ Migrated project .hx/ → .hx/", "info");
         } else if (result.error) {
           ctx.ui.notify(`Migration failed: ${result.error}`, "error");
         }
         // Also sync global state
         const globalResult = migrateGlobalGsdToHx();
         if (globalResult.migrated) {
-          ctx.ui.notify("✓ Synced global credentials from ~/.gsd/ → ~/.hx/", "info");
+          ctx.ui.notify("✓ Synced global credentials from ~/.hx/ → ~/.hx/", "info");
         }
         // Re-check — if migration succeeded, hxRoot now exists, skip init wizard
         if (existsSync(hxRoot(basePath))) {
@@ -1040,7 +1040,7 @@ export async function showSmartEntry(
     // which will detect "no milestones" and start the discuss prompt
   }
 
-  // ── Ensure git repo exists — GSD needs it for worktree isolation ──────
+  // ── Ensure git repo exists — HX needs it for worktree isolation ──────
   // Also handle inherited repos: if basePath is a subdirectory of another
   // git repo that has no .hx, create a fresh repo to prevent cross-project
   // state leaks (#1639).
@@ -1130,7 +1130,7 @@ export async function showSmartEntry(
       await dispatchWorkflow(pi, buildDiscussPrompt(nextId,
         `New project, milestone ${nextId}. Do NOT read or explore .hx/ — it's empty scaffolding.`,
         basePath
-      ), "gsd-run", ctx, "discuss-milestone");
+      ), "hx-run", ctx, "discuss-milestone");
     } else {
       const choice = await showNextAction(ctx, {
         title: "HX — Hyperlab Coding Agent",
@@ -1151,7 +1151,7 @@ export async function showSmartEntry(
         await dispatchWorkflow(pi, buildDiscussPrompt(nextId,
           `New milestone ${nextId}.`,
           basePath
-        ), "gsd-run", ctx, "discuss-milestone");
+        ), "hx-run", ctx, "discuss-milestone");
       }
     }
     return;
@@ -1190,7 +1190,7 @@ export async function showSmartEntry(
       await dispatchWorkflow(pi, buildDiscussPrompt(nextId,
         `New milestone ${nextId}.`,
         basePath
-      ), "gsd-run", ctx, "discuss-milestone");
+      ), "hx-run", ctx, "discuss-milestone");
     } else if (choice === "status") {
       const { fireStatusViaCommand } = await import("./commands.js");
       await fireStatusViaCommand(ctx);
@@ -1238,7 +1238,7 @@ export async function showSmartEntry(
         ? `${basePrompt}\n\n## Prior Discussion (Draft Seed)\n\n${draftContent}`
         : basePrompt;
       pendingAutoStart = { ctx, pi, basePath, milestoneId, step: stepMode };
-      await dispatchWorkflow(pi, seed, "gsd-discuss", ctx, "discuss-milestone");
+      await dispatchWorkflow(pi, seed, "hx-discuss", ctx, "discuss-milestone");
     } else if (choice === "discuss_fresh") {
       const discussMilestoneTemplates = inlineTemplate("context", "Context");
       const structuredQuestionsAvailable = pi.getActiveTools().includes("ask_user_questions") ? "true" : "false";
@@ -1246,7 +1246,7 @@ export async function showSmartEntry(
       await dispatchWorkflow(pi, loadPrompt("guided-discuss-milestone", {
         milestoneId, milestoneTitle, inlinedTemplates: discussMilestoneTemplates, structuredQuestionsAvailable,
         commitInstruction: buildDocsCommitInstruction(`docs(${milestoneId}): milestone context from discuss`),
-      }), "gsd-discuss", ctx, "discuss-milestone");
+      }), "hx-discuss", ctx, "discuss-milestone");
     } else if (choice === "skip_milestone") {
       const milestoneIds = findMilestoneIds(basePath);
       const uniqueMilestoneIds = !!loadEffectiveHXPreferences()?.preferences?.unique_milestone_ids;
@@ -1255,7 +1255,7 @@ export async function showSmartEntry(
       await dispatchWorkflow(pi, buildDiscussPrompt(nextId,
         `New milestone ${nextId}.`,
         basePath
-      ), "gsd-run", ctx, "discuss-milestone");
+      ), "hx-run", ctx, "discuss-milestone");
     }
     return;
   }
@@ -1323,14 +1323,14 @@ export async function showSmartEntry(
             milestoneTitle,
             extraContext: [planMilestoneTemplates],
           }),
-        }), "gsd-run", ctx, "plan-milestone");
+        }), "hx-run", ctx, "plan-milestone");
       } else if (choice === "discuss") {
         const discussMilestoneTemplates = inlineTemplate("context", "Context");
         const structuredQuestionsAvailable = pi.getActiveTools().includes("ask_user_questions") ? "true" : "false";
         await dispatchWorkflow(pi, loadPrompt("guided-discuss-milestone", {
           milestoneId, milestoneTitle, inlinedTemplates: discussMilestoneTemplates, structuredQuestionsAvailable,
           commitInstruction: buildDocsCommitInstruction(`docs(${milestoneId}): milestone context from discuss`),
-        }), "gsd-run", ctx, "discuss-milestone");
+        }), "hx-run", ctx, "discuss-milestone");
       } else if (choice === "skip_milestone") {
         const milestoneIds = findMilestoneIds(basePath);
         const uniqueMilestoneIds = !!loadEffectiveHXPreferences()?.preferences?.unique_milestone_ids;
@@ -1339,7 +1339,7 @@ export async function showSmartEntry(
         await dispatchWorkflow(pi, buildDiscussPrompt(nextId,
           `New milestone ${nextId}.`,
           basePath
-        ), "gsd-run", ctx, "discuss-milestone");
+        ), "hx-run", ctx, "discuss-milestone");
       } else if (choice === "discard_milestone") {
         const confirmed = await showConfirm(ctx, {
           title: "Discard milestone?",
@@ -1463,9 +1463,9 @@ export async function showSmartEntry(
           sliceTitle,
           extraContext: [planSliceTemplates],
         }),
-      }), "gsd-run", ctx, "plan-slice");
+      }), "hx-run", ctx, "plan-slice");
     } else if (choice === "discuss") {
-      await dispatchWorkflow(pi, await buildDiscussSlicePrompt(milestoneId, sliceId, sliceTitle, basePath, { rediscuss: hasContext }), "gsd-run", ctx, "discuss-slice");
+      await dispatchWorkflow(pi, await buildDiscussSlicePrompt(milestoneId, sliceId, sliceTitle, basePath, { rediscuss: hasContext }), "hx-run", ctx, "discuss-slice");
     } else if (choice === "research") {
       const researchTemplates = inlineTemplate("research", "Research");
       await dispatchWorkflow(pi, loadPrompt("guided-research-slice", {
@@ -1480,7 +1480,7 @@ export async function showSmartEntry(
           sliceTitle,
           extraContext: [researchTemplates],
         }),
-      }), "gsd-run", ctx, "research-slice");
+      }), "hx-run", ctx, "research-slice");
     } else if (choice === "status") {
       const { fireStatusViaCommand } = await import("./commands.js");
       await fireStatusViaCommand(ctx);
@@ -1535,7 +1535,7 @@ export async function showSmartEntry(
           sliceTitle,
           extraContext: [completeSliceTemplates],
         }),
-      }), "gsd-run", ctx, "complete-slice");
+      }), "hx-run", ctx, "complete-slice");
     } else if (choice === "status") {
       const { fireStatusViaCommand } = await import("./commands.js");
       await fireStatusViaCommand(ctx);
@@ -1608,7 +1608,7 @@ export async function showSmartEntry(
             taskId,
             taskTitle,
           }),
-        }), "gsd-run", ctx, "execute-task");
+        }), "hx-run", ctx, "execute-task");
       } else {
         const executeTaskTemplates = inlineTemplate("task-summary", "Task Summary");
         await dispatchWorkflow(pi, loadPrompt("guided-execute-task", {
@@ -1625,7 +1625,7 @@ export async function showSmartEntry(
             taskTitle,
             extraContext: [executeTaskTemplates],
           }),
-        }), "gsd-run", ctx, "execute-task");
+        }), "hx-run", ctx, "execute-task");
       }
     } else if (choice === "status") {
       const { fireStatusViaCommand } = await import("./commands.js");

@@ -32,7 +32,7 @@ export interface ReconcileResult {
 
 /**
  * Replay a list of WorkflowEvents by dispatching each to the appropriate
- * gsd-db function.  This replaces the old engine.replayAll() pattern with
+ * hx-db function.  This replaces the old engine.replayAll() pattern with
  * direct DB calls.
  */
 function replayEvents(events: WorkflowEvent[]): void {
@@ -223,7 +223,7 @@ export function writeConflictsFile(
     `# Merge Conflicts — ${timestamp}`,
     "",
     `Conflicts detected merging worktree \`${worktreePath}\` into \`${basePath}\`.`,
-    `Run \`gsd resolve-conflict\` to resolve each conflict.`,
+    `Run \`/hx resolve-conflict\` to resolve each conflict.`,
     "",
   ];
 
@@ -242,7 +242,7 @@ export function writeConflictsFile(
       lines.push(`  params: ${JSON.stringify(event.params)}`);
     }
     lines.push("");
-    lines.push(`**Resolve with:** \`gsd resolve-conflict --entity ${conflict.entityType}:${conflict.entityId} --pick [main|worktree]\``);
+    lines.push(`**Resolve with:** \`/hx resolve-conflict --entity ${conflict.entityType}:${conflict.entityId} --pick [main|worktree]\``);
     lines.push("");
   });
 

@@ -13,9 +13,9 @@ import { tmpdir } from "node:os";
 import { runGSDDoctor } from "../../doctor.js";
 
 test("doctor fix=true sanitizes em-dash in milestone title", async (t) => {
-  const tmpBase = mkdtempSync(join(tmpdir(), "gsd-doctor-delim-"));
-  const gsd = join(tmpBase, ".hx");
-  const mDir = join(gsd, "milestones", "M001");
+  const tmpBase = mkdtempSync(join(tmpdir(), "hx-doctor-delim-"));
+  const hx = join(tmpBase, ".hx");
+  const mDir = join(hx, "milestones", "M001");
   const sDir = join(mDir, "slices", "S01");
   const tDir = join(sDir, "tasks");
   mkdirSync(tDir, { recursive: true });
@@ -59,9 +59,9 @@ test("doctor fix=true sanitizes em-dash in milestone title", async (t) => {
 });
 
 test("doctor fix=false still reports delimiter_in_title as warning", async (t) => {
-  const tmpBase = mkdtempSync(join(tmpdir(), "gsd-doctor-delim-nf-"));
-  const gsd = join(tmpBase, ".hx");
-  const mDir = join(gsd, "milestones", "M001");
+  const tmpBase = mkdtempSync(join(tmpdir(), "hx-doctor-delim-nf-"));
+  const hx = join(tmpBase, ".hx");
+  const mDir = join(hx, "milestones", "M001");
   const sDir = join(mDir, "slices", "S01");
   const tDir = join(sDir, "tasks");
   mkdirSync(tDir, { recursive: true });

@@ -47,7 +47,7 @@ export function registerGsdExtension(pi: ExtensionAPI): void {
   installEpipeGuard();
 
   pi.registerCommand("kill", {
-    description: "Exit GSD immediately (no cleanup)",
+    description: "Exit HX immediately (no cleanup)",
     handler: async (_args: string, _ctx: ExtensionCommandContext) => {
       process.exit(0);
     },

@@ -3,55 +3,55 @@
 ## Install
 
 ```bash
-npm install -g gsd-pi
+npm install -g hx-pi
 ```
 
 Requires Node.js ≥ 22.0.0 (24 LTS recommended) and Git.
 
-> **`command not found: gsd`?** Your shell may not have npm's global bin directory in `$PATH`. Run `npm prefix -g` to find it, then add `$(npm prefix -g)/bin` to your PATH. See [Troubleshooting](./troubleshooting.md#command-not-found-gsd-after-install) for details.
+> **`command not found: hx`?** Your shell may not have npm's global bin directory in `$PATH`. Run `npm prefix -g` to find it, then add `$(npm prefix -g)/bin` to your PATH. See [Troubleshooting](./troubleshooting.md#command-not-found-hx-after-install) for details.
 
-GSD checks for updates once every 24 hours. When a new version is available, you'll see an interactive prompt at startup with the option to update immediately or skip. You can also update from within a session with `/gsd update`.
+HX checks for updates once every 24 hours. When a new version is available, you'll see an interactive prompt at startup with the option to update immediately or skip. You can also update from within a session with `/hx update`.
 
 ### Set up API keys
 
-If you use a non-Anthropic model, you'll need a search API key for web search. Run `/gsd config` to set keys globally — they're saved to `~/.gsd/agent/auth.json` and apply to all projects:
+If you use a non-Anthropic model, you'll need a search API key for web search. Run `/hx config` to set keys globally — they're saved to `~/.hx/agent/auth.json` and apply to all projects:
 
 ```bash
-# Inside any GSD session:
-/gsd config
+# Inside any HX session:
+/hx config
 ```
 
-See [Global API Keys](./configuration.md#global-api-keys-gsd-config) for details on supported keys.
+See [Global API Keys](./configuration.md#global-api-keys-hx-config) for details on supported keys.
 
 ### Set up custom MCP servers
 
-If you want GSD to call local or external MCP servers, add project-local config in `.mcp.json` or `.gsd/mcp.json`.
+If you want HX to call local or external MCP servers, add project-local config in `.mcp.json` or `.hx/mcp.json`.
 
 See [Configuration → MCP Servers](./configuration.md#mcp-servers) for examples and verification steps.
 
 ### VS Code Extension
 
-GSD is also available as a VS Code extension. Install from the marketplace (publisher: FluxLabs) or search for "GSD" in VS Code extensions. The extension provides:
+HX is also available as a VS Code extension. Install from the marketplace (publisher: FluxLabs) or search for "HX" in VS Code extensions. The extension provides:
 
-- **`@gsd` chat participant** — talk to the agent in VS Code Chat
+- **`@hx` chat participant** — talk to the agent in VS Code Chat
 - **Sidebar dashboard** — connection status, model info, token usage, quick actions
 - **Full command palette** — start/stop agent, switch models, export sessions
 
-The CLI (`gsd-pi`) must be installed first — the extension connects to it via RPC.
+The CLI (`hx-pi`) must be installed first — the extension connects to it via RPC.
 
 ### Web Interface
 
-GSD also has a browser-based interface. Run `gsd --web` to start a local web server with a visual dashboard, real-time progress, and multi-project support. See [Web Interface](./web-interface.md) for details.
+HX also has a browser-based interface. Run `hx --web` to start a local web server with a visual dashboard, real-time progress, and multi-project support. See [Web Interface](./web-interface.md) for details.
 
 ## First Launch
 
-Run `gsd` in any directory:
+Run `hx` in any directory:
 
 ```bash
-gsd
+hx
 ```
 
-GSD displays a welcome screen showing your version, active model, and available tool keys. Then on first launch, it runs a setup wizard:
+HX displays a welcome screen showing your version, active model, and available tool keys. Then on first launch, it runs a setup wizard:
 
 1. **LLM Provider** — select from 20+ providers (Anthropic, OpenAI, Google, OpenRouter, GitHub Copilot, Amazon Bedrock, Azure, and more). OAuth flows handle Claude Max and Copilot subscriptions automatically; otherwise paste an API key.
 2. **Tool API Keys** (optional) — Brave Search, Context7, Jina, Slack, Discord. Press Enter to skip any.
@@ -61,12 +61,12 @@ If you have an existing Pi installation, provider credentials are imported autom
 Re-run the wizard anytime with:
 
 ```bash
-gsd config
+hx config
 ```
 
 ## Choose a Model
 
-GSD auto-selects a default model after login. Switch later with:
+HX auto-selects a default model after login. Switch later with:
 
 ```
 /model
@@ -76,23 +76,23 @@ Or configure per-phase models in preferences — see [Configuration](./configura
 
 ## Two Ways to Work
 
-### Step Mode — `/gsd`
+### Step Mode — `/hx`
 
-Type `/gsd` inside a session. GSD executes one unit of work at a time, pausing between each with a wizard showing what completed and what's next.
+Type `/hx` inside a session. HX executes one unit of work at a time, pausing between each with a wizard showing what completed and what's next.
 
-- **No `.gsd/` directory** → starts a discussion flow to capture your project vision
+- **No `.hx/` directory** → starts a discussion flow to capture your project vision
 - **Milestone exists, no roadmap** → discuss or research the milestone
 - **Roadmap exists, slices pending** → plan the next slice or execute a task
 - **Mid-task** → resume where you left off
 
 Step mode is the on-ramp. You stay in the loop, reviewing output between each step.
 
-### Auto Mode — `/gsd auto`
+### Auto Mode — `/hx auto`
 
-Type `/gsd auto` and walk away. GSD autonomously researches, plans, executes, verifies, commits, and advances through every slice until the milestone is complete.
+Type `/hx auto` and walk away. HX autonomously researches, plans, executes, verifies, commits, and advances through every slice until the milestone is complete.
 
 ```
-/gsd auto
+/hx auto
 ```
 
 See [Auto Mode](./auto-mode.md) for full details.
@@ -104,24 +104,24 @@ The recommended workflow: auto mode in one terminal, steering from another.
 **Terminal 1 — let it build:**
 
 ```bash
-gsd
-/gsd auto
+hx
+/hx auto
 ```
 
 **Terminal 2 — steer while it works:**
 
 ```bash
-gsd
-/gsd discuss    # talk through architecture decisions
-/gsd status     # check progress
-/gsd queue      # queue the next milestone
+hx
+/hx discuss    # talk through architecture decisions
+/hx status     # check progress
+/hx queue      # queue the next milestone
 ```
 
-Both terminals read and write the same `.gsd/` files. Decisions in terminal 2 are picked up at the next phase boundary automatically.
+Both terminals read and write the same `.hx/` files. Decisions in terminal 2 are picked up at the next phase boundary automatically.
 
 ## Project Structure
 
-GSD organizes work into a hierarchy:
+HX organizes work into a hierarchy:
 
 ```
 Milestone  →  a shippable version (4-10 slices)
@@ -131,10 +131,10 @@ Milestone  →  a shippable version (4-10 slices)
 
 The iron rule: **a task must fit in one context window.** If it can't, it's two tasks.
 
-All state lives on disk in `.gsd/`:
+All state lives on disk in `.hx/`:
 
 ```
-.gsd/
+.hx/
   PROJECT.md          — what the project is right now
   REQUIREMENTS.md     — requirement contract (active/validated/deferred)
   DECISIONS.md        — append-only architectural decisions
@@ -158,7 +158,7 @@ All state lives on disk in `.gsd/`:
 ## Resume a Session
 
 ```bash
-gsd --continue    # or gsd -c
+hx --continue    # or hx -c
 ```
 
 Resumes the most recent session for the current directory.
@@ -166,7 +166,7 @@ Resumes the most recent session for the current directory.
 To browse and pick from all saved sessions:
 
 ```bash
-gsd sessions
+hx sessions
 ```
 
 Shows each session's date, message count, and first-message preview so you can choose which one to resume.
@@ -179,20 +179,20 @@ Shows each session's date, message count, and first-message preview so you can c
 
 ## Troubleshooting
 
-### `gsd` command runs `git svn dcommit` instead of GSD
+### `hx` command runs `git svn dcommit` instead of HX
 
-The [oh-my-zsh git plugin](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/git) defines `alias gsd='git svn dcommit'`, which shadows the GSD binary.
+The [oh-my-zsh git plugin](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/git) defines `alias hx='git svn dcommit'`, which shadows the HX binary.
 
 **Option 1** — Remove the alias in your `~/.zshrc` (add after the `source $ZSH/oh-my-zsh.sh` line):
 
 ```bash
-unalias gsd 2>/dev/null
+unalias hx 2>/dev/null
 ```
 
 **Option 2** — Use the alternative binary name:
 
 ```bash
-gsd-cli
+hx-cli
 ```
 
-Both `gsd` and `gsd-cli` point to the same binary.
+Both `hx` and `hx-cli` point to the same binary.

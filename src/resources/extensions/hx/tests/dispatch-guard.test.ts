@@ -8,9 +8,9 @@ import { openDatabase, closeDatabase, insertMilestone, insertSlice } from "../hx
 
 /** Helper: create temp dir and open an in-dir DB for dispatch-guard tests */
 function setupRepo(): string {
-  const repo = mkdtempSync(join(tmpdir(), "gsd-dispatch-guard-"));
+  const repo = mkdtempSync(join(tmpdir(), "hx-dispatch-guard-"));
   mkdirSync(join(repo, ".hx"), { recursive: true });
-  openDatabase(join(repo, ".hx", "gsd.db"));
+  openDatabase(join(repo, ".hx", "hx.db"));
   return repo;
 }
 

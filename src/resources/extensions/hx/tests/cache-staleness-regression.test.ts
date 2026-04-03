@@ -1,7 +1,7 @@
 /**
  * cache-staleness-regression.test.ts — Regression tests for stale cache bugs.
  *
- * The GSD parser caches are critical for performance but have caused multiple
+ * The HX parser caches are critical for performance but have caused multiple
  * production bugs when not invalidated at the right time.
  *
  * Regression coverage for:
@@ -22,7 +22,7 @@ import { deriveState, invalidateStateCache } from '../state.ts';
 import { invalidateAllCaches } from '../cache.ts';
 
 function createBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-cache-stale-'));
+  const base = mkdtempSync(join(tmpdir(), 'hx-cache-stale-'));
   mkdirSync(join(base, '.hx', 'milestones'), { recursive: true });
   return base;
 }

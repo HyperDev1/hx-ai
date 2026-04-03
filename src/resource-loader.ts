@@ -11,9 +11,9 @@ import { loadRegistry, readManifestFromEntryPath, isExtensionEnabled, ensureRegi
 // Resolve resources directory — prefer dist/resources/ (stable, set at build time)
 // over src/resources/ (live working tree, changes with git branch).
 //
-// Why this matters: with `npm link`, src/resources/ points into the gsd-2 repo's
+// Why this matters: with `npm link`, src/resources/ points into the hx-2 repo's
 // working tree. Switching branches there changes src/resources/ for ALL projects
-// that use gsd — causing stale/broken extensions to be synced to ~/.gsd/agent/.
+// that use hx — causing stale/broken extensions to be synced to ~/.hx/agent/.
 // dist/resources/ is populated by the build step (`npm run copy-resources`) and
 // reflects the built state, not the currently checked-out branch.
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -34,14 +34,14 @@ interface ManagedResourceManifest {
   /** Content fingerprint of bundled resources — detects same-version content changes. */
   contentHash?: string
   /**
-   * Root-level files installed in extensions/ by this GSD version.
+   * Root-level files installed in extensions/ by this HX version.
    * Used on the next upgrade to detect and prune files that were removed or
    * moved into a subdirectory, preventing orphaned non-extension files from
    * causing extension load errors.
    */
   installedExtensionRootFiles?: string[]
   /**
-   * Subdirectory extension names installed in extensions/ by this GSD version.
+   * Subdirectory extension names installed in extensions/ by this HX version.
    * Used on the next upgrade to detect and prune subdirectory extensions that
    * were removed from the bundle.
    */
@@ -275,12 +275,12 @@ function copyDirRecursive(src: string, dest: string): void {
 }
 
 /**
- * Creates (or updates) a symlink at agentDir/node_modules pointing to GSD's
+ * Creates (or updates) a symlink at agentDir/node_modules pointing to HX's
  * own node_modules directory.
  *
  * Native ESM `import()` ignores NODE_PATH — it resolves packages by walking
  * up the directory tree from the importing file. Extension files synced to
- * ~/.gsd/agent/extensions/ have no ancestor node_modules, so imports of
+ * ~/.hx/agent/extensions/ have no ancestor node_modules, so imports of
  * @hyperlab/* packages fail. The symlink makes Node's standard resolution find
  * them without requiring every call site to use jiti.
  */
@@ -308,20 +308,20 @@ function ensureNodeModulesSymlink(agentDir: string): void {
   try {
     symlinkSync(gsdNodeModules, agentNodeModules, 'junction')
   } catch (err) {
-    // This failure makes GSD non-functional — extensions can't resolve @hyperlab/* packages
+    // This failure makes HX non-functional — extensions can't resolve @hyperlab/* packages
     console.error(`[hx] WARN: Failed to symlink ${agentNodeModules} → ${gsdNodeModules}: ${err instanceof Error ? err.message : err}`)
   }
 }
 
 /**
- * Prune root-level extension files that were installed by a previous GSD version
+ * Prune root-level extension files that were installed by a previous HX version
  * but have since been removed or relocated to a subdirectory.
  *
  * Two strategies:
  * 1. Manifest-based (preferred): the manifest records which root files were installed
  *    last time; any that are no longer in the current bundle are deleted.
  * 2. Known-stale fallback: for upgrades from versions before manifest tracking,
- *    explicitly delete files known to have been moved (e.g. env-utils.js → gsd/).
+ *    explicitly delete files known to have been moved (e.g. env-utils.js → hx/).
  */
 function pruneRemovedBundledExtensions(
   manifest: ManagedResourceManifest | null,
@@ -372,27 +372,27 @@ function pruneRemovedBundledExtensions(
   // Always remove known stale files regardless of manifest state.
   // These were installed by pre-manifest versions so they may not appear in
   // installedExtensionRootFiles even when a manifest exists.
-  // env-utils.js was moved from extensions/ root → gsd/ in v2.39.x (#1634)
+  // env-utils.js was moved from extensions/ root → hx/ in v2.39.x (#1634)
   removeFileIfStale('env-utils.js')
 }
 
 /**
- * Syncs all bundled resources to agentDir (~/.gsd/agent/) on every launch.
+ * Syncs all bundled resources to agentDir (~/.hx/agent/) on every launch.
  *
- * - extensions/ → ~/.gsd/agent/extensions/   (overwrite when version changes)
- * - agents/     → ~/.gsd/agent/agents/        (overwrite when version changes)
- * - HX-WORKFLOW.md → ~/.gsd/agent/HX-WORKFLOW.md (fallback for env var miss)
+ * - extensions/ → ~/.hx/agent/extensions/   (overwrite when version changes)
+ * - agents/     → ~/.hx/agent/agents/        (overwrite when version changes)
+ * - HX-WORKFLOW.md → ~/.hx/agent/HX-WORKFLOW.md (fallback for env var miss)
  *
  * Skills are NOT synced here. They are installed by the user via the
  * skills.sh CLI (`npx skills add <repo>`) into ~/.agents/skills/ — the
  * industry-standard Agent Skills ecosystem directory.
  *
  * Skips the copy when the managed-resources.json version matches the current
- * GSD version, avoiding ~128ms of synchronous cpSync on every startup.
+ * HX version, avoiding ~128ms of synchronous cpSync on every startup.
  * After `npm update -g @glittercowboy/hx`, versions will differ and the
  * copy runs once to land the new resources.
  *
- * Inspectable: `ls ~/.gsd/agent/extensions/`
+ * Inspectable: `ls ~/.hx/agent/extensions/`
  */
 export function initResources(agentDir: string): void {
   mkdirSync(agentDir, { recursive: true })
@@ -406,9 +406,9 @@ export function initResources(agentDir: string): void {
   // up even when the version/hash match causes the full sync to be skipped.
   pruneRemovedBundledExtensions(manifest, agentDir)
 
-  // Ensure ~/.gsd/agent/node_modules symlinks to GSD's node_modules on EVERY
+  // Ensure ~/.hx/agent/node_modules symlinks to HX's node_modules on EVERY
   // launch, not just during resource syncs. A stale/broken symlink makes ALL
-  // extensions fail to resolve @hyperlab/* packages, rendering GSD non-functional.
+  // extensions fail to resolve @hyperlab/* packages, rendering HX non-functional.
   ensureNodeModulesSymlink(agentDir)
 
   // Migrate legacy skills on every launch (not gated by manifest) so that
@@ -435,7 +435,7 @@ export function initResources(agentDir: string): void {
   // skills.sh CLI (`npx skills add <repo>`) into ~/.agents/skills/ which
   // is the industry-standard Agent Skills ecosystem directory.
   //
-  // Migration from the legacy ~/.gsd/agent/skills/ directory is handled
+  // Migration from the legacy ~/.hx/agent/skills/ directory is handled
   // above the manifest check so it runs on every launch (including retries
   // after partial copy failures).
 
@@ -458,12 +458,12 @@ export function initResources(agentDir: string): void {
 
 /**
  * One-time migration: copy user-customized skills from the old
- * ~/.gsd/agent/skills/ directory into ~/.agents/skills/.
+ * ~/.hx/agent/skills/ directory into ~/.agents/skills/.
  *
  * The migration is conservative:
  *  - Only skill directories containing a SKILL.md are considered.
  *  - Copies, does not move — the old directory stays intact so downgrading
- *    to a pre-migration GSD version still works.
+ *    to a pre-migration HX version still works.
  *  - Collision-safe — if a skill name already exists in the target, the
  *    existing ecosystem skill wins (user may have already installed a newer
  *    version via skills.sh).
@@ -478,7 +478,7 @@ function migrateSkillsToEcosystemDir(agentDir: string): void {
   if (!existsSync(legacyDir)) return
 
   // Atomic marker check — 'wx' fails if file already exists, preventing races
-  // when two GSD processes start simultaneously.
+  // when two HX processes start simultaneously.
   let markerFd: number
   try {
     markerFd = openSync(markerPath, 'wx')
@@ -522,7 +522,7 @@ function migrateSkillsToEcosystemDir(agentDir: string): void {
         if (isSymlink) {
           // Recreate the symlink in the ecosystem directory using an absolute
           // target. Relative symlinks would resolve from the new parent dir
-          // (~/.agents/skills/) instead of the original (~/.gsd/agent/skills/),
+          // (~/.agents/skills/) instead of the original (~/.hx/agent/skills/),
           // pointing to the wrong location.
           const rawTarget = readlinkSync(sourcePath)
           const absTarget = resolve(dirname(sourcePath), rawTarget)
@@ -571,7 +571,7 @@ export function hasStaleCompiledExtensionSiblings(extensionsDir: string): boolea
 
 /**
  * Constructs a DefaultResourceLoader that loads extensions from both
- * ~/.gsd/agent/extensions/ (GSD's default) and ~/.pi/agent/extensions/ (pi's default).
+ * ~/.hx/agent/extensions/ (HX's default) and ~/.pi/agent/extensions/ (pi's default).
  * This allows users to use extensions from either location.
  */
 // Cache bundled extension keys at module load — avoids re-scanning the extensions

@@ -3,11 +3,11 @@
   "templates": {
     "full-project": {
       "name": "Full Project",
-      "description": "Complete GSD workflow with roadmap, milestones, slices, and full ceremony",
+      "description": "Complete HX workflow with roadmap, milestones, slices, and full ceremony",
       "file": "full-project.md",
       "phases": ["init", "discuss", "plan", "execute", "verify"],
       "triggers": ["new project", "greenfield", "from scratch", "build an app", "create a new"],
-      "artifact_dir": ".gsd/",
+      "artifact_dir": ".hx/",
       "estimated_complexity": "high",
       "requires_project": true
     },
@@ -17,7 +17,7 @@
       "file": "bugfix.md",
       "phases": ["triage", "fix", "verify", "ship"],
       "triggers": ["bug", "issue", "fix", "broken", "regression", "error", "crash", "failing", "github.com/*/issues/*"],
-      "artifact_dir": ".gsd/workflows/bugfixes/",
+      "artifact_dir": ".hx/workflows/bugfixes/",
       "estimated_complexity": "low",
       "requires_project": false
     },
@@ -27,7 +27,7 @@
       "file": "small-feature.md",
       "phases": ["scope", "plan", "implement", "verify"],
       "triggers": ["add", "feature", "implement", "build", "create", "new command", "new endpoint"],
-      "artifact_dir": ".gsd/workflows/features/",
+      "artifact_dir": ".hx/workflows/features/",
       "estimated_complexity": "medium",
       "requires_project": false
     },
@@ -37,7 +37,7 @@
       "file": "refactor.md",
       "phases": ["inventory", "plan", "migrate", "verify"],
       "triggers": ["refactor", "migrate", "rename", "restructure", "move", "reorganize", "clean up"],
-      "artifact_dir": ".gsd/workflows/refactors/",
+      "artifact_dir": ".hx/workflows/refactors/",
       "estimated_complexity": "medium",
       "requires_project": false
     },
@@ -47,7 +47,7 @@
       "file": "spike.md",
       "phases": ["scope", "research", "synthesize"],
       "triggers": ["research", "investigate", "explore", "spike", "compare", "evaluate", "should we", "what if", "how does"],
-      "artifact_dir": ".gsd/workflows/spikes/",
+      "artifact_dir": ".hx/workflows/spikes/",
       "estimated_complexity": "low",
       "requires_project": false
     },
@@ -67,7 +67,7 @@
       "file": "security-audit.md",
       "phases": ["scan", "triage", "remediate", "re-scan"],
       "triggers": ["security", "audit", "vulnerability", "owasp", "cve", "penetration", "hardening"],
-      "artifact_dir": ".gsd/workflows/audits/",
+      "artifact_dir": ".hx/workflows/audits/",
       "estimated_complexity": "medium",
       "requires_project": false
     },
@@ -77,7 +77,7 @@
       "file": "dep-upgrade.md",
       "phases": ["assess", "upgrade", "fix", "verify"],
       "triggers": ["upgrade", "update", "dependency", "deps", "bump", "outdated", "npm update", "renovate"],
-      "artifact_dir": ".gsd/workflows/upgrades/",
+      "artifact_dir": ".hx/workflows/upgrades/",
       "estimated_complexity": "medium",
       "requires_project": false
     },
@@ -87,7 +87,7 @@
       "file": "revise.md",
       "phases": ["assess", "scope", "plan", "iterate", "review"],
       "triggers": ["revise", "revision", "redo", "iterate", "not right", "doesn't look", "change this", "fix the design", "looks wrong", "try again", "olmadı", "beğenmedim", "revize", "değiştir"],
-      "artifact_dir": ".gsd/workflows/revisions/",
+      "artifact_dir": ".hx/workflows/revisions/",
       "estimated_complexity": "medium",
       "requires_project": false
     }

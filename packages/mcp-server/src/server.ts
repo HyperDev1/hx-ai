@@ -106,7 +106,7 @@ interface McpServerInstance {
 // ---------------------------------------------------------------------------
 
 /**
- * Create and configure an MCP server with 6 GSD orchestration tools.
+ * Create and configure an MCP server with 6 HX orchestration tools.
  *
  * Returns the McpServer instance — call `connect(transport)` to start serving.
  * Uses dynamic imports for the MCP SDK to avoid TS subpath resolution issues.

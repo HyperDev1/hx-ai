@@ -1,5 +1,5 @@
 /**
- * GSD Dashboard Overlay
+ * HX Dashboard Overlay
  *
  * Full-screen overlay showing auto-mode progress: milestone/slice/task
  * breakdown, current unit, completed units, timing, and activity log.
@@ -290,7 +290,7 @@ export class GSDDashboardOverlay {
     const hr = () => row(th.fg("dim", "─".repeat(contentWidth)));
     const centered = (content: string) => row(centerLine(content, contentWidth));
 
-    const title = th.fg("accent", th.bold("GSD Dashboard"));
+    const title = th.fg("accent", th.bold("HX Dashboard"));
     const isRemote = !!this.dashData.remoteSession;
     const status = this.dashData.active
       ? `${Date.now() % 2000 < 1000 ? th.fg("success", "●") : th.fg("dim", "○")} ${th.fg("success", "AUTO")}`

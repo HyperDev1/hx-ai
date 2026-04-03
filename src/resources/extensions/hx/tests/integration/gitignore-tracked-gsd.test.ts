@@ -1,5 +1,5 @@
 /**
- * gitignore-tracked-gsd.test.ts — Regression tests for #1364.
+ * gitignore-tracked-hx.test.ts — Regression tests for #1364.
  *
  * Verifies that ensureGitignore() does NOT add ".hx" to .gitignore
  * when .hx/ contains git-tracked files, and that migrateToExternalState()

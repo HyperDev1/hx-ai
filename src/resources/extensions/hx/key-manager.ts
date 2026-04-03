@@ -208,7 +208,7 @@ export function formatKeyDashboard(statuses: KeyStatus[]): string {
     { label: "Remote Integrations", key: "remote" },
   ];
 
-  const lines: string[] = ["GSD API Key Manager\n"];
+  const lines: string[] = ["HX API Key Manager\n"];
 
   for (const cat of categories) {
     const items = statuses.filter((s) => s.provider.category === cat.key);

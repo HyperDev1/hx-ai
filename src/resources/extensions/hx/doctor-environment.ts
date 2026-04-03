@@ -1,5 +1,5 @@
 /**
- * GSD Doctor — Environment Health Checks (#1221)
+ * HX Doctor — Environment Health Checks (#1221)
  *
  * Deterministic checks for environment readiness that prevent the model
  * from spinning its wheels on missing tools, port conflicts, stale

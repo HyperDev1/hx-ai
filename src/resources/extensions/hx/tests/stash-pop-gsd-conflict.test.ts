@@ -1,5 +1,5 @@
 /**
- * stash-pop-gsd-conflict.test.ts — Regression test for #2766.
+ * stash-pop-hx-conflict.test.ts — Regression test for #2766.
  *
  * When a squash merge stash-pops and hits conflicts on .hx/ state files,
  * the UU entries block every subsequent merge. This test verifies that

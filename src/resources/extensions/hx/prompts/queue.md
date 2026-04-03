@@ -34,11 +34,11 @@ Don't go deep — just enough that your next question reflects what's actually t
 - Integration surfaces — external systems, APIs, libraries, or internal modules this work touches
 - What needs to be proven before committing — the things that, if they don't work, mean the plan is wrong
 - How the new work relates to existing milestones — overlap, dependencies, prerequisites
-- If `.gsd/REQUIREMENTS.md` exists: which unmet Active or Deferred requirements this queued work advances
+- If `.hx/REQUIREMENTS.md` exists: which unmet Active or Deferred requirements this queued work advances
 
 **Then use ask_user_questions** to dig into gray areas — scope boundaries, proof expectations, integration choices, tech preferences when they materially matter, and what's in vs out. 1-3 questions per round.
 
-If a `GSD Skill Preferences` block is present in system context, use it to decide which skills to load and follow during discuss/planning work, but do not let it override the required discuss flow or artifact requirements.
+If a `HX Skill Preferences` block is present in system context, use it to decide which skills to load and follow during discuss/planning work, but do not let it override the required discuss flow or artifact requirements.
 
 **Self-regulate:** Do **not** ask a meta "ready to queue?" question after every round. Keep going until you have enough depth to write the context well, then use a single wrap-up prompt if needed. If the user clearly keeps adding detail instead of objecting, treat that as permission to continue.
 
@@ -51,7 +51,7 @@ Before writing anything, assess the new work against what already exists:
 1. **Dedup check** — Is this already covered (fully or partially) by an existing milestone? If so, tell the user and explain what's already planned. Don't create duplicate milestones.
 2. **Extension check** — Should this be added to an existing *pending* (not yet started) milestone rather than creating a new one? If the scope naturally belongs with existing pending work, propose extending that milestone's context instead.
 3. **Dependency check** — Does the new work depend on something that's currently in progress or planned? Note the dependency so context files capture it.
-4. **Requirement check** — If `.gsd/REQUIREMENTS.md` exists, identify whether this queued work advances unmet Active requirements, promotes Deferred work, or introduces entirely new scope that should also update the requirement contract.
+4. **Requirement check** — If `.hx/REQUIREMENTS.md` exists, identify whether this queued work advances unmet Active requirements, promotes Deferred work, or introduces entirely new scope that should also update the requirement contract.
 
 If the new work is already fully covered, say so and stop — don't create anything.
 
@@ -107,7 +107,7 @@ The user confirms or corrects before you write. One depth verification per miles
 
 Once the user is satisfied, in a single pass for **each** new milestone:
 
-1. Call `gsd_milestone_generate_id` to get the milestone ID — never invent milestone IDs manually. Then `mkdir -p .gsd/milestones/<ID>/slices`.
+1. Call `gsd_milestone_generate_id` to get the milestone ID — never invent milestone IDs manually. Then `mkdir -p .hx/milestones/<ID>/slices`.
 2. Call `gsd_summary_save` with `milestone_id: <ID>`, `artifact_type: "CONTEXT"`, and the full context markdown as `content` — the tool computes the file path and persists to both DB and disk. Capture intent, scope, risks, constraints, integration points, and relevant requirements in the content. Mark the status as "Queued — pending auto-mode execution." **If this milestone depends on other milestones, include YAML frontmatter with `depends_on` in the content:**
    ```yaml
    ---
@@ -118,14 +118,14 @@ Once the user is satisfied, in a single pass for **each** new milestone:
 
 Then, after all milestone directories and context files are written:
 
-3. Update `.gsd/PROJECT.md` — add the new milestones to the Milestone Sequence. Keep existing entries exactly as they are. Only add new lines.
-4. If `.gsd/REQUIREMENTS.md` exists and the queued work introduces new in-scope capabilities or promotes Deferred items, update it.
-5. If discussion produced decisions relevant to existing work, append to `.gsd/DECISIONS.md`.
-6. Append to `.gsd/QUEUE.md`.
+3. Update `.hx/PROJECT.md` — add the new milestones to the Milestone Sequence. Keep existing entries exactly as they are. Only add new lines.
+4. If `.hx/REQUIREMENTS.md` exists and the queued work introduces new in-scope capabilities or promotes Deferred items, update it.
+5. If discussion produced decisions relevant to existing work, append to `.hx/DECISIONS.md`.
+6. Append to `.hx/QUEUE.md`.
 7. {{commitInstruction}}
 
 **Do NOT write roadmaps for queued milestones.**
-**Do NOT update `.gsd/STATE.md`.**
+**Do NOT update `.hx/STATE.md`.**
 
 After writing the files and committing, say exactly: "Queued N milestone(s). Auto-mode will pick them up after current work completes." — nothing else.
 

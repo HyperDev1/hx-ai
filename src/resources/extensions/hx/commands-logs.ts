@@ -416,7 +416,7 @@ async function handleLogsDebug(basePath: string, ctx: ExtensionCommandContext, i
 
   if (debugLogs.length === 0) {
     ctx.ui.notify(
-      "No debug logs found.\n\nEnable debug logging: HX_DEBUG=1 gsd auto",
+      "No debug logs found.\n\nEnable debug logging: HX_DEBUG=1 hx auto",
       "info",
     );
     return;

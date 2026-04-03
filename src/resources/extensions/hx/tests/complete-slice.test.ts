@@ -24,7 +24,7 @@ const { assertEq, assertTrue, assertMatch, report } = createTestContext();
 // ═══════════════════════════════════════════════════════════════════════════
 
 function tempDbPath(): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-complete-slice-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'hx-complete-slice-'));
   return path.join(dir, 'test.db');
 }
 
@@ -53,7 +53,7 @@ function cleanupDir(dirPath: string): void {
  * Create a temp project directory with .hx structure and roadmap for handler tests.
  */
 function createTempProject(): { basePath: string; roadmapPath: string } {
-  const basePath = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-slice-handler-'));
+  const basePath = fs.mkdtempSync(path.join(os.tmpdir(), 'hx-slice-handler-'));
   const sliceDir = path.join(basePath, '.hx', 'milestones', 'M001', 'slices', 'S01');
   const tasksDir = path.join(sliceDir, 'tasks');
   fs.mkdirSync(tasksDir, { recursive: true });
@@ -383,7 +383,7 @@ console.log('\n=== complete-slice: handler with missing roadmap ===');
   openDatabase(dbPath);
 
   // Create a temp dir WITHOUT a roadmap file
-  const basePath = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-no-roadmap-'));
+  const basePath = fs.mkdtempSync(path.join(os.tmpdir(), 'hx-no-roadmap-'));
   const sliceDir = path.join(basePath, '.hx', 'milestones', 'M001', 'slices', 'S01');
   fs.mkdirSync(sliceDir, { recursive: true });
 

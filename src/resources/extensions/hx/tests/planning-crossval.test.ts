@@ -29,7 +29,7 @@ const { assertEq, assertTrue, report } = createTestContext();
 // ─── Fixture Helpers ───────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-planning-crossval-'));
+  const base = mkdtempSync(join(tmpdir(), 'hx-planning-crossval-'));
   mkdirSync(join(base, '.hx', 'milestones'), { recursive: true });
   return base;
 }
@@ -53,7 +53,7 @@ function cleanup(base: string): void {
 console.log('\n=== planning-crossval Test 1: ROADMAP round-trip parity ===');
 {
   const base = createFixtureBase();
-  const dbPath = join(base, '.hx', 'gsd.db');
+  const dbPath = join(base, '.hx', 'hx.db');
   openDatabase(dbPath);
   try {
     scaffoldDirs(base, 'M001', ['S01', 'S02', 'S03', 'S04']);
@@ -120,7 +120,7 @@ console.log('\n=== planning-crossval Test 1: ROADMAP round-trip parity ===');
 console.log('\n=== planning-crossval Test 2: PLAN round-trip parity ===');
 {
   const base = createFixtureBase();
-  const dbPath = join(base, '.hx', 'gsd.db');
+  const dbPath = join(base, '.hx', 'hx.db');
   openDatabase(dbPath);
   try {
     scaffoldDirs(base, 'M001', ['S01']);
@@ -248,7 +248,7 @@ console.log('\n=== planning-crossval Test 2: PLAN round-trip parity ===');
 console.log('\n=== planning-crossval Test 3: Sequence ordering parity ===');
 {
   const base = createFixtureBase();
-  const dbPath = join(base, '.hx', 'gsd.db');
+  const dbPath = join(base, '.hx', 'hx.db');
   openDatabase(dbPath);
   try {
     scaffoldDirs(base, 'M001', ['S01', 'S02', 'S03', 'S04']);

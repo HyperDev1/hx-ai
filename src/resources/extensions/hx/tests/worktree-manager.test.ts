@@ -21,7 +21,7 @@ function run(command: string, cwd: string): string {
 }
 
 function makeBaseRepo(): string {
-  const base = mkdtempSync(join(tmpdir(), "gsd-wt-test-"));
+  const base = mkdtempSync(join(tmpdir(), "hx-wt-test-"));
   run("git init -b main", base);
   run('git config user.name "Test User"', base);
   run('git config user.email "test@example.com"', base);
@@ -166,7 +166,7 @@ describe("diffWorktreeGSD and getWorktreeGSDDiff", () => {
   });
   afterEach(() => { rmSync(base, { recursive: true, force: true }); });
 
-  test("detects added and modified GSD files", () => {
+  test("detects added and modified HX files", () => {
     const diff = diffWorktreeGSD(base, "feature-x");
     assert.ok(diff.added.length > 0, "should have added files");
     assert.ok(

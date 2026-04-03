@@ -34,7 +34,7 @@ test("navigateToGSDView dispatches the shared browser navigation event", (t) => 
   const fakeWindow = new EventTarget()
   const seen: string[] = []
 
-  fakeWindow.addEventListener("gsd:navigate-view", (event: Event) => {
+  fakeWindow.addEventListener("hx:navigate-view", (event: Event) => {
     seen.push((event as CustomEvent<{ view: string }>).detail.view)
   })
 
@@ -54,7 +54,7 @@ test("executeWorkflowActionInPowerMode calls dispatch and navigates to the appro
   const seenViews: string[] = []
   let dispatchCalled = false
 
-  fakeWindow.addEventListener("gsd:navigate-view", (event: Event) => {
+  fakeWindow.addEventListener("hx:navigate-view", (event: Event) => {
     seenViews.push((event as CustomEvent<{ view: string }>).detail.view)
   })
 

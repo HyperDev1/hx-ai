@@ -1,6 +1,6 @@
-// GSD Extension — Unified Cache Invalidation
+// HX Extension — Unified Cache Invalidation
 //
-// Three module-scoped caches exist across the GSD extension:
+// Three module-scoped caches exist across the HX extension:
 //   1. State cache (state.ts)  — memoized deriveState() result
 //   2. Path cache  (paths.ts)  — directory listing results (readdirSync)
 //   3. Parse cache (files.ts)  — parsed markdown file results
@@ -15,7 +15,7 @@ import { clearParseCache } from './files.js';
 import { clearArtifacts } from './hx-db.js';
 
 /**
- * Invalidate all GSD runtime caches in one call.
+ * Invalidate all HX runtime caches in one call.
  *
  * Call this after file writes, milestone transitions, merge reconciliation,
  * or any operation that changes .hx/ contents on disk. Forgetting to clear

@@ -106,14 +106,14 @@ export function readRepoMeta(externalPath: string): RepoMeta | null {
  *   2. The resolved git root is a proper ancestor of basePath
  *   3. There is no *project* `.hx` directory at the git root or any
  *      intermediate ancestor (the parent project has not been
- *      initialised with GSD)
+ *      initialised with HX)
  *
  * When true, the caller should run `git init` at basePath so that
  * `repoIdentity()` produces a hash unique to this directory, preventing
  * cross-project state leaks (#1639).
  *
  * When the git root already has a project `.hx`, the directory is a
- * legitimate subdirectory of an existing GSD project — `cd src/ && /hx`
+ * legitimate subdirectory of an existing HX project — `cd src/ && /hx`
  * should still load the parent project's milestones.
  */
 export function isInheritedRepo(basePath: string): boolean {
@@ -124,12 +124,12 @@ export function isInheritedRepo(basePath: string): boolean {
     if (normalizedBase === normalizedRoot) return false; // basePath IS the root
 
     // The git root is a proper ancestor. Check whether it already has .hx
-    // (i.e. the parent project was initialised with GSD).
+    // (i.e. the parent project was initialised with HX).
     if (isProjectGsd(join(root, ".hx"))) return false;
 
     // Walk up from basePath's parent to the git root checking for .hx.
     // Start at dirname(normalizedBase), NOT normalizedBase itself — finding
-    // .hx at basePath means GSD state is set up for THIS project, which
+    // .hx at basePath means HX state is set up for THIS project, which
     // says nothing about whether the git repo is inherited from an ancestor.
     let dir = dirname(normalizedBase);
     while (dir !== normalizedRoot && dir !== dirname(dir)) {
@@ -148,7 +148,7 @@ export function isInheritedRepo(basePath: string): boolean {
  *
  * A project `.hx` is either:
  *   - A symlink to an external state directory (normal post-migration layout)
- *   - A legacy real directory that is NOT the global GSD home
+ *   - A legacy real directory that is NOT the global HX home
  *
  * When the user's home directory is itself a git repo (e.g. dotfile managers),
  * `~/.hx` exists but is the global state directory — not a project `.hx`.
@@ -164,7 +164,7 @@ function isProjectGsd(gsdPath: string): boolean {
     // Symlinks are always project .hx (created by ensureGsdSymlink).
     if (stat.isSymbolicLink()) return true;
 
-    // For real directories, check that this isn't the global GSD home.
+    // For real directories, check that this isn't the global HX home.
     // Recompute gsdHome dynamically so env overrides (GSD_HOME) are
     // picked up at call time, not just at module load time.
     if (stat.isDirectory()) {
@@ -294,7 +294,7 @@ export function repoIdentity(basePath: string): string {
 // ─── External State Directory ───────────────────────────────────────────────
 
 /**
- * Compute the external GSD state directory for a repository.
+ * Compute the external HX state directory for a repository.
  *
  * Returns `$HX_STATE_DIR/projects/<hash>` if `HX_STATE_DIR` is set,
  * otherwise `~/.hx/projects/<hash>`.
@@ -320,7 +320,7 @@ export function externalProjectsRoot(): string {
  *
  * When `symlinkSync` (or Finder) tries to create `.hx` but a real directory
  * already exists at that path, macOS APFS silently renames the new entry to
- * `.hx 2`, then `.hx 3`, and so on. These numbered variants confuse GSD
+ * `.hx 2`, then `.hx 3`, and so on. These numbered variants confuse HX
  * because the canonical `.hx` path no longer resolves to the external state
  * directory, making tracked planning files appear deleted.
  *

@@ -8,7 +8,7 @@ import { deriveState, isSliceComplete, isMilestoneComplete, isGhostMilestone } f
 // ─── Fixture Helpers ───────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-state-test-'));
+  const base = mkdtempSync(join(tmpdir(), 'hx-state-test-'));
   mkdirSync(join(base, '.hx', 'milestones'), { recursive: true });
   return base;
 }

@@ -15,8 +15,8 @@ const workspaceStatus = await import("../../../web/lib/workspace-status.ts");
 
 // ─── Helpers ──────────────────────────────────────────────────────────
 function makeGsdFixture(): { root: string; gsdDir: string; cleanup: () => void } {
-  const root = mkdtempSync(join(tmpdir(), "gsd-state-surfaces-"));
-  const hxDir = join(root, ".gsd");
+  const root = mkdtempSync(join(tmpdir(), "hx-state-surfaces-"));
+  const hxDir = join(root, ".hx");
   mkdirSync(gsdDir, { recursive: true });
   return {
     root,
@@ -191,7 +191,7 @@ test("getTaskStatus returns correct statuses", () => {
 });
 
 // ─── Group 3: Files API — tree listing ───────────────────────────────
-test("files API returns tree listing of .gsd/ directory", async (t) => {
+test("files API returns tree listing of .hx/ directory", async (t) => {
   const { root, gsdDir, cleanup } = makeGsdFixture();
   const origEnv = process.env.HX_WEB_PROJECT_CWD;
 
@@ -342,8 +342,8 @@ test("files API returns 404 for missing files", async (t) => {
   assert.ok(data.error);
 });
 
-test("files API returns empty tree when .gsd/ does not exist", async (t) => {
-  const root = mkdtempSync(join(tmpdir(), "gsd-state-surfaces-empty-"));
+test("files API returns empty tree when .hx/ does not exist", async (t) => {
+  const root = mkdtempSync(join(tmpdir(), "hx-state-surfaces-empty-"));
   const origEnv = process.env.HX_WEB_PROJECT_CWD;
 
   t.after(() => {
@@ -419,8 +419,8 @@ test("view components read from real data sources (store or API)", () => {
     const fullPath = resolve(import.meta.dirname, "../../..", filePath);
     const source = readFileSync(fullPath, "utf-8");
     assert.ok(
-      source.includes("gsd-workspace-store"),
-      `${filePath} does not import from gsd-workspace-store — store-backed views must read real store state`,
+      source.includes("hx-workspace-store"),
+      `${filePath} does not import from hx-workspace-store — store-backed views must read real store state`,
     );
   }
 
@@ -472,7 +472,7 @@ test("browser shell renders title overrides, widgets, and editor prefills from s
   assert.match(terminalSource, /MAX_VISIBLE_WIDGET_LINES = 6/, "terminal.tsx must bound widget rendering so extension widgets cannot grow without limit");
   assert.match(terminalSource, /widget\.placement \?\? "aboveEditor"/, "terminal.tsx must preserve the existing default above-editor placement semantics");
 
-  assert.match(storeSource, /consumeEditorTextBuffer = \(\): string \| null =>/, "gsd-workspace-store.tsx must expose a consume-once editor prefill action");
+  assert.match(storeSource, /consumeEditorTextBuffer = \(\): string \| null =>/, "hx-workspace-store.tsx must expose a consume-once editor prefill action");
   assert.match(terminalSource, /consumeEditorTextBuffer/, "terminal.tsx must consume editor prefill state instead of replaying it forever");
   assert.match(terminalSource, /setInput\(buffer\)/, "terminal.tsx must visibly prefill the command input from editorTextBuffer");
 });
@@ -503,13 +503,13 @@ test("live browser panels consume live selectors and expose inspectable freshnes
   const statusBarSource = readFileSync(statusBarPath, "utf-8")
 
   assert.match(contractSource, /export interface WorkspaceRecoverySummary/, "command-surface-contract.ts must expose a shared recovery summary shape for live panels")
-  assert.match(storeSource, /live_state_invalidation/, "gsd-workspace-store.tsx must handle typed live_state_invalidation events")
-  assert.match(storeSource, /\/api\/live-state/, "gsd-workspace-store.tsx must use the narrow live-state route for targeted refreshes")
-  assert.match(storeSource, /softBootRefreshCount/, "gsd-workspace-store.tsx must expose a soft boot refresh counter for observability")
-  assert.match(storeSource, /targetedRefreshCount/, "gsd-workspace-store.tsx must expose a targeted refresh counter for observability")
-  assert.match(storeSource, /getLiveWorkspaceIndex/, "gsd-workspace-store.tsx must expose a live workspace selector")
-  assert.match(storeSource, /getLiveAutoDashboard/, "gsd-workspace-store.tsx must expose a live auto selector")
-  assert.match(storeSource, /getLiveResumableSessions/, "gsd-workspace-store.tsx must expose a live resumable-sessions selector")
+  assert.match(storeSource, /live_state_invalidation/, "hx-workspace-store.tsx must handle typed live_state_invalidation events")
+  assert.match(storeSource, /\/api\/live-state/, "hx-workspace-store.tsx must use the narrow live-state route for targeted refreshes")
+  assert.match(storeSource, /softBootRefreshCount/, "hx-workspace-store.tsx must expose a soft boot refresh counter for observability")
+  assert.match(storeSource, /targetedRefreshCount/, "hx-workspace-store.tsx must expose a targeted refresh counter for observability")
+  assert.match(storeSource, /getLiveWorkspaceIndex/, "hx-workspace-store.tsx must expose a live workspace selector")
+  assert.match(storeSource, /getLiveAutoDashboard/, "hx-workspace-store.tsx must expose a live auto selector")
+  assert.match(storeSource, /getLiveResumableSessions/, "hx-workspace-store.tsx must expose a live resumable-sessions selector")
 
   assert.match(dashboardSource, /getLiveWorkspaceIndex/, "dashboard.tsx must derive roadmap state from the live workspace selector")
   assert.match(dashboardSource, /getLiveAutoDashboard/, "dashboard.tsx must derive auto metrics from the live auto selector")
@@ -562,8 +562,8 @@ test("sidebar Git affordance opens a real git-summary surface with visible repo/
   assert.match(contractSource, /gitSummary:/, "command-surface-contract.ts must retain git-summary state on the shared surface");
   assert.match(contractSource, /load_git_summary/, "command-surface-contract.ts must model git-summary loading as an explicit action");
 
-  assert.match(storeSource, /loadGitSummary/, "gsd-workspace-store.tsx must expose loadGitSummary so the Git surface is not inert");
-  assert.match(storeSource, /\/api\/git/, "gsd-workspace-store.tsx must fetch the current-project git route for the Git surface");
+  assert.match(storeSource, /loadGitSummary/, "hx-workspace-store.tsx must expose loadGitSummary so the Git surface is not inert");
+  assert.match(storeSource, /\/api\/git/, "hx-workspace-store.tsx must fetch the current-project git route for the Git surface");
 
   assert.match(surfaceSource, /data-testid="command-surface-git-summary"/, "command-surface.tsx must render a git-summary panel");
   assert.match(surfaceSource, /data-testid="command-surface-git-not-repo"/, "command-surface.tsx must keep not-a-repo state browser-visible");
@@ -589,9 +589,9 @@ test("recovery diagnostics surface stays on a dedicated route with explicit stal
   assert.match(contractSource, /export interface CommandSurfaceRecoveryState/, "command-surface-contract.ts must expose explicit recovery load state");
   assert.match(contractSource, /load_recovery_diagnostics/, "command-surface-contract.ts must model recovery loading as an explicit action");
 
-  assert.match(storeSource, /loadRecoveryDiagnostics = async/, "gsd-workspace-store.tsx must expose a recovery diagnostics loader");
-  assert.match(storeSource, /\/api\/recovery/, "gsd-workspace-store.tsx must call the dedicated recovery route");
-  assert.match(storeSource, /markRecoveryStateInvalidated/, "gsd-workspace-store.tsx must keep recovery diagnostics stale state inspectable after invalidation");
+  assert.match(storeSource, /loadRecoveryDiagnostics = async/, "hx-workspace-store.tsx must expose a recovery diagnostics loader");
+  assert.match(storeSource, /\/api\/recovery/, "hx-workspace-store.tsx must call the dedicated recovery route");
+  assert.match(storeSource, /markRecoveryStateInvalidated/, "hx-workspace-store.tsx must keep recovery diagnostics stale state inspectable after invalidation");
 
   assert.match(surfaceSource, /data-testid="command-surface-recovery"/, "command-surface.tsx must render a recovery diagnostics panel");
   assert.match(surfaceSource, /data-testid="command-surface-recovery-state"/, "command-surface.tsx must expose a recovery load-state marker");

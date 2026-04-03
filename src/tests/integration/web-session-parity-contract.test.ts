@@ -65,7 +65,7 @@ function makeWorkspaceFixture(): {
   otherSessionsDir: string
   cleanup: () => void
 } {
-  const root = mkdtempSync(join(tmpdir(), "gsd-web-session-parity-"))
+  const root = mkdtempSync(join(tmpdir(), "hx-web-session-parity-"))
   const projectCwd = join(root, "project")
   const sessionsDir = join(root, "sessions")
   const otherProjectCwd = join(root, "other-project")
@@ -564,7 +564,7 @@ test("/api/session/manage renames inactive sessions via authoritative session-fi
 })
 
 test("/api/git returns a current-project-scoped repo summary and ignores changes outside the current project subtree", async (t) => {
-  const root = mkdtempSync(join(tmpdir(), "gsd-web-git-summary-"))
+  const root = mkdtempSync(join(tmpdir(), "hx-web-git-summary-"))
   const repoRoot = join(root, "repo")
   const projectCwd = join(repoRoot, "apps", "current-project")
   const docsDir = join(repoRoot, "docs")
@@ -579,8 +579,8 @@ test("/api/git returns a current-project-scoped repo summary and ignores changes
   writeFileSync(join(docsDir, "outside.txt"), "baseline outside\n")
 
   git(repoRoot, ["init"])
-  git(repoRoot, ["config", "user.name", "GSD Test"])
-  git(repoRoot, ["config", "user.email", "gsd-test@example.com"])
+  git(repoRoot, ["config", "user.name", "HX Test"])
+  git(repoRoot, ["config", "user.email", "hx-test@example.com"])
   git(repoRoot, ["add", "."])
   git(repoRoot, ["commit", "-m", "initial"])
 
@@ -617,7 +617,7 @@ test("/api/git returns a current-project-scoped repo summary and ignores changes
 })
 
 test("/api/git exposes an explicit not-a-repo state instead of failing silently", async (t) => {
-  const projectCwd = mkdtempSync(join(tmpdir(), "gsd-web-not-repo-"))
+  const projectCwd = mkdtempSync(join(tmpdir(), "hx-web-not-repo-"))
 
   t.after(() => { rmSync(projectCwd, { recursive: true, force: true }) });
 
@@ -658,15 +658,15 @@ test("browser session, settings, and git surfaces keep inspectable browse/manage
   assert.match(contractSource, /set_auto_retry/, "command-surface-contract.ts must model auto-retry mutations")
   assert.match(contractSource, /abort_retry/, "command-surface-contract.ts must model retry-cancellation mutations")
 
-  assert.match(storeSource, /\/api\/git/, "gsd-workspace-store.tsx must load the current-project git summary route")
-  assert.match(storeSource, /loadGitSummary/, "gsd-workspace-store.tsx must expose a shared git-summary browser action")
-  assert.match(storeSource, /\/api\/session\/browser/, "gsd-workspace-store.tsx must load the dedicated current-project session browser route")
-  assert.match(storeSource, /\/api\/session\/manage/, "gsd-workspace-store.tsx must call the session manage route for browser renames")
-  assert.match(storeSource, /setSteeringModeFromSurface/, "gsd-workspace-store.tsx must expose a shared steering-mode browser action")
-  assert.match(storeSource, /setFollowUpModeFromSurface/, "gsd-workspace-store.tsx must expose a shared follow-up-mode browser action")
-  assert.match(storeSource, /setAutoCompactionFromSurface/, "gsd-workspace-store.tsx must expose a shared auto-compaction browser action")
-  assert.match(storeSource, /setAutoRetryFromSurface/, "gsd-workspace-store.tsx must expose a shared auto-retry browser action")
-  assert.match(storeSource, /abortRetryFromSurface/, "gsd-workspace-store.tsx must expose a shared retry-cancellation browser action")
+  assert.match(storeSource, /\/api\/git/, "hx-workspace-store.tsx must load the current-project git summary route")
+  assert.match(storeSource, /loadGitSummary/, "hx-workspace-store.tsx must expose a shared git-summary browser action")
+  assert.match(storeSource, /\/api\/session\/browser/, "hx-workspace-store.tsx must load the dedicated current-project session browser route")
+  assert.match(storeSource, /\/api\/session\/manage/, "hx-workspace-store.tsx must call the session manage route for browser renames")
+  assert.match(storeSource, /setSteeringModeFromSurface/, "hx-workspace-store.tsx must expose a shared steering-mode browser action")
+  assert.match(storeSource, /setFollowUpModeFromSurface/, "hx-workspace-store.tsx must expose a shared follow-up-mode browser action")
+  assert.match(storeSource, /setAutoCompactionFromSurface/, "hx-workspace-store.tsx must expose a shared auto-compaction browser action")
+  assert.match(storeSource, /setAutoRetryFromSurface/, "hx-workspace-store.tsx must expose a shared auto-retry browser action")
+  assert.match(storeSource, /abortRetryFromSurface/, "hx-workspace-store.tsx must expose a shared retry-cancellation browser action")
 
   assert.match(surfaceSource, /data-testid="command-surface-git-summary"/, "command-surface.tsx must expose the git summary panel")
   assert.match(surfaceSource, /data-testid="command-surface-git-state"/, "command-surface.tsx must expose inspectable git-summary state text")

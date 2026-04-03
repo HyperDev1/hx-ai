@@ -29,7 +29,7 @@ test('knowledge: KNOWLEDGE key exists in HX_ROOT_FILES', () => {
 // ─── resolveHxRootFile resolves KNOWLEDGE.md ───────────────────────────────
 
 test('knowledge: resolveHxRootFile returns canonical path when KNOWLEDGE.md exists', () => {
-  const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'gsd-knowledge-')));
+  const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'hx-knowledge-')));
   const gsdDir = join(tmp, '.hx');
   mkdirSync(gsdDir, { recursive: true });
   writeFileSync(join(gsdDir, 'KNOWLEDGE.md'), '# Project Knowledge\n');
@@ -41,7 +41,7 @@ test('knowledge: resolveHxRootFile returns canonical path when KNOWLEDGE.md exis
 });
 
 test('knowledge: resolveHxRootFile resolves when legacy knowledge.md exists', () => {
-  const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'gsd-knowledge-')));
+  const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'hx-knowledge-')));
   const gsdDir = join(tmp, '.hx');
   mkdirSync(gsdDir, { recursive: true });
   writeFileSync(join(gsdDir, 'knowledge.md'), '# Project Knowledge\n');
@@ -60,7 +60,7 @@ test('knowledge: resolveHxRootFile resolves when legacy knowledge.md exists', ()
 });
 
 test('knowledge: resolveHxRootFile returns canonical path when file does not exist', () => {
-  const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'gsd-knowledge-')));
+  const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'hx-knowledge-')));
   const gsdDir = join(tmp, '.hx');
   mkdirSync(gsdDir, { recursive: true });
 
@@ -73,7 +73,7 @@ test('knowledge: resolveHxRootFile returns canonical path when file does not exi
 // ─── inlineGsdRootFile works with knowledge.md ─────────────────────────────
 
 test('knowledge: inlineGsdRootFile returns content when KNOWLEDGE.md exists', async () => {
-  const tmp = mkdtempSync(join(tmpdir(), 'gsd-knowledge-'));
+  const tmp = mkdtempSync(join(tmpdir(), 'hx-knowledge-'));
   const gsdDir = join(tmp, '.hx');
   mkdirSync(gsdDir, { recursive: true });
   writeFileSync(join(gsdDir, 'KNOWLEDGE.md'), '# Project Knowledge\n\n## Rules\n\nK001: Use real DB');
@@ -87,7 +87,7 @@ test('knowledge: inlineGsdRootFile returns content when KNOWLEDGE.md exists', as
 });
 
 test('knowledge: inlineGsdRootFile returns null when KNOWLEDGE.md does not exist', async () => {
-  const tmp = mkdtempSync(join(tmpdir(), 'gsd-knowledge-'));
+  const tmp = mkdtempSync(join(tmpdir(), 'hx-knowledge-'));
   const gsdDir = join(tmp, '.hx');
   mkdirSync(gsdDir, { recursive: true });
 
@@ -100,7 +100,7 @@ test('knowledge: inlineGsdRootFile returns null when KNOWLEDGE.md does not exist
 // ─── appendKnowledge creates file and appends entries ──────────────────────
 
 test('knowledge: appendKnowledge creates KNOWLEDGE.md with rule when file does not exist', async () => {
-  const tmp = mkdtempSync(join(tmpdir(), 'gsd-knowledge-'));
+  const tmp = mkdtempSync(join(tmpdir(), 'hx-knowledge-'));
   const gsdDir = join(tmp, '.hx');
   mkdirSync(gsdDir, { recursive: true });
 
@@ -116,7 +116,7 @@ test('knowledge: appendKnowledge creates KNOWLEDGE.md with rule when file does n
 });
 
 test('knowledge: appendKnowledge appends to existing KNOWLEDGE.md with auto-incrementing ID', async () => {
-  const tmp = mkdtempSync(join(tmpdir(), 'gsd-knowledge-'));
+  const tmp = mkdtempSync(join(tmpdir(), 'hx-knowledge-'));
   const gsdDir = join(tmp, '.hx');
   mkdirSync(gsdDir, { recursive: true });
 
@@ -135,7 +135,7 @@ test('knowledge: appendKnowledge appends to existing KNOWLEDGE.md with auto-incr
 });
 
 test('knowledge: appendKnowledge handles pattern type', async () => {
-  const tmp = mkdtempSync(join(tmpdir(), 'gsd-knowledge-'));
+  const tmp = mkdtempSync(join(tmpdir(), 'hx-knowledge-'));
   const gsdDir = join(tmp, '.hx');
   mkdirSync(gsdDir, { recursive: true });
 
@@ -149,7 +149,7 @@ test('knowledge: appendKnowledge handles pattern type', async () => {
 });
 
 test('knowledge: appendKnowledge handles lesson type', async () => {
-  const tmp = mkdtempSync(join(tmpdir(), 'gsd-knowledge-'));
+  const tmp = mkdtempSync(join(tmpdir(), 'hx-knowledge-'));
   const gsdDir = join(tmp, '.hx');
   mkdirSync(gsdDir, { recursive: true });
 
@@ -165,7 +165,7 @@ test('knowledge: appendKnowledge handles lesson type', async () => {
 // ─── loadKnowledgeBlock — global + project merge ────────────────────────────
 
 test('loadKnowledgeBlock: returns empty block when neither file exists', () => {
-  const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'gsd-kb-')));
+  const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'hx-kb-')));
   const gsdHome = join(tmp, 'home');
   const cwd = join(tmp, 'project');
   mkdirSync(join(cwd, '.hx'), { recursive: true });
@@ -179,7 +179,7 @@ test('loadKnowledgeBlock: returns empty block when neither file exists', () => {
 });
 
 test('loadKnowledgeBlock: uses project knowledge alone when no global file', () => {
-  const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'gsd-kb-')));
+  const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'hx-kb-')));
   const gsdHome = join(tmp, 'home');
   const cwd = join(tmp, 'project');
   mkdirSync(join(cwd, '.hx'), { recursive: true });
@@ -197,7 +197,7 @@ test('loadKnowledgeBlock: uses project knowledge alone when no global file', () 
 });
 
 test('loadKnowledgeBlock: uses global knowledge alone when no project file', () => {
-  const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'gsd-kb-')));
+  const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'hx-kb-')));
   const gsdHome = join(tmp, 'home');
   const cwd = join(tmp, 'project');
   mkdirSync(join(cwd, '.hx'), { recursive: true });
@@ -215,7 +215,7 @@ test('loadKnowledgeBlock: uses global knowledge alone when no project file', () 
 });
 
 test('loadKnowledgeBlock: merges global before project when both exist', () => {
-  const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'gsd-kb-')));
+  const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'hx-kb-')));
   const gsdHome = join(tmp, 'home');
   const cwd = join(tmp, 'project');
   mkdirSync(join(cwd, '.hx'), { recursive: true });
@@ -235,7 +235,7 @@ test('loadKnowledgeBlock: merges global before project when both exist', () => {
 });
 
 test('loadKnowledgeBlock: reports globalSizeKb above 4KB threshold', () => {
-  const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'gsd-kb-')));
+  const tmp = realpathSync(mkdtempSync(join(tmpdir(), 'hx-kb-')));
   const gsdHome = join(tmp, 'home');
   const cwd = join(tmp, 'project');
   mkdirSync(join(cwd, '.hx'), { recursive: true });

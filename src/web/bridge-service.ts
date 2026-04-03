@@ -512,10 +512,10 @@ export interface GSDWorkspaceIndex {
 // ─── Project Detection ──────────────────────────────────────────────────────
 
 export type ProjectDetectionKind =
-  | "active-gsd"    // .gsd with milestones — normal operation
-  | "empty-gsd"     // .gsd exists but no milestones (freshly bootstrapped)
-  | "v1-legacy"     // .planning/ exists, no .gsd
-  | "brownfield"    // existing code (git, package.json, files) but no .gsd
+  | "active-hx"    // .hx with milestones — normal operation
+  | "empty-hx"     // .hx exists but no milestones (freshly bootstrapped)
+  | "v1-legacy"     // .planning/ exists, no .hx
+  | "brownfield"    // existing code (git, package.json, files) but no .hx
   | "blank";        // empty/near-empty folder
 
 export interface ProjectDetectionSignals {
@@ -621,7 +621,7 @@ export function detectProjectKind(projectCwd: string): ProjectDetection {
     } catch {
       // No milestones dir or can't read it
     }
-    kind = hasMilestones ? "active-gsd" : "empty-gsd";
+    kind = hasMilestones ? "active-hx" : "empty-hx";
   } else if (hasPlanningFolder) {
     kind = "v1-legacy";
   } else if (hasPackageJson || hasCargo || hasGoMod || hasPyproject || fileCount > 2 || (hasGitRepo && fileCount > 0)) {

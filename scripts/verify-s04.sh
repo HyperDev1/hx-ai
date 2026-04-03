@@ -2,7 +2,7 @@
 # S04 verification — npm pack tarball install smoke test
 # Checks: dist integrity, GSD_BUNDLED_EXTENSION_PATHS, prepublishOnly,
 #         npm pack dry-run, tarball install, binary exists, launch (no extension
-#         errors, "gsd" branding), ~/.gsd/ untouched, non-TTY warning/no exit 1.
+#         errors, "hx" branding), ~/.hx/ untouched, non-TTY warning/no exit 1.
 
 set -uo pipefail
 
@@ -10,11 +10,11 @@ FAIL=0
 pass() { echo "  PASS: $1"; }
 fail() { echo "  FAIL: $1"; FAIL=1; }
 
-SMOKE_PREFIX=/tmp/gsd-smoke-prefix
+SMOKE_PREFIX=/tmp/hx-smoke-prefix
 TARBALL=""
 
-# Capture ~/.gsd/agent/sessions/ count before any smoke runs (for Check 9)
-PI_SESSIONS_BEFORE=$(ls ~/.gsd/agent/sessions/ 2>/dev/null | wc -l | tr -d ' ')
+# Capture ~/.hx/agent/sessions/ count before any smoke runs (for Check 9)
+PI_SESSIONS_BEFORE=$(ls ~/.hx/agent/sessions/ 2>/dev/null | wc -l | tr -d ' ')
 
 cleanup() {
   rm -rf "$SMOKE_PREFIX"
@@ -106,7 +106,7 @@ echo "--- tarball pack ---"
 # ----------------------------------------------------------------
 # Note: prepublishOnly triggers a build here (expected).
 npm pack --silent 2>/dev/null || npm pack 2>&1 | tail -5
-TARBALL=$(ls glittercowboy-gsd-*.tgz 2>/dev/null | head -1 || true)
+TARBALL=$(ls glittercowboy-hx-*.tgz 2>/dev/null | head -1 || true)
 if [ -n "$TARBALL" ] && [ -f "$TARBALL" ]; then
   pass "5 — tarball produced: $TARBALL"
 else
@@ -134,10 +134,10 @@ fi
 # ----------------------------------------------------------------
 # Check 7 — binary exists at expected path after install
 # ----------------------------------------------------------------
-if [ -f "$SMOKE_PREFIX/bin/gsd" ] || [ -L "$SMOKE_PREFIX/bin/gsd" ]; then
-  pass "7 — $SMOKE_PREFIX/bin/gsd exists after install"
+if [ -f "$SMOKE_PREFIX/bin/hx" ] || [ -L "$SMOKE_PREFIX/bin/hx" ]; then
+  pass "7 — $SMOKE_PREFIX/bin/hx exists after install"
 else
-  fail "7 — $SMOKE_PREFIX/bin/gsd not found after install"
+  fail "7 — $SMOKE_PREFIX/bin/hx not found after install"
   ls -la "$SMOKE_PREFIX/bin/" 2>/dev/null || echo "    (bin/ dir does not exist)"
 fi
 
@@ -145,14 +145,14 @@ echo ""
 echo "--- launch smoke ---"
 
 # ----------------------------------------------------------------
-# Check 8 — launch: "gsd" branding + zero extension load errors
+# Check 8 — launch: "hx" branding + zero extension load errors
 # Use background kill pattern (macOS has no GNU timeout).
 # Allow 8s for extensions to load.
 # ----------------------------------------------------------------
 smoke_out=$(mktemp)
 (
   env -i HOME="$HOME" PATH="$PATH" \
-    "$SMOKE_PREFIX/bin/gsd" < /dev/null > "$smoke_out" 2>&1
+    "$SMOKE_PREFIX/bin/hx" < /dev/null > "$smoke_out" 2>&1
 ) &
 smoke_pid=$!
 sleep 8
@@ -162,7 +162,7 @@ wait "$smoke_pid" 2>/dev/null || true
 ext_errors=$(grep "Extension load error" "$smoke_out" 2>/dev/null | wc -l | tr -d ' ')
 # Strip ANSI escape codes for branding check
 plain_out=$(sed 's/\x1b\[[0-9;]*m//g' "$smoke_out" 2>/dev/null || cat "$smoke_out")
-has_gsd=$(echo "$plain_out" | grep -qi "gsd\|get shit done" && echo "yes" || echo "no")
+has_gsd=$(echo "$plain_out" | grep -qi "hx\|get shit done" && echo "yes" || echo "no")
 
 if [ "$ext_errors" -eq 0 ]; then
   pass "8a — zero Extension load errors on launch"
@@ -172,31 +172,31 @@ else
 fi
 
 if [ "$has_gsd" = "yes" ]; then
-  pass "8b — \"gsd\" / \"get shit done\" branding found in launch output"
+  pass "8b — \"hx\" / \"get shit done\" branding found in launch output"
 else
   # Fallback: check if binary self-identifies differently (not "pi")
   has_pi_only=$(echo "$plain_out" | grep -qi "^pi\b" && echo "yes" || echo "no")
   if [ "$has_pi_only" = "no" ]; then
-    pass "8b — output does not show \"pi\" branding (gsd branding likely in ANSI sequences)"
+    pass "8b — output does not show \"pi\" branding (hx branding likely in ANSI sequences)"
   else
-    fail "8b — output shows \"pi\" branding instead of \"gsd\""
+    fail "8b — output shows \"pi\" branding instead of \"hx\""
     head -5 "$smoke_out" | sed 's/^/    /'
   fi
 fi
 rm -f "$smoke_out"
 
 echo ""
-echo "--- ~/.gsd/ isolation ---"
+echo "--- ~/.hx/ isolation ---"
 
 # ----------------------------------------------------------------
-# Check 9 — ~/.gsd/ session count unchanged before/after smoke run
+# Check 9 — ~/.hx/ session count unchanged before/after smoke run
 # PI_SESSIONS_BEFORE captured at script start (before any binary invocation).
 # ----------------------------------------------------------------
-pi_after=$(ls ~/.gsd/agent/sessions/ 2>/dev/null | wc -l | tr -d ' ')
+pi_after=$(ls ~/.hx/agent/sessions/ 2>/dev/null | wc -l | tr -d ' ')
 if [ "$PI_SESSIONS_BEFORE" = "$pi_after" ]; then
-  pass "9 — ~/.gsd/agent/sessions/ count unchanged (${pi_after} sessions before and after)"
+  pass "9 — ~/.hx/agent/sessions/ count unchanged (${pi_after} sessions before and after)"
 else
-  fail "9 — ~/.gsd/agent/sessions/ count changed: was ${PI_SESSIONS_BEFORE}, now ${pi_after}"
+  fail "9 — ~/.hx/agent/sessions/ count changed: was ${PI_SESSIONS_BEFORE}, now ${pi_after}"
 fi
 
 echo ""
@@ -211,7 +211,7 @@ exit10_tmp=$(mktemp)
 echo "" > "$exit10_tmp"
 (
   env -i HOME="$HOME" PATH="$PATH" \
-    "$SMOKE_PREFIX/bin/gsd" < /dev/null > "$tmp10" 2>&1
+    "$SMOKE_PREFIX/bin/hx" < /dev/null > "$tmp10" 2>&1
   echo "$?" > "$exit10_tmp"
 ) &
 pid10=$!

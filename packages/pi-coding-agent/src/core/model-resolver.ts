@@ -2,7 +2,7 @@
  * Model resolution, scoping, and initial selection
  */
 
-import type { ThinkingLevel } from "@gsd/pi-agent-core";
+import type { ThinkingLevel } from "@hyperlab/hx-agent-core";
 import { type Api, type KnownProvider, type Model, modelsAreEqual } from "@hyperlab/hx-ai";
 import chalk from "chalk";
 import { minimatch } from "minimatch";

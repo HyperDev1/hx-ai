@@ -60,7 +60,7 @@ import type { WorkerInfo } from "../parallel-orchestrator.js";
 // ─── Test Helpers ────────────────────────────────────────────────────────────
 
 function makeTmpBase(): string {
-  const base = mkdtempSync(join(tmpdir(), "gsd-parallel-test-"));
+  const base = mkdtempSync(join(tmpdir(), "hx-parallel-test-"));
   mkdirSync(join(base, ".hx"), { recursive: true });
   return base;
 }

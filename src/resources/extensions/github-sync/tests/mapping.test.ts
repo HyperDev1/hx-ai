@@ -21,8 +21,8 @@ describe("mapping", () => {
   let tmpDir: string;
 
   beforeEach(() => {
-    tmpDir = mkdtempSync(join(tmpdir(), "gsd-sync-test-"));
-    mkdirSync(join(tmpDir, ".gsd"), { recursive: true });
+    tmpDir = mkdtempSync(join(tmpdir(), "hx-sync-test-"));
+    mkdirSync(join(tmpDir, ".hx"), { recursive: true });
   });
 
   afterEach(() => {

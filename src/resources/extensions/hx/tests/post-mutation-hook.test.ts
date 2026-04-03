@@ -1,4 +1,4 @@
-// GSD Extension — post-mutation hook regression tests
+// HX Extension — post-mutation hook regression tests
 // Verifies that after a successful handleCompleteTask call, the post-mutation
 // hook fires: event-log.jsonl and state-manifest.json are both written.
 
@@ -13,7 +13,7 @@ import { readEvents } from '../workflow-events.ts';
 import { readManifest } from '../workflow-manifest.ts';
 
 function tempDir(): string {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-post-hook-'));
+  return fs.mkdtempSync(path.join(os.tmpdir(), 'hx-post-hook-'));
 }
 
 function cleanupDir(dirPath: string): void {

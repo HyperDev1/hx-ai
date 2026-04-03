@@ -9,13 +9,13 @@ if (!process.stdin.isTTY && process.env.CI) {
   process.exit(0);
 }
 
-const tmpDir = mkdtempSync(join(tmpdir(), "gsd-smoke-init-"));
+const tmpDir = mkdtempSync(join(tmpdir(), "hx-smoke-init-"));
 
 try {
   const binary = process.env.GSD_SMOKE_BINARY || "npx";
   const args = process.env.GSD_SMOKE_BINARY
     ? ["init"]
-    : ["gsd-pi", "init"];
+    : ["hx-pi", "init"];
 
   execFileSync(binary, args, {
     encoding: "utf8",
@@ -24,9 +24,9 @@ try {
     env: { ...process.env, GSD_NON_INTERACTIVE: "1" },
   });
 
-  const gsdDir = join(tmpDir, ".gsd");
+  const gsdDir = join(tmpDir, ".hx");
   if (!existsSync(gsdDir)) {
-    console.error(`.gsd directory not created in ${tmpDir}`);
+    console.error(`.hx directory not created in ${tmpDir}`);
     process.exit(1);
   }
 } finally {

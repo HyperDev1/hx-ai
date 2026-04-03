@@ -1,7 +1,7 @@
 /**
- * E2E integration tests for `gsd headless` runtime behavior.
+ * E2E integration tests for `hx headless` runtime behavior.
  *
- * Spawns real `gsd headless` child processes and asserts on
+ * Spawns real `hx headless` child processes and asserts on
  * stdout/stderr/exit-code for: JSON batch mode, SIGINT exit code,
  * stream-json NDJSON output, --resume error path, and invalid
  * --output-format handling.
@@ -124,11 +124,11 @@ function stripAnsi(s: string): string {
   return s.replace(/\x1b\[[0-9;]*[A-Za-z]/g, "");
 }
 
-/** Bootstrap a temp directory with .gsd/ structure (milestones + runtime). */
+/** Bootstrap a temp directory with .hx/ structure (milestones + runtime). */
 function createTempWithHx(prefix: string): string {
   const dir = mkdtempSync(join(tmpdir(), prefix));
-  mkdirSync(join(dir, ".gsd", "milestones"), { recursive: true });
-  mkdirSync(join(dir, ".gsd", "runtime"), { recursive: true });
+  mkdirSync(join(dir, ".hx", "milestones"), { recursive: true });
+  mkdirSync(join(dir, ".hx", "runtime"), { recursive: true });
   return dir;
 }
 
@@ -259,7 +259,7 @@ test("headless exits with code 11 after SIGINT", async (t) => {
     );
   } else {
     // Process exited before SIGINT arrived — acceptable in environments
-    // with running gsd sessions that cause auto-mode conflict.
+    // with running hx sessions that cause auto-mode conflict.
     // Verify it at least didn't crash.
     const combined = stripAnsi(result.stdout + result.stderr);
     assertNoCrashMarkers(combined);

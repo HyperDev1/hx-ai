@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Build script for the GSD native Rust addon.
+ * Build script for the HX native Rust addon.
  *
  * Usage:
  *   node native/scripts/build.js          # release build
@@ -27,7 +27,7 @@ const profile = isDev ? "debug" : "release";
 const cargoArgs = ["build"];
 if (!isDev) cargoArgs.push("--release");
 
-console.log(`Building gsd-engine (${profile})...`);
+console.log(`Building hx-engine (${profile})...`);
 
 try {
   execSync(`cargo ${cargoArgs.join(" ")}`, {

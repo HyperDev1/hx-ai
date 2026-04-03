@@ -1,4 +1,4 @@
-// Shared assertion helpers for GSD test files.
+// Shared assertion helpers for HX test files.
 //
 // Usage:
 //   import { createTestContext } from './test-helpers.ts';

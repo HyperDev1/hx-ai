@@ -72,7 +72,7 @@ function scaffoldTaskPlan(basePath: string, mid: string, sid: string, tid: strin
 // ─── Tests ─────────────────────────────────────────────────────────────────
 
 test("dispatch: missing task plan triggers plan-slice (not stop) — issue #909", async (t) => {
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-909-"));
+  const tmp = mkdtempSync(join(tmpdir(), "hx-909-"));
   t.after(() => rmSync(tmp, { recursive: true, force: true }));
 
   // Slice plan exists with tasks, but tasks/ directory is empty
@@ -89,7 +89,7 @@ test("dispatch: missing task plan triggers plan-slice (not stop) — issue #909"
 });
 
 test("dispatch: present task plan proceeds to execute-task normally", async (t) => {
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-909-ok-"));
+  const tmp = mkdtempSync(join(tmpdir(), "hx-909-ok-"));
   t.after(() => rmSync(tmp, { recursive: true, force: true }));
 
   scaffoldSlicePlan(tmp, "M002", "S03");
@@ -108,7 +108,7 @@ test("dispatch: present task plan proceeds to execute-task normally", async (t) 
 test("dispatch: plan-slice recovery loop — second call after plan-slice still recovers cleanly", async (t) => {
   // Simulate: plan-slice ran but T01-PLAN.md is still missing (e.g. agent crashed mid-write).
   // Dispatch should still re-dispatch plan-slice, not hard-stop.
-  const tmp = mkdtempSync(join(tmpdir(), "gsd-909-loop-"));
+  const tmp = mkdtempSync(join(tmpdir(), "hx-909-loop-"));
   t.after(() => rmSync(tmp, { recursive: true, force: true }));
 
   scaffoldSlicePlan(tmp, "M002", "S03");

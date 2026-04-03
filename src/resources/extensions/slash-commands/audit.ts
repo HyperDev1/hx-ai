@@ -20,7 +20,7 @@ export default function auditCommand(pi: ExtensionAPI) {
 				goal = input.trim();
 			}
 
-			// ── Step 2: Build output path (.gsd/audits/<timestamp>-<slug>.md) ────
+			// ── Step 2: Build output path (.hx/audits/<timestamp>-<slug>.md) ────
 
 			const now = new Date();
 			const timestamp = now

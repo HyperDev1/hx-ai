@@ -84,7 +84,7 @@ export async function handlePlanTask(
 
       const existingTask = getTask(params.milestoneId, params.sliceId, params.taskId);
       if (existingTask && isClosedStatus(existingTask.status)) {
-        guardError = `cannot re-plan task ${params.taskId}: it is already complete — use gsd_task_reopen first`;
+        guardError = `cannot re-plan task ${params.taskId}: it is already complete — use hx_task_reopen first`;
         return;
       }
 
@@ -136,7 +136,7 @@ export async function handlePlanTask(
       });
     } catch (hookErr) {
       process.stderr.write(
-        `gsd: plan-task post-mutation hook warning: ${(hookErr as Error).message}\n`,
+        `hx: plan-task post-mutation hook warning: ${(hookErr as Error).message}\n`,
       );
     }
 

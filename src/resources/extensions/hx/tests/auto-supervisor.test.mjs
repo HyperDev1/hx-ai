@@ -14,7 +14,7 @@ test('resolveAutoSupervisorConfig provides safe timeout defaults', () => {
 });
 
 test('writeUnitRuntimeRecord persists progress and recovery metadata defaults', () => {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-auto-supervisor-'));
+  const base = mkdtempSync(join(tmpdir(), 'hx-auto-supervisor-'));
   const startedAt = 1234567890;
 
   writeUnitRuntimeRecord(base, 'plan-milestone', 'M010', startedAt, {
@@ -34,7 +34,7 @@ test('writeUnitRuntimeRecord persists progress and recovery metadata defaults', 
 });
 
 test('writeUnitRuntimeRecord keeps explicit recovery attempt fields', () => {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-auto-supervisor-'));
+  const base = mkdtempSync(join(tmpdir(), 'hx-auto-supervisor-'));
   const startedAt = 2234567890;
 
   writeUnitRuntimeRecord(base, 'research-milestone', 'M011', startedAt, {
@@ -46,7 +46,7 @@ test('writeUnitRuntimeRecord keeps explicit recovery attempt fields', () => {
     lastProgressKind: 'recovery-retry',
   });
 
-  const runtime = JSON.parse(readFileSync(join(base, '.gsd/runtime/units/research-milestone-M011.json'), 'utf8'));
+  const runtime = JSON.parse(readFileSync(join(base, '.hx/runtime/units/research-milestone-M011.json'), 'utf8'));
   assert.equal(runtime.recoveryAttempts, 2);
   assert.equal(runtime.lastRecoveryReason, 'idle');
   assert.equal(runtime.lastProgressKind, 'recovery-retry');

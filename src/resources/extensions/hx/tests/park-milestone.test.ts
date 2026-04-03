@@ -13,7 +13,7 @@ import { parkMilestone, unparkMilestone, discardMilestone, isParked, getParkedRe
 // ─── Fixture Helpers ───────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-park-test-'));
+  const base = mkdtempSync(join(tmpdir(), 'hx-park-test-'));
   mkdirSync(join(base, '.hx', 'milestones'), { recursive: true });
   return base;
 }

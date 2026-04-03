@@ -3,7 +3,7 @@ title: "Git strategy"
 description: "Isolation modes, branching model, and merge behavior for milestone work."
 ---
 
-GSD uses git for milestone isolation and sequential commits. You choose an **isolation mode** that controls where work happens. The strategy is fully automated — no manual branch management needed.
+HX uses git for milestone isolation and sequential commits. You choose an **isolation mode** that controls where work happens. The strategy is fully automated — no manual branch management needed.
 
 ## Isolation modes
 
@@ -12,12 +12,12 @@ Configure via the `git.isolation` preference:
 | Mode | Working directory | Branch | Best for |
 |------|-------------------|--------|----------|
 | `none` (default) | Project root | Current branch | Most projects — no isolation overhead |
-| `worktree` | `.gsd/worktrees/<MID>/` | `milestone/<MID>` | Full file isolation |
+| `worktree` | `.hx/worktrees/<MID>/` | `milestone/<MID>` | Full file isolation |
 | `branch` | Project root | `milestone/<MID>` | Submodule-heavy repos |
 
 ### `none` mode (default)
 
-Work happens directly on your current branch. No worktree, no milestone branch. GSD still commits sequentially with conventional commit messages, but there's no branch isolation. This is the simplest mode and works well for most projects.
+Work happens directly on your current branch. No worktree, no milestone branch. HX still commits sequentially with conventional commit messages, but there's no branch isolation. This is the simplest mode and works well for most projects.
 
 ### `worktree` mode
 
@@ -61,16 +61,16 @@ Merges happen sequentially to avoid conflicts.
 
 ### Commit format
 
-Conventional commit format with GSD metadata in trailers:
+Conventional commit format with HX metadata in trailers:
 
 ```
 feat: core type definitions
 
-GSD-Task: M001/S01/T01
+HX-Task: M001/S01/T01
 
 feat: markdown parser for plan files
 
-GSD-Task: M001/S01/T02
+HX-Task: M001/S01/T02
 ```
 
 ## Workflow modes
@@ -125,13 +125,13 @@ Pushes the milestone branch and creates a PR targeting your specified branch. Re
 
 ### `commit_docs: false`
 
-Adds `.gsd/` to `.gitignore` and keeps all planning artifacts local-only. Useful for teams where only some members use GSD.
+Adds `.hx/` to `.gitignore` and keeps all planning artifacts local-only. Useful for teams where only some members use HX.
 
 ## Worktree management
 
 ### Automatic (auto mode)
 
-1. Milestone starts → worktree created at `.gsd/worktrees/<MID>/`
+1. Milestone starts → worktree created at `.hx/worktrees/<MID>/`
 2. Planning artifacts copied into the worktree
 3. All execution happens inside the worktree
 4. Milestone completes → squash-merged to main
@@ -148,10 +148,10 @@ Adds `.gsd/` to `.gitignore` and keeps all planning artifacts local-only. Useful
 
 ## Self-healing
 
-GSD includes automatic recovery for common git issues:
+HX includes automatic recovery for common git issues:
 
 - **Detached HEAD** — automatically reattaches to the correct branch
 - **Stale lock files** — removes `index.lock` files from crashed processes
 - **Orphaned worktrees** — detects and offers cleanup
 
-Run `/gsd doctor` to check git health manually.
+Run `/hx doctor` to check git health manually.

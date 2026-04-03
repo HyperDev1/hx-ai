@@ -22,13 +22,13 @@ function assert(condition: boolean, message: string): void {
 
 console.log("=== Draft promotion: full state transition ===");
 
-const tmpBase = mkdtempSync(join(tmpdir(), "gsd-draft-promotion-test-"));
-const gsd = join(tmpBase, ".hx");
+const tmpBase = mkdtempSync(join(tmpdir(), "hx-draft-promotion-test-"));
+const hx = join(tmpBase, ".hx");
 
-mkdirSync(join(gsd, "milestones", "M001"), { recursive: true });
+mkdirSync(join(hx, "milestones", "M001"), { recursive: true });
 
 // Step 1: Create CONTEXT-DRAFT.md only → needs-discussion
-const draftPath = join(gsd, "milestones", "M001", "M001-CONTEXT-DRAFT.md");
+const draftPath = join(hx, "milestones", "M001", "M001-CONTEXT-DRAFT.md");
 writeFileSync(draftPath, "# M001: Draft\n\nSeed material.\n");
 
 const state1 = await deriveState(tmpBase);
@@ -38,7 +38,7 @@ assert(
 );
 
 // Step 2: Write CONTEXT.md (simulating discussion output) → pre-planning
-const contextPath = join(gsd, "milestones", "M001", "M001-CONTEXT.md");
+const contextPath = join(hx, "milestones", "M001", "M001-CONTEXT.md");
 writeFileSync(contextPath, "# M001: Full Context\n\nDeep discussion output.\n");
 
 invalidateAllCaches();
@@ -78,7 +78,7 @@ assert(
 
 console.log("=== No-draft cleanup: no-op ===");
 
-const tmpBase2 = mkdtempSync(join(tmpdir(), "gsd-draft-promotion-noop-"));
+const tmpBase2 = mkdtempSync(join(tmpdir(), "hx-draft-promotion-noop-"));
 const gsd2 = join(tmpBase2, ".hx");
 
 mkdirSync(join(gsd2, "milestones", "M001"), { recursive: true });
@@ -105,7 +105,7 @@ assert(
 
 console.log("=== Both files: CONTEXT wins, draft cleanable ===");
 
-const tmpBase3 = mkdtempSync(join(tmpdir(), "gsd-draft-promotion-both-"));
+const tmpBase3 = mkdtempSync(join(tmpdir(), "hx-draft-promotion-both-"));
 const gsd3 = join(tmpBase3, ".hx");
 
 mkdirSync(join(gsd3, "milestones", "M001"), { recursive: true });

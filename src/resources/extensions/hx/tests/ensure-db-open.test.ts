@@ -1,10 +1,10 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 // ensureDbOpen — Tests that the lazy DB opener creates + migrates the database
-// when .hx/ exists with Markdown content but no gsd.db file.
+// when .hx/ exists with Markdown content but no hx.db file.
 //
 // This covers the bug where interactive (non-auto) sessions got
-// "GSD database is not available" because ensureDbOpen only opened
+// "HX database is not available" because ensureDbOpen only opened
 // existing DB files but never created them.
 
 import * as path from 'node:path';
@@ -13,7 +13,7 @@ import * as fs from 'node:fs';
 import { closeDatabase, isDbAvailable, getDecisionById } from '../hx-db.ts';
 
 function makeTmpDir(): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-ensure-db-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'hx-ensure-db-'));
   return dir;
 }
 
@@ -43,7 +43,7 @@ describe('ensure-db-open', () => {
     fs.writeFileSync(path.join(gsdDir, 'DECISIONS.md'), decisionsContent);
 
     // Verify no DB file exists yet
-    const dbPath = path.join(gsdDir, 'gsd.db');
+    const dbPath = path.join(gsdDir, 'hx.db');
     assert.ok(!fs.existsSync(dbPath), 'DB file should not exist before ensureDbOpen');
 
     // Close any previously open DB
@@ -110,7 +110,7 @@ describe('ensure-db-open', () => {
     fs.mkdirSync(gsdDir, { recursive: true });
 
     // Create a DB file first
-    const dbPath = path.join(gsdDir, 'gsd.db');
+    const dbPath = path.join(gsdDir, 'hx.db');
     const { openDatabase } = await import('../hx-db.ts');
     openDatabase(dbPath);
     closeDatabase();
@@ -150,7 +150,7 @@ describe('ensure-db-open', () => {
       const { ensureDbOpen } = await import('../bootstrap/dynamic-tools.ts');
       const result = await ensureDbOpen();
       assert.ok(result === true, 'ensureDbOpen should create empty DB for fresh .hx/');
-      assert.ok(fs.existsSync(path.join(gsdDir, 'gsd.db')), 'DB file should be created');
+      assert.ok(fs.existsSync(path.join(gsdDir, 'hx.db')), 'DB file should be created');
       assert.ok(isDbAvailable(), 'DB should be available');
     } finally {
       process.cwd = origCwd;

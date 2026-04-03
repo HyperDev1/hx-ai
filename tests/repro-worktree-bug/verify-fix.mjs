@@ -15,12 +15,12 @@ import { homedir, tmpdir } from "node:os";
 // ── Fixed functions (copied from worktree.ts after fix) ─────────────────
 
 function findWorktreeSegment(normalizedPath) {
-  const directMarker = "/.gsd/worktrees/";
+  const directMarker = "/.hx/worktrees/";
   const idx = normalizedPath.indexOf(directMarker);
   if (idx !== -1) {
     return { gsdIdx: idx, afterWorktrees: idx + directMarker.length };
   }
-  const symlinkRe = /\/\.gsd\/projects\/[a-f0-9]+\/worktrees\//;
+  const symlinkRe = /\/\.hx\/projects\/[a-f0-9]+\/worktrees\//;
   const match = normalizedPath.match(symlinkRe);
   if (match && match.index !== undefined) {
     return { gsdIdx: match.index, afterWorktrees: match.index + match[0].length };
@@ -81,15 +81,15 @@ function resolveProjectRoot(basePath) {
   if (!seg) return basePath;
 
   const sepChar = basePath.includes("\\") ? "\\" : "/";
-  const gsdMarker = `${sepChar}.gsd${sepChar}`;
+  const gsdMarker = `${sepChar}.hx${sepChar}`;
   const gsdIdx = basePath.indexOf(gsdMarker);
   const candidate = gsdIdx !== -1
     ? basePath.slice(0, gsdIdx)
     : basePath.slice(0, seg.gsdIdx);
 
   // Layer 2: Guard against resolving to the user's home directory.
-  const gsdHome = normalizePathForCompare(process.env.GSD_HOME || join(homedir(), ".gsd"));
-  const candidateGsdPath = normalizePathForCompare(join(candidate, ".gsd"));
+  const gsdHome = normalizePathForCompare(process.env.GSD_HOME || join(homedir(), ".hx"));
+  const candidateGsdPath = normalizePathForCompare(join(candidate, ".hx"));
 
   if (candidateGsdPath === gsdHome || candidateGsdPath.startsWith(gsdHome + "/")) {
     const realRoot = resolveProjectRootFromGitFile(basePath);
@@ -103,12 +103,12 @@ function resolveProjectRoot(basePath) {
 // ── Set up filesystem layout ────────────────────────────────────────────
 
 const HASH = "abc123def456";
-const TEST_ROOT = mkdtempSync(join(tmpdir(), "gsd-verify-fix-"));
-const USER_GSD = process.env.GSD_HOME || join(TEST_ROOT, ".gsd");
+const TEST_ROOT = mkdtempSync(join(tmpdir(), "hx-verify-fix-"));
+const USER_GSD = process.env.GSD_HOME || join(TEST_ROOT, ".hx");
 const USER_HOME = homedir();
 const PROJECT_GSD_STORAGE = `${USER_GSD}/projects/${HASH}`;
 const PROJECT_DIR = mkdtempSync(join(tmpdir(), "myproject-"));
-const PROJECT_GSD_LINK = `${PROJECT_DIR}/.gsd`;
+const PROJECT_GSD_LINK = `${PROJECT_DIR}/.hx`;
 const PROJECT_REAL = normalizePathForCompare(PROJECT_DIR);
 const EXPECTED_BUGGY_ROOT = normalizePathForCompare(resolve(USER_GSD, ".."));
 
@@ -129,11 +129,11 @@ writeFileSync(join(PROJECT_DIR, "README.md"), "hello\n");
 execSync("git add -A && git commit -m init", { cwd: PROJECT_DIR, stdio: "pipe" });
 
 // Create a REAL git worktree (so .git file exists with gitdir pointer)
-execSync("git worktree add .gsd/worktrees/M001 -b worktree/M001", {
+execSync("git worktree add .hx/worktrees/M001 -b worktree/M001", {
   cwd: PROJECT_DIR,
   stdio: "pipe",
 });
-console.log("Created real git worktree at .gsd/worktrees/M001\n");
+console.log("Created real git worktree at .hx/worktrees/M001\n");
 
 let passed = 0;
 let failed = 0;
@@ -155,7 +155,7 @@ function test(name, actual, expected) {
 console.log("=== Layer 1: GSD_PROJECT_ROOT env var ===\n");
 
 process.env.GSD_PROJECT_ROOT = PROJECT_DIR;
-const resolvedPath = realpathSync(`${PROJECT_DIR}/.gsd/worktrees/M001`);
+const resolvedPath = realpathSync(`${PROJECT_DIR}/.hx/worktrees/M001`);
 test(
   "GSD_PROJECT_ROOT overrides path resolution",
   resolveProjectRoot(resolvedPath),
@@ -169,7 +169,7 @@ console.log("\n=== Direct layout (no symlink collision) ===\n");
 
 test(
   "Direct layout resolves correctly",
-  resolveProjectRoot("/foo/.gsd/worktrees/M001"),
+  resolveProjectRoot("/foo/.hx/worktrees/M001"),
   "/foo",
 );
 
@@ -184,7 +184,7 @@ test(
 console.log("\n=== Layer 2: Symlink-resolved path with git fallback ===\n");
 
 // chdir into worktree via symlink — process.cwd() resolves symlinks
-process.chdir(`${PROJECT_DIR}/.gsd/worktrees/M001`);
+process.chdir(`${PROJECT_DIR}/.hx/worktrees/M001`);
 const workerCwd = process.cwd();
 console.log(`  Worker cwd (resolved): ${workerCwd}`);
 console.log(`  Expected project root: ${PROJECT_DIR}`);
@@ -232,7 +232,7 @@ function oldResolveProjectRoot(basePath) {
   const seg = findWorktreeSegment(normalizedPath);
   if (!seg) return basePath;
   const sepChar = basePath.includes("\\") ? "\\" : "/";
-  const gsdMarker = `${sepChar}.gsd${sepChar}`;
+  const gsdMarker = `${sepChar}.hx${sepChar}`;
   const gsdIdx = basePath.indexOf(gsdMarker);
   if (gsdIdx !== -1) return basePath.slice(0, gsdIdx);
   return basePath.slice(0, seg.gsdIdx);
@@ -241,7 +241,7 @@ function oldResolveProjectRoot(basePath) {
 const oldResult = oldResolveProjectRoot(workerCwd);
 console.log(`  Old (buggy) code returns: ${oldResult}`);
 test(
-  "Old code returns parent of GSD home (confirming bug existed)",
+  "Old code returns parent of HX home (confirming bug existed)",
   oldResult,
   EXPECTED_BUGGY_ROOT,
 );

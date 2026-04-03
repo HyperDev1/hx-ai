@@ -119,7 +119,7 @@ test("updates .gitignore from .gsd to .hx", () => {
 // ─── migrateGlobalGsdToHx ───────────────────────────────────────────
 
 test("syncs auth.json from ~/.gsd/agent/ to ~/.hx/agent/", () => {
-  const gsdHome = makeTempDir("gsd-home-");
+  const gsdHome = makeTempDir("hx-home-");
   const hxHome = makeTempDir("hx-home-");
   try {
     mkdirSync(join(gsdHome, "agent"), { recursive: true });
@@ -146,7 +146,7 @@ test("syncs auth.json from ~/.gsd/agent/ to ~/.hx/agent/", () => {
 });
 
 test("does not overwrite existing hx auth.json", () => {
-  const gsdHome = makeTempDir("gsd-home-");
+  const gsdHome = makeTempDir("hx-home-");
   const hxHome = makeTempDir("hx-home-");
   try {
     mkdirSync(join(gsdHome, "agent"), { recursive: true });

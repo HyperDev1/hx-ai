@@ -35,7 +35,7 @@ import { createTestContext } from "./test-helpers.ts";
 const { assertTrue, assertEq, report } = createTestContext();
 
 function createBase(name: string): string {
-  const base = mkdtempSync(join(tmpdir(), `gsd-wt-1886-${name}-`));
+  const base = mkdtempSync(join(tmpdir(), `hx-wt-1886-${name}-`));
   mkdirSync(join(base, ".hx", "milestones"), { recursive: true });
   return base;
 }

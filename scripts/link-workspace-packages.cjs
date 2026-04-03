@@ -2,14 +2,14 @@
 /**
  * link-workspace-packages.cjs
  *
- * Creates node_modules/@gsd/* symlinks pointing to packages/* directories.
+ * Creates node_modules/@hx/* symlinks pointing to packages/* directories.
  *
  * During development, npm workspaces creates these automatically. But in the
  * published tarball, workspace packages are shipped under packages/ (via the
- * "files" field) and the @gsd/* imports in compiled code need node_modules/@gsd/*
+ * "files" field) and the @hx/* imports in compiled code need node_modules/@hx/*
  * to resolve. This script bridges the gap.
  *
- * Runs as part of postinstall (before any ESM code that imports @gsd/*).
+ * Runs as part of postinstall (before any ESM code that imports @hx/*).
  *
  * On Windows without Developer Mode or administrator rights, creating symlinks
  * (even NTFS junctions) can fail with EPERM. In that case we fall back to
@@ -20,7 +20,7 @@ const { resolve, join } = require('path')
 
 const root = resolve(__dirname, '..')
 const packagesDir = join(root, 'packages')
-const nodeModulesGsd = join(root, 'node_modules', '@gsd')
+const nodeModulesGsd = join(root, 'node_modules', '@hx')
 
 // Map directory names to package names
 const packageMap = {
@@ -31,7 +31,7 @@ const packageMap = {
   'pi-tui': 'pi-tui',
 }
 
-// Ensure @gsd scope directory exists
+// Ensure @hx scope directory exists
 if (!existsSync(nodeModulesGsd)) {
   mkdirSync(nodeModulesGsd, { recursive: true })
 }

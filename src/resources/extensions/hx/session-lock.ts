@@ -1,7 +1,7 @@
 /**
- * GSD Session Lock — OS-level exclusive locking for auto-mode sessions.
+ * HX Session Lock — OS-level exclusive locking for auto-mode sessions.
  *
- * Prevents multiple GSD processes from running auto-mode concurrently on
+ * Prevents multiple HX processes from running auto-mode concurrently on
  * the same project. Uses proper-lockfile for OS-level file locking (flock/
  * lockfile) which eliminates the TOCTOU race condition that existed with
  * the old advisory JSON lock approach.

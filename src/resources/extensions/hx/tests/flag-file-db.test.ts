@@ -29,7 +29,7 @@ import {
 // ─── Fixture Helpers ───────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-flag-file-db-'));
+  const base = mkdtempSync(join(tmpdir(), 'hx-flag-file-db-'));
   mkdirSync(join(base, '.hx', 'milestones'), { recursive: true });
   return base;
 }

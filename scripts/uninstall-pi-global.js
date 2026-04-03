@@ -57,10 +57,10 @@ removeResourceEntries('extensions')
 removeResourceEntries('skills')
 removeResourceEntries('agents')
 removeIfContentMatches(join(piAgentDir, 'AGENTS.md'), join(resourcesDir, 'AGENTS.md'), 'agent/AGENTS.md')
-removeIfContentMatches(join(piRoot, 'GSD-WORKFLOW.md'), join(resourcesDir, 'GSD-WORKFLOW.md'), 'GSD-WORKFLOW.md')
+removeIfContentMatches(join(piRoot, 'HX-WORKFLOW.md'), join(resourcesDir, 'HX-WORKFLOW.md'), 'HX-WORKFLOW.md')
 
 process.stdout.write(
-  `Removed GSD resources from ${piRoot}\n` +
+  `Removed HX resources from ${piRoot}\n` +
   `Removed: ${removed.length ? removed.join(', ') : '(nothing)'}\n` +
   (skipped.length ? `Skipped: ${skipped.join(', ')}\n` : '')
 )

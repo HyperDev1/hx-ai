@@ -1,4 +1,4 @@
-import type { RpcClient, SdkAgentEvent, RpcExtensionUIRequest } from '@gsd-build/rpc-client';
+import type { RpcClient, SdkAgentEvent, RpcExtensionUIRequest } from '@hx-build/rpc-client';
 
 /**
  * Log severity levels, ordered from most to least verbose.
@@ -63,7 +63,7 @@ export type SessionStatus = 'starting' | 'running' | 'blocked' | 'completed' | '
 // ---------------------------------------------------------------------------
 
 /**
- * A daemon-managed GSD headless session.
+ * A daemon-managed HX headless session.
  */
 export interface ManagedSession {
   /** Unique session ID returned from RpcClient.init() */
@@ -137,7 +137,7 @@ export interface CostAccumulator {
 // ---------------------------------------------------------------------------
 
 /** Marker types detectable by the project scanner */
-export type ProjectMarker = 'git' | 'node' | 'gsd' | 'rust' | 'python' | 'go';
+export type ProjectMarker = 'git' | 'node' | 'hx' | 'rust' | 'python' | 'go';
 
 export interface ProjectInfo {
   /** Directory name (basename) */
@@ -161,7 +161,7 @@ export interface StartSessionOptions {
   /** Absolute path to the project directory */
   projectDir: string;
 
-  /** Command to send after '/gsd auto' (default: none) */
+  /** Command to send after '/hx auto' (default: none) */
   command?: string;
 
   /** Model ID override */
@@ -179,7 +179,7 @@ export interface StartSessionOptions {
 // ---------------------------------------------------------------------------
 
 /**
- * Formatted Discord message payload for a GSD event.
+ * Formatted Discord message payload for a HX event.
  * content is the plain-text fallback; embeds and components are optional.
  */
 export interface FormattedEvent {

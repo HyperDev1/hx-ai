@@ -1,5 +1,5 @@
 /**
- * GSD Queue Order — Custom milestone execution ordering.
+ * HX Queue Order — Custom milestone execution ordering.
  *
  * Stores an explicit execution order in `.hx/QUEUE-ORDER.json`.
  * When present, `findMilestoneIds()` uses this order instead of

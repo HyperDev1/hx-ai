@@ -1,4 +1,4 @@
-// GSD — unit-ownership tests
+// HX — unit-ownership tests
 // Copyright (c) 2026 Jeremy McSpadden <jeremy@fluxlabs.net>
 
 import test from 'node:test';
@@ -17,7 +17,7 @@ import {
 } from '../unit-ownership.ts';
 
 function makeTmpBase(): string {
-  return mkdtempSync(join(tmpdir(), 'gsd-ownership-'));
+  return mkdtempSync(join(tmpdir(), 'hx-ownership-'));
 }
 
 function cleanup(base: string): void {

@@ -32,7 +32,7 @@ export function getSkillSearchDirs(cwd: string): Array<{ dir: string; method: Sk
     { dir: join(homedir(), ".agents", "skills"), method: "user-skill" },
     { dir: join(cwd, ".agents", "skills"), method: "project-skill" },
   ];
-  // Legacy fallback — read skills from old GSD directory only if migration hasn't completed
+  // Legacy fallback — read skills from old HX directory only if migration hasn't completed
   const legacyDir = join(homedir(), ".hx", "agent", "skills");
   if (existsSync(legacyDir) && !existsSync(join(legacyDir, ".migrated-to-agents"))) {
     dirs.push({ dir: legacyDir, method: "user-skill" });

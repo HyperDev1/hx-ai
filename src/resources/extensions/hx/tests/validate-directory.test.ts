@@ -1,5 +1,5 @@
 /**
- * Unit tests for GSD Directory Validation — safeguards against dangerous directories.
+ * Unit tests for HX Directory Validation — safeguards against dangerous directories.
  *
  * Exercises validateDirectory() and assertSafeDirectory() with:
  * - Blocked system paths (/, /usr, /etc, $HOME, C:\Windows)
@@ -20,7 +20,7 @@ const isWindows = platform() === "win32";
 function makeTempDir(prefix: string): string {
   const dir = join(
     tmpdir(),
-    `gsd-validate-test-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    `hx-validate-test-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
   );
   mkdirSync(dir, { recursive: true });
   return dir;
@@ -101,15 +101,15 @@ test("validateDirectory: subdirectory of home is NOT blocked", () => {
   }
 });
 
-// Regression test for #1317: GSD worktree inside $HOME must not be blocked even
+// Regression test for #1317: HX worktree inside $HOME must not be blocked even
 // when the resolved project root equals $HOME (e.g. home dir is a git repo).
-test("validateDirectory: GSD worktree path nested under home is NOT blocked (#1317)", () => {
+test("validateDirectory: HX worktree path nested under home is NOT blocked (#1317)", () => {
   const worktreePath = join(homedir(), ".hx", "worktrees", "M001");
   mkdirSync(worktreePath, { recursive: true });
   try {
     // The worktree CWD itself is a valid location — it must pass.
     const result = validateDirectory(worktreePath);
-    assert.equal(result.safe, true, "GSD worktree path should be safe to run in");
+    assert.equal(result.safe, true, "HX worktree path should be safe to run in");
     assert.equal(result.severity, "ok");
   } finally {
     rmSync(join(homedir(), ".hx", "worktrees", "M001"), { recursive: true, force: true });

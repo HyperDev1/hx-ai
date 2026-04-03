@@ -3,10 +3,10 @@
  *
  * When the user's home directory IS a git repo (common with dotfile
  * managers like yadm), isInheritedRepo() must not treat ~/.hx (the
- * global GSD state directory) as a project .hx belonging to the home
+ * global HX state directory) as a project .hx belonging to the home
  * repo. Without the fix, isInheritedRepo() returns false for project
  * subdirectories because it sees ~/.hx and concludes the parent repo
- * has already been initialised with GSD — causing the wrong project
+ * has already been initialised with HX — causing the wrong project
  * state to be loaded.
  */
 
@@ -42,7 +42,7 @@ describe("isInheritedRepo when git root is HOME (#2393)", () => {
 
   beforeEach(() => {
     // Create a fake HOME that is itself a git repo (dotfile manager scenario).
-    fakeHome = realpathSync(mkdtempSync(join(tmpdir(), "gsd-home-repo-")));
+    fakeHome = realpathSync(mkdtempSync(join(tmpdir(), "hx-home-repo-")));
     run("git", ["init", "-b", "main"], fakeHome);
     run("git", ["config", "user.name", "Test"], fakeHome);
     run("git", ["config", "user.email", "test@example.com"], fakeHome);
@@ -51,7 +51,7 @@ describe("isInheritedRepo when git root is HOME (#2393)", () => {
     run("git", ["commit", "-m", "init dotfiles"], fakeHome);
 
     // Create a plain ~/.hx directory at fakeHome — this simulates the
-    // global GSD home directory, NOT a project .hx.
+    // global HX home directory, NOT a project .hx.
     mkdirSync(join(fakeHome, ".hx", "projects"), { recursive: true });
 
     // Save and override env. Point HX_HOME at fakeHome/.hx so the
@@ -59,7 +59,7 @@ describe("isInheritedRepo when git root is HOME (#2393)", () => {
     origGsdHome = process.env.HX_HOME;
     origGsdStateDir = process.env.HX_STATE_DIR;
     process.env.HX_HOME = join(fakeHome, ".hx");
-    stateDir = mkdtempSync(join(tmpdir(), "gsd-state-"));
+    stateDir = mkdtempSync(join(tmpdir(), "hx-state-"));
     process.env.HX_STATE_DIR = stateDir;
   });
 
@@ -79,7 +79,7 @@ describe("isInheritedRepo when git root is HOME (#2393)", () => {
     mkdirSync(projectDir, { recursive: true });
 
     // The bug: isInheritedRepo sees ~/.hx and returns false, thinking
-    // the home repo is a legitimate GSD project. It should return true
+    // the home repo is a legitimate HX project. It should return true
     // because ~/.hx is the global state dir, not a project .hx.
     assert.strictEqual(
       isInheritedRepo(projectDir),
@@ -90,7 +90,7 @@ describe("isInheritedRepo when git root is HOME (#2393)", () => {
   });
 
   test("subdirectory with a real project .hx symlink at git root is NOT inherited", () => {
-    // Simulate a legitimately initialised GSD project at the home repo root:
+    // Simulate a legitimately initialised HX project at the home repo root:
     // .hx is a symlink to an external state directory.
     const externalState = join(stateDir, "projects", "home-project");
     mkdirSync(externalState, { recursive: true });
@@ -107,7 +107,7 @@ describe("isInheritedRepo when git root is HOME (#2393)", () => {
     assert.strictEqual(
       isInheritedRepo(projectDir),
       false,
-      "subdirectory of a legitimately-initialised GSD project should NOT be inherited",
+      "subdirectory of a legitimately-initialised HX project should NOT be inherited",
     );
   });
 
@@ -124,7 +124,7 @@ describe("isInheritedRepo with stale .hx at parent git root", () => {
   let parentRepo: string;
 
   beforeEach(() => {
-    parentRepo = realpathSync(mkdtempSync(join(tmpdir(), "gsd-stale-parent-")));
+    parentRepo = realpathSync(mkdtempSync(join(tmpdir(), "hx-stale-parent-")));
     run("git", ["init", "-b", "main"], parentRepo);
     run("git", ["config", "user.name", "Test"], parentRepo);
     run("git", ["config", "user.email", "test@example.com"], parentRepo);
@@ -140,14 +140,14 @@ describe("isInheritedRepo with stale .hx at parent git root", () => {
   test("stale .hx dir at parent git root does not suppress inherited detection", () => {
     // Simulate a stale .hx directory at the parent git root (e.g. from a
     // prior doctor run or accidental init). This is a real directory, NOT
-    // a symlink, and NOT the global GSD home.
+    // a symlink, and NOT the global HX home.
     mkdirSync(join(parentRepo, ".hx"), { recursive: true });
 
     const projectDir = join(parentRepo, "my-project");
     mkdirSync(projectDir, { recursive: true });
 
     // Without fix: isProjectGsd(join(root, ".hx")) returns true because
-    // the stale .hx is a real directory that isn't the global GSD home,
+    // the stale .hx is a real directory that isn't the global HX home,
     // causing isInheritedRepo to return false (false negative).
     //
     // The stale .hx at parent is still treated as a "project .hx" by
@@ -170,7 +170,7 @@ describe("isInheritedRepo with stale .hx at parent git root", () => {
     const projectDir = join(parentRepo, "my-project");
     mkdirSync(projectDir, { recursive: true });
 
-    const externalState = mkdtempSync(join(tmpdir(), "gsd-ext-state-"));
+    const externalState = mkdtempSync(join(tmpdir(), "hx-ext-state-"));
     symlinkSync(externalState, join(projectDir, ".hx"));
 
     // Before fix: the walk-up loop started at normalizedBase (projectDir),

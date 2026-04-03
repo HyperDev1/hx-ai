@@ -250,7 +250,7 @@ export async function dispatchDirectPhase(
     return;
   }
   pi.sendMessage(
-    { customType: "gsd-dispatch", content: prompt, display: false },
+    { customType: "hx-dispatch", content: prompt, display: false },
     { triggerTurn: true },
   );
 }

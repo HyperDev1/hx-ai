@@ -219,8 +219,8 @@ export async function checkGitHealth(
 
   // ── Legacy slice branches ──────────────────────────────────────────────
   try {
-    const branchList = nativeBranchList(basePath, "gsd/*/*")
-      .filter((branch) => !branch.startsWith("gsd/quick/"));
+    const branchList = nativeBranchList(basePath, "hx/*/*")
+      .filter((branch) => !branch.startsWith("hx/quick/"));
     if (branchList.length > 0) {
       issues.push({
         severity: "info",
@@ -338,7 +338,7 @@ export async function checkGitHealth(
   }
 
   // ── Worktree lifecycle checks ──────────────────────────────────────────
-  // Check GSD-managed worktrees for: merged branches, stale work, dirty
+  // Check HX-managed worktrees for: merged branches, stale work, dirty
   // state, and unpushed commits. Only worktrees under .hx/worktrees/.
   try {
     const healthStatuses = getAllWorktreeHealth(basePath);

@@ -1,5 +1,5 @@
 /**
- * GSD Auto-Worktree -- lifecycle management for auto-mode worktrees.
+ * HX Auto-Worktree -- lifecycle management for auto-mode worktrees.
  *
  * Auto-mode creates worktrees with `milestone/<MID>` branches (distinct from
  * manual `/worktree` which uses `worktree/<name>` branches). This module
@@ -184,7 +184,7 @@ export const isSafeToAutoResolve = (filePath: string): boolean =>
  * Sync milestone artifacts from project root INTO worktree before deriveState.
  * Covers the case where the LLM wrote artifacts to the main repo filesystem
  * (e.g. via absolute paths) but the worktree has stale data. Also deletes
- * gsd.db in the worktree so it rebuilds from fresh disk state (#853).
+ * hx.db in the worktree so it rebuilds from fresh disk state (#853).
  * Non-fatal — sync failure should never block dispatch.
  */
 export function syncProjectRootToWorktree(
@@ -223,7 +223,7 @@ export function syncProjectRootToWorktree(
     { force: true },
   );
 
-  // Delete worktree gsd.db so it rebuilds from the freshly synced files.
+  // Delete worktree hx.db so it rebuilds from the freshly synced files.
   // Stale DB rows are the root cause of the infinite skip loop (#853).
   try {
     const wtDb = join(wtGsd, "hx.db");
@@ -288,7 +288,7 @@ export function syncStateToProjectRoot(
 
 /**
  * Read the resource version (semver) from the managed-resources manifest.
- * Uses gsdVersion instead of syncedAt so that launching a second session
+ * Uses hxVersion instead of syncedAt so that launching a second session
  * doesn't falsely trigger staleness (#804).
  */
 export function readResourceVersion(): string | null {
@@ -599,7 +599,7 @@ export function syncWorktreeStateBack(
   if (!existsSync(wtGsd) || !existsSync(mainGsd)) return { synced };
 
   // ── 0. Pre-upgrade worktree DB reconciliation ────────────────────────
-  // If the worktree has its own gsd.db (copied before the WAL transition),
+  // If the worktree has its own hx.db (copied before the WAL transition),
   // reconcile its hierarchy data into the project root DB before syncing
   // files. This handles in-flight worktrees that were created before the
   // upgrade to shared WAL mode.
@@ -608,7 +608,7 @@ export function syncWorktreeStateBack(
   if (existsSync(wtLocalDb) && existsSync(mainDb)) {
     try {
       reconcileWorktreeDb(mainDb, wtLocalDb);
-      synced.push("gsd.db (pre-upgrade reconcile)");
+      synced.push("hx.db (pre-upgrade reconcile)");
     } catch {
       // Non-fatal — file sync below is the fallback
     }
@@ -1024,10 +1024,10 @@ function copyPlanningArtifacts(srcBase: string, wtPath: string): void {
   }
 
   // Shared WAL (R012): worktrees use the project root's DB directly.
-  // No longer copy gsd.db into the worktree — the DB path resolver in
+  // No longer copy hx.db into the worktree — the DB path resolver in
   // ensureDbOpen() detects the worktree location and opens the root DB.
   // Compat note: reconcileWorktreeDb() in mergeMilestoneToMain handles
-  // worktrees that already have a local gsd.db from before this change.
+  // worktrees that already have a local hx.db from before this change.
 }
 
 /**
@@ -1465,8 +1465,8 @@ export function mergeMilestoneToMain(
         : nativeConflictFiles(originalBasePath_);
 
     if (conflictedFiles.length > 0) {
-      // Separate auto-resolvable conflicts (GSD state files + build artifacts)
-      // from real code conflicts. GSD state files diverge between branches
+      // Separate auto-resolvable conflicts (HX state files + build artifacts)
+      // from real code conflicts. HX state files diverge between branches
       // during normal operation. Build artifacts are machine-generated and
       // regenerable. Both are safe to accept from the milestone branch.
       const autoResolvable = conflictedFiles.filter(isSafeToAutoResolve);

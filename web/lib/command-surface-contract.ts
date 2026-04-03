@@ -41,27 +41,27 @@ export type CommandSurfaceSection =
   | "workspace"
   | "integrations"
   | "experimental"
-  // GSD subcommand surfaces (S02)
-  | "gsd-status"
-  | "gsd-visualize"
-  | "gsd-forensics"
-  | "gsd-doctor"
-  | "gsd-skill-health"
-  | "gsd-knowledge"
-  | "gsd-capture"
-  | "gsd-triage"
-  | "gsd-quick"
-  | "gsd-history"
-  | "gsd-undo"
-  | "gsd-inspect"
-  | "gsd-prefs"
-  | "gsd-config"
-  | "gsd-hooks"
-  | "gsd-mode"
-  | "gsd-steer"
-  | "gsd-export"
-  | "gsd-cleanup"
-  | "gsd-queue"
+  // HX subcommand surfaces (S02)
+  | "hx-status"
+  | "hx-visualize"
+  | "hx-forensics"
+  | "hx-doctor"
+  | "hx-skill-health"
+  | "hx-knowledge"
+  | "hx-capture"
+  | "hx-triage"
+  | "hx-quick"
+  | "hx-history"
+  | "hx-undo"
+  | "hx-inspect"
+  | "hx-prefs"
+  | "hx-config"
+  | "hx-hooks"
+  | "hx-mode"
+  | "hx-steer"
+  | "hx-export"
+  | "hx-cleanup"
+  | "hx-queue"
 export type CommandSurfaceSource = "slash" | "sidebar" | "surface"
 export type CommandSurfacePendingAction =
   | "loading_models"
@@ -347,7 +347,7 @@ export type CommandSurfaceTarget =
   | { kind: "fork"; entryId?: string }
   | { kind: "session"; outputPath?: string }
   | { kind: "compact"; customInstructions: string }
-  | { kind: "gsd"; surface: string; subcommand: string; args: string }
+  | { kind: "hx"; surface: string; subcommand: string; args: string }
 
 // ─── Diagnostics panel state ──────────────────────────────────────────────────
 
@@ -671,27 +671,27 @@ export function commandSurfaceSectionForRequest(request: CommandSurfaceOpenReque
       return "session"
     case "compact":
       return "compact"
-    // GSD subcommand surfaces (S02)
-    case "gsd-status": return "gsd-status"
-    case "gsd-visualize": return "gsd-visualize"
-    case "gsd-forensics": return "gsd-forensics"
-    case "gsd-doctor": return "gsd-doctor"
-    case "gsd-skill-health": return "gsd-skill-health"
-    case "gsd-knowledge": return "gsd-knowledge"
-    case "gsd-capture": return "gsd-capture"
-    case "gsd-triage": return "gsd-triage"
-    case "gsd-quick": return "gsd-quick"
-    case "gsd-history": return "gsd-history"
-    case "gsd-undo": return "gsd-undo"
-    case "gsd-inspect": return "gsd-inspect"
-    case "gsd-prefs": return "gsd-prefs"
-    case "gsd-config": return "gsd-config"
-    case "gsd-hooks": return "gsd-hooks"
-    case "gsd-mode": return "gsd-mode"
-    case "gsd-steer": return "gsd-steer"
-    case "gsd-export": return "gsd-export"
-    case "gsd-cleanup": return "gsd-cleanup"
-    case "gsd-queue": return "gsd-queue"
+    // HX subcommand surfaces (S02)
+    case "hx-status": return "hx-status"
+    case "hx-visualize": return "hx-visualize"
+    case "hx-forensics": return "hx-forensics"
+    case "hx-doctor": return "hx-doctor"
+    case "hx-skill-health": return "hx-skill-health"
+    case "hx-knowledge": return "hx-knowledge"
+    case "hx-capture": return "hx-capture"
+    case "hx-triage": return "hx-triage"
+    case "hx-quick": return "hx-quick"
+    case "hx-history": return "hx-history"
+    case "hx-undo": return "hx-undo"
+    case "hx-inspect": return "hx-inspect"
+    case "hx-prefs": return "hx-prefs"
+    case "hx-config": return "hx-config"
+    case "hx-hooks": return "hx-hooks"
+    case "hx-mode": return "hx-mode"
+    case "hx-steer": return "hx-steer"
+    case "hx-export": return "hx-export"
+    case "hx-cleanup": return "hx-cleanup"
+    case "hx-queue": return "hx-queue"
     default:
       return null
   }
@@ -818,10 +818,10 @@ export function buildCommandSurfaceTarget(request: CommandSurfaceOpenRequest): C
     return buildCompactTarget(request)
   }
 
-  // GSD subcommand surfaces — generic target (S02)
-  if (request.surface?.startsWith("gsd-")) {
-    const subcommand = request.surface.slice(4) // "gsd-forensics" -> "forensics"
-    return { kind: "gsd", surface: request.surface, subcommand, args: request.args ?? "" }
+  // HX subcommand surfaces — generic target (S02)
+  if (request.surface?.startsWith("hx-")) {
+    const subcommand = request.surface.slice(4) // "hx-forensics" -> "forensics"
+    return { kind: "hx", surface: request.surface, subcommand, args: request.args ?? "" }
   }
 
   return buildSettingsTarget(section)

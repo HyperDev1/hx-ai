@@ -22,20 +22,20 @@ parallel:
 2. Start parallel execution:
 
 ```
-/gsd parallel start
+/hx parallel start
 ```
 
 3. Monitor progress:
 
 ```
-/gsd parallel status
+/hx parallel status
 ```
 
 ## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│  Coordinator (your GSD session)                      │
+│  Coordinator (your HX session)                      │
 │                                                      │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐           │
 │  │ Worker 1 │  │ Worker 2 │  │ Worker 3 │  ...       │
@@ -43,7 +43,7 @@ parallel:
 │  └──────────┘  └──────────┘  └──────────┘           │
 │       │              │              │                │
 │       ▼              ▼              ▼                │
-│  .gsd/worktrees/ .gsd/worktrees/ .gsd/worktrees/    │
+│  .hx/worktrees/ .hx/worktrees/ .hx/worktrees/    │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -59,7 +59,7 @@ parallel:
 
 ## Eligibility analysis
 
-Before starting, GSD checks which milestones can run concurrently:
+Before starting, HX checks which milestones can run concurrently:
 
 1. **Not complete** — finished milestones are skipped
 2. **Dependencies satisfied** — all `dependsOn` entries must be complete
@@ -88,16 +88,16 @@ parallel:
 
 | Command | Description |
 |---------|-------------|
-| `/gsd parallel start` | Analyze, confirm, and start workers |
-| `/gsd parallel status` | Show workers with state, progress, cost |
-| `/gsd parallel stop [MID]` | Stop all or a specific worker |
-| `/gsd parallel pause [MID]` | Pause all or a specific worker |
-| `/gsd parallel resume [MID]` | Resume paused workers |
-| `/gsd parallel merge [MID]` | Merge completed milestones to main |
+| `/hx parallel start` | Analyze, confirm, and start workers |
+| `/hx parallel status` | Show workers with state, progress, cost |
+| `/hx parallel stop [MID]` | Stop all or a specific worker |
+| `/hx parallel pause [MID]` | Pause all or a specific worker |
+| `/hx parallel resume [MID]` | Resume paused workers |
+| `/hx parallel merge [MID]` | Merge completed milestones to main |
 
 ## Merge reconciliation
 
-- `.gsd/` state files — auto-resolved (accept milestone branch version)
+- `.hx/` state files — auto-resolved (accept milestone branch version)
 - Code conflicts — merge halts, shows conflicting files. Resolve manually and retry.
 
 ## Budget management
@@ -108,16 +108,16 @@ When `budget_ceiling` is set, aggregate cost is tracked across all workers. Ceil
 
 ### "No milestones are eligible"
 
-All milestones are complete or blocked by dependencies. Check `/gsd queue`.
+All milestones are complete or blocked by dependencies. Check `/hx queue`.
 
 ### Worker crashed
 
-Workers persist state to disk. On restart, the coordinator detects dead PIDs. Run `/gsd doctor --fix` to clean up, then `/gsd parallel start` to spawn new workers.
+Workers persist state to disk. On restart, the coordinator detects dead PIDs. Run `/hx doctor --fix` to clean up, then `/hx parallel start` to spawn new workers.
 
 ### Merge conflicts
 
 ```
-/gsd parallel merge       # see which milestones conflict
-# resolve in .gsd/worktrees/<MID>/
-/gsd parallel merge MID   # retry
+/hx parallel merge       # see which milestones conflict
+# resolve in .hx/worktrees/<MID>/
+/hx parallel merge MID   # retry
 ```

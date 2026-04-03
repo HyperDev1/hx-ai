@@ -1,18 +1,18 @@
 ---
 title: "Migration from v1"
-description: "Migrate .planning directories from the original GSD to GSD-2's .gsd format."
+description: "Migrate .planning directories from the original HX to HX-2's .hx format."
 ---
 
-If you have projects with `.planning` directories from the original Get Shit Done (v1), you can migrate them to GSD-2's `.gsd` format.
+If you have projects with `.planning` directories from the original Get Shit Done (v1), you can migrate them to HX-2's `.hx` format.
 
 ## Running the migration
 
 ```bash
 # From within the project directory
-/gsd migrate
+/hx migrate
 
 # Or specify a path
-/gsd migrate ~/projects/my-old-project
+/hx migrate ~/projects/my-old-project
 ```
 
 ## What gets migrated
@@ -41,7 +41,7 @@ The migration handles various v1 format variations:
 Verify the output:
 
 ```
-/gsd doctor
+/hx doctor
 ```
 
-This checks `.gsd/` integrity and flags any structural issues.
+This checks `.hx/` integrity and flags any structural issues.

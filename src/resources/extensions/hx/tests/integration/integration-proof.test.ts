@@ -95,7 +95,7 @@ import { invalidateAllCaches } from "../../cache.ts";
 // ═══════════════════════════════════════════════════════════════════════════
 
 function makeTempDir(): string {
-  return mkdtempSync(join(tmpdir(), "gsd-integration-proof-"));
+  return mkdtempSync(join(tmpdir(), "hx-integration-proof-"));
 }
 
 function makeCtx(): { notifications: Array<{ message: string; level: string }>; ctx: any } {
@@ -276,7 +276,7 @@ function makeCompleteSliceParams(): any {
 
 test("full lifecycle: migration through completion through doctor", async (t) => {
   const base = createRealisticFixture();
-  const dbPath = join(base, ".hx", "gsd.db");
+  const dbPath = join(base, ".hx", "hx.db");
 
   t.after(() => {
     closeDatabase();
@@ -415,7 +415,7 @@ test("full lifecycle: migration through completion through doctor", async (t) =>
 
 test("recovery: DB loss → migrateFromMarkdown restores state, stale render detection", async (t) => {
   const base = createRealisticFixture();
-  const dbPath = join(base, ".hx", "gsd.db");
+  const dbPath = join(base, ".hx", "hx.db");
 
   t.after(() => {
     closeDatabase();
@@ -503,7 +503,7 @@ test("recovery: DB loss → migrateFromMarkdown restores state, stale render det
 
 test("undo/reset: undo task and reset slice revert DB + markdown", async (t) => {
   const base = createRealisticFixture();
-  const dbPath = join(base, ".hx", "gsd.db");
+  const dbPath = join(base, ".hx", "hx.db");
 
   t.after(() => {
     closeDatabase();

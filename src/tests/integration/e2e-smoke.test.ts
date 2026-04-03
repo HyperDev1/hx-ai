@@ -1,5 +1,5 @@
 /**
- * E2E smoke tests for the GSD CLI binary (dist/loader.js).
+ * E2E smoke tests for the HX CLI binary (dist/loader.js).
  *
  * These tests exercise the CLI entry point as a black box by spawning child
  * processes and asserting on exit codes and output text.  They do NOT require
@@ -98,10 +98,10 @@ function createTempGitRepo(prefix: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// 1. gsd --version outputs a semver string and exits 0
+// 1. hx --version outputs a semver string and exits 0
 // ---------------------------------------------------------------------------
 
-test("gsd --version outputs a semver version string and exits 0", async () => {
+test("hx --version outputs a semver version string and exits 0", async () => {
   const result = await runGsd(["--version"]);
 
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
@@ -117,10 +117,10 @@ test("gsd --version outputs a semver version string and exits 0", async () => {
 });
 
 // ---------------------------------------------------------------------------
-// 2. gsd --help outputs usage information and exits 0
+// 2. hx --help outputs usage information and exits 0
 // ---------------------------------------------------------------------------
 
-test("gsd --help outputs usage information and exits 0", async () => {
+test("hx --help outputs usage information and exits 0", async () => {
   const result = await runGsd(["--help"]);
 
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
@@ -151,10 +151,10 @@ test("gsd --help outputs usage information and exits 0", async () => {
 });
 
 // ---------------------------------------------------------------------------
-// 3. gsd config --help outputs config-specific or general help and exits 0
+// 3. hx config --help outputs config-specific or general help and exits 0
 // ---------------------------------------------------------------------------
 
-test("gsd config --help outputs help and exits 0", async () => {
+test("hx config --help outputs help and exits 0", async () => {
   const result = await runGsd(["config", "--help"]);
 
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
@@ -171,10 +171,10 @@ test("gsd config --help outputs help and exits 0", async () => {
 });
 
 // ---------------------------------------------------------------------------
-// 4. gsd update --help outputs update-specific or general help and exits 0
+// 4. hx update --help outputs update-specific or general help and exits 0
 // ---------------------------------------------------------------------------
 
-test("gsd update --help outputs help and exits 0", async () => {
+test("hx update --help outputs help and exits 0", async () => {
   const result = await runGsd(["update", "--help"]);
 
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
@@ -188,13 +188,13 @@ test("gsd update --help outputs help and exits 0", async () => {
 });
 
 // ---------------------------------------------------------------------------
-// 5. gsd --list-models runs without crashing
+// 5. hx --list-models runs without crashing
 // ---------------------------------------------------------------------------
 
-test("gsd --list-models runs without crashing", async () => {
+test("hx --list-models runs without crashing", async () => {
   const result = await runGsd(["--list-models"]);
 
-  assert.ok(!result.timedOut, "gsd --list-models should exit within the timeout");
+  assert.ok(!result.timedOut, "hx --list-models should exit within the timeout");
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
 
   // No unhandled crash markers
@@ -218,17 +218,17 @@ test("gsd --list-models runs without crashing", async () => {
 });
 
 // ---------------------------------------------------------------------------
-// 6. gsd --print in text mode does not segfault or throw unhandled errors
+// 6. hx --print in text mode does not segfault or throw unhandled errors
 //    (may fail with "No model selected" when no API keys are configured)
 // ---------------------------------------------------------------------------
 
-test("gsd --mode text --print does not segfault or throw unhandled errors", { skip: !process.env.ANTHROPIC_API_KEY && !process.env.OPENAI_API_KEY ? "no API key available — print mode requires a configured provider" : undefined }, async () => {
+test("hx --mode text --print does not segfault or throw unhandled errors", { skip: !process.env.ANTHROPIC_API_KEY && !process.env.OPENAI_API_KEY ? "no API key available — print mode requires a configured provider" : undefined }, async () => {
   const result = await runGsd(
     ["--mode", "text", "--print", "echo hello"],
     15_000,
   );
 
-  assert.ok(!result.timedOut, "gsd --print should not hang indefinitely");
+  assert.ok(!result.timedOut, "hx --print should not hang indefinitely");
 
   const combinedOutput = stripAnsi(result.stdout + result.stderr);
 
@@ -280,10 +280,10 @@ test("gsd --mode text --print does not segfault or throw unhandled errors", { sk
 // ===========================================================================
 
 // ---------------------------------------------------------------------------
-// 7. gsd headless --help outputs headless-specific help and exits 0
+// 7. hx headless --help outputs headless-specific help and exits 0
 // ---------------------------------------------------------------------------
 
-test("gsd headless --help outputs help and exits 0", async () => {
+test("hx headless --help outputs help and exits 0", async () => {
   const result = await runGsd(["headless", "--help"]);
 
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
@@ -303,10 +303,10 @@ test("gsd headless --help outputs help and exits 0", async () => {
 });
 
 // ---------------------------------------------------------------------------
-// 8. gsd sessions --help outputs sessions-specific help and exits 0
+// 8. hx sessions --help outputs sessions-specific help and exits 0
 // ---------------------------------------------------------------------------
 
-test("gsd sessions --help outputs sessions-specific help and exits 0", async () => {
+test("hx sessions --help outputs sessions-specific help and exits 0", async () => {
   const result = await runGsd(["sessions", "--help"]);
 
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
@@ -324,10 +324,10 @@ test("gsd sessions --help outputs sessions-specific help and exits 0", async () 
 // ===========================================================================
 
 // ---------------------------------------------------------------------------
-// 9. gsd (no TTY) exits with clean error about requiring a terminal
+// 9. hx (no TTY) exits with clean error about requiring a terminal
 // ---------------------------------------------------------------------------
 
-test("gsd with no TTY exits 1 with clean terminal-required error", async () => {
+test("hx with no TTY exits 1 with clean terminal-required error", async () => {
   // Running with piped stdin (non-TTY) and no subcommand/flags triggers
   // interactive mode which requires a TTY
   const result = await runGsd([], 15_000);
@@ -348,10 +348,10 @@ test("gsd with no TTY exits 1 with clean terminal-required error", async () => {
 });
 
 // ---------------------------------------------------------------------------
-// 10. gsd with unknown flags does not crash
+// 10. hx with unknown flags does not crash
 // ---------------------------------------------------------------------------
 
-test("gsd with unknown flags does not crash", async () => {
+test("hx with unknown flags does not crash", async () => {
   // Unknown flags are silently ignored by the arg parser.
   // With --help appended, we get a clean exit path to test.
   const result = await runGsd(["--some-unknown-flag", "--help"]);
@@ -364,10 +364,10 @@ test("gsd with unknown flags does not crash", async () => {
 });
 
 // ---------------------------------------------------------------------------
-// 11. gsd -v is equivalent to --version
+// 11. hx -v is equivalent to --version
 // ---------------------------------------------------------------------------
 
-test("gsd -v is equivalent to --version", async () => {
+test("hx -v is equivalent to --version", async () => {
   const result = await runGsd(["-v"]);
 
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
@@ -382,10 +382,10 @@ test("gsd -v is equivalent to --version", async () => {
 });
 
 // ---------------------------------------------------------------------------
-// 12. gsd -h is equivalent to --help
+// 12. hx -h is equivalent to --help
 // ---------------------------------------------------------------------------
 
-test("gsd -h is equivalent to --help", async () => {
+test("hx -h is equivalent to --help", async () => {
   const result = await runGsd(["-h"]);
 
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
@@ -403,11 +403,11 @@ test("gsd -h is equivalent to --help", async () => {
 // ===========================================================================
 
 // ---------------------------------------------------------------------------
-// 13. gsd headless without .gsd/ directory exits 1 with clean error
+// 13. hx headless without .hx/ directory exits 1 with clean error
 // ---------------------------------------------------------------------------
 
-test("gsd headless without .gsd/ directory exits 1 with clean error", async (t) => {
-  const tmpDir = mkdtempSync(join(tmpdir(), "gsd-e2e-no-gsd-"));
+test("hx headless without .hx/ directory exits 1 with clean error", async (t) => {
+  const tmpDir = mkdtempSync(join(tmpdir(), "hx-e2e-no-hx-"));
 
   t.after(() => { rmSync(tmpDir, { recursive: true, force: true }); });
 
@@ -418,19 +418,19 @@ test("gsd headless without .gsd/ directory exits 1 with clean error", async (t) 
 
   const combined = stripAnsi(result.stdout + result.stderr);
   assert.ok(
-    combined.includes(".gsd/") || combined.includes("No .gsd"),
-    `expected .gsd/ missing error, got:\n${combined.slice(0, 500)}`,
+    combined.includes(".hx/") || combined.includes("No .hx"),
+    `expected .hx/ missing error, got:\n${combined.slice(0, 500)}`,
   );
 
   assertNoCrashMarkers(combined);
 });
 
 // ---------------------------------------------------------------------------
-// 14. gsd headless new-milestone without --context exits 1
+// 14. hx headless new-milestone without --context exits 1
 // ---------------------------------------------------------------------------
 
-test("gsd headless new-milestone without --context exits 1", async (t) => {
-  const tmpDir = mkdtempSync(join(tmpdir(), "gsd-e2e-no-ctx-"));
+test("hx headless new-milestone without --context exits 1", async (t) => {
+  const tmpDir = mkdtempSync(join(tmpdir(), "hx-e2e-no-ctx-"));
 
   t.after(() => { rmSync(tmpDir, { recursive: true, force: true }); });
 
@@ -449,11 +449,11 @@ test("gsd headless new-milestone without --context exits 1", async (t) => {
 });
 
 // ---------------------------------------------------------------------------
-// 15. gsd headless --timeout with invalid value exits 1
+// 15. hx headless --timeout with invalid value exits 1
 // ---------------------------------------------------------------------------
 
-test("gsd headless --timeout with invalid value exits 1", async (t) => {
-  const tmpDir = mkdtempSync(join(tmpdir(), "gsd-e2e-bad-timeout-"));
+test("hx headless --timeout with invalid value exits 1", async (t) => {
+  const tmpDir = mkdtempSync(join(tmpdir(), "hx-e2e-bad-timeout-"));
 
   t.after(() => { rmSync(tmpDir, { recursive: true, force: true }); });
 
@@ -477,11 +477,11 @@ test("gsd headless --timeout with invalid value exits 1", async (t) => {
 });
 
 // ---------------------------------------------------------------------------
-// 16. gsd headless --timeout with negative value exits 1
+// 16. hx headless --timeout with negative value exits 1
 // ---------------------------------------------------------------------------
 
-test("gsd headless --timeout with negative value exits 1", async (t) => {
-  const tmpDir = mkdtempSync(join(tmpdir(), "gsd-e2e-neg-timeout-"));
+test("hx headless --timeout with negative value exits 1", async (t) => {
+  const tmpDir = mkdtempSync(join(tmpdir(), "hx-e2e-neg-timeout-"));
 
   t.after(() => { rmSync(tmpDir, { recursive: true, force: true }); });
 
@@ -504,12 +504,12 @@ test("gsd headless --timeout with negative value exits 1", async (t) => {
   assertNoCrashMarkers(combined);
 });
 
-test("gsd headless query returns JSON from the built CLI", async (t) => {
-  const tmpDir = createTempGitRepo("gsd-e2e-query-");
+test("hx headless query returns JSON from the built CLI", async (t) => {
+  const tmpDir = createTempGitRepo("hx-e2e-query-");
 
   t.after(() => { rmSync(tmpDir, { recursive: true, force: true }); });
 
-  mkdirSync(join(tmpDir, ".gsd", "milestones"), { recursive: true });
+  mkdirSync(join(tmpDir, ".hx", "milestones"), { recursive: true });
 
   // Cold packaged startup in a fresh temp repo is now regularly >10s because
   // the built CLI loads bundled TS resources through jiti before answering.
@@ -526,8 +526,8 @@ test("gsd headless query returns JSON from the built CLI", async (t) => {
   assert.equal(typeof snapshot.state?.phase, "string", "query output should include state.phase");
 });
 
-test("gsd worktree list loads the built worktree CLI without module errors", async (t) => {
-  const tmpDir = createTempGitRepo("gsd-e2e-worktree-");
+test("hx worktree list loads the built worktree CLI without module errors", async (t) => {
+  const tmpDir = createTempGitRepo("hx-e2e-worktree-");
 
   t.after(() => { rmSync(tmpDir, { recursive: true, force: true }); });
 
@@ -554,7 +554,7 @@ test("gsd worktree list loads the built worktree CLI without module errors", asy
 // 17. --help output lists all subcommands
 // ---------------------------------------------------------------------------
 
-test("gsd --help lists all documented subcommands", async () => {
+test("hx --help lists all documented subcommands", async () => {
   const result = await runGsd(["--help"]);
 
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
@@ -573,7 +573,7 @@ test("gsd --help lists all documented subcommands", async () => {
 // 18. --help output lists all key flags
 // ---------------------------------------------------------------------------
 
-test("gsd --help lists all key flags", async () => {
+test("hx --help lists all key flags", async () => {
   const result = await runGsd(["--help"]);
 
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
@@ -604,10 +604,10 @@ test("gsd --help lists all key flags", async () => {
 // ===========================================================================
 
 // ---------------------------------------------------------------------------
-// 19. gsd --version followed by other flags still just prints version
+// 19. hx --version followed by other flags still just prints version
 // ---------------------------------------------------------------------------
 
-test("gsd --version ignores trailing arguments", async () => {
+test("hx --version ignores trailing arguments", async () => {
   const result = await runGsd(["--version", "--help", "--list-models"]);
 
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);
@@ -623,12 +623,12 @@ test("gsd --version ignores trailing arguments", async () => {
 });
 
 // ---------------------------------------------------------------------------
-// 20. gsd headless help (positional, not flag) exits 0
+// 20. hx headless help (positional, not flag) exits 0
 // ---------------------------------------------------------------------------
 
-test("gsd headless help (positional) exits cleanly", async () => {
+test("hx headless help (positional) exits cleanly", async () => {
   // "help" as a positional is treated as a quick command by headless mode.
-  // Without .gsd/ it should fail, but with --help flag it should succeed.
+  // Without .hx/ it should fail, but with --help flag it should succeed.
   const result = await runGsd(["headless", "--help"]);
 
   assert.strictEqual(result.code, 0, `expected exit 0, got ${result.code}`);

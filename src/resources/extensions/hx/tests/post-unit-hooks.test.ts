@@ -1,4 +1,4 @@
-// GSD Extension — Hook Engine Tests (Post-Unit, Pre-Dispatch, State Persistence)
+// HX Extension — Hook Engine Tests (Post-Unit, Pre-Dispatch, State Persistence)
 
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -24,7 +24,7 @@ import {
 // ─── Fixture Helpers ───────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), "gsd-hook-test-"));
+  const base = mkdtempSync(join(tmpdir(), "hx-hook-test-"));
   mkdirSync(join(base, ".hx", "milestones", "M001", "slices", "S01", "tasks"), { recursive: true });
   return base;
 }

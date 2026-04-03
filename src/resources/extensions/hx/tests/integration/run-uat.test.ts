@@ -26,7 +26,7 @@ function loadPromptFromWorktree(name: string, vars: Record<string, string> = {})
 }
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-run-uat-test-'));
+  const base = mkdtempSync(join(tmpdir(), 'hx-run-uat-test-'));
   mkdirSync(join(base, '.hx', 'milestones'), { recursive: true });
   return base;
 }

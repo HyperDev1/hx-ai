@@ -29,7 +29,7 @@ function strip(s: string): string {
   return s.replace(/\x1b\[[0-9;]*m/g, '')
 }
 
-test('renders GSD logo', () => {
+test('renders HX logo', () => {
   const out = strip(capture({ version: '1.0.0' }))
   assert.ok(out.includes('██'), 'logo block characters missing')
 })

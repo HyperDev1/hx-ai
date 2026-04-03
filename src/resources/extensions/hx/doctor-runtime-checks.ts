@@ -322,14 +322,14 @@ export async function checkRuntimeHealth(
             code: "gitignore_missing_patterns",
             scope: "project",
             unitId: "project",
-            message: `${missing.length} critical GSD runtime pattern(s) missing from .gitignore: ${missing.join(", ")}`,
+            message: `${missing.length} critical HX runtime pattern(s) missing from .gitignore: ${missing.join(", ")}`,
             file: ".gitignore",
             fixable: true,
           });
 
           if (shouldFix("gitignore_missing_patterns")) {
             ensureGitignore(basePath);
-            fixesApplied.push("added missing GSD runtime patterns to .gitignore");
+            fixesApplied.push("added missing HX runtime patterns to .gitignore");
           }
         }
       }
@@ -396,16 +396,16 @@ export async function checkRuntimeHealth(
       for (const v of variants) {
         issues.push({
           severity: "warning",
-          code: "numbered_gsd_variant",
+          code: "numbered_hx_variant",
           scope: "project",
           unitId: "project",
-          message: `Found macOS collision variant "${v}" — this can cause GSD state to appear deleted.`,
+          message: `Found macOS collision variant "${v}" — this can cause HX state to appear deleted.`,
           file: v,
           fixable: true,
         });
       }
 
-      if (shouldFix("numbered_gsd_variant")) {
+      if (shouldFix("numbered_hx_variant")) {
         const removed = cleanNumberedHxVariants(basePath);
         for (const name of removed) {
           fixesApplied.push(`removed numbered .hx variant: ${name}`);
@@ -578,7 +578,7 @@ export async function checkRuntimeHealth(
  */
 function buildStateMarkdownForCheck(state: Awaited<ReturnType<typeof deriveState>>): string {
   const lines: string[] = [];
-  lines.push("# GSD State", "");
+  lines.push("# HX State", "");
 
   const activeMilestone = state.activeMilestone
     ? `${state.activeMilestone.id}: ${state.activeMilestone.title}`

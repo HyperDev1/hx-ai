@@ -6,7 +6,7 @@
  *
  * Test cases:
  *   1. Copy: createAutoWorktree seeds .hx/hx.db into the worktree when main has one
- *   2. Copy-skip: createAutoWorktree silently skips when main has no gsd.db
+ *   2. Copy-skip: createAutoWorktree silently skips when main has no hx.db
  *   3. Reconcile: reconcileWorktreeDb merges worktree rows into main DB
  *   4. Reconcile-skip: reconcileWorktreeDb is non-fatal when both paths are nonexistent
  *   5. Failure path: reconcileWorktreeDb emits to stderr on open failure (observable)
@@ -67,16 +67,16 @@ describe('worktree-db-integration', async () => {
       const tempDir = createTempRepo();
       tempDirs.push(tempDir);
 
-      // Seed a gsd.db in the main repo
+      // Seed a hx.db in the main repo
       const gsdDir = join(tempDir, ".hx");
       mkdirSync(gsdDir, { recursive: true });
-      const mainDbPath = join(gsdDir, "gsd.db");
+      const mainDbPath = join(gsdDir, "hx.db");
       openDatabase(mainDbPath);
       closeDatabase();
 
       // Commit so createAutoWorktree can copy planning artifacts
       run("git add .", tempDir);
-      run('git commit -m "add gsd dir"', tempDir);
+      run('git commit -m "add hx dir"', tempDir);
 
       // createAutoWorktree should copy the DB into the worktree
       const wtPath = createAutoWorktree(tempDir, "M004");
@@ -84,7 +84,7 @@ describe('worktree-db-integration', async () => {
       const worktreeDbPath = join(worktreePath(tempDir, "M004"), ".hx", "hx.db");
       assert.ok(
         existsSync(worktreeDbPath),
-        "gsd.db exists in worktree .hx after createAutoWorktree",
+        "hx.db exists in worktree .hx after createAutoWorktree",
       );
 
       // Restore cwd for next test
@@ -97,7 +97,7 @@ describe('worktree-db-integration', async () => {
       const tempDir = createTempRepo();
       tempDirs.push(tempDir);
 
-      // No gsd.db — just a bare repo
+      // No hx.db — just a bare repo
       let threw = false;
       let wtPath: string | null = null;
       try {
@@ -112,7 +112,7 @@ describe('worktree-db-integration', async () => {
       const worktreeDbPath = join(worktreePath(tempDir, "M004"), ".hx", "hx.db");
       assert.ok(
         !existsSync(worktreeDbPath),
-        "gsd.db is absent in worktree when source had none",
+        "hx.db is absent in worktree when source had none",
       );
 
       process.chdir(savedCwd);

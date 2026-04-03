@@ -1,7 +1,7 @@
 /**
- * GSD Git Service
+ * HX Git Service
  *
- * Core git operations for GSD: types, constants, and pure helpers.
+ * Core git operations for HX: types, constants, and pure helpers.
  * Higher-level operations (commit, staging, branching) build on these.
  *
  * This module centralizes the GitPreferences interface, runtime exclusion
@@ -55,10 +55,10 @@ export interface GitPreferences {
    *  - "none": no git isolation — commits land on the user's current branch directly
    */
   isolation?: "worktree" | "branch" | "none";
-  /** When false, GSD will not modify .gitignore at all — no baseline patterns
+  /** When false, HX will not modify .gitignore at all — no baseline patterns
    *  are added and no self-healing occurs. Use this if you manage your own
-   *  .gitignore and don't want GSD touching it.
-   *  Default: true (GSD ensures baseline patterns are present).
+   *  .gitignore and don't want HX touching it.
+   *  Default: true (HX ensures baseline patterns are present).
    */
   manage_gitignore?: boolean;
   /** Script to run after a worktree is created (#597).
@@ -102,9 +102,9 @@ export interface TaskCommitContext {
 
 /**
  * Build a meaningful conventional commit message from task execution context.
- * Format: `{type}: {description}` (clean conventional commit — no GSD IDs in subject).
+ * Format: `{type}: {description}` (clean conventional commit — no HX IDs in subject).
  *
- * GSD metadata is placed in a `GSD-Task:` git trailer at the end of the body,
+ * HX metadata is placed in a `HX-Task:` git trailer at the end of the body,
  * following the same convention as `Signed-off-by:` or `Co-Authored-By:`.
  *
  * The description is the task summary one-liner if available (it describes
@@ -133,8 +133,8 @@ export function buildTaskCommitMessage(ctx: TaskCommitContext): string {
     bodyParts.push(fileLines);
   }
 
-  // Trailers: GSD-Task first, then Resolves
-  bodyParts.push(`GSD-Task: ${ctx.taskId}`);
+  // Trailers: HX-Task first, then Resolves
+  bodyParts.push(`HX-Task: ${ctx.taskId}`);
 
   if (ctx.issueNumber) {
     bodyParts.push(`Resolves #${ctx.issueNumber}`);
@@ -183,7 +183,7 @@ export interface PreMergeCheckResult {
 // ─── Constants ─────────────────────────────────────────────────────────────
 
 /**
- * GSD runtime paths that should be excluded from smart staging.
+ * HX runtime paths that should be excluded from smart staging.
  * These are transient/generated artifacts that should never be committed.
  * Matches the union of SKIP_PATHS + SKIP_EXACT in worktree-manager.ts
  * and the first 7 entries in gitignore.ts BASELINE_PATTERNS.
@@ -197,8 +197,8 @@ export const RUNTIME_EXCLUSION_PATHS: readonly string[] = [
   ".hx/completed-units.json",
   ".hx/STATE.md",
   ".hx/hx.db",
-  ".hx/hx.db-shm",   // SQLite WAL sidecar — always created alongside gsd.db (#2296)
-  ".hx/hx.db-wal",   // SQLite WAL sidecar — always created alongside gsd.db (#2296)
+  ".hx/hx.db-shm",   // SQLite WAL sidecar — always created alongside hx.db (#2296)
+  ".hx/hx.db-wal",   // SQLite WAL sidecar — always created alongside hx.db (#2296)
   ".hx/journal/",     // daily-rotated JSONL event journal (#2296)
   ".hx/doctor-history.jsonl", // doctor run history (#2296)
   ".hx/DISCUSSION-MANIFEST.json",
@@ -259,7 +259,7 @@ export function writeIntegrationBranch(
   if (QUICK_BRANCH_RE.test(branch)) return;
   // Don't record workflow-template branches (hotfix, bugfix, spike, etc.) —
   // same root cause as quick-task branches (#2498). All templates create
-  // gsd/<templateId>/<slug> branches that are ephemeral.
+  // hx/<templateId>/<slug> branches that are ephemeral.
   if (WORKFLOW_BRANCH_RE.test(branch)) return;
   // Validate
   if (!VALID_BRANCH_NAME.test(branch)) return;
@@ -446,7 +446,7 @@ export class GitServiceImpl {
   }
 
   /**
-   * Smart staging: `git add -A` excluding GSD runtime paths via pathspec.
+   * Smart staging: `git add -A` excluding HX runtime paths via pathspec.
    * Falls back to plain `git add -A` if the exclusion pathspec fails.
    * @param extraExclusions Additional pathspec exclusions beyond RUNTIME_EXCLUSION_PATHS.
    */
@@ -538,7 +538,7 @@ export class GitServiceImpl {
 
     const message = taskContext
       ? buildTaskCommitMessage(taskContext)
-      : `chore: auto-commit after ${unitType}\n\nGSD-Unit: ${unitId}`;
+      : `chore: auto-commit after ${unitType}\n\nHX-Unit: ${unitId}`;
     nativeCommit(this.basePath, message, { allowEmpty: false });
     return message;
   }
@@ -550,7 +550,7 @@ export class GitServiceImpl {
    * branches are created from and merged back into.
    *
    * This is often `main` or `master`, but not necessarily. When a user
-   * starts GSD on a feature branch like `f-123-new-thing`, that branch
+   * starts HX on a feature branch like `f-123-new-thing`, that branch
    * is recorded as the integration target, and all slice branches merge
    * back into it — not the repo's default branch. The name "main branch"
    * in variable names is historical; think of it as "integration branch".

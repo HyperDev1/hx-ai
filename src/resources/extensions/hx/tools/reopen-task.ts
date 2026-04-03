@@ -1,5 +1,5 @@
 /**
- * reopen-task handler — the core operation behind gsd_task_reopen.
+ * reopen-task handler — the core operation behind hx_task_reopen.
  *
  * Resets a completed task back to "pending" so it can be re-done
  * without manual SQL surgery. The parent slice and milestone must
@@ -7,7 +7,7 @@
  * closed slice.
  */
 
-// GSD — reopen-task tool handler
+// HX — reopen-task tool handler
 // Copyright (c) 2026 Jeremy McSpadden <jeremy@fluxlabs.net>
 
 import {
@@ -75,7 +75,7 @@ export async function handleReopenTask(
       return;
     }
     if (isClosedStatus(slice.status)) {
-      guardError = `cannot reopen task in a closed slice: ${params.sliceId} (status: ${slice.status}) — use gsd_slice_reopen first`;
+      guardError = `cannot reopen task in a closed slice: ${params.sliceId} (status: ${slice.status}) — use hx_slice_reopen first`;
       return;
     }
 
@@ -118,7 +118,7 @@ export async function handleReopenTask(
     });
   } catch (hookErr) {
     process.stderr.write(
-      `gsd: reopen-task post-mutation hook warning: ${(hookErr as Error).message}\n`,
+      `hx: reopen-task post-mutation hook warning: ${(hookErr as Error).message}\n`,
     );
   }
 

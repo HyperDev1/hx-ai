@@ -1,5 +1,5 @@
 /**
- * GSD bootstrappers for .gitignore and PREFERENCES.md
+ * HX bootstrappers for .gitignore and PREFERENCES.md
  *
  * Ensures baseline .gitignore exists with universally-correct patterns.
  * Creates an empty PREFERENCES.md template if it doesn't exist.
@@ -14,7 +14,7 @@ import { hxRoot } from "./paths.js";
 import { GIT_NO_PROMPT_ENV } from "./git-constants.js";
 
 /**
- * GSD runtime patterns for git index cleanup.
+ * HX runtime patterns for git index cleanup.
  * With external state (symlink), these are a no-op in most cases,
  * but retained for backwards compatibility during migration.
  */
@@ -251,7 +251,7 @@ See \`~/.hx/agent/extensions/hx/docs/preferences-reference.md\` for full field d
 
 ## Fields
 
-- \`always_use_skills\`: Skills that must be available during all GSD operations
+- \`always_use_skills\`: Skills that must be available during all HX operations
 - \`prefer_skills\`: Skills to prioritize when multiple options exist
 - \`avoid_skills\`: Skills to minimize or avoid (with lower priority than prefer)
 - \`skill_rules\`: Context-specific rules (e.g., "use tool X for Y type of work")

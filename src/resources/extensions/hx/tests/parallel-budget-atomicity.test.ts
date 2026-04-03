@@ -41,7 +41,7 @@ import type { GSDPreferences } from "../preferences.ts";
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function makeTmpBase(): string {
-  const base = join(tmpdir(), `gsd-budget-test-${randomUUID()}`);
+  const base = join(tmpdir(), `hx-budget-test-${randomUUID()}`);
   mkdirSync(join(base, ".hx"), { recursive: true });
   return base;
 }

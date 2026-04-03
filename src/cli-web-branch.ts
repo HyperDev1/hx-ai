@@ -198,7 +198,7 @@ export async function runWebCliBranch(
   flags: CliFlags,
   deps: RunWebCliBranchDeps = {},
 ): Promise<RunWebCliBranchResult> {
-  // Handle `gsd web stop [path|--all]` subcommand
+  // Handle `hx web stop [path|--all]` subcommand
   if (flags.messages[0] === 'web' && flags.messages[1] === 'stop') {
     const stderr = deps.stderr ?? process.stderr
     const stopArg = flags.messages[2]
@@ -216,8 +216,8 @@ export async function runWebCliBranch(
     }
   }
 
-  // `gsd web [start] [path]` is an alias for `gsd --web [path]`
-  // Matches: `gsd web`, `gsd web start`, `gsd web start <path>`, `gsd web <path>`
+  // `hx web [start] [path]` is an alias for `hx --web [path]`
+  // Matches: `hx web`, `hx web start`, `hx web start <path>`, `hx web <path>`
   const isWebSubcommand = flags.messages[0] === 'web' && flags.messages[1] !== 'stop'
   if (!flags.web && !isWebSubcommand) {
     return { handled: false }
@@ -227,9 +227,9 @@ export async function runWebCliBranch(
   const defaultCwd = (deps.cwd ?? (() => process.cwd()))()
 
   // Resolve project path from multiple forms:
-  //   gsd --web <path>           → flags.webPath
-  //   gsd web start <path>       → messages[2]
-  //   gsd web <path>             → messages[1] (when not "start")
+  //   hx --web <path>           → flags.webPath
+  //   hx web start <path>       → messages[2]
+  //   hx web <path>             → messages[1] (when not "start")
   let webPath = flags.webPath
   if (!webPath && isWebSubcommand) {
     if (flags.messages[1] === 'start') {

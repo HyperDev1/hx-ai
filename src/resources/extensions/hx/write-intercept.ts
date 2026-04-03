@@ -1,4 +1,4 @@
-// GSD Extension — Write Intercept for Agent State File Blocks
+// HX Extension — Write Intercept for Agent State File Blocks
 // Detects agent attempts to write authoritative state files and returns
 // an error directing the agent to use the engine tool API instead.
 
@@ -82,9 +82,9 @@ function matchesBlockedPattern(path: string): boolean {
  * Directs the agent to use engine tool calls instead.
  */
 export const BLOCKED_WRITE_ERROR = `Direct writes to .hx/STATE.md are blocked. Use engine tool calls instead:
-- To complete a task: call gsd_complete_task(milestone_id, slice_id, task_id, summary)
-- To complete a slice: call gsd_complete_slice(milestone_id, slice_id, summary, uat_result)
-- To save a decision: call gsd_save_decision(scope, decision, choice, rationale)
-- To start a task: call gsd_start_task(milestone_id, slice_id, task_id)
-- To record verification: call gsd_record_verification(milestone_id, slice_id, task_id, evidence)
-- To report a blocker: call gsd_report_blocker(milestone_id, slice_id, task_id, description)`;
+- To complete a task: call hx_complete_task(milestone_id, slice_id, task_id, summary)
+- To complete a slice: call hx_complete_slice(milestone_id, slice_id, summary, uat_result)
+- To save a decision: call hx_save_decision(scope, decision, choice, rationale)
+- To start a task: call hx_start_task(milestone_id, slice_id, task_id)
+- To record verification: call hx_record_verification(milestone_id, slice_id, task_id, evidence)
+- To report a blocker: call hx_report_blocker(milestone_id, slice_id, task_id, description)`;

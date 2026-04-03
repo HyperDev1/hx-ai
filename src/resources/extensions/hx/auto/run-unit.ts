@@ -104,7 +104,7 @@ export async function runUnit(
   debugLog("runUnit", { phase: "send-message", unitType, unitId });
 
   pi.sendMessage(
-    { customType: "gsd-auto", content: prompt, display: s.verbose },
+    { customType: "hx-auto", content: prompt, display: s.verbose },
     { triggerTurn: true },
   );
 

@@ -8,7 +8,7 @@ import {
 	highlightCode as nativeHighlightCode,
 	supportsLanguage,
 	type HighlightColors,
-} from "@gsd/native";
+} from "@hyperlab/hx-native";
 import { getCustomThemesDir } from "../../../config.js";
 import { builtinThemes } from "./themes.js";
 

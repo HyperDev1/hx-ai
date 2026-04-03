@@ -24,7 +24,7 @@ import { parseContextDependsOn } from '../../files.ts';
 // ─── Fixture Helpers ───────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-reorder-e2e-'));
+  const base = mkdtempSync(join(tmpdir(), 'hx-reorder-e2e-'));
   mkdirSync(join(base, '.hx', 'milestones'), { recursive: true });
   return base;
 }
@@ -299,7 +299,7 @@ test('E2E: DB-backed path respects queue order (#2556)', async () => {
     const base = createFixtureBase();
     try {
       const { openDatabase, closeDatabase, insertMilestone, isDbAvailable } = await import('../../hx-db.ts');
-      const dbPath = join(base, '.hx', 'gsd.db');
+      const dbPath = join(base, '.hx', 'hx.db');
 
       // Create milestone directories (required for findMilestoneIds)
       writeMilestoneDir(base, 'M006');

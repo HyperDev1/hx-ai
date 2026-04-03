@@ -5,7 +5,7 @@
  * Responses and events are emitted as JSON lines on stdout.
  */
 
-import type { AgentMessage, ThinkingLevel } from "@gsd/pi-agent-core";
+import type { AgentMessage, ThinkingLevel } from "@hyperlab/hx-agent-core";
 import type { ImageContent, Model } from "@hyperlab/hx-ai";
 import type { SessionStats } from "../../core/agent-session.js";
 import type { BashResult } from "../../core/bash-executor.js";

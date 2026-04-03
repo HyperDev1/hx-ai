@@ -78,7 +78,7 @@ describe("DevWorkflowEngine", () => {
     const engine = new DevWorkflowEngine();
 
     // Create a minimal temp .hx structure for deriveState
-    const tempDir = mkdtempSync(join(tmpdir(), "gsd-engine-test-"));
+    const tempDir = mkdtempSync(join(tmpdir(), "hx-engine-test-"));
     mkdirSync(join(tempDir, ".hx", "milestones"), { recursive: true });
 
     t.after(() => rmSync(tempDir, { recursive: true, force: true }));
@@ -171,7 +171,7 @@ describe("DevWorkflowEngine", () => {
     assert.ok("currentPhase" in meta, "should have currentPhase");
     assert.ok("progressSummary" in meta, "should have progressSummary");
     assert.ok("stepCount" in meta, "should have stepCount");
-    assert.equal(meta.engineLabel, "GSD Dev");
+    assert.equal(meta.engineLabel, "HX Dev");
   });
 });
 

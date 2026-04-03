@@ -19,7 +19,7 @@ function makeMockPi() {
 }
 
 function makeTmpBase(): string {
-  const base = join(tmpdir(), `gsd-journal-tool-test-${randomUUID()}`);
+  const base = join(tmpdir(), `hx-journal-tool-test-${randomUUID()}`);
   mkdirSync(join(base, ".hx"), { recursive: true });
   return base;
 }
@@ -136,7 +136,7 @@ test("gsd_journal_query handles errors gracefully", async () => {
   // queryJournal returns [] for missing journal dirs (never throws), so empty
   // result is the expected behavior. This confirms the tool doesn't crash and
   // returns the "no entries" message when there's no journal data.
-  const base = join(tmpdir(), `gsd-journal-tool-test-${randomUUID()}`);
+  const base = join(tmpdir(), `hx-journal-tool-test-${randomUUID()}`);
   mkdirSync(base, { recursive: true }); // dir must exist for process.chdir
   try {
     const result = await executeToolInDir(tool, {}, base);

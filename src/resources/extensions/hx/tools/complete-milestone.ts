@@ -1,5 +1,5 @@
 /**
- * complete-milestone handler — the core operation behind gsd_complete_milestone.
+ * complete-milestone handler — the core operation behind hx_complete_milestone.
  *
  * Validates all slices are complete, updates milestone status in DB,
  * renders MILESTONE-SUMMARY.md to disk, stores rendered markdown in DB
@@ -218,7 +218,7 @@ export async function handleCompleteMilestone(
     });
   } catch (hookErr) {
     process.stderr.write(
-      `gsd: complete-milestone post-mutation hook warning: ${(hookErr as Error).message}\n`,
+      `hx: complete-milestone post-mutation hook warning: ${(hookErr as Error).message}\n`,
     );
   }
 

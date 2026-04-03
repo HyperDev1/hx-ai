@@ -21,7 +21,7 @@ describe("rewrite-docs circuit breaker persistence (#2203)", () => {
   let tempBase: string;
 
   beforeEach(() => {
-    tempBase = mkdtempSync(join(tmpdir(), "gsd-rewrite-test-"));
+    tempBase = mkdtempSync(join(tmpdir(), "hx-rewrite-test-"));
     // Create .hx/ directory so gsdRoot resolves to it
     mkdirSync(join(tempBase, ".hx", "runtime"), { recursive: true });
   });

@@ -1,5 +1,5 @@
 /**
- * Type definitions, constants, and configuration shapes for GSD preferences.
+ * Type definitions, constants, and configuration shapes for HX preferences.
  *
  * All interfaces, type aliases, and static lookup tables live here so that
  * both the validation and runtime modules can import them without pulling
@@ -245,7 +245,7 @@ export interface GSDPreferences {
   reactive_execution?: ReactiveExecutionConfig;
   /** Parallel quality gate evaluation during slice planning. Disabled by default. */
   gate_evaluation?: GateEvaluationConfig;
-  /** GitHub sync configuration. Opt-in: syncs GSD events to GitHub Issues, Milestones, and PRs. */
+  /** GitHub sync configuration. Opt-in: syncs HX events to GitHub Issues, Milestones, and PRs. */
   github?: GitHubSyncConfig;
   /** OpenAI service tier preference. "priority" = 2x cost, faster. "flex" = 0.5x cost, slower. Only affects gpt-5.4 models. */
   service_tier?: "priority" | "flex";
@@ -254,7 +254,7 @@ export interface GSDPreferences {
   /** Opt-in: show per-prompt and cumulative session token cost in the footer. Default: false. */
   show_token_cost?: boolean;
   /**
-   * Response language preference. Controls which language GSD uses when communicating with the user.
+   * Response language preference. Controls which language HX uses when communicating with the user.
    * Code, technical terms, commit messages, and artifact structure always remain in English.
    * Only conversational text (narration, explanations, questions) switches to the chosen language.
    * Default: "en" (English).

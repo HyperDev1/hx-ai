@@ -36,10 +36,10 @@ test("/hx description includes discuss", () => {
   const pi = createMockPi();
   registerGSDCommand(pi as any);
 
-  const gsd = pi.commands.get("gsd");
-  assert.ok(gsd, "registerGSDCommand should register /hx");
+  const hx = pi.commands.get("hx");
+  assert.ok(hxCmd, "registerGSDCommand should register /hx");
   assert.ok(
-    gsd.description.includes("discuss"),
+    hxCmd.description.includes("discuss"),
     "description should include discuss",
   );
 });
@@ -48,8 +48,8 @@ test("/hx next completions include --debug", () => {
   const pi = createMockPi();
   registerGSDCommand(pi as any);
 
-  const gsd = pi.commands.get("gsd");
-  const completions = gsd.getArgumentCompletions("next ");
+  const hx = pi.commands.get("hx");
+  const completions = hxCmd.getArgumentCompletions("next ");
   const debug = completions.find((c: any) => c.value === "next --debug");
   assert.ok(debug, "next --debug should appear in completions");
 });
@@ -58,8 +58,8 @@ test("/hx widget completions include full|small|min|off", () => {
   const pi = createMockPi();
   registerGSDCommand(pi as any);
 
-  const gsd = pi.commands.get("gsd");
-  const completions = gsd.getArgumentCompletions("widget ");
+  const hx = pi.commands.get("hx");
+  const completions = hx.getArgumentCompletions("widget ");
   const values = completions.map((c: any) => c.value);
   for (const expected of ["widget full", "widget small", "widget min", "widget off"]) {
     assert.ok(values.includes(expected), `missing completion: ${expected}`);

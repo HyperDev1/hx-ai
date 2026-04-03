@@ -22,7 +22,7 @@ import type {
 	AgentState,
 	AgentTool,
 	ThinkingLevel,
-} from "@gsd/pi-agent-core";
+} from "@hyperlab/hx-agent-core";
 import type { AssistantMessage, ImageContent, Message, Model, TextContent } from "@hyperlab/hx-ai";
 import { modelsAreEqual, resetApiProviders, supportsXhigh } from "@hyperlab/hx-ai";
 import { Type } from "@sinclair/typebox";

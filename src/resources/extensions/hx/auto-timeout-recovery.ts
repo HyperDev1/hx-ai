@@ -113,7 +113,7 @@ export async function recoverTimedOutUnit(
 
       pi.sendMessage(
         {
-          customType: "gsd-auto-timeout-recovery",
+          customType: "hx-auto-timeout-recovery",
           display: verbose,
           content: steeringLines.join("\n"),
         },
@@ -217,7 +217,7 @@ export async function recoverTimedOutUnit(
 
     pi.sendMessage(
       {
-        customType: "gsd-auto-timeout-recovery",
+        customType: "hx-auto-timeout-recovery",
         display: verbose,
         content: steeringLines.join("\n"),
       },

@@ -1,5 +1,5 @@
 /**
- * GSD Config — Tool API key management.
+ * HX Config — Tool API key management.
  *
  * Contains: TOOL_KEYS, loadToolApiKeys, getConfigAuthStorage, handleConfig
  */
@@ -59,7 +59,7 @@ export async function handleConfig(ctx: ExtensionCommandContext): Promise<void> 
   const auth = getConfigAuthStorage();
 
   // Show current status
-  const statusLines = ["GSD Tool Configuration\n"];
+  const statusLines = ["HX Tool Configuration\n"];
   for (const tool of TOOL_KEYS) {
     const hasKey = !!process.env[tool.env] || !!getStoredToolKey(auth, tool.id);
     statusLines.push(`  ${hasKey ? "\u2713" : "\u2717"} ${tool.label}${hasKey ? "" : ` \u2014 get key at ${tool.hint}`}`);

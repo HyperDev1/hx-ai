@@ -3,16 +3,16 @@ title: "Configuration"
 description: "Preferences, model selection, MCP servers, hooks, and all settings."
 ---
 
-GSD preferences live in `~/.gsd/PREFERENCES.md` (global) or `.gsd/PREFERENCES.md` (project-local). Manage interactively with `/gsd prefs`.
+HX preferences live in `~/.hx/PREFERENCES.md` (global) or `.hx/PREFERENCES.md` (project-local). Manage interactively with `/hx prefs`.
 
 ## Preferences commands
 
 | Command | Description |
 |---------|-------------|
-| `/gsd prefs` | Open the global preferences wizard |
-| `/gsd prefs global` | Global preferences wizard |
-| `/gsd prefs project` | Project preferences wizard |
-| `/gsd prefs status` | Show current files, merged values, and skill status |
+| `/hx prefs` | Open the global preferences wizard |
+| `/hx prefs global` | Global preferences wizard |
+| `/hx prefs project` | Project preferences wizard |
+| `/hx prefs status` | Show current files, merged values, and skill status |
 
 ## Preferences file format
 
@@ -40,8 +40,8 @@ token_profile: balanced
 
 | Scope | Path | Applies to |
 |-------|------|-----------|
-| Global | `~/.gsd/PREFERENCES.md` | All projects |
-| Project | `.gsd/PREFERENCES.md` | Current project only |
+| Global | `~/.hx/PREFERENCES.md` | All projects |
+| Project | `.hx/PREFERENCES.md` | Current project only |
 
 **Merge behavior:**
 - **Scalar fields** — project wins if defined
@@ -50,7 +50,7 @@ token_profile: balanced
 
 ## Global API keys
 
-Tool API keys are stored globally in `~/.gsd/agent/auth.json`. Set them once with `/gsd config`.
+Tool API keys are stored globally in `~/.hx/agent/auth.json`. Set them once with `/hx config`.
 
 | Tool | Environment variable | Purpose |
 |------|---------------------|---------|
@@ -62,10 +62,10 @@ Anthropic models have built-in web search — no extra keys needed.
 
 ## MCP servers
 
-GSD connects to external MCP servers configured in project files:
+HX connects to external MCP servers configured in project files:
 
 - `.mcp.json` — repo-shared config
-- `.gsd/mcp.json` — local-only config
+- `.hx/mcp.json` — local-only config
 
 <Tabs>
   <Tab title="stdio server">
@@ -97,7 +97,7 @@ GSD connects to external MCP servers configured in project files:
   </Tab>
 </Tabs>
 
-Verify from a GSD session: `mcp_servers` → `mcp_discover` → `mcp_call`.
+Verify from a HX session: `mcp_servers` → `mcp_discover` → `mcp_call`.
 
 ## Models
 
@@ -118,7 +118,7 @@ models:
 
 **Phases:** `research`, `planning`, `execution`, `execution_simple`, `completion`, `subagent`
 
-When a model fails to switch, GSD automatically tries the next model in the `fallbacks` list.
+When a model fails to switch, HX automatically tries the next model in the `fallbacks` list.
 
 For custom providers (Ollama, vLLM, LM Studio), see [custom models](/guides/custom-models).
 
@@ -236,7 +236,7 @@ See [parallel orchestration](/guides/parallel-orchestration).
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `GSD_HOME` | `~/.gsd` | Global GSD directory |
+| `GSD_HOME` | `~/.hx` | Global HX directory |
 | `GSD_PROJECT_ID` | (auto-hash) | Override project identity hash |
 | `GSD_STATE_DIR` | `$GSD_HOME` | Per-project state root |
 | `GSD_CODING_AGENT_DIR` | `$GSD_HOME/agent` | Agent directory |

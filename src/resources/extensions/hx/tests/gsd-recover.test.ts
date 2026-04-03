@@ -1,6 +1,6 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-// gsd-recover.test.ts — Tests for the `gsd recover` recovery logic.
+// hx-recover.test.ts — Tests for the `/hx recover` recovery logic.
 // Verifies: populate DB → clear hierarchy → recover from markdown → state matches.
 
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
@@ -133,7 +133,7 @@ milestone: M001
 Setup is complete.
 `;
 
-// ─── Recovery helpers (mirrors gsd recover handler logic) ─────────────────
+// ─── Recovery helpers (mirrors hx recover handler logic) ─────────────────
 
 function clearHierarchyTables(): void {
   const db = _getAdapter()!;

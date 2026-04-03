@@ -1,5 +1,5 @@
 /**
- * GSD Prompt Loader
+ * HX Prompt Loader
  *
  * Reads .md prompt templates from the prompts/ directory and substitutes
  * {{variable}} placeholders with provided values.
@@ -8,7 +8,7 @@
  * They use {{variableName}} syntax for substitution.
  *
  * All templates are eagerly loaded into cache at module init via warmCache().
- * This prevents a running session from being invalidated when another `gsd`
+ * This prevents a running session from being invalidated when another `hx`
  * launch overwrites ~/.hx/agent/ with newer templates via initResources().
  * Without eager caching, the in-memory extension code (which knows variable
  * set A) can read a newer template from disk (which expects variable set B),
@@ -24,7 +24,7 @@ import { fileURLToPath } from "node:url";
 import { homedir } from "node:os";
 
 /**
- * Resolve the GSD extension directory.
+ * Resolve the HX extension directory.
  *
  * `import.meta.url` resolves to whichever copy of this module is executing.
  * On Windows (npm global install via MSYS2 / Git Bash) this can resolve to

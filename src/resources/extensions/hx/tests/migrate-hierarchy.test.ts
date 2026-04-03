@@ -24,7 +24,7 @@ import assert from 'node:assert/strict';
 // ─── Fixture Helpers ───────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-migrate-hier-'));
+  const base = mkdtempSync(join(tmpdir(), 'hx-migrate-hier-'));
   mkdirSync(join(base, '.hx', 'milestones'), { recursive: true });
   return base;
 }

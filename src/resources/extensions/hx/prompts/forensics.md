@@ -1,4 +1,4 @@
-You are debugging GSD itself. The user is donating their tokens to help find bugs in GSD's source code. Your job is to trace from symptom to root cause in the actual source and produce a filing-ready GitHub issue with specific file:line references and a concrete fix suggestion.
+You are debugging HX itself. The user is donating their tokens to help find bugs in HX's source code. Your job is to trace from symptom to root cause in the actual source and produce a filing-ready GitHub issue with specific file:line references and a concrete fix suggestion.
 
 ## User's Problem
 
@@ -8,9 +8,9 @@ You are debugging GSD itself. The user is donating their tokens to help find bug
 
 {{forensicData}}
 
-## GSD Source Location
+## HX Source Location
 
-GSD extension source code is at: `{{gsdSourceDir}}`
+HX extension source code is at: `{{gsdSourceDir}}`
 
 ### Source Map by Domain
 
@@ -28,7 +28,7 @@ GSD extension source code is at: `{{gsdSourceDir}}`
 ### Runtime Path Reference
 
 ```
-.gsd/
+.hx/
 ├── PROJECT.md, DECISIONS.md, QUEUE.md, STATE.md, REQUIREMENTS.md, OVERRIDES.md, KNOWLEDGE.md, RUNTIME.md
 ├── auto.lock                    — crash lock (JSON: pid, unitType, unitId, sessionFile)
 ├── metrics.json                 — token/cost ledger (units array with cost, tokens, duration)
@@ -48,7 +48,7 @@ GSD extension source code is at: `{{gsdSourceDir}}`
 │   └── slices/{SID}/            — slice artifacts
 │       ├── {SID}-PLAN.md, {SID}-RESEARCH.md, {SID}-UAT.md, {SID}-SUMMARY.md
 │       └── tasks/{TID}-PLAN.md, {TID}-SUMMARY.md
-└── worktrees/{milestoneId}/     — per-milestone worktree with replicated .gsd/
+└── worktrees/{milestoneId}/     — per-milestone worktree with replicated .hx/
 ```
 
 ### Activity Log Format
@@ -62,7 +62,7 @@ GSD extension source code is at: `{{gsdSourceDir}}`
 - `usage` field on assistant messages: `input`, `output`, `cacheRead`, `cacheWrite`, `totalTokens`, `cost`
 - **To trace a failure**: find the last activity log, search for `isError: true` tool results, then read the agent's reasoning text preceding that error
 
-### Journal Format (`.gsd/journal/`)
+### Journal Format (`.hx/journal/`)
 
 The journal is a structured event log for auto-mode iterations. Each daily file contains JSONL entries:
 
@@ -112,7 +112,7 @@ A unit dispatched more than once (`type/id` appears multiple times) indicates a 
 
 4. **Form hypotheses** about which module and code path is responsible. Use the source map to identify candidate files.
 
-5. **Read the actual GSD source code** at `{{gsdSourceDir}}` to confirm or deny each hypothesis. Do not guess what code does — read it.
+5. **Read the actual HX source code** at `{{gsdSourceDir}}` to confirm or deny each hypothesis. Do not guess what code does — read it.
 
 6. **Trace the code path** from the entry point (usually `auto-loop.ts` dispatch or `auto-dispatch.ts`) through to the failure point. Follow function calls across files.
 
@@ -129,15 +129,15 @@ A unit dispatched more than once (`type/id` appears multiple times) indicates a 
 
 Explain your findings:
 - **What happened** — the failure sequence reconstructed from activity logs and anomalies
-- **Why it happened** — root cause traced to specific code in GSD source, with `file:line` references
+- **Why it happened** — root cause traced to specific code in HX source, with `file:line` references
 - **Code snippet** — the problematic code and what it should do instead
 - **Recovery** — what the user can do right now to get unstuck
 
 {{dedupSection}}
 
-Then **offer GitHub issue creation**: "Would you like me to create a GitHub issue for this on gsd-build/gsd-2?"
+Then **offer GitHub issue creation**: "Would you like me to create a GitHub issue for this on hx-build/hx-2?"
 
-**CRITICAL: The `github_issues` tool ONLY targets the current user's repository — it has no `repo` parameter. You MUST use `gh issue create --repo gsd-build/gsd-2` via the `bash` tool to file on the correct repo. Do NOT use the `github_issues` tool for this.**
+**CRITICAL: The `github_issues` tool ONLY targets the current user's repository — it has no `repo` parameter. You MUST use `gh issue create --repo hx-build/hx-2` via the `bash` tool to file on the correct repo. Do NOT use the `github_issues` tool for this.**
 
 If yes, create using the `bash` tool:
 
@@ -145,18 +145,18 @@ If yes, create using the `bash` tool:
 # Step 1: Write issue body to a temp file to avoid escaping/truncation issues.
 # Using --body-file bypasses shell quoting entirely — backticks, quotes, and
 # content containing "EOF" all render correctly. (#2465)
-cat > /tmp/gsd-forensic-issue.md << 'GSD_ISSUE_BODY'
+cat > /tmp/hx-forensic-issue.md << 'GSD_ISSUE_BODY'
 ## Problem
 [1-2 sentence summary]
 
 ## Root Cause
-[Specific file:line in GSD source, with code snippet showing the bug]
+[Specific file:line in HX source, with code snippet showing the bug]
 
 ## Expected Behavior
 [What the code should do instead — concrete fix suggestion]
 
 ## Environment
-- GSD version: [from report]
+- HX version: [from report]
 - Model: [from report]
 - Unit: [type/id that failed]
 
@@ -167,19 +167,19 @@ cat > /tmp/gsd-forensic-issue.md << 'GSD_ISSUE_BODY'
 [Key anomalies, error traces, relevant tool call sequences from the report]
 
 ---
-*Auto-generated by `/gsd forensics`*
+*Auto-generated by `/hx forensics`*
 GSD_ISSUE_BODY
 
-ISSUE_URL=$(gh issue create --repo gsd-build/gsd-2 \
+ISSUE_URL=$(gh issue create --repo hx-build/hx-2 \
   --title "..." \
   --label "auto-generated" \
-  --body-file /tmp/gsd-forensic-issue.md)
-rm -f /tmp/gsd-forensic-issue.md
+  --body-file /tmp/hx-forensic-issue.md)
+rm -f /tmp/hx-forensic-issue.md
 
 # Step 2: Set issue type via GraphQL (gh issue create has no --type flag)
 ISSUE_NUM=$(echo "$ISSUE_URL" | grep -oE '[0-9]+$')
-ISSUE_ID=$(gh api graphql -f query='{ repository(owner:"gsd-build",name:"gsd-2") { issue(number:'"$ISSUE_NUM"') { id } } }' --jq '.data.repository.issue.id')
-TYPE_ID=$(gh api graphql -f query='{ repository(owner:"gsd-build",name:"gsd-2") { issueTypes(first:20) { nodes { id name } } } }' --jq '.data.repository.issueTypes.nodes[] | select(.name=="Bug") | .id')
+ISSUE_ID=$(gh api graphql -f query='{ repository(owner:"hx-build",name:"hx-2") { issue(number:'"$ISSUE_NUM"') { id } } }' --jq '.data.repository.issue.id')
+TYPE_ID=$(gh api graphql -f query='{ repository(owner:"hx-build",name:"hx-2") { issueTypes(first:20) { nodes { id name } } } }' --jq '.data.repository.issueTypes.nodes[] | select(.name=="Bug") | .id')
 gh api graphql -f query='mutation { updateIssue(input:{id:"'"$ISSUE_ID"'",issueTypeId:"'"$TYPE_ID"'"}) { issue { number } } }'
 ```
 
@@ -189,7 +189,7 @@ Before creating the issue, you MUST:
 - Replace all absolute paths with relative paths
 - Remove any API keys, tokens, or credentials
 - Remove any environment variable values
-- Do not include user's project code — only GSD structural information (tool names, file names, error messages)
+- Do not include user's project code — only HX structural information (tool names, file names, error messages)
 
 ## Report Saved
 

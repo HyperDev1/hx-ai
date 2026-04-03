@@ -1,24 +1,24 @@
 <overview>
-GSD-specific skill ecosystem details: directory conventions, discovery mechanics, telemetry, and health monitoring. Read this reference when creating or auditing skills within GSD.
+HX-specific skill ecosystem details: directory conventions, discovery mechanics, telemetry, and health monitoring. Read this reference when creating or auditing skills within HX.
 </overview>
 
 <skill_directories>
-GSD supports two skill directories, checked in order:
+HX supports two skill directories, checked in order:
 
-**User-scope (global):** `~/.gsd/agent/skills/`
-- Available in every GSD session regardless of working directory
+**User-scope (global):** `~/.hx/agent/skills/`
+- Available in every HX session regardless of working directory
 - Installed by default or by the user
 
 **Project-scope (local):** `.pi/agent/skills/`
-- Available only when GSD runs inside the project directory
-- The project-local directory uses `.pi` (inherited from the pi base), **not** `.gsd`
+- Available only when HX runs inside the project directory
+- The project-local directory uses `.pi` (inherited from the pi base), **not** `.hx`
 - Ideal for project-specific workflows, deploy scripts, or conventions
 
 Skills in both directories follow the same SKILL.md format and router pattern conventions.
 </skill_directories>
 
 <skill_discovery>
-GSD auto-discovers skills at session start and during auto-mode:
+HX auto-discovers skills at session start and during auto-mode:
 
 **Session start:** All skills in both directories are enumerated and their names + descriptions are injected into the system prompt as `<available_skills>`.
 
@@ -42,7 +42,7 @@ Skill metadata has validation constraints:
 - **Staleness detection:** Skills unused for 60+ days are flagged as stale
 - **Pass/fail rates:** Derived from unit completion status when a skill is active
 
-Telemetry data is stored in `~/.gsd/metrics.json` alongside other GSD metrics.
+Telemetry data is stored in `~/.hx/metrics.json` alongside other HX metrics.
 </skill_telemetry>
 
 <skill_health>

@@ -227,7 +227,7 @@ export async function handleReplanSlice(
       });
     } catch (hookErr) {
       process.stderr.write(
-        `gsd: replan-slice post-mutation hook warning: ${(hookErr as Error).message}\n`,
+        `hx: replan-slice post-mutation hook warning: ${(hookErr as Error).message}\n`,
       );
     }
 

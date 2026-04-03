@@ -90,7 +90,7 @@ describe("parallel-worker-lock-contention (#2184)", () => {
 
   // ─── Bug 1c: Two parallel workers acquire independent locks ──────────────
   test("Bug 1c: parallel workers use per-milestone lock files, not shared auto.lock", () => {
-    const base = mkdtempSync(join(tmpdir(), "gsd-parallel-lock-"));
+    const base = mkdtempSync(join(tmpdir(), "hx-parallel-lock-"));
     mkdirSync(join(base, ".hx"), { recursive: true });
 
     try {
@@ -127,7 +127,7 @@ describe("parallel-worker-lock-contention (#2184)", () => {
 
   // ─── Bug 1d: crash-recovery uses per-milestone lock file ─────────────────
   test("Bug 1d: crash-recovery writeLock/readCrashLock uses per-milestone lock in parallel mode", () => {
-    const base = mkdtempSync(join(tmpdir(), "gsd-parallel-crash-"));
+    const base = mkdtempSync(join(tmpdir(), "hx-parallel-crash-"));
     mkdirSync(join(base, ".hx"), { recursive: true });
 
     try {
@@ -155,8 +155,8 @@ describe("parallel-worker-lock-contention (#2184)", () => {
 
   // ─── Bug 3: syncProjectRootToWorktree skips same-path symlinks ───────────
   test("Bug 3: syncProjectRootToWorktree skips when .hx resolves to same path (symlink)", () => {
-    const base = mkdtempSync(join(tmpdir(), "gsd-symlink-sync-"));
-    const externalGsd = join(base, "external-gsd");
+    const base = mkdtempSync(join(tmpdir(), "hx-symlink-sync-"));
+    const externalGsd = join(base, "external-hx");
     const projectRoot = join(base, "project");
     const worktreePath = join(base, "worktree");
 
@@ -200,7 +200,7 @@ describe("parallel-worker-lock-contention (#2184)", () => {
 
   // ─── Bug 3b: sync still works when paths are different ───────────────────
   test("Bug 3b: syncProjectRootToWorktree copies when .hx paths are different", () => {
-    const base = mkdtempSync(join(tmpdir(), "gsd-diff-sync-"));
+    const base = mkdtempSync(join(tmpdir(), "hx-diff-sync-"));
     const projectRoot = join(base, "project");
     const worktreePath = join(base, "worktree");
 

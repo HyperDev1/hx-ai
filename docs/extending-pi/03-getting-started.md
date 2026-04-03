@@ -3,7 +3,7 @@
 
 ### Minimal Extension
 
-Create `~/.gsd/agent/extensions/my-extension.ts`:
+Create `~/.hx/agent/extensions/my-extension.ts`:
 
 ```typescript
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
@@ -27,7 +27,7 @@ pi
 
 ### Hot Reload
 
-Extensions in auto-discovered locations (`~/.gsd/agent/extensions/` or `.gsd/extensions/`) can be hot-reloaded:
+Extensions in auto-discovered locations (`~/.hx/agent/extensions/` or `.hx/extensions/`) can be hot-reloaded:
 
 ```
 /reload

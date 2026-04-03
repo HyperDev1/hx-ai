@@ -87,7 +87,7 @@ const pkgDir = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'pkg')
 // MUST be set before any dynamic import of pi SDK fires — this is what config.js
 // reads to determine APP_NAME and CONFIG_DIR_NAME
 process.env.PI_PACKAGE_DIR = pkgDir
-process.env.PI_SKIP_VERSION_CHECK = '1'  // GSD runs its own update check in cli.ts — suppress pi's
+process.env.PI_SKIP_VERSION_CHECK = '1'  // HX runs its own update check in cli.ts — suppress pi's
 process.title = 'hx'
 
 // Print branded banner on first launch (before ~/.hx/ exists).
@@ -111,7 +111,7 @@ if (!existsSync(appRoot)) {
 process.env.HX_CODING_AGENT_DIR = agentDir
 
 // RTK environment — make ~/.hx/agent/bin visible to all child-process paths,
-// not just the bash tool, and force-disable RTK telemetry for GSD-managed use.
+// not just the bash tool, and force-disable RTK telemetry for HX-managed use.
 applyRtkProcessEnv(process.env)
 
 // NODE_PATH — make hx's own node_modules available to extensions loaded via jiti.
@@ -161,7 +161,7 @@ const discoveredExtensionPaths = discoverExtensionEntryPaths(bundledExtDir)
 process.env.HX_BUNDLED_EXTENSION_PATHS = serializeBundledExtensionPaths(discoveredExtensionPaths)
 
 // Respect HTTP_PROXY / HTTPS_PROXY / NO_PROXY env vars for all outbound requests.
-// pi-coding-agent's cli.ts sets this, but GSD bypasses that entry point — so we
+// pi-coding-agent's cli.ts sets this, but HX bypasses that entry point — so we
 // must set it here before any SDK clients are created.
 // Lazy-load undici (~200ms) only when proxy env vars are actually set.
 if (process.env.HTTP_PROXY || process.env.HTTPS_PROXY || process.env.http_proxy || process.env.https_proxy) {

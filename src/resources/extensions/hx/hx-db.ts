@@ -80,10 +80,10 @@ function loadProvider(): void {
 
   const nodeMajor = parseInt(process.versions.node.split(".")[0], 10);
   const versionHint = nodeMajor < 22
-    ? ` GSD requires Node >= 22.0.0 (current: v${process.versions.node}). Upgrade Node to fix this.`
+    ? ` HX requires Node >= 22.0.0 (current: v${process.versions.node}). Upgrade Node to fix this.`
     : "";
   process.stderr.write(
-    `gsd-db: No SQLite provider available (tried node:sqlite, better-sqlite3).${versionHint}\n`,
+    `hx-db: No SQLite provider available (tried node:sqlite, better-sqlite3).${versionHint}\n`,
   );
 }
 
@@ -1738,7 +1738,7 @@ export function copyWorktreeDb(srcDbPath: string, destDbPath: string): boolean {
     copyFileSync(srcDbPath, destDbPath);
     return true;
   } catch (err) {
-    process.stderr.write(`gsd-db: failed to copy DB to worktree: ${(err as Error).message}\n`);
+    process.stderr.write(`hx-db: failed to copy DB to worktree: ${(err as Error).message}\n`);
     return false;
   }
 }
@@ -1770,13 +1770,13 @@ export function reconcileWorktreeDb(
   // ATTACH DATABASE doesn't support parameterized paths in all providers,
   // so we use strict allowlist validation instead.
   if (/['";\x00]/.test(worktreeDbPath)) {
-    process.stderr.write("gsd-db: worktree DB reconciliation failed: path contains unsafe characters\n");
+    process.stderr.write("hx-db: worktree DB reconciliation failed: path contains unsafe characters\n");
     return zero;
   }
   if (!currentDb) {
     const opened = openDatabase(mainDbPath);
     if (!opened) {
-      process.stderr.write("gsd-db: worktree DB reconciliation failed: cannot open main DB\n");
+      process.stderr.write("hx-db: worktree DB reconciliation failed: cannot open main DB\n");
       return zero;
     }
   }
@@ -1910,7 +1910,7 @@ export function reconcileWorktreeDb(
       try { adapter.exec("DETACH DATABASE wt"); } catch { /* best effort */ }
     }
   } catch (err) {
-    process.stderr.write(`gsd-db: worktree DB reconciliation failed: ${(err as Error).message}\n`);
+    process.stderr.write(`hx-db: worktree DB reconciliation failed: ${(err as Error).message}\n`);
     return { ...zero, conflicts };
   }
 }

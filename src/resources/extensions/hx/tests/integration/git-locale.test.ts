@@ -20,7 +20,7 @@ function git(cwd: string, ...args: string[]): string {
 }
 
 function initTempRepo(): string {
-  const dir = mkdtempSync(join(tmpdir(), "gsd-locale-"));
+  const dir = mkdtempSync(join(tmpdir(), "hx-locale-"));
   git(dir, "init");
   git(dir, "config", "user.email", "test@test.com");
   git(dir, "config", "user.name", "Test");

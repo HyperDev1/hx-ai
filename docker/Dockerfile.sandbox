@@ -20,23 +20,23 @@ ARG HX_VERSION=latest
 RUN npm install -g @hyperlab/hx@${HX_VERSION}
 
 # Create non-root user for sandbox isolation
-RUN groupadd --gid 1000 gsd \
+RUN groupadd --gid 1000 hx \
     && useradd hx
 
-# Persistent GSD state directory
-RUN mkdir -p /home/hx/.gsd && chown -R gsd:gsd /home/hx/.gsd
+# Persistent HX state directory
+RUN mkdir -p /home/hx/.hx && chown -R hx:hx /home/hx/.hx
 
 # Workspace directory — synced from host via Docker sandbox
 WORKDIR /workspace
-RUN chown gsd:gsd /workspace
+RUN chown hx:hx /workspace
 
-# Entrypoint handles UID/GID remapping, bootstrap, and drops to gsd user
+# Entrypoint handles UID/GID remapping, bootstrap, and drops to hx user
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 COPY bootstrap.sh /usr/local/bin/bootstrap.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/bootstrap.sh
 
-# Expose default GSD web UI port
+# Expose default HX web UI port
 EXPOSE 3000
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-CMD ["gsd", "--help"]
+CMD ["hx", "--help"]

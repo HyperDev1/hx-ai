@@ -1,5 +1,5 @@
 /**
- * GSD Parallel Orchestrator — Core engine for parallel milestone orchestration.
+ * HX Parallel Orchestrator — Core engine for parallel milestone orchestration.
  *
  * Manages worker lifecycle, budget tracking, and coordination. Workers are
  * separate processes spawned via child_process, each running in its own git
@@ -519,7 +519,7 @@ function createMilestoneWorktree(basePath: string, milestoneId: string): string 
 
 /**
  * Spawn a worker process for a milestone.
- * The worker runs `gsd headless --json auto` in the milestone's worktree
+ * The worker runs `hx headless --json auto` in the milestone's worktree
  * with HX_MILESTONE_LOCK set to isolate state derivation.
  *
  * IMPORTANT: We use `headless --json auto` instead of `--print "/hx auto"`.
@@ -542,7 +542,7 @@ export function spawnWorker(
   if (!worker) return false;
   if (worker.process) return true; // already spawned
 
-  // Resolve the GSD CLI binary path
+  // Resolve the HX CLI binary path
   const binPath = resolveGsdBin();
   if (!binPath) return false;
 
@@ -678,7 +678,7 @@ export function spawnWorker(
 }
 
 /**
- * Resolve the GSD CLI binary path.
+ * Resolve the HX CLI binary path.
  * Uses HX_BIN_PATH env var (set by loader.ts) or falls back to
  * finding the binary relative to the current module.
  */
@@ -766,7 +766,7 @@ function processWorkerLine(basePath: string, milestoneId: string, line: string):
 
   // tool_execution_start can track current unit
   if (type === "extension_ui_request" && event.method === "notify") {
-    // GSD auto-mode sends notifications about current unit
+    // HX auto-mode sends notifications about current unit
     const worker = state.workers.get(milestoneId);
     if (worker) {
       writeSessionStatus(basePath, {

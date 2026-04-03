@@ -1,5 +1,5 @@
 /**
- * Pure GSD health widget logic.
+ * Pure HX health widget logic.
  *
  * Separates project-state detection and line rendering from the widget's
  * runtime integrations so the regressions can be tested directly.
@@ -38,11 +38,11 @@ function formatCost(n: number): string {
  */
 export function buildHealthLines(data: HealthWidgetData): string[] {
   if (data.projectState === "none") {
-    return ["  GSD  No project loaded — run /hx to start"];
+    return ["  HX  No project loaded — run /hx to start"];
   }
 
   if (data.projectState === "initialized") {
-    return ["  GSD  Project initialized — run /hx to continue setup"];
+    return ["  HX  Project initialized — run /hx to continue setup"];
   }
 
   const parts: string[] = [];

@@ -16,8 +16,8 @@ test("bundled extension paths use the platform delimiter by default", () => {
 
 test("bundled extension paths preserve Windows drive letters when semicolon-delimited", () => {
   const windowsPaths = [
-    String.raw`C:\Users\dev\.hx\agent\extensions\gsd\index.ts`,
-    String.raw`D:\work\gsd\extensions\browser-tools\index.ts`,
+    String.raw`C:\Users\dev\.hx\agent\extensions\hx\index.ts`,
+    String.raw`D:\work\hx\extensions\browser-tools\index.ts`,
   ];
   const encoded = serializeBundledExtensionPaths(windowsPaths, ";");
 

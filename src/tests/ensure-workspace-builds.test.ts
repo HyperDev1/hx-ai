@@ -11,7 +11,7 @@ const { newestSrcMtime } = require("../../scripts/ensure-workspace-builds.cjs");
 describe("newestSrcMtime", () => {
   let tmp: string;
 
-  beforeEach(() => { tmp = mkdtempSync(join(tmpdir(), "gsd-mtime-test-")); });
+  beforeEach(() => { tmp = mkdtempSync(join(tmpdir(), "hx-mtime-test-")); });
   afterEach(() => { rmSync(tmp, { recursive: true, force: true }); });
 
   it("returns 0 for a non-existent directory", () => {

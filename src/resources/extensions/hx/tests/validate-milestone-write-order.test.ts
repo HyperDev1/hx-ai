@@ -11,7 +11,7 @@ import { clearPathCache } from "../paths.js";
 import { clearParseCache } from "../files.js";
 
 function makeTmpBase(): string {
-  const base = join(tmpdir(), `gsd-val-handler-${randomUUID()}`);
+  const base = join(tmpdir(), `hx-val-handler-${randomUUID()}`);
   mkdirSync(join(base, ".hx", "milestones", "M001"), { recursive: true });
   return base;
 }
@@ -42,7 +42,7 @@ describe("handleValidateMilestone write ordering (#2725)", () => {
 
   it("writes DB row and disk file on success", async () => {
     base = makeTmpBase();
-    const dbPath = join(base, ".hx", "gsd.db");
+    const dbPath = join(base, ".hx", "hx.db");
     openDatabase(dbPath);
     insertMilestone({ id: "M001" });
 
@@ -68,7 +68,7 @@ describe("handleValidateMilestone write ordering (#2725)", () => {
 
   it("omits verification class section when no verification classes are supplied", async () => {
     base = makeTmpBase();
-    const dbPath = join(base, ".hx", "gsd.db");
+    const dbPath = join(base, ".hx", "hx.db");
     openDatabase(dbPath);
     insertMilestone({ id: "M001" });
 
@@ -85,7 +85,7 @@ describe("handleValidateMilestone write ordering (#2725)", () => {
 
   it("rolls back DB row when disk write fails", async () => {
     base = makeTmpBase();
-    const dbPath = join(base, ".hx", "gsd.db");
+    const dbPath = join(base, ".hx", "hx.db");
     openDatabase(dbPath);
     insertMilestone({ id: "M001" });
 

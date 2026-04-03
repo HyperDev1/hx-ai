@@ -40,7 +40,7 @@ test("docker/Dockerfile.sandbox installs git", () => {
 
 // ── docker-compose.yaml (minimal) ──
 
-test("docker/docker-compose.yaml exists and defines gsd service", () => {
+test("docker/docker-compose.yaml exists and defines hx service", () => {
   const content = readFile("docker/docker-compose.yaml");
   assert.match(content, /services:/);
   assert.match(content, /hx:/);

@@ -21,7 +21,7 @@ export function showHelp(ctx: ExtensionCommandContext): void {
     "  /hx stop           Stop auto-mode gracefully",
     "  /hx pause          Pause auto-mode (preserves state, /hx auto to resume)",
     "  /hx discuss        Start guided milestone/slice discussion",
-    "  /hx new-milestone  Create milestone from headless context (used by gsd headless)",
+    "  /hx new-milestone  Create milestone from headless context (used by hx headless)",
     "",
     "VISIBILITY",
     "  /hx status         Show progress dashboard  (Ctrl+Alt+G)",
@@ -63,7 +63,7 @@ export function showHelp(ctx: ExtensionCommandContext): void {
     "  /hx migrate        Migrate .planning/ (v1) to .hx/ (v2) format",
     "  /hx remote         Control remote auto-mode  [slack|discord|status|disconnect]",
     "  /hx inspect        Show SQLite DB diagnostics (schema, row counts, recent entries)",
-    "  /hx update         Update GSD to the latest version via npm",
+    "  /hx update         Update HX to the latest version via npm",
   ];
   ctx.ui.notify(lines.join("\n"), "info");
 }
@@ -73,7 +73,7 @@ export async function handleStatus(ctx: ExtensionCommandContext): Promise<void> 
   const state = await deriveState(basePath);
 
   if (state.registry.length === 0) {
-    ctx.ui.notify("No GSD milestones found. Run /hx to start.", "info");
+    ctx.ui.notify("No HX milestones found. Run /hx to start.", "info");
     return;
   }
 
@@ -131,7 +131,7 @@ export async function handleSetup(args: string, ctx: ExtensionCommandContext): P
   const globalConfigured = hasGlobalSetup();
   const detection = detectProjectState(projectRoot());
 
-  const statusLines = ["GSD Setup Status\n"];
+  const statusLines = ["HX Setup Status\n"];
   statusLines.push(`  Global preferences: ${globalConfigured ? "configured" : "not set"}`);
   statusLines.push(`  Project state: ${detection.state}`);
   if (detection.projectSignals.primaryLanguage) {
@@ -221,7 +221,7 @@ export async function handleCoreCommand(trimmed: string, ctx: ExtensionCommandCo
 }
 
 export function formatTextStatus(state: GSDState): string {
-  const lines: string[] = ["GSD Status\n"];
+  const lines: string[] = ["HX Status\n"];
   lines.push(formatProgressLine(computeProgressScore()));
   lines.push("");
   lines.push(`Phase: ${state.phase}`);

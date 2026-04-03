@@ -1,5 +1,5 @@
 /**
- * GSD Triage UI — Confirmation flow for programmatic triage results
+ * HX Triage UI — Confirmation flow for programmatic triage results
  *
  * Used by auto-mode dispatch (S02) when triage fires between tasks.
  * For manual `/hx triage`, the LLM session handles confirmation directly.

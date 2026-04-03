@@ -412,10 +412,10 @@ export async function postUnitPreVerification(pctx: PostUnitContext, opts?: PreV
           );
         }
         for (const action of triageResult.actions) {
-          process.stderr.write(`gsd-triage: ${action}\n`);
+          process.stderr.write(`hx-triage: ${action}\n`);
         }
       } catch (err) {
-        process.stderr.write(`gsd-triage: resolution execution failed: ${(err as Error).message}\n`);
+        process.stderr.write(`hx-triage: resolution execution failed: ${(err as Error).message}\n`);
       }
     }
 
@@ -423,7 +423,7 @@ export async function postUnitPreVerification(pctx: PostUnitContext, opts?: PreV
     try {
       const rogueFiles = detectRogueFileWrites(s.currentUnit.type, s.currentUnit.id, s.basePath);
       for (const rogue of rogueFiles) {
-        process.stderr.write(`gsd-rogue: detected rogue file write: ${rogue.path} (unit: ${rogue.unitId})\n`);
+        process.stderr.write(`hx-rogue: detected rogue file write: ${rogue.path} (unit: ${rogue.unitId})\n`);
         ctx.ui.notify(`Rogue file write detected: ${rogue.path}`, "warning");
       }
     } catch (e) {
@@ -543,9 +543,9 @@ export async function postUnitPostVerification(pctx: PostUnitContext): Promise<"
               await renderPlanCheckboxes(s.basePath, mid, sid);
             } catch (dbErr) {
               // DB unavailable — fail explicitly rather than silently reverting to markdown mutation.
-              // Use 'gsd recover' to rebuild DB state from disk if needed.
+              // Use '/hx doctor --fix' to rebuild DB state from disk if needed.
               process.stderr.write(
-                `gsd: retry state-reset failed (DB unavailable): ${(dbErr as Error).message}. Run 'gsd recover' to reconcile.\n`,
+                `hx: retry state-reset failed (DB unavailable): ${(dbErr as Error).message}. Run '/hx doctor --fix' to reconcile.\n`,
               );
             }
           }

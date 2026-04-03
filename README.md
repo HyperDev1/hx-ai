@@ -1,25 +1,25 @@
 <div align="center">
 
-# GSD 2
+# HX 2
 
-**The evolution of [Get Shit Done](https://github.com/gsd-build/get-shit-done) — now a real coding agent.**
+**The evolution of [Get Shit Done](https://github.com/hx-build/get-shit-done) — now a real coding agent.**
 
-[![npm version](https://img.shields.io/npm/v/gsd-pi?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/gsd-pi)
-[![npm downloads](https://img.shields.io/npm/dm/gsd-pi?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/gsd-pi)
-[![GitHub stars](https://img.shields.io/github/stars/gsd-build/GSD-2?style=for-the-badge&logo=github&color=181717)](https://github.com/gsd-build/GSD-2)
-[![Discord](https://img.shields.io/badge/Discord-Join%20us-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/gsd)
+[![npm version](https://img.shields.io/npm/v/hx-pi?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/hx-pi)
+[![npm downloads](https://img.shields.io/npm/dm/hx-pi?style=for-the-badge&logo=npm&logoColor=white&color=CB3837)](https://www.npmjs.com/package/hx-pi)
+[![GitHub stars](https://img.shields.io/github/stars/hx-build/HX-2?style=for-the-badge&logo=github&color=181717)](https://github.com/hx-build/HX-2)
+[![Discord](https://img.shields.io/badge/Discord-Join%20us-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/hx)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
-[![$GSD Token](https://img.shields.io/badge/$GSD-Dexscreener-1C1C1C?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCIgZmlsbD0iIzAwRkYwMCIvPjwvc3ZnPg==&logoColor=00FF00)](https://dexscreener.com/solana/dwudwjvan7bzkw9zwlbyv6kspdlvhwzrqy6ebk8xzxkv)
+[![$HX Token](https://img.shields.io/badge/$HX-Dexscreener-1C1C1C?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCIgZmlsbD0iIzAwRkYwMCIvPjwvc3ZnPg==&logoColor=00FF00)](https://dexscreener.com/solana/dwudwjvan7bzkw9zwlbyv6kspdlvhwzrqy6ebk8xzxkv)
 
-The original GSD went viral as a prompt framework for Claude Code. It worked, but it was fighting the tool — injecting prompts through slash commands, hoping the LLM would follow instructions, with no actual control over context windows, sessions, or execution.
+The original HX went viral as a prompt framework for Claude Code. It worked, but it was fighting the tool — injecting prompts through slash commands, hoping the LLM would follow instructions, with no actual control over context windows, sessions, or execution.
 
-This version is different. GSD is now a standalone CLI built on the [Pi SDK](https://github.com/badlogic/pi-mono), which gives it direct TypeScript access to the agent harness itself. That means GSD can actually _do_ what v1 could only _ask_ the LLM to do: clear context between tasks, inject exactly the right files at dispatch time, manage git branches, track cost and tokens, detect stuck loops, recover from crashes, and auto-advance through an entire milestone without human intervention.
+This version is different. HX is now a standalone CLI built on the [Pi SDK](https://github.com/badlogic/pi-mono), which gives it direct TypeScript access to the agent harness itself. That means HX can actually _do_ what v1 could only _ask_ the LLM to do: clear context between tasks, inject exactly the right files at dispatch time, manage git branches, track cost and tokens, detect stuck loops, recover from crashes, and auto-advance through an entire milestone without human intervention.
 
 One command. Walk away. Come back to a built project with clean git history.
 
-<pre><code>npm install -g gsd-pi@latest</code></pre>
+<pre><code>npm install -g hx-pi@latest</code></pre>
 
-> GSD now provisions a managed [RTK](https://github.com/rtk-ai/rtk) binary on supported macOS, Linux, and Windows installs to compress shell-command output in `bash`, `async_bash`, `bg_shell`, and verification flows. GSD forces `RTK_TELEMETRY_DISABLED=1` for all managed invocations. Set `GSD_RTK_DISABLED=1` to disable the integration.
+> HX now provisions a managed [RTK](https://github.com/rtk-ai/rtk) binary on supported macOS, Linux, and Windows installs to compress shell-command output in `bash`, `async_bash`, `bg_shell`, and verification flows. HX forces `RTK_TELEMETRY_DISABLED=1` for all managed invocations. Set `GSD_RTK_DISABLED=1` to disable the integration.
 
 > **📋 NOTICE: New to Node on Mac?** If you installed Node.js via Homebrew, you may be running a development release instead of LTS. **[Read this guide](./docs/node-lts-macos.md)** to pin Node 24 LTS and avoid compatibility issues.
 
@@ -44,7 +44,7 @@ One command. Walk away. Come back to a built project with clean git history.
 - **`--bare` mode** — wired across headless, pi-coding-agent, and resource-loader for minimal-output operation.
 - **RPC protocol v2** — new types, init handshake with version detection, and runId generation on prompt/steer/follow_up commands.
 - **PREFERENCES.md rename** — `preferences.md` renamed to `PREFERENCES.md` for consistency. (#2700, #2738)
-- **Comprehensive SQLite audit** — indexes, caching, safety, and reconciliation fixes across gsd-db.
+- **Comprehensive SQLite audit** — indexes, caching, safety, and reconciliation fixes across hx-db.
 - **Unified error classifier** — three overlapping error classifiers consolidated into a single classify-decide-act pipeline.
 
 ### Key Fixes
@@ -72,13 +72,13 @@ One command. Walk away. Come back to a built project with clean git history.
 
 ### v2.49.0 — Git Trailers & Yolo Mode
 
-- **`--yolo` flag** — `/gsd auto --yolo` for non-interactive project init.
-- **Git trailers** — GSD metadata moved from commit subject scopes to git trailers.
+- **`--yolo` flag** — `/hx auto --yolo` for non-interactive project init.
+- **Git trailers** — HX metadata moved from commit subject scopes to git trailers.
 
 ### v2.48.0 — Forensics & Discussion
 
-- **`/gsd discuss` for queued milestones** — target milestones still in the queue. (#2349)
-- **Enhanced forensics** — journal and activity log awareness added to `/gsd forensics`.
+- **`/hx discuss` for queued milestones** — target milestones still in the queue. (#2349)
+- **Enhanced forensics** — journal and activity log awareness added to `/hx forensics`.
 
 ### v2.47.0 — External Providers
 
@@ -88,17 +88,17 @@ One command. Walk away. Come back to a built project with clean git history.
 ### Previous highlights (v2.42–v2.46)
 
 - **Single-writer state engine** — disciplined state transitions with machine guards, actor identity, reversibility, and TOCTOU hardening. (#2494)
-- **`/gsd rethink`** — conversational project reorganization. (#2459)
-- **`/gsd mcp`** — MCP server status and connectivity. (#2362)
+- **`/hx rethink`** — conversational project reorganization. (#2459)
+- **`/hx mcp`** — MCP server status and connectivity. (#2362)
 - **Complete offline mode** — fully offline with local models. (#2429)
-- **Global KNOWLEDGE.md injection** — cross-project knowledge via `~/.gsd/agent/KNOWLEDGE.md`. (#2331)
+- **Global KNOWLEDGE.md injection** — cross-project knowledge via `~/.hx/agent/KNOWLEDGE.md`. (#2331)
 - **Mobile-responsive web UI** — browser interface works on phones and tablets. (#2354)
 - **Default isolation mode changed to `none`** — set `git.isolation: worktree` explicitly if needed. (#2481)
 - **Non-API-key provider extensions** — support for Claude Code CLI and similar providers. (#2382)
 - **Docker sandbox template** — official Docker template for isolated auto mode. (#2360)
 - **DB-backed planning tools** — write-side state transitions use atomic SQLite tool calls. (#2141)
 - **Declarative workflow engine** — YAML workflows through auto-loop. (#2024)
-- **`/gsd fast`** — toggle service tier for prioritized API routing. (#1862)
+- **`/hx fast`** — toggle service tier for prioritized API routing. (#1862)
 
 ---
 
@@ -106,8 +106,8 @@ One command. Walk away. Come back to a built project with clean git history.
 
 ### New Features
 
-- **Browser-based web interface** — run GSD from the browser with `gsd --web`. Full project management, real-time progress, and multi-project support via server-sent events. (#1717)
-- **Doctor: worktree lifecycle checks** — `/gsd doctor` now validates worktree health, detects orphaned worktrees, consolidates cleanup, and enhances `/worktree list` with lifecycle status. (#1814)
+- **Browser-based web interface** — run HX from the browser with `hx --web`. Full project management, real-time progress, and multi-project support via server-sent events. (#1717)
+- **Doctor: worktree lifecycle checks** — `/hx doctor` now validates worktree health, detects orphaned worktrees, consolidates cleanup, and enhances `/worktree list` with lifecycle status. (#1814)
 - **CI: docs-only PR detection** — PRs that only change documentation skip build and test steps, with a new prompt injection scan for security. (#1699)
 - **Custom Models guide** — new documentation for adding custom providers (Ollama, vLLM, LM Studio, proxies) via `models.json`. (#1670)
 
@@ -116,10 +116,10 @@ One command. Walk away. Come back to a built project with clean git history.
 This release includes 7 fixes preventing silent data loss in auto-mode:
 
 - **Hallucination guard** — execute-task agents that complete with zero tool calls are now rejected as hallucinated. Previously, agents could produce detailed but fabricated summaries without writing any code, wasting ~$25/milestone. (#1838)
-- **Merge anchor verification** — before deleting a milestone worktree/branch, GSD now verifies the code is actually on the integration branch. Prevents orphaning commits when squash-merge produces an empty diff. (#1829)
-- **Dirty working tree detection** — `nativeMergeSquash` now distinguishes dirty-tree rejections from content conflicts, preventing silent commit loss when synced `.gsd/` files block the merge. (#1752)
+- **Merge anchor verification** — before deleting a milestone worktree/branch, HX now verifies the code is actually on the integration branch. Prevents orphaning commits when squash-merge produces an empty diff. (#1829)
+- **Dirty working tree detection** — `nativeMergeSquash` now distinguishes dirty-tree rejections from content conflicts, preventing silent commit loss when synced `.hx/` files block the merge. (#1752)
 - **Doctor cleanup safety** — the `orphaned_completed_units` check no longer auto-fixes during post-task health checks. Previously, timing races could cause the doctor to remove valid completion keys, reverting users to earlier tasks. (#1825)
-- **Root file reverse-sync** — worktree teardown now syncs root-level `.gsd/` files (PROJECT.md, REQUIREMENTS.md, completed-units.json) back to the project root. Previously these were lost on milestone closeout. (#1831)
+- **Root file reverse-sync** — worktree teardown now syncs root-level `.hx/` files (PROJECT.md, REQUIREMENTS.md, completed-units.json) back to the project root. Previously these were lost on milestone closeout. (#1831)
 - **Empty merge guard** — milestone branches with unanchored code changes are preserved instead of deleted when squash-merge produces nothing to commit. (#1755)
 - **Crash-safe task closeout** — orphaned checkboxes in PLAN.md are unchecked on retry, preventing phantom task completion. (#1759)
 
@@ -137,14 +137,14 @@ This release includes 7 fixes preventing silent data loss in auto-mode:
 - **Table format support** — roadmaps using markdown tables (`| S01 | Title | Risk | Status |`) are now parsed correctly. (#1741)
 - **Prose header fallback** — when `## Slices` contains H3 headers instead of checkboxes, the prose parser is invoked as a fallback. (#1744)
 - **Completion marker detection** — prose headers with `✓` or `(Complete)` markers are correctly identified as done. (#1816)
-- **Zero-slice stub handling** — stub roadmaps from `/gsd queue` return `pre-planning` instead of `blocked`. (#1826)
+- **Zero-slice stub handling** — stub roadmaps from `/hx queue` return `pre-planning` instead of `blocked`. (#1826)
 - **Immediate roadmap fix** — roadmap checkbox and UAT stub are fixed immediately after last task instead of deferring to `complete-slice`. (#1819)
 
 ### State & Git Improvements
 
 - **CONTEXT-DRAFT.md fallback** — `depends_on` is read from CONTEXT-DRAFT.md when CONTEXT.md doesn't exist, preventing draft milestones from being promoted past dependency constraints. (#1743)
 - **Unborn branch support** — `nativeBranchExists` handles repos with zero commits, preventing dispatch deadlock on new repos. (#1815)
-- **Ghost milestone detection** — empty `.gsd/milestones/` directories are skipped instead of crashing `deriveState()`. (#1817)
+- **Ghost milestone detection** — empty `.hx/milestones/` directories are skipped instead of crashing `deriveState()`. (#1817)
 - **Default branch detection** — milestone merge detects `master` vs `main` instead of hardcoding. (#1669)
 - **Milestone title extraction** — titles are pulled from CONTEXT.md headings when no ROADMAP exists. (#1729)
 
@@ -164,11 +164,11 @@ See the full [Changelog](./CHANGELOG.md) for all 70+ fixes in this release.
 
 ### Previous highlights (v2.39–v2.41)
 
-- **Browser-based web interface** — run GSD from the browser with `gsd --web`
+- **Browser-based web interface** — run HX from the browser with `hx --web`
 - **GitHub sync extension** — auto-sync milestones to GitHub Issues, PRs, and Milestones
 - **Skill tool resolution** — skills auto-activate in dispatched prompts
 - **Health check phase 2** — real-time doctor issues in dashboard and visualizer
-- **Forensics upgrade** — full-access GSD debugger with anomaly detection
+- **Forensics upgrade** — full-access HX debugger with anomaly detection
 - **7 data-loss prevention fixes** — hallucination guard, merge anchor verification, dirty tree detection, and more
 - **Pipeline decomposition** — auto-loop rewritten as linear phase pipeline
 - **Sliding-window stuck detection** — pattern-aware, fewer false positives
@@ -178,7 +178,7 @@ See the full [Changelog](./CHANGELOG.md) for all 70+ fixes in this release.
 
 ## Documentation
 
-Full documentation is available at **[gsd.build](https://gsd.build)** (powered by Mintlify) and in the [`docs/`](./docs/) directory:
+Full documentation is available at **[hx.build](https://hx.build)** (powered by Mintlify) and in the [`docs/`](./docs/) directory:
 
 - **[Getting Started](./docs/getting-started.md)** — install, first run, basic usage
 - **[Auto Mode](./docs/auto-mode.md)** — autonomous execution deep-dive
@@ -200,27 +200,27 @@ Full documentation is available at **[gsd.build](https://gsd.build)** (powered b
 - **[Dynamic Model Routing](./docs/dynamic-model-routing.md)** — complexity-based model selection and budget pressure
 - **[Web Interface](./docs/web-interface.md)** — browser-based project management and real-time progress
 - **[Pipeline Simplification (ADR-003)](./docs/ADR-003-pipeline-simplification.md)** — merged research into planning, mechanical completion
-- **[Docker Sandbox](./docker/README.md)** — run GSD auto mode in an isolated Docker container
-- **[Migration from v1](./docs/migration.md)** — `.planning` → `.gsd` migration
+- **[Docker Sandbox](./docker/README.md)** — run HX auto mode in an isolated Docker container
+- **[Migration from v1](./docs/migration.md)** — `.planning` → `.hx` migration
 
 ---
 
 ## What Changed From v1
 
-The original GSD was a collection of markdown prompts installed into `~/.claude/commands/`. It relied entirely on the LLM reading those prompts and doing the right thing. That worked surprisingly well — but it had hard limits:
+The original HX was a collection of markdown prompts installed into `~/.claude/commands/`. It relied entirely on the LLM reading those prompts and doing the right thing. That worked surprisingly well — but it had hard limits:
 
 - **No context control.** The LLM accumulated garbage over a long session. Quality degraded.
 - **No real automation.** "Auto mode" was the LLM calling itself in a loop, burning context on orchestration overhead.
 - **No crash recovery.** If the session died mid-task, you started over.
 - **No observability.** No cost tracking, no progress dashboard, no stuck detection.
 
-GSD v2 solves all of these because it's not a prompt framework anymore — it's a TypeScript application that _controls_ the agent session.
+HX v2 solves all of these because it's not a prompt framework anymore — it's a TypeScript application that _controls_ the agent session.
 
 |                      | v1 (Prompt Framework)        | v2 (Agent Application)                                  |
 | -------------------- | ---------------------------- | ------------------------------------------------------- |
 | Runtime              | Claude Code slash commands   | Standalone CLI via Pi SDK                               |
 | Context management   | Hope the LLM doesn't fill up | Fresh session per task, programmatic                    |
-| Auto mode            | LLM self-loop                | State machine reading `.gsd/` files                     |
+| Auto mode            | LLM self-loop                | State machine reading `.hx/` files                     |
 | Crash recovery       | None                         | Lock files + session forensics                          |
 | Git strategy         | LLM writes git commands      | Worktree isolation, sequential commits, squash merge    |
 | Cost tracking        | None                         | Per-unit token/cost ledger with dashboard               |
@@ -237,14 +237,14 @@ GSD v2 solves all of these because it's not a prompt framework anymore — it's 
 
 > **Note:** Migration works best with a `ROADMAP.md` file for milestone structure. Without one, milestones are inferred from the `phases/` directory.
 
-If you have projects with `.planning` directories from the original Get Shit Done, you can migrate them to GSD-2's `.gsd` format:
+If you have projects with `.planning` directories from the original Get Shit Done, you can migrate them to HX-2's `.hx` format:
 
 ```bash
 # From within the project directory
-/gsd migrate
+/hx migrate
 
 # Or specify a path
-/gsd migrate ~/projects/my-old-project
+/hx migrate ~/projects/my-old-project
 ```
 
 The migration tool:
@@ -262,7 +262,7 @@ Supports format variations including milestone-sectioned roadmaps with `<details
 
 ## How It Works
 
-GSD structures work into a hierarchy:
+HX structures work into a hierarchy:
 
 ```
 Milestone  →  a shippable version (4-10 slices)
@@ -284,15 +284,15 @@ Plan (with integrated research) → Execute (per task) → Complete → Reassess
 
 **Plan** scouts the codebase, researches relevant docs, and decomposes the slice into tasks with must-haves (mechanically verifiable outcomes). **Execute** runs each task in a fresh context window with only the relevant files pre-loaded — then runs configured verification commands (lint, test, etc.) with auto-fix retries. **Complete** writes the summary, UAT script, marks the roadmap, and commits with meaningful messages derived from task summaries. **Reassess** checks if the roadmap still makes sense given what was learned. **Validate Milestone** runs a reconciliation gate after all slices complete — comparing roadmap success criteria against actual results before sealing the milestone.
 
-### `/gsd auto` — The Main Event
+### `/hx auto` — The Main Event
 
-This is what makes GSD different. Run it, walk away, come back to built software.
+This is what makes HX different. Run it, walk away, come back to built software.
 
 ```
-/gsd auto
+/hx auto
 ```
 
-Auto mode is a state machine driven by files on disk. It reads `.gsd/STATE.md`, determines the next unit of work, creates a fresh agent session, injects a focused prompt with all relevant context pre-inlined, and lets the LLM execute. When the LLM finishes, auto mode reads disk state again and dispatches the next unit.
+Auto mode is a state machine driven by files on disk. It reads `.hx/STATE.md`, determines the next unit of work, creates a fresh agent session, injects a focused prompt with all relevant context pre-inlined, and lets the LLM execute. When the LLM finishes, auto mode reads disk state again and dispatches the next unit.
 
 **What happens under the hood:**
 
@@ -302,7 +302,7 @@ Auto mode is a state machine driven by files on disk. It reads `.gsd/STATE.md`, 
 
 3. **Git isolation** — When `git.isolation` is set to `worktree` or `branch`, each milestone runs on its own `milestone/<MID>` branch (in a worktree or in-place). All slice work commits sequentially — no branch switching, no merge conflicts. When the milestone completes, it's squash-merged to main as one clean commit. The default is `none` (work on the current branch), configurable via preferences.
 
-4. **Crash recovery** — A lock file tracks the current unit. If the session dies, the next `/gsd auto` reads the surviving session file, synthesizes a recovery briefing from every tool call that made it to disk, and resumes with full context. Parallel orchestrator state is persisted to disk with PID liveness detection, so multi-worker sessions survive crashes too. In headless mode, crashes trigger automatic restart with exponential backoff (default 3 attempts).
+4. **Crash recovery** — A lock file tracks the current unit. If the session dies, the next `/hx auto` reads the surviving session file, synthesizes a recovery briefing from every tool call that made it to disk, and resumes with full context. Parallel orchestrator state is persisted to disk with PID liveness detection, so multi-worker sessions survive crashes too. In headless mode, crashes trigger automatic restart with exponential backoff (default 3 attempts).
 
 5. **Provider error recovery** — Transient provider errors (rate limits, 500/503 server errors, overloaded) auto-resume after a delay. Permanent errors (auth, billing) pause for manual review. The model fallback chain retries transient network errors before switching models.
 
@@ -318,18 +318,18 @@ Auto mode is a state machine driven by files on disk. It reads `.gsd/STATE.md`, 
 
 11. **Milestone validation** — After all slices complete, a `validate-milestone` gate compares roadmap success criteria against actual results before sealing the milestone.
 
-12. **Escape hatch** — Press Escape to pause. The conversation is preserved. Interact with the agent, inspect what happened, or just `/gsd auto` to resume from disk state.
+12. **Escape hatch** — Press Escape to pause. The conversation is preserved. Interact with the agent, inspect what happened, or just `/hx auto` to resume from disk state.
 
-### `/gsd` and `/gsd next` — Step Mode
+### `/hx` and `/hx next` — Step Mode
 
-By default, `/gsd` runs in **step mode**: the same state machine as auto mode, but it pauses between units with a wizard showing what completed and what's next. You advance one step at a time, review the output, and continue when ready.
+By default, `/hx` runs in **step mode**: the same state machine as auto mode, but it pauses between units with a wizard showing what completed and what's next. You advance one step at a time, review the output, and continue when ready.
 
-- **No `.gsd/` directory** → Start a new project. Discussion flow captures your vision, constraints, and preferences.
+- **No `.hx/` directory** → Start a new project. Discussion flow captures your vision, constraints, and preferences.
 - **Milestone exists, no roadmap** → Discuss or research the milestone.
 - **Roadmap exists, slices pending** → Plan the next slice, execute one task, or switch to auto.
 - **Mid-task** → Resume from where you left off.
 
-`/gsd next` is an explicit alias for step mode. You can switch from step → auto mid-session via the wizard.
+`/hx next` is an explicit alias for step mode. You can switch from step → auto mid-session via the wizard.
 
 Step mode is the on-ramp. Auto mode is the highway.
 
@@ -340,7 +340,7 @@ Step mode is the on-ramp. Auto mode is the highway.
 ### Install
 
 ```bash
-npm install -g gsd-pi
+npm install -g hx-pi
 ```
 
 ### Log in to a provider
@@ -348,13 +348,13 @@ npm install -g gsd-pi
 First, choose your LLM provider:
 
 ```bash
-gsd
+hx
 /login
 ```
 
 Select from 20+ providers — Anthropic, OpenAI, Google, OpenRouter, GitHub Copilot, and more. If you have a Claude Max or Copilot subscription, the OAuth flow handles everything. Otherwise, paste your API key when prompted.
 
-GSD auto-selects a default model after login. To switch models later:
+HX auto-selects a default model after login. To switch models later:
 
 ```bash
 /model
@@ -365,14 +365,14 @@ GSD auto-selects a default model after login. To switch models later:
 Open a terminal in your project and run:
 
 ```bash
-gsd
+hx
 ```
 
-GSD opens an interactive agent session. From there, you have two ways to work:
+HX opens an interactive agent session. From there, you have two ways to work:
 
-**`/gsd` — step mode.** Type `/gsd` and GSD executes one unit of work at a time, pausing between each with a wizard showing what completed and what's next. Same state machine as auto mode, but you stay in the loop. No project yet? It starts the discussion flow. Roadmap exists? It plans or executes the next step.
+**`/hx` — step mode.** Type `/hx` and HX executes one unit of work at a time, pausing between each with a wizard showing what completed and what's next. Same state machine as auto mode, but you stay in the loop. No project yet? It starts the discussion flow. Roadmap exists? It plans or executes the next step.
 
-**`/gsd auto` — autonomous mode.** Type `/gsd auto` and walk away. GSD researches, plans, executes, verifies, commits, and advances through every slice until the milestone is complete. Fresh context window per task. No babysitting.
+**`/hx auto` — autonomous mode.** Type `/hx auto` and walk away. HX researches, plans, executes, verifies, commits, and advances through every slice until the milestone is complete. Fresh context window per task. No babysitting.
 
 ### Two terminals, one project
 
@@ -381,95 +381,95 @@ The real workflow: run auto mode in one terminal, steer from another.
 **Terminal 1 — let it build**
 
 ```bash
-gsd
-/gsd auto
+hx
+/hx auto
 ```
 
 **Terminal 2 — steer while it works**
 
 ```bash
-gsd
-/gsd discuss    # talk through architecture decisions
-/gsd status     # check progress
-/gsd queue      # queue the next milestone
+hx
+/hx discuss    # talk through architecture decisions
+/hx status     # check progress
+/hx queue      # queue the next milestone
 ```
 
-Both terminals read and write the same `.gsd/` files on disk. Your decisions in terminal 2 are picked up automatically at the next phase boundary — no need to stop auto mode.
+Both terminals read and write the same `.hx/` files on disk. Your decisions in terminal 2 are picked up automatically at the next phase boundary — no need to stop auto mode.
 
 ### Headless mode — CI and scripts
 
-`gsd headless` runs any `/gsd` command without a TUI. Designed for CI pipelines, cron jobs, and scripted automation.
+`hx headless` runs any `/hx` command without a TUI. Designed for CI pipelines, cron jobs, and scripted automation.
 
 ```bash
 # Run auto mode in CI
-gsd headless --timeout 600000
+hx headless --timeout 600000
 
 # Create and execute a milestone end-to-end
-gsd headless new-milestone --context spec.md --auto
+hx headless new-milestone --context spec.md --auto
 
 # One unit at a time (cron-friendly)
-gsd headless next
+hx headless next
 
 # Instant JSON snapshot (no LLM, ~50ms)
-gsd headless query
+hx headless query
 
 # Force a specific pipeline phase
-gsd headless dispatch plan
+hx headless dispatch plan
 ```
 
-Headless auto-responds to interactive prompts, detects completion, and exits with structured codes: `0` complete, `1` error/timeout, `2` blocked. Auto-restarts on crash with exponential backoff. Use `gsd headless query` for instant, machine-readable state inspection — returns phase, next dispatch preview, and parallel worker costs as a single JSON object without spawning an LLM session. Pair with [remote questions](./docs/remote-questions.md) to route decisions to Slack or Discord when human input is needed.
+Headless auto-responds to interactive prompts, detects completion, and exits with structured codes: `0` complete, `1` error/timeout, `2` blocked. Auto-restarts on crash with exponential backoff. Use `hx headless query` for instant, machine-readable state inspection — returns phase, next dispatch preview, and parallel worker costs as a single JSON object without spawning an LLM session. Pair with [remote questions](./docs/remote-questions.md) to route decisions to Slack or Discord when human input is needed.
 
-**Multi-session orchestration** — headless mode supports file-based IPC in `.gsd/parallel/` for coordinating multiple GSD workers across milestones. Build orchestrators that spawn, monitor, and budget-cap a fleet of GSD workers.
+**Multi-session orchestration** — headless mode supports file-based IPC in `.hx/parallel/` for coordinating multiple HX workers across milestones. Build orchestrators that spawn, monitor, and budget-cap a fleet of HX workers.
 
 ### First launch
 
-On first run, GSD launches a branded setup wizard that walks you through LLM provider selection (OAuth or API key), then optional tool API keys (Brave Search, Context7, Jina, Slack, Discord). Every step is skippable — press Enter to skip any. If you have an existing Pi installation, your provider credentials (LLM and tool keys) are imported automatically. Run `gsd config` anytime to re-run the wizard.
+On first run, HX launches a branded setup wizard that walks you through LLM provider selection (OAuth or API key), then optional tool API keys (Brave Search, Context7, Jina, Slack, Discord). Every step is skippable — press Enter to skip any. If you have an existing Pi installation, your provider credentials (LLM and tool keys) are imported automatically. Run `hx config` anytime to re-run the wizard.
 
 ### Commands
 
 | Command                 | What it does                                                    |
 | ----------------------- | --------------------------------------------------------------- |
-| `/gsd`                  | Step mode — executes one unit at a time, pauses between each    |
-| `/gsd next`             | Explicit step mode (same as bare `/gsd`)                        |
-| `/gsd auto`             | Autonomous mode — researches, plans, executes, commits, repeats |
-| `/gsd quick`            | Execute a quick task with GSD guarantees, skip planning overhead |
-| `/gsd stop`             | Stop auto mode gracefully                                       |
-| `/gsd steer`            | Hard-steer plan documents during execution                      |
-| `/gsd discuss`          | Discuss architecture and decisions (works alongside auto mode)  |
-| `/gsd rethink`          | Conversational project reorganization                           |
-| `/gsd mcp`              | MCP server status and connectivity                              |
-| `/gsd status`           | Progress dashboard                                              |
-| `/gsd queue`            | Queue future milestones (safe during auto mode)                 |
-| `/gsd prefs`            | Model selection, timeouts, budget ceiling                       |
-| `/gsd migrate`          | Migrate a v1 `.planning` directory to `.gsd` format             |
-| `/gsd help`             | Categorized command reference for all GSD subcommands           |
-| `/gsd mode`             | Switch workflow mode (solo/team) with coordinated defaults      |
-| `/gsd forensics`        | Full-access GSD debugger for auto-mode failure investigation    |
-| `/gsd cleanup`          | Archive phase directories from completed milestones             |
-| `/gsd doctor`           | Runtime health checks — issues surface across widget, visualizer, and reports |
-| `/gsd keys`             | API key manager — list, add, remove, test, rotate, doctor       |
-| `/gsd logs`             | Browse activity, debug, and metrics logs                        |
-| `/gsd export --html`    | Generate HTML report for current or completed milestone         |
+| `/hx`                  | Step mode — executes one unit at a time, pauses between each    |
+| `/hx next`             | Explicit step mode (same as bare `/hx`)                        |
+| `/hx auto`             | Autonomous mode — researches, plans, executes, commits, repeats |
+| `/hx quick`            | Execute a quick task with HX guarantees, skip planning overhead |
+| `/hx stop`             | Stop auto mode gracefully                                       |
+| `/hx steer`            | Hard-steer plan documents during execution                      |
+| `/hx discuss`          | Discuss architecture and decisions (works alongside auto mode)  |
+| `/hx rethink`          | Conversational project reorganization                           |
+| `/hx mcp`              | MCP server status and connectivity                              |
+| `/hx status`           | Progress dashboard                                              |
+| `/hx queue`            | Queue future milestones (safe during auto mode)                 |
+| `/hx prefs`            | Model selection, timeouts, budget ceiling                       |
+| `/hx migrate`          | Migrate a v1 `.planning` directory to `.hx` format             |
+| `/hx help`             | Categorized command reference for all HX subcommands           |
+| `/hx mode`             | Switch workflow mode (solo/team) with coordinated defaults      |
+| `/hx forensics`        | Full-access HX debugger for auto-mode failure investigation    |
+| `/hx cleanup`          | Archive phase directories from completed milestones             |
+| `/hx doctor`           | Runtime health checks — issues surface across widget, visualizer, and reports |
+| `/hx keys`             | API key manager — list, add, remove, test, rotate, doctor       |
+| `/hx logs`             | Browse activity, debug, and metrics logs                        |
+| `/hx export --html`    | Generate HTML report for current or completed milestone         |
 | `/worktree` (`/wt`)     | Git worktree lifecycle — create, switch, merge, remove          |
 | `/voice`                | Toggle real-time speech-to-text (macOS, Linux)                  |
 | `/exit`                 | Graceful shutdown — saves session state before exiting          |
-| `/kill`                 | Kill GSD process immediately                                    |
+| `/kill`                 | Kill HX process immediately                                    |
 | `/clear`                | Start a new session (alias for `/new`)                          |
 | `Ctrl+Alt+G`            | Toggle dashboard overlay                                        |
 | `Ctrl+Alt+V`            | Toggle voice transcription                                      |
 | `Ctrl+Alt+B`            | Show background shell processes                                 |
 | `Alt+V`                 | Paste clipboard image (macOS)                                   |
-| `gsd config`            | Re-run the setup wizard (LLM provider + tool keys)              |
-| `gsd update`            | Update GSD to the latest version                                |
-| `gsd headless [cmd]`    | Run `/gsd` commands without TUI (CI, cron, scripts)             |
-| `gsd headless query`    | Instant JSON snapshot — state, next dispatch, costs (no LLM)    |
-| `gsd --continue` (`-c`) | Resume the most recent session for the current directory        |
-| `gsd --worktree` (`-w`) | Launch an isolated worktree session for the active milestone    |
-| `gsd sessions`          | Interactive session picker — browse and resume any saved session |
+| `hx config`            | Re-run the setup wizard (LLM provider + tool keys)              |
+| `hx update`            | Update HX to the latest version                                |
+| `hx headless [cmd]`    | Run `/hx` commands without TUI (CI, cron, scripts)             |
+| `hx headless query`    | Instant JSON snapshot — state, next dispatch, costs (no LLM)    |
+| `hx --continue` (`-c`) | Resume the most recent session for the current directory        |
+| `hx --worktree` (`-w`) | Launch an isolated worktree session for the active milestone    |
+| `hx sessions`          | Interactive session picker — browse and resume any saved session |
 
 ---
 
-## What GSD Manages For You
+## What HX Manages For You
 
 ### Context Engineering
 
@@ -501,7 +501,7 @@ main:
   feat(M001/S02): API endpoints and middleware
   feat(M001/S01): data model and type system
 
-gsd/M001/S01 (deleted after merge):
+hx/M001/S01 (deleted after merge):
   feat(S01/T03): file writer with round-trip fidelity
   feat(S01/T02): markdown parser for plan files
   feat(S01/T01): core types and interfaces
@@ -521,7 +521,7 @@ The verification ladder: static checks → command execution → behavioral test
 
 ### Dashboard
 
-`Ctrl+Alt+G` or `/gsd status` opens a real-time overlay showing:
+`Ctrl+Alt+G` or `/hx status` opens a real-time overlay showing:
 
 - Current milestone, slice, and task progress
 - Auto mode elapsed time and phase
@@ -531,12 +531,12 @@ The verification ladder: static checks → command execution → behavioral test
 
 ### HTML Reports
 
-After a milestone completes, GSD auto-generates a self-contained HTML report in `.gsd/reports/`. Each report includes project summary, progress tree, slice dependency graph (SVG DAG), cost/token metrics with bar charts, execution timeline, changelog, and knowledge base sections. No external dependencies — all CSS and JS are inlined, printable to PDF from any browser.
+After a milestone completes, HX auto-generates a self-contained HTML report in `.hx/reports/`. Each report includes project summary, progress tree, slice dependency graph (SVG DAG), cost/token metrics with bar charts, execution timeline, changelog, and knowledge base sections. No external dependencies — all CSS and JS are inlined, printable to PDF from any browser.
 
 An auto-generated `index.html` shows all reports with progression metrics across milestones.
 
 - **Automatic** — generated after milestone completion (configurable via `auto_report` preference)
-- **Manual** — run `/gsd export --html` anytime
+- **Manual** — run `/hx export --html` anytime
 
 ---
 
@@ -544,7 +544,7 @@ An auto-generated `index.html` shows all reports with progression metrics across
 
 ### Preferences
 
-GSD preferences live in `~/.gsd/PREFERENCES.md` (global) or `.gsd/PREFERENCES.md` (project). Manage with `/gsd prefs`.
+HX preferences live in `~/.hx/PREFERENCES.md` (global) or `.hx/PREFERENCES.md` (project). Manage with `/hx prefs`.
 
 ```yaml
 ---
@@ -577,7 +577,7 @@ auto_report: true
 | Setting                | What it controls                                                                                      |
 | ---------------------- | ----------------------------------------------------------------------------------------------------- |
 | `models.*`             | Per-phase model selection — string for a single model, or `{model, fallbacks}` for automatic failover |
-| `skill_discovery`      | `auto` / `suggest` / `off` — how GSD finds and applies skills                                         |
+| `skill_discovery`      | `auto` / `suggest` / `off` — how HX finds and applies skills                                         |
 | `auto_supervisor.*`    | Timeout thresholds for auto mode supervision                                                          |
 | `budget_ceiling`       | USD ceiling — auto mode pauses when reached                                                           |
 | `uat_dispatch`         | Enable automatic UAT runs after slice completion                                                      |
@@ -586,7 +586,7 @@ auto_report: true
 | `skill_staleness_days` | Skills unused for N days get deprioritized (default: 60, 0 = disabled)                                |
 | `unique_milestone_ids` | Uses unique milestone names to avoid clashes when working in teams of people                          |
 | `git.isolation`        | `none` (default), `worktree`, or `branch` — enable worktree or branch isolation for milestone work               |
-| `git.manage_gitignore` | Set `false` to prevent GSD from modifying `.gitignore`                                                           |
+| `git.manage_gitignore` | Set `false` to prevent HX from modifying `.gitignore`                                                           |
 | `verification_commands`| Array of shell commands to run after task execution (e.g., `["npm run lint", "npm run test"]`)        |
 | `verification_auto_fix`| Auto-retry on verification failures (default: true)                                                   |
 | `verification_max_retries` | Max retries for verification failures (default: 2)                                               |
@@ -598,15 +598,15 @@ auto_report: true
 
 Place an `AGENTS.md` file in any directory to provide persistent behavioral guidance for that scope. Pi core loads `AGENTS.md` automatically (with `CLAUDE.md` as a fallback) at both user and project levels. Use these files for coding standards, architectural decisions, domain terminology, or workflow preferences.
 
-> **Note:** The legacy `agent-instructions.md` format (`~/.gsd/agent-instructions.md` and `.gsd/agent-instructions.md`) is deprecated and no longer loaded. Migrate any existing instructions to `AGENTS.md` or `CLAUDE.md`.
+> **Note:** The legacy `agent-instructions.md` format (`~/.hx/agent-instructions.md` and `.hx/agent-instructions.md`) is deprecated and no longer loaded. Migrate any existing instructions to `AGENTS.md` or `CLAUDE.md`.
 
 ### Debug Mode
 
-Start GSD with `gsd --debug` to enable structured JSONL diagnostic logging. Debug logs capture dispatch decisions, state transitions, and timing data for troubleshooting auto-mode issues.
+Start HX with `hx --debug` to enable structured JSONL diagnostic logging. Debug logs capture dispatch decisions, state transitions, and timing data for troubleshooting auto-mode issues.
 
 ### Token Optimization
 
-GSD includes a coordinated token optimization system that reduces usage by 40-60% on cost-sensitive workloads. Set a single preference to coordinate model selection, phase skipping, and context compression:
+HX includes a coordinated token optimization system that reduces usage by 40-60% on cost-sensitive workloads. Set a single preference to coordinate model selection, phase skipping, and context compression:
 
 ```yaml
 token_profile: budget      # or balanced (default), quality
@@ -626,11 +626,11 @@ See the full [Token Optimization Guide](./docs/token-optimization.md) for detail
 
 ### Bundled Tools
 
-GSD ships with 19 extensions, all loaded automatically:
+HX ships with 19 extensions, all loaded automatically:
 
 | Extension              | What it provides                                                                                                       |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| **GSD**                | Core workflow engine, auto mode, commands, dashboard                                                                   |
+| **HX**                | Core workflow engine, auto mode, commands, dashboard                                                                   |
 | **Browser Tools**      | Playwright-based browser with form intelligence, intent-ranked element finding, semantic actions, PDF export, session state persistence, network mocking, device emulation, structured extraction, visual diffing, region zoom, test code generation, and prompt injection detection |
 | **Search the Web**     | Brave Search, Tavily, or Jina page extraction                                                                          |
 | **Google Search**      | Gemini-powered web search with AI-synthesized answers                                                                  |
@@ -664,38 +664,38 @@ Three specialized subagents for delegated work:
 
 ## Working in teams
 
-The best practice for working in teams is to ensure unique milestone names across all branches (by using `unique_milestone_ids`) and checking in the right `.gsd/` artifacts to share valuable context between teammates.
+The best practice for working in teams is to ensure unique milestone names across all branches (by using `unique_milestone_ids`) and checking in the right `.hx/` artifacts to share valuable context between teammates.
 
 ### Suggested .gitignore setup
 
 ```bash
-# ── GSD: Runtime / Ephemeral (per-developer, per-session) ──────────────────
+# ── HX: Runtime / Ephemeral (per-developer, per-session) ──────────────────
 # Crash detection sentinel — PID lock, written per auto-mode session
-.gsd/auto.lock
+.hx/auto.lock
 # Auto-mode dispatch tracker — prevents re-running completed units
-.gsd/completed-units.json
+.hx/completed-units.json
 # Derived state cache — regenerated from plan/roadmap files on disk
-.gsd/STATE.md
+.hx/STATE.md
 # Per-developer token/cost accumulator
-.gsd/metrics.json
+.hx/metrics.json
 # Raw JSONL session dumps — crash recovery forensics, auto-pruned
-.gsd/activity/
+.hx/activity/
 # Unit execution records — dispatch phase, timeouts, recovery tracking
-.gsd/runtime/
+.hx/runtime/
 # Git worktree working copies
-.gsd/worktrees/
+.hx/worktrees/
 # Parallel orchestration IPC and worker status
-.gsd/parallel/
-# Generated HTML reports (regenerable via /gsd export --html)
-.gsd/reports/
+.hx/parallel/
+# Generated HTML reports (regenerable via /hx export --html)
+.hx/reports/
 # Session-specific interrupted-work markers
-.gsd/milestones/**/continue.md
-.gsd/milestones/**/*-CONTINUE.md
+.hx/milestones/**/continue.md
+.hx/milestones/**/*-CONTINUE.md
 ```
 
 ### Unique Milestone Names
 
-Create or amend your `.gsd/PREFERENCES.md` file within the repo to include `unique_milestone_ids: true` e.g.
+Create or amend your `.hx/PREFERENCES.md` file within the repo to include `unique_milestone_ids: true` e.g.
 
 ```markdown
 ---
@@ -704,47 +704,47 @@ unique_milestone_ids: true
 ---
 ```
 
-With the above `.gitignore` set up, the `.gsd/PREFERENCES.md` file is checked into the repo ensuring all teammates use unique milestone names to avoid collisions.
+With the above `.gitignore` set up, the `.hx/PREFERENCES.md` file is checked into the repo ensuring all teammates use unique milestone names to avoid collisions.
 
 Milestone names will now be generated with a 6 char random string appended e.g. instead of `M001` you'll get something like `M001-ush8s3`
 
-### Migrating an existing git ignored `.gsd/` folder
+### Migrating an existing git ignored `.hx/` folder
 
 1. Ensure you are not in the middle of any milestones (clean state)
-2. Update the `.gsd/` related entries in your `.gitignore` to follow the `Suggested .gitignore setup` section under `Working in teams` (ensure you are no longer blanket ignoring the whole `.gsd/` directory)
-3. Update your `.gsd/PREFERENCES.md` file within the repo as per section `Unique Milestone Names`
-4. If you want to update all your existing milestones use this prompt in GSD: `I have turned on unique milestone ids, please update all old milestone ids to use this new format e.g. M001-abc123 where abc123 is a random 6 char lowercase alpha numeric string. Update all references in all .gsd file contents, file names and directory names. Validate your work once done to ensure referential integrity.`
+2. Update the `.hx/` related entries in your `.gitignore` to follow the `Suggested .gitignore setup` section under `Working in teams` (ensure you are no longer blanket ignoring the whole `.hx/` directory)
+3. Update your `.hx/PREFERENCES.md` file within the repo as per section `Unique Milestone Names`
+4. If you want to update all your existing milestones use this prompt in HX: `I have turned on unique milestone ids, please update all old milestone ids to use this new format e.g. M001-abc123 where abc123 is a random 6 char lowercase alpha numeric string. Update all references in all .hx file contents, file names and directory names. Validate your work once done to ensure referential integrity.`
 5. Commit to git
 
 ---
 
 ## Architecture
 
-GSD is a TypeScript application that embeds the Pi coding agent SDK.
+HX is a TypeScript application that embeds the Pi coding agent SDK.
 
 ```
-gsd (CLI binary)
-  └─ loader.ts          Sets PI_PACKAGE_DIR, GSD env vars, dynamic-imports cli.ts
+hx (CLI binary)
+  └─ loader.ts          Sets PI_PACKAGE_DIR, HX env vars, dynamic-imports cli.ts
       └─ cli.ts         Wires SDK managers, loads extensions, starts InteractiveMode
           ├─ headless.ts     Headless orchestrator (spawns RPC child, auto-responds, detects completion)
           ├─ onboarding.ts   First-run setup wizard (LLM provider + tool keys)
           ├─ wizard.ts       Env hydration from stored auth.json credentials
-          ├─ app-paths.ts    ~/.gsd/agent/, ~/.gsd/sessions/, auth.json
-          ├─ resource-loader.ts  Syncs bundled extensions + agents to ~/.gsd/agent/
+          ├─ app-paths.ts    ~/.hx/agent/, ~/.hx/sessions/, auth.json
+          ├─ resource-loader.ts  Syncs bundled extensions + agents to ~/.hx/agent/
           └─ src/resources/
-              ├─ extensions/gsd/    Core GSD extension (auto, state, commands, ...)
+              ├─ extensions/hx/    Core HX extension (auto, state, commands, ...)
               ├─ extensions/...     18 supporting extensions
               ├─ agents/            scout, researcher, worker
               ├─ AGENTS.md          Agent routing instructions
-              └─ GSD-WORKFLOW.md    Manual bootstrap protocol
+              └─ HX-WORKFLOW.md    Manual bootstrap protocol
 ```
 
 **Key design decisions:**
 
 - **`pkg/` shim directory** — `PI_PACKAGE_DIR` points here (not project root) to avoid Pi's theme resolution collision with our `src/` directory. Contains only `piConfig` and theme assets.
 - **Two-file loader pattern** — `loader.ts` sets all env vars with zero SDK imports, then dynamic-imports `cli.ts` which does static SDK imports. This ensures `PI_PACKAGE_DIR` is set before any SDK code evaluates.
-- **Always-overwrite sync** — `npm update -g` takes effect immediately. Bundled extensions and agents are synced to `~/.gsd/agent/` on every launch, not just first run.
-- **State lives on disk** — `.gsd/` is the source of truth. Auto mode reads it, writes it, and advances based on what it finds. No in-memory state survives across sessions.
+- **Always-overwrite sync** — `npm update -g` takes effect immediately. Bundled extensions and agents are synced to `~/.hx/agent/` on every launch, not just first run.
+- **State lives on disk** — `.hx/` is the source of truth. Auto mode reads it, writes it, and advances based on what it finds. No in-memory state survives across sessions.
 
 ---
 
@@ -766,7 +766,7 @@ Optional:
 
 ## Use Any Model
 
-GSD isn't locked to one provider. It runs on the [Pi SDK](https://github.com/badlogic/pi-mono), which supports **20+ model providers** out of the box. Use different models for different phases — Opus for planning, Sonnet for execution, a fast model for research.
+HX isn't locked to one provider. It runs on the [Pi SDK](https://github.com/badlogic/pi-mono), which supports **20+ model providers** out of the box. Use different models for different phases — Opus for planning, Sonnet for execution, a fast model for research.
 
 ### Built-in Providers
 
@@ -782,15 +782,15 @@ If you have a **Claude Max**, **Codex**, or **GitHub Copilot** subscription, you
 > - **Claude Max** — Anthropic's ToS may not explicitly permit OAuth use outside Claude's own applications.
 > - **GitHub Copilot** — Usage outside GitHub's own tools may be restricted by your subscription terms.
 >
-> GSD supports API key authentication for all providers as the safe alternative. **We strongly recommend using API keys over OAuth for Google Gemini.**
+> HX supports API key authentication for all providers as the safe alternative. **We strongly recommend using API keys over OAuth for Google Gemini.**
 
 ### OpenRouter
 
-[OpenRouter](https://openrouter.ai) gives you access to hundreds of models through a single API key. Use it to run GSD with Llama, DeepSeek, Qwen, or anything else OpenRouter supports.
+[OpenRouter](https://openrouter.ai) gives you access to hundreds of models through a single API key. Use it to run HX with Llama, DeepSeek, Qwen, or anything else OpenRouter supports.
 
 ### Per-Phase Model Selection
 
-In your preferences (`/gsd prefs`), assign different models to different phases:
+In your preferences (`/hx prefs`), assign different models to different phases:
 
 ```yaml
 models:
@@ -803,14 +803,14 @@ models:
   completion: claude-sonnet-4-6
 ```
 
-Use expensive models where quality matters (planning, complex execution) and cheaper/faster models where speed matters (research, simple completions). Each phase accepts a simple model string or an object with `model` and `fallbacks` — if the primary model fails (provider outage, rate limit, credit exhaustion), GSD automatically tries the next fallback. GSD tracks cost per-model so you can see exactly where your budget goes.
+Use expensive models where quality matters (planning, complex execution) and cheaper/faster models where speed matters (research, simple completions). Each phase accepts a simple model string or an object with `model` and `fallbacks` — if the primary model fails (provider outage, rate limit, credit exhaustion), HX automatically tries the next fallback. HX tracks cost per-model so you can see exactly where your budget goes.
 
 ---
 
 ## Star History
 
-<a href="https://star-history.com/#gsd-build/gsd-2&Date">
-  <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=gsd-build/gsd-2&type=Date" />
+<a href="https://star-history.com/#hx-build/hx-2&Date">
+  <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=hx-build/hx-2&type=Date" />
 </a>
 
 ---
@@ -823,8 +823,8 @@ Use expensive models where quality matters (planning, complex execution) and che
 
 <div align="center">
 
-**The original GSD showed what was possible. This version delivers it.**
+**The original HX showed what was possible. This version delivers it.**
 
-**`npm install -g gsd-pi && gsd`**
+**`npm install -g hx-pi && hx`**
 
 </div>

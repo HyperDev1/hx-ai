@@ -32,7 +32,7 @@ import type { Decision, Requirement } from '../types.ts';
 // ═══════════════════════════════════════════════════════════════════════════
 
 function makeTmpDir(): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-dbwriter-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'hx-dbwriter-'));
   // Create .hx directory structure
   fs.mkdirSync(path.join(dir, ".hx"), { recursive: true });
   return dir;
@@ -306,7 +306,7 @@ describe('db-writer', () => {
 
   test('saveDecisionToDb', async () => {
     const tmpDir = makeTmpDir();
-    const dbPath = path.join(tmpDir, '.hx', 'gsd.db');
+    const dbPath = path.join(tmpDir, '.hx', 'hx.db');
     openDatabase(dbPath);
 
     try {
@@ -364,7 +364,7 @@ describe('db-writer', () => {
 
   test('updateRequirementInDb', async () => {
     const tmpDir = makeTmpDir();
-    const dbPath = path.join(tmpDir, '.hx', 'gsd.db');
+    const dbPath = path.join(tmpDir, '.hx', 'hx.db');
     openDatabase(dbPath);
 
     try {
@@ -418,7 +418,7 @@ describe('db-writer', () => {
 
   test('updateRequirementInDb — not found', async () => {
     const tmpDir = makeTmpDir();
-    const dbPath = path.join(tmpDir, '.hx', 'gsd.db');
+    const dbPath = path.join(tmpDir, '.hx', 'hx.db');
     openDatabase(dbPath);
 
     try {
@@ -445,7 +445,7 @@ describe('db-writer', () => {
 
   test('saveArtifactToDb', async () => {
     const tmpDir = makeTmpDir();
-    const dbPath = path.join(tmpDir, '.hx', 'gsd.db');
+    const dbPath = path.join(tmpDir, '.hx', 'hx.db');
     openDatabase(dbPath);
 
     try {
@@ -485,7 +485,7 @@ describe('db-writer', () => {
 
   test('saveArtifactToDb — shrinkage guard preserves larger existing file', async () => {
     const tmpDir = makeTmpDir();
-    const dbPath = path.join(tmpDir, '.hx', 'gsd.db');
+    const dbPath = path.join(tmpDir, '.hx', 'hx.db');
     openDatabase(dbPath);
 
     try {
@@ -531,7 +531,7 @@ describe('db-writer', () => {
 
   test('saveArtifactToDb — allows overwrite when new content is similar size', async () => {
     const tmpDir = makeTmpDir();
-    const dbPath = path.join(tmpDir, '.hx', 'gsd.db');
+    const dbPath = path.join(tmpDir, '.hx', 'hx.db');
     openDatabase(dbPath);
 
     try {

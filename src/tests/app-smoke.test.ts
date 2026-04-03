@@ -1,5 +1,5 @@
 /**
- * Unit tests for the gsd CLI package.
+ * Unit tests for the hx CLI package.
  *
  * Tests the glue code that IS the product:
  * - app-paths resolve to ~/.hx/

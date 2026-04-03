@@ -1,5 +1,5 @@
 /**
- * GSD Milestone Actions — Park, Unpark, and Discard operations.
+ * HX Milestone Actions — Park, Unpark, and Discard operations.
  *
  * Park: Creates a PARKED.md marker file. deriveState() skips parked milestones
  * when finding the active milestone, but keeps them in the registry.
@@ -58,7 +58,7 @@ export function parkMilestone(basePath: string, milestoneId: string, reason: str
     try {
       updateMilestoneStatus(milestoneId, "parked");
     } catch (err) {
-      process.stderr.write(`gsd: parkMilestone DB sync failed for ${milestoneId}: ${(err as Error).message}\n`);
+      process.stderr.write(`hx: parkMilestone DB sync failed for ${milestoneId}: ${(err as Error).message}\n`);
     }
   }
   invalidateAllCaches();
@@ -84,7 +84,7 @@ export function unparkMilestone(basePath: string, milestoneId: string): boolean 
     try {
       updateMilestoneStatus(milestoneId, "active");
     } catch (err) {
-      process.stderr.write(`gsd: unparkMilestone DB sync failed for ${milestoneId}: ${(err as Error).message}\n`);
+      process.stderr.write(`hx: unparkMilestone DB sync failed for ${milestoneId}: ${(err as Error).message}\n`);
     }
   }
   invalidateAllCaches();

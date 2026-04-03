@@ -14,7 +14,7 @@ import {
 // ─── Fixture Helpers ───────────────────────────────────────────────────────
 
 function createFixtureBase(): string {
-  const base = mkdtempSync(join(tmpdir(), 'gsd-queue-order-'));
+  const base = mkdtempSync(join(tmpdir(), 'hx-queue-order-'));
   mkdirSync(join(base, ".hx"), { recursive: true });
   return base;
 }

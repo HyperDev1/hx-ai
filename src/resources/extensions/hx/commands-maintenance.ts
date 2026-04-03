@@ -1,5 +1,5 @@
 /**
- * GSD Maintenance — cleanup, skip, dry-run, and recover handlers.
+ * HX Maintenance — cleanup, skip, dry-run, and recover handlers.
  *
  * Contains: handleCleanupBranches, handleCleanupSnapshots, handleCleanupWorktrees, handleSkip, handleDryRun, handleRecover
  */

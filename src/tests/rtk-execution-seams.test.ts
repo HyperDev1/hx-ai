@@ -70,7 +70,7 @@ function withFakeRtk<T>(mapping: Record<string, string | { status?: number; stdo
 
 function withManagedFakeRtk<T>(mapping: Record<string, string | { status?: number; stdout?: string }>, run: (env: NodeJS.ProcessEnv, managedPath: string) => Promise<T> | T): Promise<T> | T {
   const fake = createFakeRtk(mapping);
-  const managedHome = mkdtempSync(join(tmpdir(), "gsd-rtk-managed-home-"));
+  const managedHome = mkdtempSync(join(tmpdir(), "hx-rtk-managed-home-"));
   const managedDir = join(managedHome, "agent", "bin");
   const managedPath = join(managedDir, process.platform === "win32" ? "rtk.cmd" : "rtk");
   mkdirSync(managedDir, { recursive: true });
@@ -123,7 +123,7 @@ function withManagedFakeRtk<T>(mapping: Record<string, string | { status?: numbe
 
 // NOTE: The bash tool itself no longer does RTK rewriting directly. That's now
 // handled by the bash_transform extension hook in register-hooks.ts. The seam
-// tests below verify the GSD-layer surfaces that still call rewriteCommandWithRtk
+// tests below verify the HX-layer surfaces that still call rewriteCommandWithRtk
 // directly: shared/rtk.ts, verification-gate, async-bash, and bg-shell.
 
 test("shared RTK helper rewrites commands via fake RTK binary", async () => {

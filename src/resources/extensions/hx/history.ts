@@ -1,4 +1,4 @@
-// GSD Extension — Session History View
+// HX Extension — Session History View
 // Human-readable display of past auto-mode unit executions.
 
 import type { ExtensionCommandContext } from "@hyperlab/hx-coding-agent";

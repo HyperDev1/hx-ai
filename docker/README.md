@@ -1,6 +1,6 @@
-# GSD Docker Sandbox
+# HX Docker Sandbox
 
-Run GSD auto mode inside an isolated Docker sandbox so it cannot touch your host filesystem, SSH keys, or other projects.
+Run HX auto mode inside an isolated Docker sandbox so it cannot touch your host filesystem, SSH keys, or other projects.
 
 ## Prerequisites
 
@@ -31,13 +31,13 @@ Docker Sandboxes provide MicroVM isolation — each sandbox runs in a lightweigh
 
 ```bash
 # Create a sandbox from the template
-docker sandbox create --template ./docker --name gsd-sandbox
+docker sandbox create --template ./docker --name hx-sandbox
 
 # Shell into the sandbox
-docker sandbox exec -it gsd-sandbox bash
+docker sandbox exec -it hx-sandbox bash
 
-# Inside the sandbox, run GSD
-gsd auto "implement the feature described in issue #42"
+# Inside the sandbox, run HX
+hx auto "implement the feature described in issue #42"
 ```
 
 ### Option B: Docker Compose
@@ -53,15 +53,15 @@ cp docker/.env.example docker/.env
 docker compose -f docker/docker-compose.yaml up -d
 
 # 3. Shell into the container
-docker exec -it gsd-sandbox bash
+docker exec -it hx-sandbox bash
 
-# 4. Run GSD inside the container
-gsd auto "implement the feature described in issue #42"
+# 4. Run HX inside the container
+hx auto "implement the feature described in issue #42"
 ```
 
 ## UID/GID Remapping
 
-The entrypoint handles UID/GID remapping via `PUID` and `PGID` environment variables. This avoids permission issues on bind-mounted volumes by matching the container's `gsd` user to your host UID/GID.
+The entrypoint handles UID/GID remapping via `PUID` and `PGID` environment variables. This avoids permission issues on bind-mounted volumes by matching the container's `hx` user to your host UID/GID.
 
 ```bash
 # Find your host UID/GID
@@ -75,25 +75,25 @@ Set these in your `.env` file or in the `environment` section of the compose fil
 
 The container entrypoint (`entrypoint.sh`) runs four steps on every start:
 
-1. **UID/GID remapping** — adjusts the `gsd` user to match `PUID`/`PGID`
+1. **UID/GID remapping** — adjusts the `hx` user to match `PUID`/`PGID`
 2. **Pre-create critical files** — prevents Docker bind-mount from creating directories where files are expected
 3. **Sentinel-based bootstrap** — runs `bootstrap.sh` exactly once on first boot
-4. **Drop privileges** — `exec gosu gsd` for proper PID 1 signal forwarding
+4. **Drop privileges** — `exec gosu hx` for proper PID 1 signal forwarding
 
-No hardcoded `user:` directive in compose — the entrypoint starts as root, remaps, then drops to `gsd`.
+No hardcoded `user:` directive in compose — the entrypoint starts as root, remaps, then drops to `hx`.
 
 ## Two-Terminal Workflow
 
-GSD's recommended workflow uses two terminals — one for auto mode, one for interactive discussion:
+HX's recommended workflow uses two terminals — one for auto mode, one for interactive discussion:
 
 ```bash
 # Terminal 1: auto mode
-docker sandbox exec -it gsd-sandbox bash
-gsd auto "your task description"
+docker sandbox exec -it hx-sandbox bash
+hx auto "your task description"
 
 # Terminal 2: discuss / monitor
-docker sandbox exec -it gsd-sandbox bash
-gsd discuss
+docker sandbox exec -it hx-sandbox bash
+hx discuss
 ```
 
 With Docker Compose, replace `docker sandbox exec` with `docker exec`.
@@ -110,7 +110,7 @@ Copy `docker/.env.example` to `docker/.env` and fill in your keys. The `.env` fi
 
 ## Network Allowlisting
 
-If you restrict outbound network access in your sandbox, GSD needs these endpoints:
+If you restrict outbound network access in your sandbox, HX needs these endpoints:
 
 | Purpose | Endpoints |
 |---------|-----------|
@@ -121,7 +121,7 @@ If you restrict outbound network access in your sandbox, GSD needs these endpoin
 
 ## Customizing the Image
 
-Build with a specific GSD version:
+Build with a specific HX version:
 
 ```bash
 docker compose -f docker/docker-compose.yaml build --build-arg GSD_VERSION=2.51.0
@@ -131,7 +131,7 @@ docker compose -f docker/docker-compose.yaml build --build-arg GSD_VERSION=2.51.
 
 ```bash
 # Docker Sandbox
-docker sandbox rm gsd-sandbox
+docker sandbox rm hx-sandbox
 
 # Docker Compose
 docker compose -f docker/docker-compose.yaml down -v
@@ -141,4 +141,4 @@ docker compose -f docker/docker-compose.yaml down -v
 
 - **macOS/Windows only**: Docker Sandboxes require Docker Desktop 4.58+. Linux sandbox support is experimental.
 - **Environment parity**: The sandbox runs Ubuntu (Debian). macOS-only dependencies may not work inside the sandbox.
-- **Named agent registration**: Docker Desktop's built-in named agents (claude, codex, etc.) are registered by Docker itself. Third-party tools cannot register new named agents. GSD uses the generic shell sandbox type with a custom template instead.
+- **Named agent registration**: Docker Desktop's built-in named agents (claude, codex, etc.) are registered by Docker itself. Third-party tools cannot register new named agents. HX uses the generic shell sandbox type with a custom template instead.

@@ -1,4 +1,4 @@
-// GSD DB Writer — Markdown generators + DB-first write helpers
+// HX DB Writer — Markdown generators + DB-first write helpers
 //
 // The missing DB→markdown direction. S03 established markdown→DB (md-importer.ts).
 // This module generates DECISIONS.md and REQUIREMENTS.md from DB state,
