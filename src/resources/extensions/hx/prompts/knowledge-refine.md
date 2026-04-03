@@ -33,9 +33,15 @@ Make it clear, concise, and actionable. A good knowledge entry is something a fu
 
 ### Step 4: Gather missing fields
 
-Through the conversation:
-- For **rules**: ask "Why is this important?" if not obvious from the text
+Through the conversation (max 2 exchanges total across all steps):
+
+- For **rules**:
+  - If the rule is negative-only ("don't do X", "never use Y") — ask: "What should be done instead?" and "How would an agent detect a violation?" before saving. A rule without an alternative and a signal is too weak to enforce.
+  - If it's already positive or has an alternative — ask "Why is this important?" only if not obvious.
+  - Target format: `Never [X]. Instead: [specific alternative]. Why: [one sentence]. Signal: [grep pattern / file name / observable symptom].`
+
 - For **patterns**: ask "Where in the codebase?" if not obvious
+
 - For **lessons**: ask "What was the root cause?" and "What's the fix?"
 
 ### Step 5: Present the final version
