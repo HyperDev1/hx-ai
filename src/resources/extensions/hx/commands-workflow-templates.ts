@@ -6,6 +6,7 @@
  */
 
 import type { ExtensionAPI, ExtensionCommandContext } from "@hyperlab/hx-coding-agent";
+import type { Api, AssistantMessage, Model } from "@hyperlab/hx-ai";
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import {
@@ -26,15 +27,108 @@ import { getErrorMessage } from "./error-utils.js";
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 /**
- * Generate a URL-friendly slug from text.
+ * Extra transliteration map for characters that NFD decomposition doesn't
+ * reduce to ASCII (e.g. Turkish ı, ş, ğ; German ß; Scandinavian ø, æ, etc.).
  */
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
+const TRANSLITERATE: Record<string, string> = {
+  ı: "i", İ: "i", ş: "s", Ş: "s", ğ: "g", Ğ: "g", ç: "c", Ç: "c",
+  ö: "o", Ö: "o", ü: "u", Ü: "u",
+  ß: "ss", ø: "o", Ø: "o", æ: "ae", Æ: "ae", đ: "d", Đ: "d",
+  ł: "l", Ł: "l", ð: "d", þ: "th",
+};
+
+/**
+ * Generate a URL-friendly slug from text.
+ *
+ * Handles non-ASCII characters by:
+ * 1. Applying an explicit transliteration map for letters NFD can't decompose
+ * 2. NFD-decomposing accented chars and stripping combining diacritical marks
+ * 3. Replacing remaining non-alphanumeric chars with dashes
+ *
+ * @internal Exported for testing.
+ */
+export function slugify(text: string): string {
+  let s = text.toLowerCase();
+
+  // Apply explicit transliterations first (ı→i, ş→s, ğ→g, ß→ss, etc.)
+  s = s.replace(/[^\x00-\x7F]/g, (ch) => TRANSLITERATE[ch] ?? ch);
+
+  // NFD decompose (e.g. é → e + combining accent) then strip combining marks
+  s = s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+  return s
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
     .slice(0, 40)
     .replace(/-$/, "");
+}
+
+// ─── AI-Powered Slug Generation ──────────────────────────────────────────────
+
+const SLUG_SYSTEM_PROMPT = `You generate concise English git branch name slugs from user descriptions.
+
+Rules:
+- Output ONLY the slug, nothing else — no quotes, no explanation
+- Use lowercase English words separated by hyphens
+- 2-5 words maximum (aim for 3)
+- Translate non-English descriptions to English
+- Capture the core intent, not every detail
+- Use developer vocabulary (e.g. "fix", "add", "update", "refactor")
+- No articles (a, the), no filler words
+
+Examples:
+  "login sayfasındaki şifre doğrulama hatası" → fix-password-validation-login
+  "upgrade react to v19" → upgrade-react-v19
+  "API returns 500 on checkout" → fix-checkout-api-500
+  "kullanıcı profil sayfası responsive değil" → fix-profile-responsive-layout
+  "branch isimleri anlamsız oluyor" → improve-branch-naming`;
+
+/**
+ * Use the cheapest available LLM (Haiku preferred) to generate a meaningful
+ * English slug from the user's description. Falls back to `slugify()` on any failure.
+ */
+async function generateSmartSlug(
+  description: string,
+  ctx: ExtensionCommandContext,
+): Promise<string> {
+  try {
+    const available = ctx.modelRegistry.getAvailable();
+    if (!available || available.length === 0) return slugify(description);
+
+    // Prefer Haiku (cheapest), then sort by input cost
+    let model = available.find(m => m.id.toLowerCase().includes("haiku"));
+    if (!model) {
+      model = [...available].sort((a, b) => a.cost.input - b.cost.input)[0];
+    }
+    if (!model) return slugify(description);
+
+    const selectedModel = model as Model<Api>;
+    const { completeSimple } = await import("@hyperlab/hx-ai");
+
+    const result: AssistantMessage = await completeSimple(selectedModel, {
+      systemPrompt: SLUG_SYSTEM_PROMPT,
+      messages: [{ role: "user", content: [{ type: "text", text: description }], timestamp: Date.now() }],
+    }, {
+      maxTokens: 60,
+      temperature: 0,
+    });
+
+    const text = result.content
+      .filter((c): c is { type: "text"; text: string } => c.type === "text")
+      .map(c => c.text)
+      .join("")
+      .trim();
+
+    // Validate: sanitize whatever the LLM returned through slugify
+    // to guarantee it's a safe branch name
+    const slug = slugify(text);
+    if (slug.length >= 5) return slug;
+
+    // LLM returned something too short / empty — fall back
+    return slugify(description);
+  } catch {
+    return slugify(description);
+  }
 }
 
 /**
@@ -360,10 +454,15 @@ export async function handleStart(
     return;
   }
 
+  // ─── Generate slug (AI-powered when available, fallback to transliteration) ─
+
+  const slug = description
+    ? await generateSmartSlug(description, ctx)
+    : slugify(templateId);
+
   // ─── Dry-run mode: preview without executing ────────────────────────────
 
   if (dryRun) {
-    const slug = slugify(description || templateId);
     const lines = [
       `DRY RUN — ${template.name} (${templateId})\n`,
       `Description: ${description || "(none)"}`,
@@ -416,7 +515,6 @@ export async function handleStart(
 
   let artifactDir = "";
   if (template.artifact_dir) {
-    const slug = slugify(description || templateId);
     const prefix = datePrefix();
     const num = getNextWorkflowNum(join(basePath, template.artifact_dir));
     artifactDir = `${template.artifact_dir}${prefix}-${num}-${slug}`;
@@ -427,7 +525,6 @@ export async function handleStart(
 
   const git = createGitService(basePath);
   const skipBranch = git.prefs.isolation === "none";
-  const slug = slugify(description || templateId);
   const branchName = `hx/${templateId}/${slug}`;
   let branchCreated = false;
 
