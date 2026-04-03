@@ -1200,6 +1200,21 @@ export async function buildExecuteTaskPrompt(
     ? `### Runtime Context\nSource: \`.hx/RUNTIME.md\`\n\n${runtimeContent.trim()}`
     : "";
 
+  // Resolve project-level verification commands from preferences
+  const verificationCommands = prefs?.preferences?.verification_commands;
+  let verificationCommandsSection: string;
+  if (verificationCommands && verificationCommands.length > 0) {
+    const cmds = verificationCommands.map(cmd => `   - \`${cmd}\``).join("\n");
+    verificationCommandsSection = [
+      `   The project defines these verification commands — run ALL of them before completing the task:`,
+      cmds,
+      `   If any command fails, fix the issue before proceeding. If the failure is in code you modified, update the tests. If the failure is pre-existing and unrelated to your changes, note it in \`knownIssues\` in the task summary but do NOT skip running the commands.`,
+    ].join("\n");
+  } else {
+    verificationCommandsSection =
+      `   No \`verification_commands\` defined in project preferences. Auto-detect: look for \`pytest\`, \`npm test\`, \`vitest\`, \`jest\`, or the test command in \`package.json\` / \`pyproject.toml\` / \`Makefile\`. Run whatever exists. If you changed code, the test suite MUST run.`;
+  }
+
   return loadPrompt("execute-task", {
     overridesSection,
     runtimeContext,
@@ -1216,6 +1231,7 @@ export async function buildExecuteTaskPrompt(
     taskSummaryPath,
     inlinedTemplates,
     verificationBudget,
+    verificationCommandsSection,
     skillActivation: buildSkillActivationBlock({
       base,
       milestoneId: mid,
