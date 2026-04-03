@@ -23,21 +23,25 @@ Do NOT ask any questions yet. Just produce the improved version.
 
 ## Step 2: Present and confirm
 
-Show the improved entry to the user **in {{language}}**:
+First, show the improved entry to the user **in {{language}}** as plain text:
 
 ```
 İyileştirilmiş versiyon:
 
 "<improved entry text in {{language}}>"
-
-Onaylıyor musun?
-> ✅ Onayla
-> ✏️  Tekrar düzenle  (not ekleyebilirsin)
 ```
+
+Then use the `ask_user_questions` tool to ask for confirmation:
+- **id:** `"knowledge_confirm"`
+- **header:** `"Onay"`
+- **question:** A brief confirmation prompt in {{language}}, e.g. "Bu haliyle kaydedelim mi?"
+- **options:**
+  - label: `"Onayla"`, description: `"Bu haliyle kaydet"`
+  - label: `"Tekrar düzenle"`, description: `"Not ekleyebilirsin"`
 
 Wait for the user's response.
 
-- If the user selects **Onayla** (or equivalent confirmation) → proceed to Step 3
+- If the user selects **Onayla** → proceed to Step 3
 - If the user selects **Tekrar düzenle** or provides a correction note → go back to Step 1 with their note incorporated, then repeat Step 2. Do this as many times as needed.
 
 ---
@@ -52,19 +56,16 @@ Determine the best type for this entry:
 - **pattern** — A code convention or approach the project uses. Descriptive: "We use X in Y".
 - **lesson** — Something learned from experience: "We had X problem, fixed by Y". Retrospective.
 
-Show the classification choice **in {{language}}** with your recommendation clearly marked:
+Use the `ask_user_questions` tool to present the classification choice:
+- **id:** `"knowledge_classify"`
+- **header:** `"Kategori"`
+- **question:** `"Bu içerik hangi kategoriye girmeli? Öneri: <type> — <one sentence why in {{language}}>"`
+- **options:**
+  - label: `"rule"`, description: `"Kural — her zaman / asla yapılacak şeyler"`
+  - label: `"pattern"`, description: `"Kod pattern'ı veya proje convention'ı"`
+  - label: `"lesson"`, description: `"Deneyimden öğrenilen ders"`
 
-```
-Bu içerik hangi kategoriye girmeli?
-
-> 1. rule     — Kural (her zaman / asla yapılacak şeyler)
-> 2. pattern  — Kod pattern'ı veya proje convention'ı
-> 3. lesson   — Deneyimden öğrenilen ders
-
-Öneri: <N> (<type>) — <one sentence explaining why in {{language}}>
-```
-
-Wait for the user to pick a number (or confirm the recommendation).
+Wait for the user to pick an option.
 
 ---
 

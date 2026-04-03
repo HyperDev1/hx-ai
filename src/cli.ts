@@ -16,6 +16,7 @@ import { agentDir, sessionsDir, authFilePath } from './app-paths.js'
 import { initResources, buildResourceLoader, getNewerManagedResourceVersion } from './resource-loader.js'
 import { ensureManagedTools } from './tool-bootstrap.js'
 import { loadStoredEnvKeys } from './wizard.js'
+import { loadEnvFile, validateEnv, logEnvWarnings } from './env.js'
 import { getPiDefaultModelAndProvider, migratePiCredentials } from './pi-migration.js'
 import { shouldRunOnboarding, runOnboarding } from './onboarding.js'
 import chalk from 'chalk'
@@ -200,6 +201,7 @@ if (packageCommand.handled) {
 
 // `hx config` — replay the setup wizard and exit
 if (cliFlags.messages[0] === 'config') {
+  loadEnvFile()
   const authStorage = AuthStorage.create(authFilePath)
   loadStoredEnvKeys(authStorage)
   await runOnboarding(authStorage)
@@ -306,10 +308,19 @@ if (cliFlags.messages[0] === 'headless') {
 ensureManagedTools(join(agentDir, 'bin'))
 markStartup('ensureManagedTools')
 
+// Load .env file first (does NOT overwrite existing env vars)
+loadEnvFile()
+markStartup('loadEnvFile')
+
 const authStorage = AuthStorage.create(authFilePath)
 markStartup('AuthStorage.create')
 loadStoredEnvKeys(authStorage)
 migratePiCredentials(authStorage)
+
+// Validate environment after all sources are loaded
+const envResult = validateEnv()
+logEnvWarnings(envResult)
+markStartup('validateEnv')
 
 // Resolve models.json path with fallback to ~/.pi/agent/models.json
 const { resolveModelsJsonPath } = await import('./models-resolver.js')
