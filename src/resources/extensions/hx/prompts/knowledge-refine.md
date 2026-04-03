@@ -2,60 +2,92 @@ You are refining a knowledge entry before it's saved to KNOWLEDGE.md.
 
 ## Entry Details
 
-- **Type:** {{type}} (if "auto", you must classify it — see below)
 - **User's original text:** {{entry}}
 - **Scope:** {{scope}}
-- **User's language preference:** {{language}}
+- **User's language:** {{language}}
+- **Pre-selected type:** {{type}} (if "auto", you determine the type at Step 3; otherwise skip Step 3 and use this type directly)
 
-## Your Task
+---
 
-### Step 0: Classify the entry type (only when type is "auto")
+## Step 1: Improve
 
-If the type above is "auto", the user did not specify whether this is a rule, pattern, or lesson. Determine the best fit:
+Silently analyze the user's input. Improve it into a strong, actionable knowledge entry:
+- If it's a negative instruction ("don't do X", "never use Y") → add an alternative ("Instead: do Y"), a reason ("Why: ..."), and a detection signal ("Signal: grep pattern / file name / observable symptom")
+- If it's vague → make it specific (add file paths, module names, or concrete examples)
+- If it's a lesson → ensure it has a root cause and a fix path
+- If it's already strong → keep it as-is with minimal changes
 
-- **rule** — A directive: "always do X", "never do Y", "use X for Y". Rules are prescriptive.
-- **pattern** — A code pattern or convention the project follows. Patterns are descriptive: "We use X pattern in Y".
-- **lesson** — Something learned from experience: "We had X problem because Y, fixed by Z". Lessons are retrospective.
+Do NOT ask any questions yet. Just produce the improved version.
 
-Choose the type based on the content. If ambiguous, briefly ask the user (one question, max). If the type is already specified (rule/pattern/lesson), skip this step.
+---
 
-### Step 1: Discuss briefly
+## Step 2: Present and confirm
 
-Is this the right framing? Would a slightly different wording capture the intent better? Surface any ambiguity — but keep it short, this is a knowledge entry, not a design doc.
+Show the improved entry to the user **in {{language}}**:
 
-### Step 2: Translate to English
+```
+İyileştirilmiş versiyon:
 
-If the user wrote in a non-English language, translate the entry. Knowledge entries are project documentation and must be stored in English.
+"<improved entry text in {{language}}>"
 
-### Step 3: Refine the wording
+Onaylıyor musun?
+> ✅ Onayla
+> ✏️  Tekrar düzenle  (not ekleyebilirsin)
+```
 
-Make it clear, concise, and actionable. A good knowledge entry is something a future agent can immediately act on without needing context.
+Wait for the user's response.
 
-### Step 4: Gather missing fields
+- If the user selects **Onayla** (or equivalent confirmation) → proceed to Step 3
+- If the user selects **Tekrar düzenle** or provides a correction note → go back to Step 1 with their note incorporated, then repeat Step 2. Do this as many times as needed.
 
-Through the conversation (max 2 exchanges total across all steps):
+---
 
-- For **rules**:
-  - If the rule is negative-only ("don't do X", "never use Y") — ask: "What should be done instead?" and "How would an agent detect a violation?" before saving. A rule without an alternative and a signal is too weak to enforce.
-  - If it's already positive or has an alternative — ask "Why is this important?" only if not obvious.
-  - Target format: `Never [X]. Instead: [specific alternative]. Why: [one sentence]. Signal: [grep pattern / file name / observable symptom].`
+## Step 3: Classify
 
-- For **patterns**: ask "Where in the codebase?" if not obvious
+**Skip this step if Pre-selected type is not "auto"** — use that type directly and go to Step 4.
 
-- For **lessons**: ask "What was the root cause?" and "What's the fix?"
+Determine the best type for this entry:
 
-### Step 5: Present the final version
+- **rule** — A directive: "always do X", "never do Y". Prescriptive. Future agents must follow it.
+- **pattern** — A code convention or approach the project uses. Descriptive: "We use X in Y".
+- **lesson** — Something learned from experience: "We had X problem, fixed by Y". Retrospective.
 
-Show it to the user in their language for confirmation. Show both the English version (what will be saved) and a translation back to their language so they can verify the meaning is preserved.
+Show the classification choice **in {{language}}** with your recommendation clearly marked:
 
-### Step 6: Save it
+```
+Bu içerik hangi kategoriye girmeli?
 
-Run: `/hx knowledge --raw <type> <refined English text>`
-- Replace `<type>` with rule, pattern, or lesson (the classified or user-specified type).
-- If there are additional fields (why/where/rootCause/fix), the interactive prompts will be skipped in --raw mode, so include the essential context in the entry text itself.
+> 1. rule     — Kural (her zaman / asla yapılacak şeyler)
+> 2. pattern  — Kod pattern'ı veya proje convention'ı
+> 3. lesson   — Deneyimden öğrenilen ders
+
+Öneri: <N> (<type>) — <one sentence explaining why in {{language}}>
+```
+
+Wait for the user to pick a number (or confirm the recommendation).
+
+---
+
+## Step 4: Save
+
+Translate the approved entry to English (if it isn't already).
+Then run:
+
+```
+/hx knowledge --raw <type> <entry text in English>
+```
+
+After saving, confirm to the user **in {{language}}**:
+```
+✅ Kaydedildi: <ID> [<type>] — "<saved English text>"
+```
+
+---
 
 ## Rules
 
-- Keep the discussion to 1-2 exchanges max. Don't over-discuss a knowledge entry.
-- The saved entry MUST be in English regardless of what language the user wrote in.
-- After saving, confirm to the user in their preferred language what was saved.
+- Never ask clarifying questions mid-flow — improve first, ask only at the confirm step via the Onayla/Tekrar düzenle choice
+- The saved entry MUST be in English regardless of the user's language
+- Show the improved version in the user's language ({{language}}) at Step 2 — not in English
+- At Step 3, always show the recommended type first
+- Keep the loop tight: improve → confirm → classify → save. No extra exchanges.
