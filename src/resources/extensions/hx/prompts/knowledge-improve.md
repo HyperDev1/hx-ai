@@ -6,41 +6,39 @@ You are helping the user improve weak knowledge entries in their project's KNOWL
 
 ## Your Task
 
-### Step 1: Identify weak entries
+### Step 1: Check for prior audit results
 
-Silently analyze the KNOWLEDGE.md content for weak entries using these criteria:
-- **negative-only** — Rule says "don't do X" but gives no alternative
-- **vague** — No file path, module, scope, or concrete example
-- **no-signal** — No way for an agent to detect a violation
-- **missing-fix** — Lesson has no actionable fix path
-- **ambiguous** — Unclear when or where the entry applies
+Look back in the conversation history for a previous `/hx knowledge audit` result (a message with `hx-knowledge-audit` type or an assistant response listing weak entries with weakness tags like `negative-only`, `vague`, `no-signal`, `missing-fix`, `ambiguous`).
 
-### Step 2: Present findings to the user
+- **If found:** Use those findings directly. Do NOT re-analyze the KNOWLEDGE.md. Skip to Step 2 with the audit's weak entries list.
+- **If NOT found:** Tell the user in {{language}}:
+  > No prior audit found in this conversation. Please run `/hx knowledge audit` first to identify weak entries, then run `/hx knowledge improve` again.
+  
+  Then **stop**. Do not proceed further.
 
-Show a numbered list of weak entries in the user's language ({{language}}):
+### Step 2: Present weak entries for selection using interactive UI
 
-```
-Weak knowledge entries found:
+You MUST use the `ask_user_questions` tool with `allowMultiple: true` to let the user select which entries to improve.
 
-1. <ID> [<type>] — <current entry text, truncated to 80 chars>
-   Issue: <one sentence>
+Build the question as follows:
+- **id:** `"knowledge_improve_selection"`
+- **header:** `"Improve"`
+- **question:** A brief message in {{language}} like "Select entries to improve:" 
+- **allowMultiple:** `true`
+- **options:** One option per weak entry from the audit:
+  - **label:** `"<ID> [<type>]"` (e.g. `"R003 [rule]"`)
+  - **description:** The audit's one-sentence issue description for that entry (in {{language}})
 
-2. ...
+The user can:
+- Toggle entries with SPACE
+- Add notes per entry with TAB (to provide context, scope details, or corrections)
+- Confirm with ENTER
 
-Which entries do you want to improve? (e.g. 1,3 or "all" or "none")
-```
+If the user selects no entries (cancels or selects nothing), thank them and stop.
 
-If no weak entries found, say so and stop.
+### Step 3: Improve each selected entry one at a time
 
-### Step 3: Wait for user selection
-
-The user will reply with numbers, "all", or "none".
-- "none" or empty → thank them and stop
-- Numbers or "all" → proceed with only those entries
-
-### Step 4: Improve each selected entry one at a time
-
-If the user provides context, scope details, or corrections in a non-English language ({{language}}),
+If the user provides context via notes in a non-English language ({{language}}),
 translate their input to English before incorporating it into the rewrite.
 The saved entry must always be in English — show both the English version and a back-translation
 in {{language}} so the user can verify the meaning is preserved.
@@ -78,7 +76,7 @@ Apply this improvement? (yes/no/edit)
 
 Wait for confirmation before moving to the next entry.
 
-### Step 5: Apply confirmed improvements
+### Step 4: Apply confirmed improvements
 
 For each confirmed improvement, run:
 ```
@@ -95,3 +93,5 @@ After all confirmations, summarize what was improved and what was skipped.
 - Show before/after for each — never silently overwrite
 - If the user says "edit", ask them what to change in their language ({{language}}), translate their correction to English, then show the updated English version + back-translation before saving
 - Be terse — don't explain your reasoning unless asked
+- ALWAYS use `ask_user_questions` with `allowMultiple: true` for entry selection — NEVER ask plain text questions like "which entries?"
+- If the user added notes via TAB during selection, use those notes as context when rewriting the entry
