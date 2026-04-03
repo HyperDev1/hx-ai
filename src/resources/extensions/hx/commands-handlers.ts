@@ -444,7 +444,13 @@ export async function handleKnowledgeAudit(ctx: ExtensionCommandContext, pi: Ext
     return;
   }
 
-  const prompt = loadPrompt("knowledge-audit", { knowledgeContent });
+  const prefs = loadEffectiveHXPreferences();
+  const language = prefs?.preferences.language ?? "en";
+
+  const prompt = loadPrompt("knowledge-audit", {
+    knowledgeContent,
+    language: language === "en" ? "English" : language,
+  });
   pi.sendMessage(
     { customType: "hx-knowledge-audit", content: prompt, display: false },
     { triggerTurn: true },

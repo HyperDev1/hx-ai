@@ -1,4 +1,5 @@
 You are auditing a project's KNOWLEDGE.md for entries that are too weak to reliably guide an AI agent.
+Respond in {{language}}.
 
 ## KNOWLEDGE.md Content
 

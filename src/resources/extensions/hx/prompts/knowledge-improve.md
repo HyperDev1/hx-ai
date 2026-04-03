@@ -40,6 +40,11 @@ The user will reply with numbers, "all", or "none".
 
 ### Step 4: Improve each selected entry one at a time
 
+If the user provides context, scope details, or corrections in a non-English language ({{language}}),
+translate their input to English before incorporating it into the rewrite.
+The saved entry must always be in English — show both the English version and a back-translation
+in {{language}} so the user can verify the meaning is preserved.
+
 For each selected entry, rewrite it in this strengthened format depending on type:
 
 **Rule** (stored as a single table cell):
@@ -88,5 +93,5 @@ After all confirmations, summarize what was improved and what was skipped.
 - Keep the same table row structure as KNOWLEDGE.md (don't change the format of the file)
 - Rewrites must be in English regardless of the user's language (knowledge entries are project docs)
 - Show before/after for each — never silently overwrite
-- If the user says "edit", ask them what to change and incorporate it before saving
+- If the user says "edit", ask them what to change in their language ({{language}}), translate their correction to English, then show the updated English version + back-translation before saving
 - Be terse — don't explain your reasoning unless asked
