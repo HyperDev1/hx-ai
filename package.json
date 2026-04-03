@@ -18,7 +18,9 @@
   ],
   "bin": {
     "hx": "dist/loader.js",
-    "hx-cli": "dist/loader.js"
+    "hx-cli": "dist/loader.js",
+    "hx-dev": "scripts/hx-dev.js",
+    "hx-local": "scripts/hx-local.js"
   },
   "files": [
     "dist",

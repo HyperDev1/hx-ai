@@ -41,7 +41,8 @@ export function printWelcomeScreen(opts: WelcomeScreenOptions): void {
 
   // Narrow terminal fallback
   if (termWidth < 70) {
-    process.stderr.write(`\n  HX — Hyperlab Coding Agent v${version}\n  ${shortCwd}\n\n`)
+    const envTag = (process.env.HX_ENV && process.env.HX_ENV !== 'production') ? ` [${process.env.HX_ENV}]` : ''
+    process.stderr.write(`\n  HX — Hyperlab Coding Agent v${version}${envTag}\n  ${shortCwd}\n\n`)
     return
   }
 
@@ -59,7 +60,9 @@ export function printWelcomeScreen(opts: WelcomeScreenOptions): void {
 
   // ── Right rows (8 total, null = divider) ────────────────────────────────────
   const titleLeft  = `  ${chalk.bold('HX — Hyperlab Coding Agent')}`
-  const titleRight = chalk.dim(`v${version}`)
+  const hxEnv = process.env.HX_ENV
+  const envSuffix = hxEnv && hxEnv !== 'production' ? chalk.yellow(` [${hxEnv}]`) : ''
+  const titleRight = chalk.dim(`v${version}`) + envSuffix
   const titleFill  = RIGHT_INNER - visLen(titleLeft) - visLen(titleRight)
   const titleRow   = titleLeft + ' '.repeat(Math.max(1, titleFill)) + titleRight
 
