@@ -525,95 +525,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "hx-ast"
-version = "0.1.0"
-dependencies = [
- "ast-grep-core",
- "globset",
- "ignore",
- "napi",
- "napi-derive",
- "phf",
- "tree-sitter",
- "tree-sitter-bash",
- "tree-sitter-c",
- "tree-sitter-c-sharp",
- "tree-sitter-cpp",
- "tree-sitter-css",
- "tree-sitter-diff",
- "tree-sitter-elixir",
- "tree-sitter-go",
- "tree-sitter-haskell",
- "tree-sitter-hcl",
- "tree-sitter-html",
- "tree-sitter-java",
- "tree-sitter-javascript",
- "tree-sitter-json",
- "tree-sitter-julia",
- "tree-sitter-kotlin-sg",
- "tree-sitter-lua",
- "tree-sitter-make",
- "tree-sitter-md",
- "tree-sitter-nix",
- "tree-sitter-objc",
- "tree-sitter-odin",
- "tree-sitter-php",
- "tree-sitter-python",
- "tree-sitter-regex",
- "tree-sitter-ruby",
- "tree-sitter-rust",
- "tree-sitter-scala",
- "tree-sitter-solidity",
- "tree-sitter-starlark",
- "tree-sitter-swift",
- "tree-sitter-toml-ng",
- "tree-sitter-typescript",
- "tree-sitter-verilog",
- "tree-sitter-xml",
- "tree-sitter-yaml",
- "tree-sitter-zig",
-]
-
-[[package]]
-name = "hx-engine"
-version = "0.1.0"
-dependencies = [
- "arboard",
- "dashmap",
- "git2",
- "globset",
- "hx-ast",
- "hx-grep",
- "html-to-markdown-rs",
- "ignore",
- "image",
- "libc",
- "memchr",
- "napi",
- "napi-build",
- "napi-derive",
- "regex",
- "serde_json",
- "similar",
- "smallvec",
- "syntect",
- "unicode-segmentation",
- "unicode-width",
- "xxhash-rust",
-]
-
-[[package]]
-name = "hx-grep"
-version = "0.1.0"
-dependencies = [
- "grep-matcher",
- "grep-regex",
- "grep-searcher",
- "ignore",
- "rayon",
-]
-
-[[package]]
 name = "half"
 version = "2.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -675,6 +586,95 @@ checksum = "1054432bae2f14e0061e33d23402fbaa67a921d319d56adc6bcf887ddad1cbc2"
 dependencies = [
  "log",
  "markup5ever",
+]
+
+[[package]]
+name = "hx-ast"
+version = "0.1.0"
+dependencies = [
+ "ast-grep-core",
+ "globset",
+ "ignore",
+ "napi",
+ "napi-derive",
+ "phf",
+ "tree-sitter",
+ "tree-sitter-bash",
+ "tree-sitter-c",
+ "tree-sitter-c-sharp",
+ "tree-sitter-cpp",
+ "tree-sitter-css",
+ "tree-sitter-diff",
+ "tree-sitter-elixir",
+ "tree-sitter-go",
+ "tree-sitter-haskell",
+ "tree-sitter-hcl",
+ "tree-sitter-html",
+ "tree-sitter-java",
+ "tree-sitter-javascript",
+ "tree-sitter-json",
+ "tree-sitter-julia",
+ "tree-sitter-kotlin-sg",
+ "tree-sitter-lua",
+ "tree-sitter-make",
+ "tree-sitter-md",
+ "tree-sitter-nix",
+ "tree-sitter-objc",
+ "tree-sitter-odin",
+ "tree-sitter-php",
+ "tree-sitter-python",
+ "tree-sitter-regex",
+ "tree-sitter-ruby",
+ "tree-sitter-rust",
+ "tree-sitter-scala",
+ "tree-sitter-solidity",
+ "tree-sitter-starlark",
+ "tree-sitter-swift",
+ "tree-sitter-toml-ng",
+ "tree-sitter-typescript",
+ "tree-sitter-verilog",
+ "tree-sitter-xml",
+ "tree-sitter-yaml",
+ "tree-sitter-zig",
+]
+
+[[package]]
+name = "hx-engine"
+version = "0.1.0"
+dependencies = [
+ "arboard",
+ "dashmap",
+ "git2",
+ "globset",
+ "html-to-markdown-rs",
+ "hx-ast",
+ "hx-grep",
+ "ignore",
+ "image",
+ "libc",
+ "memchr",
+ "napi",
+ "napi-build",
+ "napi-derive",
+ "regex",
+ "serde_json",
+ "similar",
+ "smallvec",
+ "syntect",
+ "unicode-segmentation",
+ "unicode-width",
+ "xxhash-rust",
+]
+
+[[package]]
+name = "hx-grep"
+version = "0.1.0"
+dependencies = [
+ "grep-matcher",
+ "grep-regex",
+ "grep-searcher",
+ "ignore",
+ "rayon",
 ]
 
 [[package]]

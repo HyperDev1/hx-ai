@@ -52,9 +52,9 @@ const targetDir = path.join(cargoTargetRoot, profile);
 const platformTag = `${process.platform}-${process.arch}`;
 
 const libraryNames = {
-  darwin: "libgsd_engine.dylib",
-  linux: "libgsd_engine.so",
-  win32: "gsd_engine.dll",
+  darwin: "libhx_engine.dylib",
+  linux: "libhx_engine.so",
+  win32: "hx_engine.dll",
 };
 
 const libName = libraryNames[process.platform];
