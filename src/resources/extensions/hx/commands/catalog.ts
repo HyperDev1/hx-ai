@@ -163,6 +163,8 @@ const NESTED_COMPLETIONS: CompletionMap = {
     { cmd: "pattern", desc: "Add a code pattern to follow" },
     { cmd: "lesson", desc: "Record a lesson learned" },
     { cmd: "search", desc: "Search existing knowledge entries" },
+    { cmd: "audit", desc: "Audit KNOWLEDGE.md for weak or vague entries" },
+    { cmd: "improve", desc: "Select and rewrite weak knowledge entries with AI" },
   ],
   start: [
     { cmd: "bugfix", desc: "Triage, fix, test, and ship a bug fix" },
