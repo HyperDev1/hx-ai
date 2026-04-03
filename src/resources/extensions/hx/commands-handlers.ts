@@ -432,6 +432,50 @@ export async function handleKnowledgeSearch(query: string, ctx: ExtensionCommand
   );
 }
 
+export async function handleKnowledgeAudit(ctx: ExtensionCommandContext, pi: ExtensionAPI): Promise<void> {
+  const basePath = process.cwd();
+  const { resolveHxRootFile } = await import("./paths.js");
+  const { loadFile } = await import("./files.js");
+  const knowledgePath = resolveHxRootFile(basePath, "KNOWLEDGE");
+  const knowledgeContent = await loadFile(knowledgePath);
+
+  if (!knowledgeContent) {
+    ctx.ui.notify("No KNOWLEDGE.md found. Add entries first with /hx knowledge rule|pattern|lesson.", "warning");
+    return;
+  }
+
+  const prompt = loadPrompt("knowledge-audit", { knowledgeContent });
+  pi.sendMessage(
+    { customType: "hx-knowledge-audit", content: prompt, display: false },
+    { triggerTurn: true },
+  );
+}
+
+export async function handleKnowledgeImprove(ctx: ExtensionCommandContext, pi: ExtensionAPI): Promise<void> {
+  const basePath = process.cwd();
+  const { resolveHxRootFile } = await import("./paths.js");
+  const { loadFile } = await import("./files.js");
+  const knowledgePath = resolveHxRootFile(basePath, "KNOWLEDGE");
+  const knowledgeContent = await loadFile(knowledgePath);
+
+  if (!knowledgeContent) {
+    ctx.ui.notify("No KNOWLEDGE.md found. Add entries first with /hx knowledge rule|pattern|lesson.", "warning");
+    return;
+  }
+
+  const prefs = loadEffectiveHXPreferences();
+  const language = prefs?.preferences.language ?? "en";
+
+  const prompt = loadPrompt("knowledge-improve", {
+    knowledgeContent,
+    language: language === "en" ? "English" : language,
+  });
+  pi.sendMessage(
+    { customType: "hx-knowledge-improve", content: prompt, display: false },
+    { triggerTurn: true },
+  );
+}
+
 export async function handleRunHook(args: string, ctx: ExtensionCommandContext, pi: ExtensionAPI): Promise<void> {
   const parts = args.trim().split(/\s+/);
   if (parts.length < 3) {
