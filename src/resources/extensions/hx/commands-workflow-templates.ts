@@ -26,11 +26,36 @@ import { getErrorMessage } from "./error-utils.js";
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 /**
- * Generate a URL-friendly slug from text.
+ * Extra transliteration map for characters that NFD decomposition doesn't
+ * reduce to ASCII (e.g. Turkish ı, ş, ğ; German ß; Scandinavian ø, æ, etc.).
  */
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
+const TRANSLITERATE: Record<string, string> = {
+  ı: "i", İ: "i", ş: "s", Ş: "s", ğ: "g", Ğ: "g", ç: "c", Ç: "c",
+  ö: "o", Ö: "o", ü: "u", Ü: "u",
+  ß: "ss", ø: "o", Ø: "o", æ: "ae", Æ: "ae", đ: "d", Đ: "d",
+  ł: "l", Ł: "l", ð: "d", þ: "th",
+};
+
+/**
+ * Generate a URL-friendly slug from text.
+ *
+ * Handles non-ASCII characters by:
+ * 1. Applying an explicit transliteration map for letters NFD can't decompose
+ * 2. NFD-decomposing accented chars and stripping combining diacritical marks
+ * 3. Replacing remaining non-alphanumeric chars with dashes
+ *
+ * @internal Exported for testing.
+ */
+export function slugify(text: string): string {
+  let s = text.toLowerCase();
+
+  // Apply explicit transliterations first (ı→i, ş→s, ğ→g, ß→ss, etc.)
+  s = s.replace(/[^\x00-\x7F]/g, (ch) => TRANSLITERATE[ch] ?? ch);
+
+  // NFD decompose (e.g. é → e + combining accent) then strip combining marks
+  s = s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+  return s
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
     .slice(0, 40)
