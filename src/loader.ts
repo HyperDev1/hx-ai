@@ -20,7 +20,9 @@ try {
 } catch { /* ignore */ }
 
 if (firstArg === '--version' || firstArg === '-v') {
-  process.stdout.write(hxVersion + '\n')
+  const env = process.env.HX_ENV
+  const suffix = env && env !== 'production' ? ` (${env})` : ''
+  process.stdout.write(hxVersion + suffix + '\n')
   process.exit(0)
 }
 
@@ -88,7 +90,12 @@ const pkgDir = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'pkg')
 // reads to determine APP_NAME and CONFIG_DIR_NAME
 process.env.PI_PACKAGE_DIR = pkgDir
 process.env.PI_SKIP_VERSION_CHECK = '1'  // HX runs its own update check in cli.ts — suppress pi's
-process.title = 'hx'
+
+// HX_ENV — runtime environment. Set by hx-dev (staging) and hx-local (local)
+// launch scripts. When not set (npm global install), defaults to production.
+const hxEnv = process.env.HX_ENV ?? 'production'
+process.env.HX_ENV = hxEnv
+process.title = hxEnv === 'production' ? 'hx' : `hx [${hxEnv}]`
 
 // Print branded banner on first launch (before ~/.hx/ exists).
 // Set GSD_FIRST_RUN_BANNER so cli.ts skips the duplicate welcome screen.
@@ -96,12 +103,14 @@ if (!existsSync(appRoot)) {
   const cyan  = '\x1b[36m'
   const green = '\x1b[32m'
   const dim   = '\x1b[2m'
+  const yellow = '\x1b[33m'
   const reset = '\x1b[0m'
   const colorCyan = (s: string) => `${cyan}${s}${reset}`
+  const envTag = hxEnv !== 'production' ? ` ${yellow}[${hxEnv}]${reset}` : ''
   process.stderr.write(
     renderLogo(colorCyan) +
     '\n' +
-    `  HX — Hyperlab Coding Agent ${dim}v${hxVersion}${reset}\n` +
+    `  HX — Hyperlab Coding Agent ${dim}v${hxVersion}${reset}${envTag}\n` +
     `  ${green}Welcome.${reset} Setting up your environment...\n\n`
   )
   process.env.HX_FIRST_RUN_BANNER = '1'

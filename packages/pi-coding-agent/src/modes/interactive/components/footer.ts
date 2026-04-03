@@ -110,6 +110,12 @@ export class FooterComponent implements Component {
 			pwd = `${pwd} • ${sessionName}`;
 		}
 
+		// Show environment tag for non-production environments
+		const hxEnv = process.env.HX_ENV;
+		if (hxEnv && hxEnv !== 'production') {
+			pwd = `${pwd} [${hxEnv}]`;
+		}
+
 		// Build stats line
 		const statsParts = [];
 		if (totalInput) statsParts.push(`↑${formatTokens(totalInput)}`);
