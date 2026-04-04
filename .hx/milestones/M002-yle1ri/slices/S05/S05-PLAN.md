@@ -66,7 +66,7 @@
   - Estimate: 60min
   - Files: src/resources/extensions/hx/types.ts, src/resources/extensions/hx/state.ts, src/resources/extensions/hx/forensics.ts, src/resources/extensions/hx/doctor-runtime-checks.ts, src/resources/extensions/hx/tests/forensics-db-completion.test.ts, src/resources/extensions/hx/tests/hook-key-parsing.test.ts
   - Verify: cd /Users/beratcan/Desktop/GithubProjects/hx-ai/.hx/worktrees/M002-yle1ri && npx tsc --noEmit && node scripts/compile-tests.mjs && node --test dist-test/src/resources/extensions/hx/tests/forensics-db-completion.test.js && node --test dist-test/src/resources/extensions/hx/tests/hook-key-parsing.test.js
-- [ ] **T03: Forensics context persistence across follow-up turns** — Apply upstream fix #2e90c244f: write a marker file after forensics completes so follow-up turns can inject the saved report as context.
+- [x] **T03: Added ForensicsMarker + writeForensicsMarker/readForensicsMarker to forensics.ts, integrated hx-forensics context injection into system-context.ts, and created 17-test suite — all passing** — Apply upstream fix #2e90c244f: write a marker file after forensics completes so follow-up turns can inject the saved report as context.
 
 **Steps:**
 

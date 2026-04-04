@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-04-04T18:09:46.391Z",
+  "exported_at": "2026-04-04T18:14:04.906Z",
   "milestones": [
     {
       "id": "M001-df6x5t",
@@ -2884,19 +2884,28 @@
       "milestone_id": "M002-yle1ri",
       "slice_id": "S05",
       "id": "T03",
-      "title": "Forensics context persistence across follow-up turns",
-      "status": "pending",
-      "one_liner": "",
-      "narrative": "",
-      "verification_result": "",
+      "title": "Added ForensicsMarker + writeForensicsMarker/readForensicsMarker to forensics.ts, integrated hx-forensics context injection into system-context.ts, and created 17-test suite — all passing",
+      "status": "complete",
+      "one_liner": "Added ForensicsMarker + writeForensicsMarker/readForensicsMarker to forensics.ts, integrated hx-forensics context injection into system-context.ts, and created 17-test suite — all passing",
+      "narrative": "The verification failure in the auto-fix prompt was the gate running test paths relative to the main project root instead of the worktree (the compiled test files exist in the worktree's dist-test/, not the project root's). The T02 tests themselves were already correct and passing. For T03 proper: forensics.ts gained the ForensicsMarker interface (savedPath, content, writtenAt) as an exported type, plus writeForensicsMarker (writes JSON to .hx/runtime/forensics-marker.json, creating the directory if needed, non-fatal on error) and readForensicsMarker (reads and JSON-parses the marker file, returns null on any error). handleForensics() calls writeForensicsMarker(basePath, savedPath, content) after pi.sendMessage. system-context.ts gained unlinkSync in its node:fs import, readForensicsMarker imported from ../forensics.js, hxRoot added to the existing paths import, plus two new local functions: buildForensicsContextInjection (calls readForensicsMarker, formats a carry-forward context block, or returns null) and clearForensicsMarker (calls unlinkSync on the marker path, ignores all errors). In buildBeforeAgentStartResult, when the guided-context injection (injection) is null, an IIFE checks for a forensics marker; if found, it clears it and returns a message with customType: hx-forensics. The test file uses source-read assertions only.",
+      "verification_result": "TypeCheck (npx tsc --noEmit): 0 errors. node scripts/compile-tests.mjs: success. node --test forensics-context-persist.test.js: 17/17 pass. T02 tests (forensics-db-completion + hook-key-parsing): 23/23 pass. T01 tests (5 suites, 33 tests): 33/33 pass.",
       "duration": "",
-      "completed_at": null,
+      "completed_at": "2026-04-04T18:14:04.847Z",
       "blocker_discovered": false,
-      "deviations": "",
-      "known_issues": "",
-      "key_files": [],
-      "key_decisions": [],
-      "full_summary_md": "",
+      "deviations": "IIFE pattern used in return spread (instead of extracting into a separate variable) to keep the return structure readable. hxRoot added to existing paths import rather than a new import line.",
+      "known_issues": "None.",
+      "key_files": [
+        "src/resources/extensions/hx/forensics.ts",
+        "src/resources/extensions/hx/bootstrap/system-context.ts",
+        "src/resources/extensions/hx/tests/forensics-context-persist.test.ts"
+      ],
+      "key_decisions": [
+        "clearForensicsMarker uses unlinkSync and ignores all errors (including ENOENT) to be safe",
+        "forensics injection uses customType hx-forensics (consistent with hx-guided-context already in system-context.ts)",
+        "forensics injection only happens when no guided-context injection exists (same turn priority as per plan)",
+        "IIFE pattern used in the return spread to keep the forensics check inline without restructuring the return shape"
+      ],
+      "full_summary_md": "---\nid: T03\nparent: S05\nmilestone: M002-yle1ri\nkey_files:\n  - src/resources/extensions/hx/forensics.ts\n  - src/resources/extensions/hx/bootstrap/system-context.ts\n  - src/resources/extensions/hx/tests/forensics-context-persist.test.ts\nkey_decisions:\n  - clearForensicsMarker uses unlinkSync and ignores all errors (including ENOENT) to be safe\n  - forensics injection uses customType hx-forensics (consistent with hx-guided-context already in system-context.ts)\n  - forensics injection only happens when no guided-context injection exists (same turn priority as per plan)\n  - IIFE pattern used in the return spread to keep the forensics check inline without restructuring the return shape\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-04-04T18:14:04.849Z\nblocker_discovered: false\n---\n\n# T03: Added ForensicsMarker + writeForensicsMarker/readForensicsMarker to forensics.ts, integrated hx-forensics context injection into system-context.ts, and created 17-test suite — all passing\n\n**Added ForensicsMarker + writeForensicsMarker/readForensicsMarker to forensics.ts, integrated hx-forensics context injection into system-context.ts, and created 17-test suite — all passing**\n\n## What Happened\n\nThe verification failure in the auto-fix prompt was the gate running test paths relative to the main project root instead of the worktree (the compiled test files exist in the worktree's dist-test/, not the project root's). The T02 tests themselves were already correct and passing. For T03 proper: forensics.ts gained the ForensicsMarker interface (savedPath, content, writtenAt) as an exported type, plus writeForensicsMarker (writes JSON to .hx/runtime/forensics-marker.json, creating the directory if needed, non-fatal on error) and readForensicsMarker (reads and JSON-parses the marker file, returns null on any error). handleForensics() calls writeForensicsMarker(basePath, savedPath, content) after pi.sendMessage. system-context.ts gained unlinkSync in its node:fs import, readForensicsMarker imported from ../forensics.js, hxRoot added to the existing paths import, plus two new local functions: buildForensicsContextInjection (calls readForensicsMarker, formats a carry-forward context block, or returns null) and clearForensicsMarker (calls unlinkSync on the marker path, ignores all errors). In buildBeforeAgentStartResult, when the guided-context injection (injection) is null, an IIFE checks for a forensics marker; if found, it clears it and returns a message with customType: hx-forensics. The test file uses source-read assertions only.\n\n## Verification\n\nTypeCheck (npx tsc --noEmit): 0 errors. node scripts/compile-tests.mjs: success. node --test forensics-context-persist.test.js: 17/17 pass. T02 tests (forensics-db-completion + hook-key-parsing): 23/23 pass. T01 tests (5 suites, 33 tests): 33/33 pass.\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `cd .hx/worktrees/M002-yle1ri && npx tsc --noEmit` | 0 | ✅ pass | 31200ms |\n| 2 | `node scripts/compile-tests.mjs` | 0 | ✅ pass | 4100ms |\n| 3 | `node --test dist-test/src/resources/extensions/hx/tests/forensics-context-persist.test.js` | 0 | ✅ pass | 211ms |\n| 4 | `node --test dist-test/.../forensics-db-completion.test.js dist-test/.../hook-key-parsing.test.js` | 0 | ✅ pass | 1675ms |\n| 5 | `node --test [5 prior T01 test files]` | 0 | ✅ pass | 273ms |\n\n\n## Deviations\n\nIIFE pattern used in return spread (instead of extracting into a separate variable) to keep the return structure readable. hxRoot added to existing paths import rather than a new import line.\n\n## Known Issues\n\nNone.\n\n## Files Created/Modified\n\n- `src/resources/extensions/hx/forensics.ts`\n- `src/resources/extensions/hx/bootstrap/system-context.ts`\n- `src/resources/extensions/hx/tests/forensics-context-persist.test.ts`\n",
       "description": "Apply upstream fix #2e90c244f: write a marker file after forensics completes so follow-up turns can inject the saved report as context.\n\n**Steps:**\n\n1. First, read `src/resources/extensions/hx/bootstrap/system-context.ts` to understand current `buildBeforeAgentStartResult` shape and existing customType strings (check if `hx-guided-context` or `gsd-guided-context` is used).\n\n2. **`src/resources/extensions/hx/forensics.ts`** — marker support:\n   - Add `ForensicsMarker` interface: `{ savedPath: string; content: string; writtenAt: string }`\n   - Add `writeForensicsMarker(basePath: string, savedPath: string, content: string): void` — writes marker JSON to `.hx/runtime/forensics-marker.json` (using `hxRoot` → `.hx/runtime/` path)\n   - Add `readForensicsMarker(basePath: string): ForensicsMarker | null` — reads and parses the marker file, returns null on any error\n   - In `handleForensics()`: at the end (after `sendMessage`), call `writeForensicsMarker(basePath, savedPath, promptContent)` where `savedPath` is the path where the forensics report was saved.\n\n3. **`src/resources/extensions/hx/bootstrap/system-context.ts`** — context injection:\n   - Add `unlinkSync` to the `fs` imports (or use `fs.unlinkSync`).\n   - Import `readForensicsMarker` from `../forensics.js`.\n   - Add `buildForensicsContextInjection(basePath: string): string | null` — calls `readForensicsMarker`, returns formatted context string if marker exists, null otherwise.\n   - Add `clearForensicsMarker(basePath: string): void` — calls `unlinkSync` on the marker path, ignores ENOENT.\n   - In `buildBeforeAgentStartResult()`: when there is no existing `injection` (i.e., no guided-context injection), check for forensics marker. If found, build a `forensicsInjection` with `customType: \"hx-forensics\"` and the content from the marker, then clear the marker. Add this injection to the result.\n   - Use `hxRoot` (not `gsdRoot`) for the basePath.\n\n4. **Create** `src/resources/extensions/hx/tests/forensics-context-persist.test.ts`: Source-read style test (~129 lines). Assert: (a) `ForensicsMarker` interface exported from forensics.ts; (b) `writeForensicsMarker` and `readForensicsMarker` exported; (c) `handleForensics` source calls `writeForensicsMarker`; (d) system-context.ts imports `readForensicsMarker`; (e) system-context.ts has `hx-forensics` customType string; (f) system-context.ts has `clearForensicsMarker` or equivalent `unlinkSync` call; (g) marker path uses `.hx/runtime/` directory.\n\n**Important naming note:** Check what customType is currently used for guided context in system-context.ts. If it's already `hx-guided-context` (not `gsd-guided-context`), use `hx-forensics` for consistency. If guided context still says `gsd-guided-context`, adapt forensics to `hx-forensics` regardless (forensics is new, guided is legacy).\n\n**Verify:** After `node scripts/compile-tests.mjs`: run `node --test dist-test/src/resources/extensions/hx/tests/forensics-context-persist.test.js`. Also run `npx tsc --noEmit` to confirm no type errors from the new imports.",
       "estimate": "50min",
       "files": [
@@ -4882,6 +4891,61 @@
       "verdict": "✅ pass",
       "duration_ms": 5500,
       "created_at": "2026-04-04T18:09:46.266Z"
+    },
+    {
+      "id": 160,
+      "task_id": "T03",
+      "slice_id": "S05",
+      "milestone_id": "M002-yle1ri",
+      "command": "cd .hx/worktrees/M002-yle1ri && npx tsc --noEmit",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 31200,
+      "created_at": "2026-04-04T18:14:04.847Z"
+    },
+    {
+      "id": 161,
+      "task_id": "T03",
+      "slice_id": "S05",
+      "milestone_id": "M002-yle1ri",
+      "command": "node scripts/compile-tests.mjs",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 4100,
+      "created_at": "2026-04-04T18:14:04.847Z"
+    },
+    {
+      "id": 162,
+      "task_id": "T03",
+      "slice_id": "S05",
+      "milestone_id": "M002-yle1ri",
+      "command": "node --test dist-test/src/resources/extensions/hx/tests/forensics-context-persist.test.js",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 211,
+      "created_at": "2026-04-04T18:14:04.847Z"
+    },
+    {
+      "id": 163,
+      "task_id": "T03",
+      "slice_id": "S05",
+      "milestone_id": "M002-yle1ri",
+      "command": "node --test dist-test/.../forensics-db-completion.test.js dist-test/.../hook-key-parsing.test.js",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 1675,
+      "created_at": "2026-04-04T18:14:04.847Z"
+    },
+    {
+      "id": 164,
+      "task_id": "T03",
+      "slice_id": "S05",
+      "milestone_id": "M002-yle1ri",
+      "command": "node --test [5 prior T01 test files]",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 273,
+      "created_at": "2026-04-04T18:14:04.847Z"
     }
   ]
 }
