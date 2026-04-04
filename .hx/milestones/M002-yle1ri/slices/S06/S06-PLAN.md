@@ -77,7 +77,7 @@ Upstream commit 7c00f53ef adds `windowsHide: true` to every `execFile`/`spawn` c
   - Estimate: 60m
   - Files: src/web-mode.ts, src/web/auto-dashboard-service.ts, src/web/bridge-service.ts, src/web/captures-service.ts, src/web/cleanup-service.ts, src/web/doctor-service.ts, src/web/export-service.ts, src/web/forensics-service.ts, src/web/history-service.ts, src/web/hooks-service.ts, src/web/recovery-diagnostics-service.ts, src/web/settings-service.ts, src/web/skill-health-service.ts, src/web/undo-service.ts, src/web/visualizer-service.ts, src/tests/integration/web-mode-cli.test.ts, src/tests/integration/web-mode-windows-hide.test.ts
   - Verify: npx tsc --noEmit
-- [ ] **T03: ask-user-questions free-text, MCP name spaces, OAuth shape, npm staleness, Discord links, extension paths** — ## Why
+- [x] **T03: Ported 6 upstream bugfix commits: ask-user-questions free-text follow-up, MCP server name normalization, OAuth google_search ?alt=sse+userAgent, detectStalePackages .git guard, Discord link canonicalization, and create-hx-extension path clarification — with 8 new test files; 4101 pass, 10 pre-existing failures** — ## Why
 Six isolated bugfix commits, each touching 1-3 files with no dependencies between them. Bundled as one task because they share verification (typecheck + test:unit) and all fit comfortably within one context window.
 
 ## Fixes

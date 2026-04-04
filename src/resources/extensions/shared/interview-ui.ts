@@ -105,7 +105,7 @@ export interface WrapUpOptions {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const OTHER_OPTION_LABEL = "None of the above";
-const OTHER_OPTION_DESCRIPTION = "Press TAB to add optional notes.";
+const OTHER_OPTION_DESCRIPTION = "Select to type your own answer.";
 
 // ─── Wrap-up screen ───────────────────────────────────────────────────────────
 
@@ -293,6 +293,13 @@ export async function showInterviewRound(
 		function goNextOrSubmit() {
 			if (!isMultiSelect(currentIdx)) {
 				states[currentIdx].committedIndex = states[currentIdx].cursorIndex;
+				if (!isMultiSelect(currentIdx) && states[currentIdx].cursorIndex === noneOrDoneIdx(currentIdx)) {
+					states[currentIdx].notesVisible = true;
+					focusNotes = true;
+					loadStateToEditor();
+					refresh();
+					return;
+				}
 			}
 
 			if (isMultiQuestion && currentIdx < questions.length - 1) {
