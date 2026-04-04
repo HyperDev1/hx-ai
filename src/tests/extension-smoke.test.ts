@@ -13,11 +13,19 @@
 
 import test from "node:test";
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
-const projectRoot = join(fileURLToPath(import.meta.url), "..", "..", "..");
-const extensionsDir = join(projectRoot, "src", "resources", "extensions");
+// When running from dist-test/, __dirname is dist-test/src/tests/ — walk up 3 levels
+// to reach the project root, then pick up extensions from dist-test when available
+// (compiled .js output) so that `import()` works without --experimental-strip-types.
+const thisDir = join(fileURLToPath(import.meta.url), "..");
+const projectRoot = join(thisDir, "..", "..", "..");
+const distTestExtensionsDir = join(projectRoot, "dist-test", "src", "resources", "extensions");
+const srcExtensionsDir = join(projectRoot, "src", "resources", "extensions");
+// Prefer dist-test extensions (compiled .js) when available — avoids .ts import failures.
+const extensionsDir = existsSync(distTestExtensionsDir) ? distTestExtensionsDir : srcExtensionsDir;
 
 // Extensions that can't be smoke-tested in a plain Node process.
 // Each entry documents WHY so we can remove it when the underlying issue is fixed.
@@ -47,7 +55,19 @@ test("all bundled extensions can be imported without throwing", async () => {
     }
 
     try {
-      await import(pathToFileURL(entryPath).href);
+      // When entryPath points to a .ts file inside dist-test, use the compiled .js
+      // instead — Node.js cannot load .ts files without --experimental-strip-types.
+      let importPath = entryPath;
+      if (
+        importPath.endsWith(".ts") &&
+        importPath.includes("dist-test")
+      ) {
+        const jsPath = importPath.slice(0, -3) + ".js";
+        if (existsSync(jsPath)) {
+          importPath = jsPath;
+        }
+      }
+      await import(pathToFileURL(importPath).href);
     } catch (err) {
       failures.push({
         path: relPath,

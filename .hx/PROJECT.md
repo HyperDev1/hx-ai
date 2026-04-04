@@ -13,16 +13,16 @@ HX is a complete, consistently-named AI coding agent harness with upstream stabi
 ## Current State
 
 - **M001-df6x5t COMPLETE** — All GSD→HX renames finished across 377 files. Zero GSD references outside migrate-gsd-to-hx.ts (intentionally preserved). typecheck:extensions exits 0.
+- **M002-yle1ri COMPLETE** — All 95 upstream gsd-2 v2.59.0 bugfix commits ported to hx-ai with GSD→HX naming adaptation. 422 non-.hx/ files changed. 4113 tests pass / 0 fail / 5 skip. npx tsc --noEmit exits 0. R001–R014 all validated.
+  - S01 ✅ State/DB Reconciliation & Data Safety — DB sync, disk→DB reconciliation, VACUUM recovery, unit ownership migration, coercion, data loss prevention (16 fixes)
+  - S02 ✅ Worktree/Git & Auto-mode Fixes — Worktree merge, MERGE_HEAD cleanup, pre-merge safety, auto-mode dispatch, headless routing, parallel mode fixes (21 fixes)
+  - S03 ✅ Milestone Lifecycle, Guided-flow & Model/Provider — Completion, guided-flow routing, model routing, provider resolution, rate-limit, OAuth fixes (19 fixes)
+  - S04 ✅ TUI/UI, Error Handling & Context Management — TUI layout (28-file), JSON parse error handling, YAML repair, compaction overflow, prompt explosion prevention (15 fixes)
+  - S05 ✅ Prompts, Diagnostics & Extensions — Prompt camelCase params, web_search→search-the-web migration, forensics DB counts / marker persistence / dedup ordering, doctor false-positive fixes, extension manifest hooks (12 fixes)
+  - S06 ✅ Remaining Fixes — read-tool offset clamping, Windows shell guards, ask-user-questions free-text, MCP name handling, OAuth google_search shape, misc (9 fixes + 4 test infrastructure repairs)
 - Runtime binaries and CLI entry points use `hx` naming
 - `.hx/` directory structure is in place (migrated from `.gsd/`)
 - `migrate-gsd-to-hx.ts` handles backward compat for `.gsd/` → `.hx/` directory migration
-- **M002-yle1ri IN PROGRESS** — Porting 95 bugfix commits from upstream gsd-2 v2.59.0 with GSD→HX naming adaptation
-  - S01 ✅ State/DB Reconciliation & Data Safety — DB sync, disk→DB reconciliation, VACUUM recovery, unit ownership migration, coercion, data loss prevention
-  - S02 ✅ Worktree/Git & Auto-mode Fixes — Worktree merge, MERGE_HEAD cleanup, pre-merge safety, auto-mode dispatch, headless routing, parallel mode fixes
-  - S03 ✅ Milestone Lifecycle, Guided-flow & Model/Provider — Completion, guided-flow routing, model routing, provider resolution, rate-limit, OAuth fixes
-  - S04 ✅ TUI/UI, Error Handling & Context Management — TUI layout (28-file), JSON parse error handling, YAML repair, compaction overflow, prompt explosion prevention
-  - S05 ✅ Prompts, Diagnostics & Extensions — Prompt camelCase params, web_search→search-the-web migration, forensics DB counts / marker persistence / dedup ordering, doctor false-positive fixes, extension manifest hooks (7 files)
-  - S06 ⬜ Remaining Fixes — read-tool offset clamping, Windows shell guards, ask-user-questions free-text, MCP name handling, OAuth google_search shape, misc
 
 ## Architecture / Key Patterns
 
@@ -41,4 +41,4 @@ See `.hx/REQUIREMENTS.md` for the explicit capability contract, requirement stat
 ## Milestone Sequence
 
 - [x] M001-df6x5t: GSD → HX Complete Rename — **COMPLETE** — Eliminated all residual GSD identifiers across 377 files. Zero GSD hits outside migrate-gsd-to-hx.ts. typecheck:extensions exits 0.
-- [ ] M002-yle1ri: Upstream v2.59.0 Bugfix Port — Port 95 bugfix commits from upstream gsd-2 v2.59.0 with GSD→HX naming adaptation.
+- [x] M002-yle1ri: Upstream v2.59.0 Bugfix Port — **COMPLETE** — Ported all 95 upstream gsd-2 v2.59.0 bugfix commits with GSD→HX naming adaptation across 6 slices. 422 files changed. 4113 tests pass / 0 fail. npx tsc --noEmit exits 0. R001–R014 validated.

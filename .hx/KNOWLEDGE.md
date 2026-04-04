@@ -125,3 +125,57 @@ This keeps the conditional logic inline without extracting extra variables that 
 **Rule:** `splitCompletedKey` returns `null` for `hook/<name>` keys with NO id remainder (i.e., exactly `hook/name` with nothing after the slash), not just any malformed input. A key like `hook/telegram-progress/M007/S01` is valid (type=`hook/telegram-progress`, id=`M007/S01`). Only keys with zero slashes or hook keys with no segment after the hook name return null.
 
 **Pattern:** When using splitCompletedKey, always null-check the result before destructuring. Log/skip null entries rather than crashing.
+
+## Node.js 23.4 cannot import absolute .ts file:// URLs even with --import hooks
+
+The `resolve` hook in Node.js 23 is **not invoked** for absolute `file://` URLs pointing to `.ts` files — Node.js rejects the extension at the filesystem level before hooks run. This means any test that does `import(pathToFileURL('/path/to/file.ts').href)` will fail with `ERR_UNKNOWN_FILE_EXTENSION` regardless of what hooks are registered. Similarly, static `import` statements in `.mjs` files that reference `.ts` files bypass hooks.
+
+**Fix:** When running compiled tests from `dist-test/`, use the compiled `.js` counterpart. For the extension smoke test: use `dist-test/src/resources/extensions/` as extensionsDir. For `.mjs` test files with static imports: use `.js` extensions (the dist-test-resolve hook rewrites `.ts`→`.js` for relative imports in compiled `.js` files, but not in `.mjs` static imports).
+
+## HX_RTK_DISABLED=1 is set in this development environment
+
+Any test that exercises RTK functionality (rtk-session-stats, rewriteCommandWithRtk, etc.) must explicitly unset `HX_RTK_DISABLED` during the test. Use a helper pattern:
+```ts
+function withRtkEnabled(): () => void {
+  const prev = process.env.HX_RTK_DISABLED;
+  delete process.env.HX_RTK_DISABLED;
+  return () => {
+    if (prev === undefined) delete process.env.HX_RTK_DISABLED;
+    else process.env.HX_RTK_DISABLED = prev;
+  };
+}
+```
+Call the returned function in the `finally` block.
+
+## dist-test accumulates stale directories from renamed/removed source extensions
+
+The `compile-tests.mjs` script does **not** clean `dist-test/` before rebuilding — it only overwrites files that still exist in source. If a directory is renamed or removed (e.g., `gsd/` → `hx/`), the old directory persists in `dist-test/` indefinitely. This causes static analysis tests that scan `dist-test/src/` to find ghost files. Periodically run `rm -rf dist-test/src/resources/extensions/<old-name>` when renaming extension directories, or add a manifest-diff cleanup step to `compile-tests.mjs`.
+
+## deleteSlice disk-DB symmetry is a critical invariant (M002/S03)
+
+**Rule:** Any DB row deletion for a slice, task, or milestone must also remove the corresponding disk artifact directory. If only the DB row is deleted, `deriveState()` reconciliation will re-insert the deleted row on the next cycle (it scans disk and inserts any missing entries).
+
+**Pattern:** Always pair `deleteSlice(db, id)` with `rmSync(slicePath, { recursive: true, force: true })`. Same applies to tasks and milestones. The disk-DB symmetry invariant must be maintained in both directions — creation and deletion.
+
+## When porting upstream TUI changes, verify each item individually (M002/S04)
+
+**Rule:** hx-ai is frequently ahead of upstream on TUI changes (the fork has independent improvements). In the S04 28-file TUI audit, 12 of 15 items were already correct in hx-ai and required no changes. Do NOT assume all upstream TUI fixes need to be applied — check each one.
+
+**Pattern:** For each upstream TUI fix, `grep -n <pattern> <file>` in hx-ai before writing any code. If the fix is already there (same or equivalent implementation), mark it N/A and move on. Only the 3 items that were genuinely different required code changes.
+
+## upstream 'quality_gates' vs 'gate_results' table name divergence (M002/S03)
+
+**Rule:** The upstream gsd-2 codebase refers to gate rows in some files as written to a 'gate_results' table, but the actual hx-ai DB schema uses 'quality_gates'. Always verify the table name against the actual schema (`sqlite3 .hx/hx.db ".schema quality_gates"`) before porting any gate-writing code.
+
+**Pattern:** grep for both names in the actual schema file (hx-db.ts CREATE TABLE statements) before writing any INSERT INTO queries for gate rows. The safe name to use is 'quality_gates'.
+
+## Forensics marker pattern — reusable context-injection template (M002/S05)
+
+**Rule:** The forensics persistence pattern (write JSON to `.hx/runtime/<type>-marker.json` after an investigation, inject as a named custom-type context block on the next agent turn, then clear the marker) is a general template for "remember this for next turn" use cases.
+
+**Pattern:**
+1. After completing work: `writeFileSync(markerPath, JSON.stringify({ content: report, timestamp: Date.now() }))`
+2. In `buildBeforeAgentStartResult()`: check for marker, if present clear it and return `{ injection: { customType: "hx-<type>", content: marker.content } }`
+3. In `system-context.ts`: handle `customType === "hx-<type>"` to inject as a named context block
+
+The pattern handles cold-start re-injection (the agent was stopped and restarted) correctly because the marker persists on disk across process restarts.

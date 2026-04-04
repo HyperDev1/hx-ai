@@ -12,6 +12,17 @@ import {
 } from "../resources/extensions/shared/rtk-session-stats.ts";
 import { createFakeRtk } from "./rtk-test-utils.ts";
 
+// Ensure RTK is not disabled during tests — the environment may set HX_RTK_DISABLED=1.
+// Each test that needs RTK to be active should call withRtkEnabled() in its try/finally.
+function withRtkEnabled(): () => void {
+  const prev = process.env.HX_RTK_DISABLED;
+  delete process.env.HX_RTK_DISABLED;
+  return () => {
+    if (prev === undefined) delete process.env.HX_RTK_DISABLED;
+    else process.env.HX_RTK_DISABLED = prev;
+  };
+}
+
 function summary(totalCommands: number, totalInput: number, totalOutput: number, totalSaved: number, totalTimeMs = 1000) {
   return JSON.stringify({
     summary: {
@@ -38,6 +49,7 @@ test("RTK session savings diff from a persisted baseline", () => {
   });
 
   const previous = process.env.HX_RTK_PATH;
+  const restoreRtk = withRtkEnabled();
   try {
     process.env.HX_RTK_PATH = first.path;
     ensureRtkSessionBaseline(basePath, "sess-1");
@@ -53,6 +65,7 @@ test("RTK session savings diff from a persisted baseline", () => {
   } finally {
     if (previous === undefined) delete process.env.HX_RTK_PATH;
     else process.env.HX_RTK_PATH = previous;
+    restoreRtk();
     first.cleanup();
     second.cleanup();
     rmSync(basePath, { recursive: true, force: true });
@@ -71,6 +84,7 @@ test("RTK session savings baseline resets cleanly when tracking totals go backwa
   });
 
   const previous = process.env.HX_RTK_PATH;
+  const restoreRtk = withRtkEnabled();
   try {
     process.env.HX_RTK_PATH = first.path;
     ensureRtkSessionBaseline(basePath, "sess-2");
@@ -83,6 +97,7 @@ test("RTK session savings baseline resets cleanly when tracking totals go backwa
   } finally {
     if (previous === undefined) delete process.env.HX_RTK_PATH;
     else process.env.HX_RTK_PATH = previous;
+    restoreRtk();
     first.cleanup();
     second.cleanup();
     rmSync(basePath, { recursive: true, force: true });
@@ -107,6 +122,7 @@ test("RTK session stats fall back to the managed RTK path when HX_RTK_PATH is un
 
   const previousHome = process.env.HX_HOME;
   const previousPath = process.env.HX_RTK_PATH;
+  const restoreRtk = withRtkEnabled();
 
   try {
     process.env.HX_HOME = managedHome;
@@ -117,6 +133,7 @@ test("RTK session stats fall back to the managed RTK path when HX_RTK_PATH is un
       HX_HOME: managedHome,
     };
     delete env.HX_RTK_PATH;
+    delete env.HX_RTK_DISABLED;
 
     const baseline = ensureRtkSessionBaseline(basePath, "sess-managed", env);
     assert.ok(baseline, "expected baseline from managed RTK path");
@@ -129,6 +146,7 @@ test("RTK session stats fall back to the managed RTK path when HX_RTK_PATH is un
     else process.env.HX_HOME = previousHome;
     if (previousPath === undefined) delete process.env.HX_RTK_PATH;
     else process.env.HX_RTK_PATH = previousPath;
+    restoreRtk();
     fake.cleanup();
     rmSync(managedHome, { recursive: true, force: true });
     rmSync(basePath, { recursive: true, force: true });
@@ -172,6 +190,7 @@ test("clearRtkSessionBaseline removes a stored session entry", () => {
     "gain --all --format json": { stdout: summary(3, 300, 200, 100) },
   });
   const previous = process.env.HX_RTK_PATH;
+  const restoreRtk = withRtkEnabled();
 
   try {
     process.env.HX_RTK_PATH = fake.path;
@@ -183,6 +202,7 @@ test("clearRtkSessionBaseline removes a stored session entry", () => {
   } finally {
     if (previous === undefined) delete process.env.HX_RTK_PATH;
     else process.env.HX_RTK_PATH = previous;
+    restoreRtk();
     fake.cleanup();
     rmSync(basePath, { recursive: true, force: true });
   }

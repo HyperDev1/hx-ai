@@ -44,10 +44,13 @@ test("buildRtkEnv prepends the managed bin dir and disables telemetry", () => {
 
 test("rewriteCommandWithRtk rewrites when RTK returns exit 0 or 3", () => {
   const spawnSyncImpl = ((_binary: string, _args: string[]) => ({ status: 0, stdout: "rtk git status", error: undefined })) as typeof import("node:child_process").spawnSync;
-  assert.equal(rewriteCommandWithRtk("git status", { binaryPath: "/tmp/rtk", spawnSyncImpl }), "rtk git status");
+  // Pass an explicit env without HX_RTK_DISABLED so the test is not affected by the env var.
+  const env: NodeJS.ProcessEnv = { ...process.env };
+  delete env.HX_RTK_DISABLED;
+  assert.equal(rewriteCommandWithRtk("git status", { binaryPath: "/tmp/rtk", spawnSyncImpl, env }), "rtk git status");
 
   const askSpawn = ((_binary: string, _args: string[]) => ({ status: 3, stdout: "rtk npm run test", error: undefined })) as typeof import("node:child_process").spawnSync;
-  assert.equal(rewriteCommandWithRtk("npm run test", { binaryPath: "/tmp/rtk", spawnSyncImpl: askSpawn }), "rtk npm run test");
+  assert.equal(rewriteCommandWithRtk("npm run test", { binaryPath: "/tmp/rtk", spawnSyncImpl: askSpawn, env }), "rtk npm run test");
 });
 
 test("rewriteCommandWithRtk passes commands through on no-match or process error", () => {
@@ -89,8 +92,9 @@ test("rewriteCommandWithRtk falls back to the managed RTK path when HX_RTK_PATH 
     const env = {
       ...process.env,
       HX_HOME: managedHome,
-    };
+    } as NodeJS.ProcessEnv;
     delete env.HX_RTK_PATH;
+    delete env.HX_RTK_DISABLED;
 
     assert.equal(resolveRtkBinaryPath({ env }), managedPath);
     assert.equal(rewriteCommandWithRtk("git status", { env }), "rtk git status");
