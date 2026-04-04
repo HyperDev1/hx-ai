@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "taskId": "T03",
+  "unitId": "M002-yle1ri/S04/T03",
+  "timestamp": 1775314149666,
+  "passed": true,
+  "discoverySource": "task-plan",
+  "checks": [
+    {
+      "command": "npx tsc --noEmit",
+      "exitCode": 0,
+      "durationMs": 6275,
+      "verdict": "pass"
+    },
+    {
+      "command": "node --test dist-test/src/tests/provider-manager-remove.test.js",
+      "exitCode": 0,
+      "durationMs": 853,
+      "verdict": "pass"
+    }
+  ]
+}

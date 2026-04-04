@@ -8,7 +8,7 @@ The codebase was originally named "GSD" and has been fully rebranded to "HX" / "
 
 ## Core Value
 
-HX is a complete, consistently-named AI coding agent harness. The GSD→HX rename is complete — every public-facing and internal identifier uses `hx` / `HX` naming.
+HX is a complete, consistently-named AI coding agent harness with upstream stability fixes applied. The GSD→HX rename is complete, and the codebase stays current with upstream bugfixes while maintaining its own identity.
 
 ## Current State
 
@@ -16,7 +16,7 @@ HX is a complete, consistently-named AI coding agent harness. The GSD→HX renam
 - Runtime binaries and CLI entry points use `hx` naming
 - `.hx/` directory structure is in place (migrated from `.gsd/`)
 - `migrate-gsd-to-hx.ts` handles backward compat for `.gsd/` → `.hx/` directory migration
-- **Post-merge items:** run test:unit/test:integration in main repo; CI must rebuild native binaries (hx_engine.*.node); publish @hx-build/engine-* platform packages to npm registry; rename any GSD_* secrets in GitHub repository settings.
+- **M002-yle1ri IN PROGRESS** — Porting 95 bugfix commits from upstream gsd-2 v2.59.0 with GSD→HX naming adaptation
 
 ## Architecture / Key Patterns
 
@@ -26,6 +26,7 @@ HX is a complete, consistently-named AI coding agent harness. The GSD→HX renam
 - **Prompts**: Markdown files in `src/resources/extensions/hx/prompts/` reference hx_* tool names exclusively
 - **Preferences**: `HXPreferences` interface is the central config type used across ~30 files
 - **Web module**: Next.js app at `web/` uses `HX_WEB_*` env vars and HX-prefixed React components
+- **Upstream**: Fork of `gsd-build/gsd-2` — upstream remote configured, diverged at `fe0e21895`. Upstream uses `gsd`/`GSD` naming; hx-ai uses `hx`/`HX` naming. All upstream ports require naming adaptation.
 
 ## Capability Contract
 
@@ -34,3 +35,4 @@ See `.hx/REQUIREMENTS.md` for the explicit capability contract, requirement stat
 ## Milestone Sequence
 
 - [x] M001-df6x5t: GSD → HX Complete Rename — **COMPLETE** — Eliminated all residual GSD identifiers across 377 files. Zero GSD hits outside migrate-gsd-to-hx.ts. typecheck:extensions exits 0.
+- [ ] M002-yle1ri: Upstream v2.59.0 Bugfix Port — Port 95 bugfix commits from upstream gsd-2 v2.59.0 with GSD→HX naming adaptation.

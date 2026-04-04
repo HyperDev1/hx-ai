@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "taskId": "T01",
+  "unitId": "M002-yle1ri/S03/T01",
+  "timestamp": 1775307278678,
+  "passed": true,
+  "discoverySource": "task-plan",
+  "checks": [
+    {
+      "command": "npx tsc --noEmit",
+      "exitCode": 0,
+      "durationMs": 3923,
+      "verdict": "pass"
+    },
+    {
+      "command": "node --test dist-test/src/resources/extensions/hx/tests/state-corruption-2945.test.js dist-test/src/resources/extensions/hx/tests/summary-render-parity.test.js dist-test/src/resources/extensions/hx/tests/workflow-projections.test.js dist-test/src/resources/extensions/hx/tests/validate-milestone-write-order.test.js",
+      "exitCode": 0,
+      "durationMs": 602,
+      "verdict": "pass"
+    }
+  ]
+}

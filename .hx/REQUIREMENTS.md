@@ -2,152 +2,214 @@
 
 This file is the explicit capability and coverage contract for the project.
 
-## Validated
-
-All R001–R012 requirements were validated during M001-df6x5t. See VALIDATION.md for full evidence.
-
-### R001 — All TypeScript type/interface names use HX prefix
-- Class: core-capability
-- Status: validated
-- Description: Every `GSD*` type and interface renamed to `HX*` / `Hx*` equivalents (~37 unique types, 100+ files).
-- Source: user
-- Primary owning slice: M001-df6x5t/S01
-- Validation: `grep -rn 'GSD[A-Za-z]|Gsd[A-Z]|gsd[A-Z]' --include='*.ts' --include='*.tsx'` returns 0 hits (excl. migrate-gsd-to-hx.ts, batchParseGsdFiles N-API call, gsd_engine path strings). npm run typecheck:extensions exits 0.
-
-### R002 — All environment variables use HX_ prefix
-- Class: core-capability
-- Status: validated
-- Description: Every `GSD_*` environment variable renamed to `HX_*` (~43 unique env vars across all source types).
-- Source: user
-- Primary owning slice: M001-df6x5t/S02
-- Validation: `grep -rn 'GSD_'` across all .ts/.tsx/.js/.sh/.yml/.yaml/.json (excl node_modules/dist/.next/.hx/.git) returns 0 hits.
-
-### R003 — All DB tool names use hx_ prefix
-- Class: core-capability
-- Status: validated
-- Description: All 14 canonical tool names and aliases changed from `gsd_*` to `hx_*`. All 29 prompt files updated.
-- Source: user
-- Primary owning slice: M001-df6x5t/S03
-- Validation: `grep -rn 'gsd_' src/resources/extensions/hx/prompts/` returns 0. 13 registerAlias calls in db-tools.ts. All 12 hx test files assert hx_* names.
-
-### R004 — Native Rust engine uses hx naming
-- Class: core-capability
-- Status: validated
-- Description: Rust source `gsd_parser.rs` → `hx_parser.rs`; N-API functions `batch_parse_hx_files`/`scan_hx_tree`; binaries `hx_engine.*.node`; packages `@hx-build/engine-*`.
-- Source: user
-- Primary owning slice: M001-df6x5t/S04
-- Validation: hx_parser.rs exists; gsd_parser.rs absent; lib.rs uses `mod hx_parser`; all 5 @hx-build/engine-* platform packages updated; native.ts loads hx_engine.*.node. Note: D005 corrected scope from @hyperlab to @hx-build to match existing require path in native.ts.
-
-### R005 — Internal variable names use hx prefix
-- Class: quality-attribute
-- Status: validated
-- Description: All internal variable names using `gsd` prefix renamed to `hx` equivalents (~30 unique names, ~250+ usages across ~60 files).
-- Source: user
-- Primary owning slice: M001-df6x5t/S01
-- Supporting slices: S05
-- Validation: grep for all gsd* variable patterns returns 0 hits outside intentionally preserved files.
-
-### R006 — Web module uses HX naming
-- Class: core-capability
-- Status: validated
-- Description: Package name `hx-web`; `HX_WEB_*` env vars throughout; HX-prefixed React components; pty-manager.ts prefix filter uses `HX_WEB_`.
-- Source: user
-- Primary owning slice: M001-df6x5t/S02
-- Validation: web/package-lock.json shows hx-web; pty-manager.ts uses HX_WEB_ prefix; rpc-mode.ts reads HX_WEB_BRIDGE_TUI.
-
-### R007 — Docker, CI/CD, and docs use HX naming
-- Class: core-capability
-- Status: validated
-- Description: All Docker, CI/CD workflows, .plans/, docs/, CHANGELOG.md, README.md use HX naming.
-- Source: user
-- Primary owning slice: M001-df6x5t/S05
-- Validation: All 5 GitHub Actions workflows updated; docker/entrypoint.sh and docker-compose.full.yaml updated; all docs and .plans/ files updated (~330 hits across 17 .plans/ files).
-
-### R008 — File renames from gsd to hx
-- Class: core-capability
-- Status: validated
-- Description: All gsd-named files renamed: gsd_parser.rs→hx_parser.rs, 4 test files git-mv'd to hx-*, 7 native platform package dirs renamed, recovery scripts renamed.
-- Source: user
-- Primary owning slice: M001-df6x5t/S04
-- Supporting slices: S01, S05
-- Validation: All old gsd-named files absent; new hx-named present. `test ! -f src/resources/extensions/hx/tests/gsd-db.test.ts` passes; `test -f src/resources/extensions/hx/tests/hx-db.test.ts` passes.
-
-### R009 — migrate-gsd-to-hx.ts remains untouched
-- Class: constraint
-- Status: validated
-- Description: The migration file `src/resources/extensions/hx/migrate-gsd-to-hx.ts` preserved with all 4 GSD-named exports intact.
-- Source: user
-- Validation: `git diff src/resources/extensions/hx/migrate-gsd-to-hx.ts | wc -l` → 0 throughout all slices. File has 4 GSD-named exports intact.
-
-### R010 — TypeScript compilation passes after rename
-- Class: quality-attribute
-- Status: validated
-- Description: `npm run typecheck:extensions` passes with zero errors after all renames.
-- Source: inferred
-- Primary owning slice: M001-df6x5t/S01
-- Supporting slices: S02, S03, S04, S05
-- Validation: npm run typecheck:extensions exits 0 — verified after S01, S02, S03, S04, S05, and independently during milestone validation.
-
-### R011 — All existing tests pass after rename
-- Class: quality-attribute
-- Status: partially-validated
-- Description: Test files renamed and content updated; TypeScript compilation passes. Unit/integration test execution not runnable in worktree (missing esbuild dev dependency).
-- Source: inferred
-- Primary owning slice: M001-df6x5t/S05
-- Validation: All test file renames complete; all grep checks pass; typecheck:extensions exits 0. Full test:unit/test:integration execution must be verified in main repo after merge.
-
-### R012 — Zero gsd/GSD references remain (excluding migration code)
-- Class: core-capability
-- Status: validated
-- Description: Final comprehensive grep across all file types returns 0 hits outside migrate-gsd-to-hx.ts and auto-generated package-lock.json.
-- Source: user
-- Primary owning slice: M001-df6x5t/S05
-- Validation: `grep -rn 'gsd|GSD|Gsd' . --include='*.ts' --include='*.tsx' --include='*.js' --include='*.mjs' --include='*.sh' --include='*.ps1' --include='*.yml' --include='*.yaml' --include='*.md' --include='*.rs' --include='*.json' --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=.next --exclude-dir=.git --exclude-dir=.hx | grep -v migrate-gsd-to-hx | grep -v 'package-lock.json' | wc -l` → 0.
+Use it to track what is actively in scope, what has been validated by completed work, what is intentionally deferred, and what is explicitly out of scope.
 
 ## Active
 
-(none — all requirements validated by M001-df6x5t)
+### R001 — All upstream v2.59.0 bugfixes applied to hx-ai
+- Class: core-capability
+- Status: active
+- Description: All 95 bugfix commits from upstream gsd-2 between merge-base (fe0e21895) and v2.59.0 tag must be analyzed and applied to hx-ai with GSD→HX naming adaptation
+- Why it matters: hx-ai inherits the same bugs as upstream — state corruption, data loss, merge races, TUI glitches, compaction overflow, DB sync issues
+- Source: user
+- Primary owning slice: M002-yle1ri/S01-S06
+- Supporting slices: none
+- Validation: unmapped
+- Notes: Each fix applied or explicitly skipped with documented rationale
+
+### R002 — GSD→HX naming adaptation consistent across all ported fixes
+- Class: quality-attribute
+- Status: active
+- Description: Every ported fix must use hx/HX naming (function names, env vars, file paths, comments, strings) — no GSD references introduced
+- Why it matters: M001-df6x5t eliminated all GSD references; porting upstream code must not reintroduce them
+- Source: inferred
+- Primary owning slice: M002-yle1ri/S01-S06
+- Supporting slices: none
+- Validation: unmapped
+- Notes: Verified by grep for residual gsd/GSD references after each slice
+
+### R003 — State/DB reconciliation fixes applied (16 fixes)
+- Class: core-capability
+- Status: active
+- Description: State machine DB sync, disk→DB reconciliation, SQLite migration, schema recovery, and data loss prevention fixes from upstream applied
+- Why it matters: State corruption and data loss are the most severe class of bugs — these fixes prevent silent data destruction
+- Source: user
+- Primary owning slice: M002-yle1ri/S01
+- Supporting slices: none
+- Validation: unmapped
+- Notes: Includes VACUUM recovery, unit ownership migration, DB column coercion, deriveState reconciliation
+
+### R004 — Worktree/git merge fixes applied (14 fixes)
+- Class: core-capability
+- Status: active
+- Description: Worktree merge, MERGE_HEAD cleanup, pre-merge safety, snapshot absorption, nested .git detection, and parallel mode boundary fixes from upstream applied
+- Why it matters: Worktree operations are the most complex git interactions — merge failures can destroy work
+- Source: user
+- Primary owning slice: M002-yle1ri/S02
+- Supporting slices: none
+- Validation: unmapped
+- Notes: Includes 3 separate MERGE_HEAD cleanup fixes, worktree DB sync, parallel milestone scoping
+
+### R005 — Milestone lifecycle fixes applied (10 fixes)
+- Class: core-capability
+- Status: active
+- Description: Milestone/slice completion, roadmap parser, validation invalidation, SUMMARY render, plan-milestone guard, and completing-milestone gate fixes from upstream applied
+- Why it matters: Milestone lifecycle bugs cause stuck states, lost progress, and incorrect completion reporting
+- Source: user
+- Primary owning slice: M002-yle1ri/S03
+- Supporting slices: none
+- Validation: unmapped
+- Notes: Includes 4 state corruption fixes in completion, roadmap H3 header parser, milestone title preservation
+
+### R006 — Model/provider routing fixes applied (8 fixes)
+- Class: core-capability
+- Status: active
+- Description: Model routing, provider resolution, rate-limit classification, OAuth API key resolution, and new provider integration fixes from upstream applied
+- Why it matters: Model routing bugs cause 400/429 errors, wrong provider selection, and failed LLM calls
+- Source: user
+- Primary owning slice: M002-yle1ri/S03
+- Supporting slices: none
+- Validation: unmapped
+- Notes: Includes Codex/Gemini CLI integration, claude-code provider statefulness, bare model ID resolution
+
+### R007 — Auto-mode dispatch fixes applied (7 fixes)
+- Class: core-capability
+- Status: active
+- Description: Auto-mode dispatch, headless routing, ask_user_questions poisoning prevention, stopAuto race guard, and work execution blocking fixes from upstream applied
+- Why it matters: Auto-mode is the primary execution path — dispatch bugs cause hangs, infinite loops, and lost work
+- Source: user
+- Primary owning slice: M002-yle1ri/S02
+- Supporting slices: none
+- Validation: unmapped
+- Notes: Includes piped stdout detection, empty-content abort skip, queue mode blocking
+
+### R008 — TUI/UI rendering fixes applied (7 fixes)
+- Class: quality-attribute
+- Status: active
+- Description: TUI layout, flow, rendering, state, border color, widget, tab switching, notification, and non-TTY CPU burn fixes from upstream applied
+- Why it matters: TUI bugs cause visual glitches, CPU waste on non-TTY, and broken interactive workflows
+- Source: user
+- Primary owning slice: M002-yle1ri/S04
+- Supporting slices: none
+- Validation: unmapped
+- Notes: Includes comprehensive 28-file TUI review fix, skip-render-loop on non-TTY
+
+### R009 — Error handling / JSON parse fixes applied (4 fixes)
+- Class: quality-attribute
+- Status: active
+- Description: STREAM_RE catch-all, YAML bullet list repair, malformed tool-call JSON repair, and prompt explosion prevention fixes from upstream applied
+- Why it matters: Error handling gaps cause silent failures, unrecoverable parse errors, and prompt context poisoning
+- Source: user
+- Primary owning slice: M002-yle1ri/S04
+- Supporting slices: none
+- Validation: unmapped
+- Notes: Includes catch-all V8 JSON.parse pattern replacing whack-a-mole approach
+
+### R010 — Guided-flow / wizard fixes applied (4 fixes)
+- Class: core-capability
+- Status: active
+- Description: Guided-flow session isolation, discussion milestone queries, roadmap fallback, allDiscussed routing, and dynamic routing pipeline fixes from upstream applied
+- Why it matters: Guided-flow bugs cause wrong milestone selection, stuck discussions, and session state leaks
+- Source: user
+- Primary owning slice: M002-yle1ri/S03
+- Supporting slices: none
+- Validation: unmapped
+- Notes: Includes dispatchWorkflow routing through dynamic routing pipeline
+
+### R011 — Prompt and template fixes applied (5 fixes)
+- Class: quality-attribute
+- Status: active
+- Description: camelCase parameter naming, web_search→search-the-web replacement, PROJECT.md write tool specification, and template replacement explosion prevention fixes from upstream applied
+- Why it matters: Prompt bugs cause LLM confusion, wrong tool calls, and template corruption
+- Source: user
+- Primary owning slice: M002-yle1ri/S05
+- Supporting slices: none
+- Validation: unmapped
+- Notes: Fixes span execute-task, complete-slice, milestone, and slice prompts
+
+### R012 — Diagnostics (doctor/forensics) fixes applied (4 fixes)
+- Class: quality-attribute
+- Status: active
+- Description: Doctor audit false positives, forensics duplicate detection ordering, forensics report persistence, and completion status DB read fixes from upstream applied
+- Why it matters: False positives erode trust in diagnostics; missing persistence loses investigation context
+- Source: user
+- Primary owning slice: M002-yle1ri/S05
+- Supporting slices: none
+- Validation: unmapped
+- Notes: Includes forensics reading completion from DB instead of legacy file
+
+### R013 — Remaining fixes applied (tools, windows, user-interaction, misc)
+- Class: core-capability
+- Status: active
+- Description: read-tool offset clamping, Windows shell guards, ask-user-questions free-text input, MCP server name spaces, OAuth google_search shape, Discord links, and other miscellaneous fixes from upstream applied
+- Why it matters: These fixes address edge cases across multiple subsystems that individually cause user-facing failures
+- Source: user
+- Primary owning slice: M002-yle1ri/S06
+- Supporting slices: none
+- Validation: unmapped
+- Notes: Mix of platform compat, tool UX, and documentation fixes
+
+### R014 — Typecheck + build + tests all pass
+- Class: quality-attribute
+- Status: active
+- Description: After all fixes applied, tsc --noEmit passes, build succeeds, and full test suite passes
+- Why it matters: Ported fixes must not break existing functionality
+- Source: user
+- Primary owning slice: M002-yle1ri/S01-S06
+- Supporting slices: none
+- Validation: unmapped
+- Notes: Verified after each slice completion
 
 ## Deferred
 
-(none)
+### R015 — Upstream feature commits port (Ollama, codebase map, vscode redesign, etc.)
+- Class: core-capability
+- Status: deferred
+- Description: 8 feature commits from upstream v2.59.0 (Ollama extension, codebase map, vscode sidebar redesign, dynamic model routing default, widget improvements, extension topological sort, splash header)
+- Why it matters: These add new capabilities but are not stability fixes
+- Source: user
+- Primary owning slice: none
+- Supporting slices: none
+- Validation: unmapped
+- Notes: Deferred by user decision — bugfixes only for M002-yle1ri
 
 ## Out of Scope
 
-### R020 — npm registry package rename (gsd-pi → @hyperlab/hx)
+### R016 — Upstream CHANGELOG / version bump changes
 - Class: constraint
 - Status: out-of-scope
-- Description: Actual npm registry publish is outside this milestone's scope. Source files updated but no npm publish performed.
+- Description: CHANGELOG.md updates, package.json version bumps, and release-related changes from upstream are excluded
+- Why it matters: hx-ai has its own versioning and changelog — upstream release metadata is not applicable
+- Source: inferred
+- Primary owning slice: none
+- Supporting slices: none
 - Validation: n/a
-
-### R021 — GitHub org/repo rename (gsd-build → hyperlab)
-- Class: constraint
-- Status: out-of-scope
-- Description: GitHub org/repo URL references updated in source, but no actual GitHub org/repo rename performed.
-- Validation: n/a
+- Notes: hx-ai maintains independent version numbers
 
 ## Traceability
 
-| ID | Class | Status | Primary owner | Evidence |
-|---|---|---|---|---|
-| R001 | core-capability | validated | M001-df6x5t/S01 | grep returns 0 GSD type hits; typecheck exits 0 |
-| R002 | core-capability | validated | M001-df6x5t/S02 | grep -rn 'GSD_' returns 0 across all source |
-| R003 | core-capability | validated | M001-df6x5t/S03 | gsd_ in prompts → 0; 13 registerAlias calls |
-| R004 | core-capability | validated | M001-df6x5t/S04 | hx_parser.rs exists; @hx-build packages updated |
-| R005 | quality-attribute | validated | M001-df6x5t/S01 | gsd variable grep returns 0 |
-| R006 | core-capability | validated | M001-df6x5t/S02 | hx-web package name; HX_WEB_* env vars |
-| R007 | core-capability | validated | M001-df6x5t/S05 | all CI/Docker/docs updated; grep returns 0 |
-| R008 | core-capability | validated | M001-df6x5t/S04 | all gsd-named files absent; hx-named present |
-| R009 | constraint | validated | all slices | git diff migrate-gsd-to-hx.ts = 0 lines |
-| R010 | quality-attribute | validated | M001-df6x5t/S01 | typecheck:extensions exits 0 (verified 5+ times) |
-| R011 | quality-attribute | partially-validated | M001-df6x5t/S05 | files renamed; typecheck passes; runtime tests deferred to post-merge |
-| R012 | core-capability | validated | M001-df6x5t/S05 | comprehensive grep returns 0 hits |
-| R020 | constraint | out-of-scope | none | n/a |
-| R021 | constraint | out-of-scope | none | n/a |
+| ID | Class | Status | Primary owner | Supporting | Proof |
+|---|---|---|---|---|---|
+| R001 | core-capability | active | M002-yle1ri/S01-S06 | none | unmapped |
+| R002 | quality-attribute | active | M002-yle1ri/S01-S06 | none | unmapped |
+| R003 | core-capability | active | M002-yle1ri/S01 | none | unmapped |
+| R004 | core-capability | active | M002-yle1ri/S02 | none | unmapped |
+| R005 | core-capability | active | M002-yle1ri/S03 | none | unmapped |
+| R006 | core-capability | active | M002-yle1ri/S03 | none | unmapped |
+| R007 | core-capability | active | M002-yle1ri/S02 | none | unmapped |
+| R008 | quality-attribute | active | M002-yle1ri/S04 | none | unmapped |
+| R009 | quality-attribute | active | M002-yle1ri/S04 | none | unmapped |
+| R010 | core-capability | active | M002-yle1ri/S03 | none | unmapped |
+| R011 | quality-attribute | active | M002-yle1ri/S05 | none | unmapped |
+| R012 | quality-attribute | active | M002-yle1ri/S05 | none | unmapped |
+| R013 | core-capability | active | M002-yle1ri/S06 | none | unmapped |
+| R014 | quality-attribute | active | M002-yle1ri/S01-S06 | none | unmapped |
+| R015 | core-capability | deferred | none | none | unmapped |
+| R016 | constraint | out-of-scope | none | none | n/a |
 
 ## Coverage Summary
 
-- Requirements validated: 11 (R001–R010, R012)
-- Partially validated: 1 (R011 — test execution deferred to post-merge)
-- Out of scope: 2 (R020, R021)
-- Active requirements remaining: 0
+- Active requirements: 14
+- Mapped to slices: 14
+- Validated: 0
+- Unmapped active requirements: 0

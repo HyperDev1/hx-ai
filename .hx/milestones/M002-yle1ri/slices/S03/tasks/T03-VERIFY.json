@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "taskId": "T03",
+  "unitId": "M002-yle1ri/S03/T03",
+  "timestamp": 1775308610722,
+  "passed": false,
+  "discoverySource": "task-plan",
+  "checks": [
+    {
+      "command": "npx tsc --noEmit",
+      "exitCode": 0,
+      "durationMs": 3900,
+      "verdict": "pass"
+    },
+    {
+      "command": "node --test dist-test/src/resources/extensions/hx/tests/plan-milestone-title.test.js dist-test/src/resources/extensions/hx/tests/reassess-handler.test.js dist-test/src/resources/extensions/hx/tests/verification-operational-gate.test.js dist-test/src/resources/extensions/hx/tests/roadmap-slices.test.js",
+      "exitCode": 1,
+      "durationMs": 1443,
+      "verdict": "fail"
+    }
+  ],
+  "retryAttempt": 1,
+  "maxRetries": 2
+}

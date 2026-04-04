@@ -1,0 +1,1 @@
+{"ts":"2026-04-03T22:17:08.350Z","severity":"warn","component":"reconcile","message":"Stash pop conflict on non-.hx files after merge","context":{"files":"src/resources/extensions/hx/bootstrap/register-extension.ts, src/resources/extensions/hx/repo-identity.ts, src/resources/extensions/hx/session-lock.ts"}}
