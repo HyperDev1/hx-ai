@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-04-04T18:03:23.206Z",
+  "exported_at": "2026-04-04T18:09:46.391Z",
   "milestones": [
     {
       "id": "M001-df6x5t",
@@ -2825,19 +2825,30 @@
       "milestone_id": "M002-yle1ri",
       "slice_id": "S05",
       "id": "T02",
-      "title": "Forensics DB completion status + splitCompletedKey helper",
-      "status": "pending",
-      "one_liner": "",
-      "narrative": "",
-      "verification_result": "",
+      "title": "Added getDbCompletionCounts (DB-backed completion counts), splitCompletedKey (hook/* key parsing), and lastCompletedMilestone field — all with 23 passing tests",
+      "status": "complete",
+      "one_liner": "Added getDbCompletionCounts (DB-backed completion counts), splitCompletedKey (hook/* key parsing), and lastCompletedMilestone field — all with 23 passing tests",
+      "narrative": "All 6 source files modified or created as planned. types.ts gained lastCompletedMilestone in HXState. Both \"All milestones complete\" branches in state.ts now set activeMilestone: null + lastCompletedMilestone: lastEntry. forensics.ts gained DbCompletionCounts interface, getDbCompletionCounts (queries DB via getAllMilestones/getMilestoneSlices/getSliceTasks with isClosedStatus counting, try/catch returns null), dbCompletionCounts in ForensicReport, structured DB counts in formatReportForPrompt, splitCompletedKey exported function (hook/* prefix awareness), and detectMissingArtifacts updated to use splitCompletedKey. doctor-runtime-checks.ts imports splitCompletedKey and uses it in the orphaned-keys check. Two new test files created with 12+11=23 tests, all passing. Prior 50 T01 tests unaffected.",
+      "verification_result": "TypeCheck (npx tsc --noEmit): 0 errors. compile-tests.mjs: success. forensics-db-completion.test.js: 12/12 pass. hook-key-parsing.test.js: 11/11 pass. Prior T01 tests (50/50): still pass.",
       "duration": "",
-      "completed_at": null,
+      "completed_at": "2026-04-04T18:09:46.265Z",
       "blocker_discovered": false,
-      "deviations": "",
-      "known_issues": "",
-      "key_files": [],
-      "key_decisions": [],
-      "full_summary_md": "",
+      "deviations": "None — all source changes followed the task plan exactly.",
+      "known_issues": "None.",
+      "key_files": [
+        "src/resources/extensions/hx/types.ts",
+        "src/resources/extensions/hx/state.ts",
+        "src/resources/extensions/hx/forensics.ts",
+        "src/resources/extensions/hx/doctor-runtime-checks.ts",
+        "src/resources/extensions/hx/tests/forensics-db-completion.test.ts",
+        "src/resources/extensions/hx/tests/hook-key-parsing.test.ts"
+      ],
+      "key_decisions": [
+        "splitCompletedKey returns null for hook/<name> keys with no id (not just any hook/ prefix)",
+        "getDbCompletionCounts returns null (not 0) when DB unavailable, distinguishing DB-not-loaded from nothing-completed",
+        "Both All-milestones-complete branches in state.ts updated (DB path and filesystem path)"
+      ],
+      "full_summary_md": "---\nid: T02\nparent: S05\nmilestone: M002-yle1ri\nkey_files:\n  - src/resources/extensions/hx/types.ts\n  - src/resources/extensions/hx/state.ts\n  - src/resources/extensions/hx/forensics.ts\n  - src/resources/extensions/hx/doctor-runtime-checks.ts\n  - src/resources/extensions/hx/tests/forensics-db-completion.test.ts\n  - src/resources/extensions/hx/tests/hook-key-parsing.test.ts\nkey_decisions:\n  - splitCompletedKey returns null for hook/<name> keys with no id (not just any hook/ prefix)\n  - getDbCompletionCounts returns null (not 0) when DB unavailable, distinguishing DB-not-loaded from nothing-completed\n  - Both All-milestones-complete branches in state.ts updated (DB path and filesystem path)\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-04-04T18:09:46.269Z\nblocker_discovered: false\n---\n\n# T02: Added getDbCompletionCounts (DB-backed completion counts), splitCompletedKey (hook/* key parsing), and lastCompletedMilestone field — all with 23 passing tests\n\n**Added getDbCompletionCounts (DB-backed completion counts), splitCompletedKey (hook/* key parsing), and lastCompletedMilestone field — all with 23 passing tests**\n\n## What Happened\n\nAll 6 source files modified or created as planned. types.ts gained lastCompletedMilestone in HXState. Both \"All milestones complete\" branches in state.ts now set activeMilestone: null + lastCompletedMilestone: lastEntry. forensics.ts gained DbCompletionCounts interface, getDbCompletionCounts (queries DB via getAllMilestones/getMilestoneSlices/getSliceTasks with isClosedStatus counting, try/catch returns null), dbCompletionCounts in ForensicReport, structured DB counts in formatReportForPrompt, splitCompletedKey exported function (hook/* prefix awareness), and detectMissingArtifacts updated to use splitCompletedKey. doctor-runtime-checks.ts imports splitCompletedKey and uses it in the orphaned-keys check. Two new test files created with 12+11=23 tests, all passing. Prior 50 T01 tests unaffected.\n\n## Verification\n\nTypeCheck (npx tsc --noEmit): 0 errors. compile-tests.mjs: success. forensics-db-completion.test.js: 12/12 pass. hook-key-parsing.test.js: 11/11 pass. Prior T01 tests (50/50): still pass.\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `cd .hx/worktrees/M002-yle1ri && npx tsc --noEmit` | 0 | ✅ pass | 9800ms |\n| 2 | `node scripts/compile-tests.mjs` | 0 | ✅ pass | 10700ms |\n| 3 | `node --test dist-test/src/resources/extensions/hx/tests/forensics-db-completion.test.js` | 0 | ✅ pass | 262ms |\n| 4 | `node --test dist-test/src/resources/extensions/hx/tests/hook-key-parsing.test.js` | 0 | ✅ pass | 4792ms |\n| 5 | `node --test [5 prior T01 test files]` | 0 | ✅ pass | 5500ms |\n\n\n## Deviations\n\nNone — all source changes followed the task plan exactly.\n\n## Known Issues\n\nNone.\n\n## Files Created/Modified\n\n- `src/resources/extensions/hx/types.ts`\n- `src/resources/extensions/hx/state.ts`\n- `src/resources/extensions/hx/forensics.ts`\n- `src/resources/extensions/hx/doctor-runtime-checks.ts`\n- `src/resources/extensions/hx/tests/forensics-db-completion.test.ts`\n- `src/resources/extensions/hx/tests/hook-key-parsing.test.ts`\n",
       "description": "Apply 2 upstream forensics accuracy fixes: (1) read completion counts from DB instead of always-0 file read, (2) add `splitCompletedKey()` to handle hook/* prefix keys correctly.\n\n**Steps:**\n\n1. **`src/resources/extensions/hx/types.ts`**: Add `lastCompletedMilestone?: ActiveRef | null` field to the `HXState` interface (same type as `activeMilestone`).\n\n2. **`src/resources/extensions/hx/state.ts`**: In the \"all milestones complete\" branch (where `isClosedStatus` is true for the last entry), change the return to `activeMilestone: null, lastCompletedMilestone: lastEntry` (or similar shape) instead of setting `activeMilestone: lastEntry`. Also verify imports include `isClosedStatus`.\n\n3. **`src/resources/extensions/hx/forensics.ts`** — DB completion counts:\n   - Add `DbCompletionCounts` interface: `{ milestones: number; slices: number; tasks: number }`\n   - Add `dbCompletionCounts: DbCompletionCounts | null` field to `ForensicReport` interface\n   - Add `getDbCompletionCounts(basePath: string): DbCompletionCounts | null` function that imports `getAllMilestones`, `getMilestoneSlices`, `getSliceTasks` from `hx-db.js` and counts closed-status items using `isClosedStatus` from `status-guards.js`. Wrap in try/catch, return null on error.\n   - In `buildForensicReport()`: call `getDbCompletionCounts(basePath)` and set `report.dbCompletionCounts`\n   - In `formatReportForPrompt()`: replace the `### Completed Keys: ${report.completedKeys.length}` output with structured DB counts output (show milestones/slices/tasks completed from DB, and still show the raw `completedKeys` array if present)\n\n4. **`src/resources/extensions/hx/forensics.ts`** — splitCompletedKey:\n   - Add exported `splitCompletedKey(key: string): { unitType: string; unitId: string } | null` function.\n   - Logic: if key starts with `hook/`, the type is the first two segments (`hook/<name>`), id is remainder. Otherwise split at first `/`. Return null for malformed keys with no `/`.\n   - Update `detectMissingArtifacts` to use `splitCompletedKey()` instead of `key.indexOf(\"/\")` direct split.\n\n5. **`src/resources/extensions/hx/doctor-runtime-checks.ts`**: Import `splitCompletedKey` from `../forensics.js` and use it instead of `key.indexOf(\"/\")` at line ~122.\n\n6. **Create** `src/resources/extensions/hx/tests/forensics-db-completion.test.ts`: Source-read style test (~96 lines). Assert: (a) `ForensicReport` type has `dbCompletionCounts` field; (b) `getDbCompletionCounts` is exported from forensics.ts source; (c) forensics.ts calls `getAllMilestones` or similar DB import; (d) `formatReportForPrompt` source references DB count fields; (e) state.ts has `lastCompletedMilestone` assignment.\n\n7. **Create** `src/resources/extensions/hx/tests/hook-key-parsing.test.ts`: Runtime test for `splitCompletedKey`. Import the function via dynamic import of compiled forensics. Test: (a) simple `\"milestone/M001\"` → `{unitType:\"milestone\", unitId:\"M001\"}`; (b) hook key `\"hook/telegram-progress/M007/S01\"` → `{unitType:\"hook/telegram-progress\", unitId:\"M007/S01\"}`; (c) malformed `\"noSlash\"` → null. Also source assertions that `detectMissingArtifacts` uses `splitCompletedKey` and `doctor-runtime-checks.ts` imports from forensics.\n\n**Verify:** After `node scripts/compile-tests.mjs`: run `node --test dist-test/src/resources/extensions/hx/tests/forensics-db-completion.test.js` and `node --test dist-test/src/resources/extensions/hx/tests/hook-key-parsing.test.js`.",
       "estimate": "60min",
       "files": [
@@ -4816,6 +4827,61 @@
       "verdict": "✅ pass",
       "duration_ms": 257,
       "created_at": "2026-04-04T18:03:23.137Z"
+    },
+    {
+      "id": 155,
+      "task_id": "T02",
+      "slice_id": "S05",
+      "milestone_id": "M002-yle1ri",
+      "command": "cd .hx/worktrees/M002-yle1ri && npx tsc --noEmit",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 9800,
+      "created_at": "2026-04-04T18:09:46.266Z"
+    },
+    {
+      "id": 156,
+      "task_id": "T02",
+      "slice_id": "S05",
+      "milestone_id": "M002-yle1ri",
+      "command": "node scripts/compile-tests.mjs",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 10700,
+      "created_at": "2026-04-04T18:09:46.266Z"
+    },
+    {
+      "id": 157,
+      "task_id": "T02",
+      "slice_id": "S05",
+      "milestone_id": "M002-yle1ri",
+      "command": "node --test dist-test/src/resources/extensions/hx/tests/forensics-db-completion.test.js",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 262,
+      "created_at": "2026-04-04T18:09:46.266Z"
+    },
+    {
+      "id": 158,
+      "task_id": "T02",
+      "slice_id": "S05",
+      "milestone_id": "M002-yle1ri",
+      "command": "node --test dist-test/src/resources/extensions/hx/tests/hook-key-parsing.test.js",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 4792,
+      "created_at": "2026-04-04T18:09:46.266Z"
+    },
+    {
+      "id": 159,
+      "task_id": "T02",
+      "slice_id": "S05",
+      "milestone_id": "M002-yle1ri",
+      "command": "node --test [5 prior T01 test files]",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 5500,
+      "created_at": "2026-04-04T18:09:46.266Z"
     }
   ]
 }
