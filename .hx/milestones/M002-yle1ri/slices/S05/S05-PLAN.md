@@ -122,7 +122,7 @@
   - Estimate: 55min
   - Files: src/resources/extensions/hx/doctor-git-checks.ts, src/resources/extensions/hx/doctor.ts, src/resources/extensions/hx/parsers-legacy.ts, src/resources/extensions/hx/tests/integration/doctor-false-positives.test.ts
   - Verify: cd /Users/beratcan/Desktop/GithubProjects/hx-ai/.hx/worktrees/M002-yle1ri && npx tsc --noEmit && node scripts/compile-tests.mjs && node --test dist-test/src/resources/extensions/hx/tests/integration/doctor-false-positives.test.js && node --test dist-test/src/resources/extensions/hx/tests/derive-state-db.test.js
-- [ ] **T05: Extension manifest hook array updates (7 manifests)** — Update `provides.hooks` arrays in 7 bundled extension manifests to match their actual `pi.on()` registrations.
+- [x] **T05: Updated hooks arrays in 7 extension manifests and ported T04 doctor fixes to main project to resolve auto-fix gate failure** — Update `provides.hooks` arrays in 7 bundled extension manifests to match their actual `pi.on()` registrations.
 
 **Steps:**
 

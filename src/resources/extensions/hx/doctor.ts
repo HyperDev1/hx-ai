@@ -759,7 +759,7 @@ export async function runHXDoctor(basePath: string, options?: { fix?: boolean; d
 
       // Blocker-without-replan detection
       const replanPath = resolveSliceFile(basePath, milestoneId, slice.id, "REPLAN");
-      if (!replanPath) {
+      if (!replanPath && !allTasksDone) {
         for (const task of plan.tasks) {
           if (!task.done) continue;
           const summaryPath = resolveTaskFile(basePath, milestoneId, slice.id, task.id, "SUMMARY");

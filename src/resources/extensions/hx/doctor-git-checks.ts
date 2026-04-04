@@ -14,6 +14,15 @@ import { nativeIsRepo, nativeWorktreeList, nativeWorktreeRemove, nativeBranchLis
 import { getAllWorktreeHealth } from "./worktree-health.js";
 import { loadEffectiveHXPreferences } from "./preferences.js";
 
+export function isDoctorArtifactOnly(dirPath: string): boolean {
+  try {
+    const entries = readdirSync(dirPath);
+    return entries.length === 0 || (entries.length === 1 && entries[0] === "doctor-history.jsonl");
+  } catch {
+    return false;
+  }
+}
+
 export async function checkGitHealth(
   basePath: string,
   issues: DoctorIssue[],
@@ -314,6 +323,7 @@ export async function checkGitHealth(
         } catch { continue; }
         const normalizedFullPath = normalizePath(fullPath);
         if (!registeredPaths.has(normalizedFullPath)) {
+          if (isDoctorArtifactOnly(fullPath)) continue;
           issues.push({
             severity: "warning",
             code: "worktree_directory_orphaned",
