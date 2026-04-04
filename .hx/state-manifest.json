@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-04-04T18:14:04.906Z",
+  "exported_at": "2026-04-04T18:22:31.405Z",
   "milestones": [
     {
       "id": "M001-df6x5t",
@@ -2931,19 +2931,28 @@
       "milestone_id": "M002-yle1ri",
       "slice_id": "S05",
       "id": "T04",
-      "title": "Doctor false-positive fixes: orphaned worktree, blocker-resolved guard, parsers-legacy second-pass",
-      "status": "pending",
-      "one_liner": "",
-      "narrative": "",
-      "verification_result": "",
+      "title": "Applied 3 doctor accuracy fixes (isDoctorArtifactOnly guard, !allTasksDone blocker guard, parsers-legacy second-pass) with 9/9 new tests + 28/28 derive-state-db regression tests all passing.",
+      "status": "complete",
+      "one_liner": "Applied 3 doctor accuracy fixes (isDoctorArtifactOnly guard, !allTasksDone blocker guard, parsers-legacy second-pass) with 9/9 new tests + 28/28 derive-state-db regression tests all passing.",
+      "narrative": "The auto-fix trigger was a gate path issue from T03 (forensics-context-persist.test.js run from project root instead of worktree). T04 implemented: (1) isDoctorArtifactOnly helper + guard in doctor-git-checks.ts to skip directories containing only doctor-history.jsonl before pushing worktree_directory_orphaned; (2) !allTasksDone condition added to blocker check in doctor.ts to suppress false-positive blocker_discovered_no_replan when all tasks already completed; (3) parsers-legacy.ts second-pass scan with knownIds Set to pick up task checkboxes outside the extractSection('Tasks') boundary. Test file placed in flat tests/ directory (not tests/integration/) because compile-tests.mjs explicitly excludes the integration/ subdir via SKIP_DIRS.",
+      "verification_result": "npx tsc --noEmit: 0 errors. node scripts/compile-tests.mjs: 1186 files compiled. node --test doctor-false-positives.test.js: 9/9 pass. node --test derive-state-db.test.js: 28/28 pass. Prior forensics tests (40/40): all pass.",
       "duration": "",
-      "completed_at": null,
+      "completed_at": "2026-04-04T18:22:31.336Z",
       "blocker_discovered": false,
-      "deviations": "",
-      "known_issues": "",
-      "key_files": [],
-      "key_decisions": [],
-      "full_summary_md": "",
+      "deviations": "Test file in tests/ (not tests/integration/) due to compile-tests.mjs SKIP_DIRS exclusion. Proximity threshold 700 chars (500 was too tight at 529 actual distance). Test mock uses ## H2 heading to push T02 outside Tasks section boundary.",
+      "known_issues": "S05 verification gate runs paths relative to project root; must be run with `cd .hx/worktrees/M002-yle1ri` prefix.",
+      "key_files": [
+        "src/resources/extensions/hx/doctor-git-checks.ts",
+        "src/resources/extensions/hx/doctor.ts",
+        "src/resources/extensions/hx/parsers-legacy.ts",
+        "src/resources/extensions/hx/tests/doctor-false-positives.test.ts"
+      ],
+      "key_decisions": [
+        "Test file placed in flat tests/ (not tests/integration/) because compile-tests.mjs SKIP_DIRS excludes integration/",
+        "parsers-legacy second-pass uses knownIds Set dedup; native parser returns early so second-pass only activates in legacy fallback",
+        "blocker check proximity threshold set to 700 chars based on measured distance of ~529 chars in actual file"
+      ],
+      "full_summary_md": "---\nid: T04\nparent: S05\nmilestone: M002-yle1ri\nkey_files:\n  - src/resources/extensions/hx/doctor-git-checks.ts\n  - src/resources/extensions/hx/doctor.ts\n  - src/resources/extensions/hx/parsers-legacy.ts\n  - src/resources/extensions/hx/tests/doctor-false-positives.test.ts\nkey_decisions:\n  - Test file placed in flat tests/ (not tests/integration/) because compile-tests.mjs SKIP_DIRS excludes integration/\n  - parsers-legacy second-pass uses knownIds Set dedup; native parser returns early so second-pass only activates in legacy fallback\n  - blocker check proximity threshold set to 700 chars based on measured distance of ~529 chars in actual file\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-04-04T18:22:31.339Z\nblocker_discovered: false\n---\n\n# T04: Applied 3 doctor accuracy fixes (isDoctorArtifactOnly guard, !allTasksDone blocker guard, parsers-legacy second-pass) with 9/9 new tests + 28/28 derive-state-db regression tests all passing.\n\n**Applied 3 doctor accuracy fixes (isDoctorArtifactOnly guard, !allTasksDone blocker guard, parsers-legacy second-pass) with 9/9 new tests + 28/28 derive-state-db regression tests all passing.**\n\n## What Happened\n\nThe auto-fix trigger was a gate path issue from T03 (forensics-context-persist.test.js run from project root instead of worktree). T04 implemented: (1) isDoctorArtifactOnly helper + guard in doctor-git-checks.ts to skip directories containing only doctor-history.jsonl before pushing worktree_directory_orphaned; (2) !allTasksDone condition added to blocker check in doctor.ts to suppress false-positive blocker_discovered_no_replan when all tasks already completed; (3) parsers-legacy.ts second-pass scan with knownIds Set to pick up task checkboxes outside the extractSection('Tasks') boundary. Test file placed in flat tests/ directory (not tests/integration/) because compile-tests.mjs explicitly excludes the integration/ subdir via SKIP_DIRS.\n\n## Verification\n\nnpx tsc --noEmit: 0 errors. node scripts/compile-tests.mjs: 1186 files compiled. node --test doctor-false-positives.test.js: 9/9 pass. node --test derive-state-db.test.js: 28/28 pass. Prior forensics tests (40/40): all pass.\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `cd .hx/worktrees/M002-yle1ri && npx tsc --noEmit` | 0 | ✅ pass | 6900ms |\n| 2 | `node scripts/compile-tests.mjs` | 0 | ✅ pass | 4090ms |\n| 3 | `node --test dist-test/src/resources/extensions/hx/tests/doctor-false-positives.test.js` | 0 | ✅ pass | 380ms |\n| 4 | `node --test dist-test/src/resources/extensions/hx/tests/derive-state-db.test.js` | 0 | ✅ pass | 475ms |\n| 5 | `node --test forensics-context-persist + forensics-db-completion + hook-key-parsing` | 0 | ✅ pass | 1828ms |\n\n\n## Deviations\n\nTest file in tests/ (not tests/integration/) due to compile-tests.mjs SKIP_DIRS exclusion. Proximity threshold 700 chars (500 was too tight at 529 actual distance). Test mock uses ## H2 heading to push T02 outside Tasks section boundary.\n\n## Known Issues\n\nS05 verification gate runs paths relative to project root; must be run with `cd .hx/worktrees/M002-yle1ri` prefix.\n\n## Files Created/Modified\n\n- `src/resources/extensions/hx/doctor-git-checks.ts`\n- `src/resources/extensions/hx/doctor.ts`\n- `src/resources/extensions/hx/parsers-legacy.ts`\n- `src/resources/extensions/hx/tests/doctor-false-positives.test.ts`\n",
       "description": "Apply 3 upstream doctor accuracy fixes eliminating false positives.\n\n**Steps:**\n\n1. **`src/resources/extensions/hx/doctor-git-checks.ts`**:\n   - Add `isDoctorArtifactOnly(dirPath: string): boolean` helper function. It reads the directory entries and returns `true` if the only file present is `doctor-history.jsonl` (i.e., no real worktree content). Use `fs.readdirSync(dirPath)` — if length is 0 or the only entry is `\"doctor-history.jsonl\"`, return true.\n   - In the orphaned-worktree detection loop, add guard: `if (isDoctorArtifactOnly(fullPath)) continue;` before pushing the `worktree_directory_orphaned` issue.\n\n2. **`src/resources/extensions/hx/doctor.ts`**:\n   - Find the blocker check: the line that reads `if (!replanPath)` (guards `blocker_discovered_no_replan` rule push).\n   - Change to `if (!replanPath && !allTasksDone)` — only fire the blocker alert if there's no replan AND tasks are not all done (implicitly resolved).\n   - Check what `allTasksDone` is — it should be a pre-computed boolean in that scope. If not named exactly that, find the equivalent boolean that indicates all tasks are complete.\n\n3. **`src/resources/extensions/hx/parsers-legacy.ts`**:\n   - Read the current `parsePlan` function implementation to understand the existing task parsing logic.\n   - Extract a `parseTaskLines(lines: string[]): TaskEntry[]` helper that uses a `knownIds = new Set<string>()` to deduplicate.\n   - Add a second pass: after the first `extractSection(\"Tasks\")` parse, scan the full document body for any task checkbox lines (`- [x]` or `- [ ]`) matching the task ID pattern that weren't captured in the first pass (i.e., tasks appearing after interleaved detail headings like `### T02: ...`). Use `knownIds` to avoid duplicates.\n   - Ensure the refactor doesn't change existing behavior for normal plan files — only adds coverage for the edge case.\n\n4. **Create** `src/resources/extensions/hx/tests/integration/doctor-false-positives.test.ts`:\n   - Source-read assertions: (a) `isDoctorArtifactOnly` is defined in `doctor-git-checks.ts`; (b) `doctor-git-checks.ts` has the `isDoctorArtifactOnly` guard before `worktree_directory_orphaned`; (c) `doctor.ts` has `!allTasksDone` (or equivalent) in the blocker check condition; (d) `parsers-legacy.ts` has a second-pass scan (check for presence of the `knownIds` Set pattern).\n   - Integration test: create a temp directory with only `doctor-history.jsonl`, call `isDoctorArtifactOnly` directly (dynamic import), assert it returns true.\n   - Integration test: parse a mock plan string that has a task after a detail heading (`### T02: details\\n- [x] T02: something`) and assert both T01 and T02 are extracted.\n\n**Verify:** After `node scripts/compile-tests.mjs`: run `node --test dist-test/src/resources/extensions/hx/tests/integration/doctor-false-positives.test.js`. Also run `npx tsc --noEmit`. Confirm existing `derive-state-db.test.js` still passes (parsers-legacy change regression check).",
       "estimate": "55min",
       "files": [
@@ -4946,6 +4955,61 @@
       "verdict": "✅ pass",
       "duration_ms": 273,
       "created_at": "2026-04-04T18:14:04.847Z"
+    },
+    {
+      "id": 165,
+      "task_id": "T04",
+      "slice_id": "S05",
+      "milestone_id": "M002-yle1ri",
+      "command": "cd .hx/worktrees/M002-yle1ri && npx tsc --noEmit",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 6900,
+      "created_at": "2026-04-04T18:22:31.336Z"
+    },
+    {
+      "id": 166,
+      "task_id": "T04",
+      "slice_id": "S05",
+      "milestone_id": "M002-yle1ri",
+      "command": "node scripts/compile-tests.mjs",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 4090,
+      "created_at": "2026-04-04T18:22:31.336Z"
+    },
+    {
+      "id": 167,
+      "task_id": "T04",
+      "slice_id": "S05",
+      "milestone_id": "M002-yle1ri",
+      "command": "node --test dist-test/src/resources/extensions/hx/tests/doctor-false-positives.test.js",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 380,
+      "created_at": "2026-04-04T18:22:31.336Z"
+    },
+    {
+      "id": 168,
+      "task_id": "T04",
+      "slice_id": "S05",
+      "milestone_id": "M002-yle1ri",
+      "command": "node --test dist-test/src/resources/extensions/hx/tests/derive-state-db.test.js",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 475,
+      "created_at": "2026-04-04T18:22:31.336Z"
+    },
+    {
+      "id": 169,
+      "task_id": "T04",
+      "slice_id": "S05",
+      "milestone_id": "M002-yle1ri",
+      "command": "node --test forensics-context-persist + forensics-db-completion + hook-key-parsing",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 1828,
+      "created_at": "2026-04-04T18:22:31.336Z"
     }
   ]
 }

@@ -94,7 +94,7 @@
   - Estimate: 50min
   - Files: src/resources/extensions/hx/forensics.ts, src/resources/extensions/hx/bootstrap/system-context.ts, src/resources/extensions/hx/tests/forensics-context-persist.test.ts
   - Verify: cd /Users/beratcan/Desktop/GithubProjects/hx-ai/.hx/worktrees/M002-yle1ri && npx tsc --noEmit && node scripts/compile-tests.mjs && node --test dist-test/src/resources/extensions/hx/tests/forensics-context-persist.test.js
-- [ ] **T04: Doctor false-positive fixes: orphaned worktree, blocker-resolved guard, parsers-legacy second-pass** — Apply 3 upstream doctor accuracy fixes eliminating false positives.
+- [x] **T04: Applied 3 doctor accuracy fixes (isDoctorArtifactOnly guard, !allTasksDone blocker guard, parsers-legacy second-pass) with 9/9 new tests + 28/28 derive-state-db regression tests all passing.** — Apply 3 upstream doctor accuracy fixes eliminating false positives.
 
 **Steps:**
 
