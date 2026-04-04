@@ -339,6 +339,7 @@ async function runWorkspaceDiagnostics(
 	const [cmd, ...cmdArgs] = projectType.command;
 	const proc = spawn(cmd, cmdArgs, {
 		cwd,
+		shell: process.platform === "win32",
 		stdio: ["ignore", "pipe", "pipe"],
 	});
 	const abortHandler = () => {

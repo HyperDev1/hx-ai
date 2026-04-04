@@ -41,6 +41,7 @@ function runDoctorChild(
           HX_DOCTOR_SCOPE: scope ?? "",
         },
         maxBuffer: DOCTOR_MAX_BUFFER,
+        windowsHide: true,
       },
       (error, stdout, stderr) => {
         if (error) {

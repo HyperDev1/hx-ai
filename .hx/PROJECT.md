@@ -17,6 +17,12 @@ HX is a complete, consistently-named AI coding agent harness with upstream stabi
 - `.hx/` directory structure is in place (migrated from `.gsd/`)
 - `migrate-gsd-to-hx.ts` handles backward compat for `.gsd/` → `.hx/` directory migration
 - **M002-yle1ri IN PROGRESS** — Porting 95 bugfix commits from upstream gsd-2 v2.59.0 with GSD→HX naming adaptation
+  - S01 ✅ State/DB Reconciliation & Data Safety — DB sync, disk→DB reconciliation, VACUUM recovery, unit ownership migration, coercion, data loss prevention
+  - S02 ✅ Worktree/Git & Auto-mode Fixes — Worktree merge, MERGE_HEAD cleanup, pre-merge safety, auto-mode dispatch, headless routing, parallel mode fixes
+  - S03 ✅ Milestone Lifecycle, Guided-flow & Model/Provider — Completion, guided-flow routing, model routing, provider resolution, rate-limit, OAuth fixes
+  - S04 ✅ TUI/UI, Error Handling & Context Management — TUI layout (28-file), JSON parse error handling, YAML repair, compaction overflow, prompt explosion prevention
+  - S05 ✅ Prompts, Diagnostics & Extensions — Prompt camelCase params, web_search→search-the-web migration, forensics DB counts / marker persistence / dedup ordering, doctor false-positive fixes, extension manifest hooks (7 files)
+  - S06 ⬜ Remaining Fixes — read-tool offset clamping, Windows shell guards, ask-user-questions free-text, MCP name handling, OAuth google_search shape, misc
 
 ## Architecture / Key Patterns
 

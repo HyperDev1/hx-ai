@@ -89,6 +89,7 @@ async function parseConfig(): Promise<LspmuxConfig | null> {
 async function checkServerRunning(binaryPath: string): Promise<boolean> {
 	try {
 		const proc = spawn(binaryPath, ["status"], {
+			shell: process.platform === "win32",
 			stdio: ["ignore", "pipe", "pipe"],
 		});
 

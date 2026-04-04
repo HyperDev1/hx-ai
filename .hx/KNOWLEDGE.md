@@ -90,3 +90,38 @@ TypeScript interface property declarations that mirror Rust N-API function names
 **Rule:** After a large env var rename (GSD_* → HX_*), remember that GitHub Actions secrets and environment variables configured in the GitHub repository settings UI are NOT in source control. The source rename is complete, but any `GSD_*` secrets in the GitHub repo settings must be manually renamed or duplicated in the GitHub UI.
 
 **Pattern:** After any env var rename milestone, audit the GitHub repository's "Secrets and variables" settings page to rename any matching secrets. This cannot be automated via source-only changes.
+
+## compile-tests.mjs skips the integration/ subdirectory (M002/S05/T04)
+
+**Rule:** `scripts/compile-tests.mjs` has a `SKIP_DIRS` exclusion that prevents compilation of files in `tests/integration/`. Any test file placed in `src/resources/extensions/hx/tests/integration/` will NOT appear in `dist-test/` and will silently not run.
+
+**Pattern:** Always place new test files in the flat `src/resources/extensions/hx/tests/` directory. If the plan says "tests/integration/", place the file one level up (flat `tests/`) and add an explicit compile step if integration isolation is truly needed.
+
+**Exception:** T05 ported the T04 test to `tests/integration/` and added a manual compile step to `scripts/compile-tests.mjs`. This is the approved pattern if integration/ placement is truly required — add the sub-path explicitly to the compile script.
+
+## Porting worktree changes to main project when gates run from main CWD (M002/S05/T05)
+
+**Rule:** The auto-fix gate runs tests from the main project CWD (`/Users/beratcan/Desktop/GithubProjects/hx-ai`), not from the worktree. Any test files or source changes that exist only in the worktree's `dist-test/` will not be found by the gate.
+
+**Pattern:** When a task creates new test files and those tests must pass the auto-fix gate, apply the same changes to both the worktree AND the main project. Use `cp` to mirror the source files and re-run `node scripts/compile-tests.mjs` in the main project.
+
+## IIFE pattern for conditional spread in buildBeforeAgentStartResult (M002/S05/T03)
+
+**Rule:** When adding a conditional injection to `buildBeforeAgentStartResult()` that should not restructure the return shape, use an IIFE spread pattern:
+```typescript
+...(() => {
+  const marker = readForensicsMarker(basePath);
+  if (!injection && marker) {
+    clearForensicsMarker(basePath);
+    return { injection: { customType: "hx-forensics", content: marker.content } };
+  }
+  return {};
+})()
+```
+This keeps the conditional logic inline without extracting extra variables that bloat the surrounding function.
+
+## splitCompletedKey null semantics for hook/* keys (M002/S05/T02)
+
+**Rule:** `splitCompletedKey` returns `null` for `hook/<name>` keys with NO id remainder (i.e., exactly `hook/name` with nothing after the slash), not just any malformed input. A key like `hook/telegram-progress/M007/S01` is valid (type=`hook/telegram-progress`, id=`M007/S01`). Only keys with zero slashes or hook keys with no segment after the hook name return null.
+
+**Pattern:** When using splitCompletedKey, always null-check the result before destructuring. Log/skip null entries rather than crashing.

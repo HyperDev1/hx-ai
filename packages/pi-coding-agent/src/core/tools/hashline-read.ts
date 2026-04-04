@@ -123,12 +123,13 @@ export function createHashlineReadTool(cwd: string, options?: HashlineReadToolOp
 								const allLines = textContent.split("\n");
 								const totalFileLines = allLines.length;
 
-								const startLine = offset ? Math.max(0, offset - 1) : 0;
-								const startLineDisplay = startLine + 1;
-
+								let startLine = offset ? Math.max(0, offset - 1) : 0;
+								let offsetClamped = false;
 								if (startLine >= allLines.length) {
-									throw new Error(`Offset ${offset} is beyond end of file (${allLines.length} lines total)`);
+									startLine = Math.max(0, allLines.length - 1);
+									offsetClamped = true;
 								}
+								const startLineDisplay = startLine + 1;
 
 								let selectedContent: string;
 								let userLimitedLines: number | undefined;
@@ -170,6 +171,10 @@ export function createHashlineReadTool(cwd: string, options?: HashlineReadToolOp
 									outputText += `\n\n[${remaining} more lines in file. Use offset=${nextOffset} to continue.]`;
 								} else {
 									outputText = formatHashLines(truncation.content, startLineDisplay);
+								}
+
+								if (offsetClamped) {
+									outputText = `[Offset ${offset} beyond end of file (${totalFileLines} lines). Clamped to line ${startLineDisplay}.]\n\n` + outputText;
 								}
 
 								content = [{ type: "text", text: outputText }];

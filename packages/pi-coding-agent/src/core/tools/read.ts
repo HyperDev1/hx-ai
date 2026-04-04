@@ -133,13 +133,13 @@ export function createReadTool(cwd: string, options?: ReadToolOptions): AgentToo
 								const totalFileLines = allLines.length;
 
 								// Apply offset if specified (1-indexed to 0-indexed)
-								const startLine = offset ? Math.max(0, offset - 1) : 0;
-								const startLineDisplay = startLine + 1; // For display (1-indexed)
-
-								// Check if offset is out of bounds
+								let startLine = offset ? Math.max(0, offset - 1) : 0;
+								let offsetClamped = false;
 								if (startLine >= allLines.length) {
-									throw new Error(`Offset ${offset} is beyond end of file (${allLines.length} lines total)`);
+									startLine = Math.max(0, allLines.length - 1);
+									offsetClamped = true;
 								}
+								const startLineDisplay = startLine + 1; // For display (1-indexed)
 
 								// If limit is specified by user, use it; otherwise we'll let truncateHead decide
 								let selectedContent: string;
@@ -185,6 +185,10 @@ export function createReadTool(cwd: string, options?: ReadToolOptions): AgentToo
 								} else {
 									// No truncation, no user limit exceeded
 									outputText = truncation.content;
+								}
+
+								if (offsetClamped) {
+									outputText = `[Offset ${offset} beyond end of file (${totalFileLines} lines). Clamped to line ${startLineDisplay}.]\n\n` + outputText;
 								}
 
 								content = [{ type: "text", text: outputText }];

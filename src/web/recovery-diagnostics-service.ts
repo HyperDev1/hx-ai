@@ -491,6 +491,7 @@ async function collectRecoveryDiagnosticsChildPayload(
           HX_RECOVERY_FORENSICS_MODULE: sessionForensicsModulePath,
         },
         maxBuffer: RECOVERY_DIAGNOSTICS_MAX_BUFFER,
+        windowsHide: true,
       },
       (error, stdout, stderr) => {
         if (error) {

@@ -78,6 +78,7 @@ export async function collectCleanupData(projectCwdOverride?: string): Promise<C
           HX_CLEANUP_BASE: projectCwd,
         },
         maxBuffer: CLEANUP_MAX_BUFFER,
+        windowsHide: true,
       },
       (error, stdout, stderr) => {
         if (error) {
@@ -170,6 +171,7 @@ export async function executeCleanup(
           HX_CLEANUP_SNAPSHOTS: JSON.stringify(pruneSnapshots),
         },
         maxBuffer: CLEANUP_MAX_BUFFER,
+        windowsHide: true,
       },
       (error, stdout, stderr) => {
         if (error) {
