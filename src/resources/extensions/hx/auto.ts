@@ -115,7 +115,8 @@ import {
   formatCost,
   formatTokenCount,
 } from "./metrics.js";
-import { setLogBasePath } from "./workflow-logger.js";
+import { setLogBasePath, logWarning } from "./workflow-logger.js";
+import { clearWrapupInflight } from "./bootstrap/auto-wrapup-guard.js";
 import { join } from "node:path";
 import { readFileSync, existsSync, mkdirSync, writeFileSync, unlinkSync } from "node:fs";
 import { atomicWriteSync } from "./atomic-write.js";
@@ -492,6 +493,7 @@ function clearUnitTimeout(): void {
     s.continueHereHandle = null;
   }
   clearInFlightTools();
+  clearWrapupInflight();
 }
 
 /** Build snapshot metric opts. */
@@ -661,8 +663,8 @@ export async function stopAuto(
           } else {
             milestoneComplete = true;
           }
-        } catch {
-          // Non-fatal — fall through to preserveBranch path
+        } catch (e) {
+          logWarning('engine', 'Failed to check milestone SUMMARY existence', { milestone: s.currentMilestoneId ?? 'unknown', error: String(e) });
         }
 
         if (milestoneComplete) {
@@ -862,16 +864,16 @@ export async function pauseAuto(
       JSON.stringify(pausedMeta, null, 2),
       "utf-8",
     );
-  } catch {
-    // Non-fatal — resume will still work via full bootstrap, just without worktree context
+  } catch (e) {
+    logWarning('engine', 'Failed to write paused-session.json', { error: String(e) });
   }
 
   // Close out the current unit so its runtime record doesn't stay at "dispatched"
   if (s.currentUnit && ctx) {
     try {
       await closeoutUnit(ctx, s.basePath, s.currentUnit.type, s.currentUnit.id, s.currentUnit.startedAt);
-    } catch {
-      // Non-fatal — best-effort closeout on pause
+    } catch (e) {
+      logWarning('engine', 'Unit closeout on pause threw', { error: String(e) });
     }
     s.currentUnit = null;
   }

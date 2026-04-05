@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-04-05T17:33:29.371Z",
+  "exported_at": "2026-04-05T17:42:43.121Z",
   "milestones": [
     {
       "id": "M001-df6x5t",
@@ -4141,19 +4141,28 @@
       "milestone_id": "M003-ttxmyu",
       "slice_id": "S04",
       "id": "T03",
-      "title": "Create auto-wrapup-guard.ts + wire into auto-timers.ts and auto.ts + write test",
-      "status": "pending",
-      "one_liner": "",
-      "narrative": "",
-      "verification_result": "",
+      "title": "Created auto-wrapup-guard module, wired setWrapupInflight() before both hx-auto-wrapup sendMessage calls and clearWrapupInflight() in clearUnitTimeout(), all verified by 6 passing tests",
+      "status": "complete",
+      "one_liner": "Created auto-wrapup-guard module, wired setWrapupInflight() before both hx-auto-wrapup sendMessage calls and clearWrapupInflight() in clearUnitTimeout(), all verified by 6 passing tests",
+      "narrative": "Created src/resources/extensions/hx/bootstrap/auto-wrapup-guard.ts with four exported functions: setWrapupInflight(), clearWrapupInflight(), isWrapupInflight(), resetWrapupGuard(). Wired into auto-timers.ts by inserting setWrapupInflight() immediately before pi.sendMessage() in both the soft-timeout callback and the context-pressure continueHere interval (both send customType: hx-auto-wrapup). Wired into auto.ts by adding import after setLogBasePath and calling clearWrapupInflight() as the last statement in clearUnitTimeout() after clearInFlightTools(). Wrote auto-wrapup-inflight-guard.test.ts with 6 tests: 4 state-machine tests and 2 static source wiring checks using readFileSync on TS source files.",
+      "verification_result": "npx tsc --noEmit clean. npm run test:unit: 4179 passed, 0 failed, 5 skipped (6 new tests added). Isolated run of auto-wrapup-inflight-guard.test.js: 6/6 pass.",
       "duration": "",
-      "completed_at": null,
+      "completed_at": "2026-04-05T17:37:38.406Z",
       "blocker_discovered": false,
-      "deviations": "",
-      "known_issues": "",
-      "key_files": [],
-      "key_decisions": [],
-      "full_summary_md": "",
+      "deviations": "None. Both sendMessage sites confirmed and wired as planned.",
+      "known_issues": "None.",
+      "key_files": [
+        "src/resources/extensions/hx/bootstrap/auto-wrapup-guard.ts",
+        "src/resources/extensions/hx/auto-timers.ts",
+        "src/resources/extensions/hx/auto.ts",
+        "src/resources/extensions/hx/tests/auto-wrapup-inflight-guard.test.ts"
+      ],
+      "key_decisions": [
+        "Added import for auto-wrapup-guard.js at end of import block in both files — minimal footprint",
+        "Both hx-auto-wrapup sendMessage sites (soft-timeout and context-pressure) wired — confirmed both are live paths",
+        "clearWrapupInflight() placed as last statement in clearUnitTimeout() after clearInFlightTools()"
+      ],
+      "full_summary_md": "---\nid: T03\nparent: S04\nmilestone: M003-ttxmyu\nkey_files:\n  - src/resources/extensions/hx/bootstrap/auto-wrapup-guard.ts\n  - src/resources/extensions/hx/auto-timers.ts\n  - src/resources/extensions/hx/auto.ts\n  - src/resources/extensions/hx/tests/auto-wrapup-inflight-guard.test.ts\nkey_decisions:\n  - Added import for auto-wrapup-guard.js at end of import block in both files — minimal footprint\n  - Both hx-auto-wrapup sendMessage sites (soft-timeout and context-pressure) wired — confirmed both are live paths\n  - clearWrapupInflight() placed as last statement in clearUnitTimeout() after clearInFlightTools()\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-04-05T17:37:38.407Z\nblocker_discovered: false\n---\n\n# T03: Created auto-wrapup-guard module, wired setWrapupInflight() before both hx-auto-wrapup sendMessage calls and clearWrapupInflight() in clearUnitTimeout(), all verified by 6 passing tests\n\n**Created auto-wrapup-guard module, wired setWrapupInflight() before both hx-auto-wrapup sendMessage calls and clearWrapupInflight() in clearUnitTimeout(), all verified by 6 passing tests**\n\n## What Happened\n\nCreated src/resources/extensions/hx/bootstrap/auto-wrapup-guard.ts with four exported functions: setWrapupInflight(), clearWrapupInflight(), isWrapupInflight(), resetWrapupGuard(). Wired into auto-timers.ts by inserting setWrapupInflight() immediately before pi.sendMessage() in both the soft-timeout callback and the context-pressure continueHere interval (both send customType: hx-auto-wrapup). Wired into auto.ts by adding import after setLogBasePath and calling clearWrapupInflight() as the last statement in clearUnitTimeout() after clearInFlightTools(). Wrote auto-wrapup-inflight-guard.test.ts with 6 tests: 4 state-machine tests and 2 static source wiring checks using readFileSync on TS source files.\n\n## Verification\n\nnpx tsc --noEmit clean. npm run test:unit: 4179 passed, 0 failed, 5 skipped (6 new tests added). Isolated run of auto-wrapup-inflight-guard.test.js: 6/6 pass.\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `npx tsc --noEmit` | 0 | ✅ pass | 4500ms |\n| 2 | `npm run test:unit` | 0 | ✅ pass (4179 passed) | 72300ms |\n| 3 | `node --import ./scripts/dist-test-resolve.mjs --test auto-wrapup-inflight-guard.test.js` | 0 | ✅ pass (6/6) | 2500ms |\n\n\n## Deviations\n\nNone. Both sendMessage sites confirmed and wired as planned.\n\n## Known Issues\n\nNone.\n\n## Files Created/Modified\n\n- `src/resources/extensions/hx/bootstrap/auto-wrapup-guard.ts`\n- `src/resources/extensions/hx/auto-timers.ts`\n- `src/resources/extensions/hx/auto.ts`\n- `src/resources/extensions/hx/tests/auto-wrapup-inflight-guard.test.ts`\n",
       "description": "Create the auto-wrapup-inflight guard module, wire setWrapupInflight() into the soft-timeout callback in auto-timers.ts and clearWrapupInflight() into clearUnitTimeout() in auto.ts, then write the test file.\n\n## Steps\n\n1. Create `src/resources/extensions/hx/bootstrap/auto-wrapup-guard.ts`:\n```typescript\n/** Tracks whether an hx-auto-wrapup message has been sent and the triggered turn is still inflight. */\nlet _wrapupInflight = false;\n\n/** Mark that a wrapup message has been sent and a new turn is inflight. */\nexport function setWrapupInflight(): void { _wrapupInflight = true; }\n\n/** Clear the inflight flag — called when the triggered turn completes or the unit ends. */\nexport function clearWrapupInflight(): void { _wrapupInflight = false; }\n\n/** Returns true if a wrapup message has been sent and the turn is still inflight. */\nexport function isWrapupInflight(): boolean { return _wrapupInflight; }\n\n/** Reset guard state — called at session start and session switch. */\nexport function resetWrapupGuard(): void { _wrapupInflight = false; }\n```\n\n2. Wire into `src/resources/extensions/hx/auto-timers.ts`:\n   - Add `import { setWrapupInflight } from './bootstrap/auto-wrapup-guard.js';` at the top imports.\n   - In the soft-timeout callback (around line 116, the `s.wrapupWarningHandle = setTimeout(() => {` block), call `setWrapupInflight()` immediately before the `pi.sendMessage(...)` call.\n   - Also check line ~292 for a second `customType: 'hx-auto-wrapup'` sendMessage — add `setWrapupInflight()` before that one too if it's in a parallel path.\n\n3. Wire into `src/resources/extensions/hx/auto.ts`:\n   - Widen the existing `import { setLogBasePath } from './workflow-logger.js'` to NOT change (setLogBasePath is the only import needed there).\n   - Add a NEW import line: `import { clearWrapupInflight } from './bootstrap/auto-wrapup-guard.js';`\n   - In `clearUnitTimeout()` (around line 477), add `clearWrapupInflight();` at the end of the function body, before the closing brace.\n\n4. Create `src/resources/extensions/hx/tests/auto-wrapup-inflight-guard.test.ts`:\n   - Import the 4 functions from `'../bootstrap/auto-wrapup-guard.js'` (compiled path — check if other tests use `.js` extension for imports from bootstrap/).\n   - Test 1: `isWrapupInflight()` returns false initially\n   - Test 2: after `setWrapupInflight()`, `isWrapupInflight()` returns true\n   - Test 3: after `setWrapupInflight()` then `clearWrapupInflight()`, `isWrapupInflight()` returns false\n   - Test 4: `resetWrapupGuard()` clears inflight state after `setWrapupInflight()`\n   - Test 5 (static): `readFileSync` the compiled auto-timers.ts source and assert it contains `setWrapupInflight()` in the wrapup callback region\n   - Test 6 (static): `readFileSync` auto.ts source and assert it contains `clearWrapupInflight` in the clearUnitTimeout region\n   - Note: reset state between each test via `resetWrapupGuard()` in beforeEach or explicit reset calls\n\n5. Run `npm run test:unit` and `npx tsc --noEmit`.",
       "estimate": "45m",
       "files": [
@@ -4182,19 +4191,28 @@
       "milestone_id": "M003-ttxmyu",
       "slice_id": "S04",
       "id": "T04",
-      "title": "Migrate targeted silent catch blocks + write silent-catch-diagnostics.test.ts",
-      "status": "pending",
-      "one_liner": "",
-      "narrative": "",
-      "verification_result": "",
+      "title": "Migrated 5 targeted empty/silent catch blocks to logWarning in auto.ts, phases.ts, and register-hooks.ts, verified by an 8-assertion static analysis test",
+      "status": "complete",
+      "one_liner": "Migrated 5 targeted empty/silent catch blocks to logWarning in auto.ts, phases.ts, and register-hooks.ts, verified by an 8-assertion static analysis test",
+      "narrative": "Widened workflow-logger import in auto.ts to include logWarning. Migrated 3 catch blocks in auto.ts (preserveBranch path, paused-session.json write, closeoutUnit on pause), 1 in phases.ts (anchor write), and 1 in register-hooks.ts (show_token_cost preference load) — adding logWarning import to register-hooks.ts. Wrote silent-catch-diagnostics.test.ts with 8 static assertions verifying old patterns are gone and new logWarning calls are present. 4187 tests passed, tsc clean.",
+      "verification_result": "npx tsc --noEmit clean. npm run test:unit: 4187 passed, 0 failed, 5 skipped. grep -c logWarning.*Phase anchor write failed phases.ts → 1.",
       "duration": "",
-      "completed_at": null,
+      "completed_at": "2026-04-05T17:42:43.072Z",
       "blocker_discovered": false,
-      "deviations": "",
-      "known_issues": "",
-      "key_files": [],
-      "key_decisions": [],
-      "full_summary_md": "",
+      "deviations": "register-hooks.ts has multiple catch { /* non-fatal */ } instances — only the show_token_cost preference block (line 51) was in scope per the plan. Test assertion scoped to that region to avoid false positives from other unchanged catch blocks.",
+      "known_issues": "None.",
+      "key_files": [
+        "src/resources/extensions/hx/auto.ts",
+        "src/resources/extensions/hx/auto/phases.ts",
+        "src/resources/extensions/hx/bootstrap/register-hooks.ts",
+        "src/resources/extensions/hx/tests/silent-catch-diagnostics.test.ts"
+      ],
+      "key_decisions": [
+        "phases.ts already had logWarning imported at line 31 — no import change needed",
+        "register-hooks.ts needed new logWarning import added after isToolCallEventType import",
+        "Test uses absence of original comment text as old-pattern signal — more robust than exact whitespace matching"
+      ],
+      "full_summary_md": "---\nid: T04\nparent: S04\nmilestone: M003-ttxmyu\nkey_files:\n  - src/resources/extensions/hx/auto.ts\n  - src/resources/extensions/hx/auto/phases.ts\n  - src/resources/extensions/hx/bootstrap/register-hooks.ts\n  - src/resources/extensions/hx/tests/silent-catch-diagnostics.test.ts\nkey_decisions:\n  - phases.ts already had logWarning imported at line 31 — no import change needed\n  - register-hooks.ts needed new logWarning import added after isToolCallEventType import\n  - Test uses absence of original comment text as old-pattern signal — more robust than exact whitespace matching\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-04-05T17:42:43.073Z\nblocker_discovered: false\n---\n\n# T04: Migrated 5 targeted empty/silent catch blocks to logWarning in auto.ts, phases.ts, and register-hooks.ts, verified by an 8-assertion static analysis test\n\n**Migrated 5 targeted empty/silent catch blocks to logWarning in auto.ts, phases.ts, and register-hooks.ts, verified by an 8-assertion static analysis test**\n\n## What Happened\n\nWidened workflow-logger import in auto.ts to include logWarning. Migrated 3 catch blocks in auto.ts (preserveBranch path, paused-session.json write, closeoutUnit on pause), 1 in phases.ts (anchor write), and 1 in register-hooks.ts (show_token_cost preference load) — adding logWarning import to register-hooks.ts. Wrote silent-catch-diagnostics.test.ts with 8 static assertions verifying old patterns are gone and new logWarning calls are present. 4187 tests passed, tsc clean.\n\n## Verification\n\nnpx tsc --noEmit clean. npm run test:unit: 4187 passed, 0 failed, 5 skipped. grep -c logWarning.*Phase anchor write failed phases.ts → 1.\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `npx tsc --noEmit` | 0 | ✅ pass | 4400ms |\n| 2 | `npm run test:unit` | 0 | ✅ pass (4187 passed) | 72700ms |\n| 3 | `grep -c \"logWarning.*Phase anchor write failed\" src/resources/extensions/hx/auto/phases.ts` | 0 | ✅ pass (1) | 30ms |\n\n\n## Deviations\n\nregister-hooks.ts has multiple catch { /* non-fatal */ } instances — only the show_token_cost preference block (line 51) was in scope per the plan. Test assertion scoped to that region to avoid false positives from other unchanged catch blocks.\n\n## Known Issues\n\nNone.\n\n## Files Created/Modified\n\n- `src/resources/extensions/hx/auto.ts`\n- `src/resources/extensions/hx/auto/phases.ts`\n- `src/resources/extensions/hx/bootstrap/register-hooks.ts`\n- `src/resources/extensions/hx/tests/silent-catch-diagnostics.test.ts`\n",
       "description": "Add logWarning calls to 5 specific empty/silent catch blocks across auto.ts, auto/phases.ts, and bootstrap/register-hooks.ts, then write a static analysis test that proves the migration.\n\n## Steps\n\n1. **auto.ts** — widen the workflow-logger import. Current: `import { setLogBasePath } from './workflow-logger.js'`. Change to: `import { setLogBasePath, logWarning } from './workflow-logger.js'`.\n\n2. **auto.ts line ~664** — catch block after `milestoneComplete = wtSummaryPath !== null`:\n   - Find the catch block: `} catch {` followed by `// Non-fatal — fall through to preserveBranch path`\n   - Change to: `} catch (e) {\\n  logWarning('engine', 'Failed to check milestone SUMMARY existence', { milestone: s.currentMilestoneId ?? 'unknown', error: String(e) });\\n}`\n\n3. **auto.ts line ~865** — catch block after `writeFileSync(join(runtimeDir, 'paused-session.json'), ...)`:\n   - Find: `} catch {` followed by `// Non-fatal — resume will still work via full bootstrap, just without worktree context`\n   - Change to: `} catch (e) {\\n  logWarning('engine', 'Failed to write paused-session.json', { error: String(e) });\\n}`\n\n4. **auto.ts line ~873** — catch block around `closeoutUnit(...)` call:\n   - Find: `} catch {` followed by `// Non-fatal — best-effort closeout on pause`\n   - Change to: `} catch (e) {\\n  logWarning('engine', 'Unit closeout on pause threw', { error: String(e) });\\n}`\n\n5. **auto/phases.ts line ~1214** — catch block after phase anchor write:\n   - Find: `} catch { /* non-fatal — anchor is advisory */ }`\n   - Change to: `} catch (e) { logWarning('engine', 'Phase anchor write failed', { error: String(e) }); }`\n   - NOTE: phases.ts already imports `logWarning` from `'../workflow-logger.js'` at line 31 — no import change needed.\n\n6. **bootstrap/register-hooks.ts line ~51** — preference load catch:\n   - Find: `} catch { /* non-fatal */ }` in the preference load block (around the `show_token_cost` section)\n   - Add import: `import { logWarning } from '../workflow-logger.js';` at the top of the file (after existing imports)\n   - Change catch to: `} catch (e) { logWarning('engine', 'Failed to load preferences for show_token_cost', { error: String(e) }); }`\n\n7. Create `src/resources/extensions/hx/tests/silent-catch-diagnostics.test.ts`:\n   - Use `readFileSync` to read each modified source file\n   - Assert the OLD silent catch patterns are GONE:\n     - auto.ts: does NOT contain `catch {\\n          // Non-fatal — fall through to preserveBranch path`\n     - auto.ts: does NOT contain `catch {\\n    // Non-fatal — resume will still work via full bootstrap`\n     - auto.ts: does NOT contain `catch {\\n      // Non-fatal — best-effort closeout on pause`\n     - phases.ts: does NOT contain `catch { /* non-fatal — anchor is advisory */ }`\n     - register-hooks.ts: does NOT contain first `catch { /* non-fatal */ }` in the preference block\n   - Assert the NEW patterns ARE present:\n     - phases.ts: contains `logWarning('engine', 'Phase anchor write failed'`\n     - auto.ts: contains `logWarning('engine', 'Failed to check milestone SUMMARY existence'`\n     - register-hooks.ts: contains `logWarning('engine', 'Failed to load preferences for show_token_cost'`\n\n8. Run `npm run test:unit` and `npx tsc --noEmit`. Expect no regressions.",
       "estimate": "45m",
       "files": [
@@ -7089,6 +7107,72 @@
       "verdict": "✅ pass (4)",
       "duration_ms": 50,
       "created_at": "2026-04-05T17:33:29.323Z"
+    },
+    {
+      "id": 242,
+      "task_id": "T03",
+      "slice_id": "S04",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npx tsc --noEmit",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 4500,
+      "created_at": "2026-04-05T17:37:38.406Z"
+    },
+    {
+      "id": 243,
+      "task_id": "T03",
+      "slice_id": "S04",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npm run test:unit",
+      "exit_code": 0,
+      "verdict": "✅ pass (4179 passed)",
+      "duration_ms": 72300,
+      "created_at": "2026-04-05T17:37:38.406Z"
+    },
+    {
+      "id": 244,
+      "task_id": "T03",
+      "slice_id": "S04",
+      "milestone_id": "M003-ttxmyu",
+      "command": "node --import ./scripts/dist-test-resolve.mjs --test auto-wrapup-inflight-guard.test.js",
+      "exit_code": 0,
+      "verdict": "✅ pass (6/6)",
+      "duration_ms": 2500,
+      "created_at": "2026-04-05T17:37:38.406Z"
+    },
+    {
+      "id": 245,
+      "task_id": "T04",
+      "slice_id": "S04",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npx tsc --noEmit",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 4400,
+      "created_at": "2026-04-05T17:42:43.072Z"
+    },
+    {
+      "id": 246,
+      "task_id": "T04",
+      "slice_id": "S04",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npm run test:unit",
+      "exit_code": 0,
+      "verdict": "✅ pass (4187 passed)",
+      "duration_ms": 72700,
+      "created_at": "2026-04-05T17:42:43.072Z"
+    },
+    {
+      "id": 247,
+      "task_id": "T04",
+      "slice_id": "S04",
+      "milestone_id": "M003-ttxmyu",
+      "command": "grep -c \"logWarning.*Phase anchor write failed\" src/resources/extensions/hx/auto/phases.ts",
+      "exit_code": 0,
+      "verdict": "✅ pass (1)",
+      "duration_ms": 30,
+      "created_at": "2026-04-05T17:42:43.072Z"
     }
   ]
 }

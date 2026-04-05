@@ -40,7 +40,7 @@
   - Estimate: 45m
   - Files: src/resources/extensions/hx/captures.ts, src/resources/extensions/hx/triage-resolution.ts, src/resources/extensions/hx/prompts/triage-captures.md
   - Verify: npx tsc --noEmit && npm run test:unit 2>&1 | tail -5 && grep -c 'stop\|backtrack' src/resources/extensions/hx/captures.ts
-- [ ] **T03: Create auto-wrapup-guard.ts + wire into auto-timers.ts and auto.ts + write test** — Create the auto-wrapup-inflight guard module, wire setWrapupInflight() into the soft-timeout callback in auto-timers.ts and clearWrapupInflight() into clearUnitTimeout() in auto.ts, then write the test file.
+- [x] **T03: Created auto-wrapup-guard module, wired setWrapupInflight() before both hx-auto-wrapup sendMessage calls and clearWrapupInflight() in clearUnitTimeout(), all verified by 6 passing tests** — Create the auto-wrapup-inflight guard module, wire setWrapupInflight() into the soft-timeout callback in auto-timers.ts and clearWrapupInflight() into clearUnitTimeout() in auto.ts, then write the test file.
 
 ## Steps
 
@@ -86,7 +86,7 @@ export function resetWrapupGuard(): void { _wrapupInflight = false; }
   - Estimate: 45m
   - Files: src/resources/extensions/hx/bootstrap/auto-wrapup-guard.ts, src/resources/extensions/hx/auto-timers.ts, src/resources/extensions/hx/auto.ts, src/resources/extensions/hx/tests/auto-wrapup-inflight-guard.test.ts
   - Verify: npm run test:unit 2>&1 | grep -E 'auto-wrapup-inflight|passed|failed' | tail -5; npx tsc --noEmit
-- [ ] **T04: Migrate targeted silent catch blocks + write silent-catch-diagnostics.test.ts** — Add logWarning calls to 5 specific empty/silent catch blocks across auto.ts, auto/phases.ts, and bootstrap/register-hooks.ts, then write a static analysis test that proves the migration.
+- [x] **T04: Migrated 5 targeted empty/silent catch blocks to logWarning in auto.ts, phases.ts, and register-hooks.ts, verified by an 8-assertion static analysis test** — Add logWarning calls to 5 specific empty/silent catch blocks across auto.ts, auto/phases.ts, and bootstrap/register-hooks.ts, then write a static analysis test that proves the migration.
 
 ## Steps
 

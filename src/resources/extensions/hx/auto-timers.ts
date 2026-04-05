@@ -24,6 +24,7 @@ import { saveActivityLog } from "./activity-log.js";
 import { recoverTimedOutUnit, type RecoveryContext } from "./auto-timeout-recovery.js";
 import { resolveAgentEndCancelled } from "./auto/resolve.js";
 import type { AutoSession } from "./auto/session.js";
+import { setWrapupInflight } from "./bootstrap/auto-wrapup-guard.js";
 
 export interface SupervisionContext {
   s: AutoSession;
@@ -120,6 +121,7 @@ export function startUnitSupervision(sctx: SupervisionContext): void {
       phase: "wrapup-warning-sent",
       wrapupWarningSent: true,
     });
+    setWrapupInflight();
     pi.sendMessage(
       {
         customType: "hx-auto-wrapup",
@@ -287,6 +289,7 @@ export function startUnitSupervision(sctx: SupervisionContext): void {
       );
     }
 
+    setWrapupInflight();
     pi.sendMessage(
       {
         customType: "hx-auto-wrapup",

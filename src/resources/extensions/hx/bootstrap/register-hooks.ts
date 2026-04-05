@@ -2,6 +2,7 @@ import { join } from "node:path";
 
 import type { ExtensionAPI, ExtensionContext } from "@hyperlab/hx-coding-agent";
 import { isToolCallEventType } from "@hyperlab/hx-coding-agent";
+import { logWarning } from "../workflow-logger.js";
 
 import { buildMilestoneFileName, resolveMilestonePath, resolveSliceFile, resolveSlicePath } from "../paths.js";
 import { buildBeforeAgentStartResult } from "./system-context.js";
@@ -48,7 +49,7 @@ export function registerHooks(pi: ExtensionAPI): void {
       const { loadEffectiveHXPreferences } = await import("../preferences.js");
       const prefs = loadEffectiveHXPreferences();
       process.env.HX_SHOW_TOKEN_COST = prefs?.preferences.show_token_cost ? "1" : "";
-    } catch { /* non-fatal */ }
+    } catch (e) { logWarning('engine', 'Failed to load preferences for show_token_cost', { error: String(e) }); }
     if (isFirstSession) {
       isFirstSession = false;
     } else {

@@ -1211,7 +1211,7 @@ export async function runUnitPhase(
         blockers: [],
         nextSteps: [],
       });
-    } catch { /* non-fatal — anchor is advisory */ }
+    } catch (e) { logWarning('engine', 'Phase anchor write failed', { error: String(e) }); }
   }
 
   deps.emitJournalEvent({ ts: new Date().toISOString(), flowId: ic.flowId, seq: ic.nextSeq(), eventType: "unit-end", data: { unitType, unitId, status: unitResult.status, artifactVerified, ...(unitResult.errorContext ? { errorContext: unitResult.errorContext } : {}) }, causedBy: { flowId: ic.flowId, seq: unitStartSeq } });
