@@ -225,10 +225,18 @@ export function syncProjectRootToWorktree(
 
   // Delete worktree hx.db so it rebuilds from the freshly synced files.
   // Stale DB rows are the root cause of the infinite skip loop (#853).
+  // Also remove companion WAL/SHM files to prevent orphaned journal state
+  // that would cause "database disk image is malformed" on next open (#1c9032a).
   try {
     const wtDb = join(wtHx, "hx.db");
     if (existsSync(wtDb)) {
       unlinkSync(wtDb);
+    }
+    for (const suffix of ["-wal", "-shm"]) {
+      const companion = wtDb + suffix;
+      if (existsSync(companion)) {
+        unlinkSync(companion);
+      }
     }
   } catch {
     /* non-fatal */

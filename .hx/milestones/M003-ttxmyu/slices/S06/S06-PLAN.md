@@ -87,7 +87,7 @@ Steps:
   - Estimate: 35m
   - Files: src/resources/extensions/ask-user-questions.ts, src/resources/extensions/hx/bootstrap/register-hooks.ts, src/resources/extensions/hx/bootstrap/tool-call-loop-guard.ts, src/resources/extensions/hx/tests/ask-user-questions-dedup.test.ts, src/resources/extensions/hx/tests/tool-call-loop-guard.test.ts
   - Verify: npx tsc --noEmit && npm run test:unit -- --reporter=dot 2>&1 | tail -3
-- [ ] **T03: DB-Level Fixes: WAL/SHM orphan, transaction race, deferred slice, milestone status promotion, seed requirements (Clusters 3, 8, 9, 11, 20)** — Five targeted DB-layer fixes. All surgical changes to existing files.
+- [x] **T03: Ported five DB-layer fixes: WAL/SHM orphan cleanup, atomic decision ID transaction, deferred-slice status predicates + dispatch hook, milestone title/status preservation on re-plan, and seed-requirements-from-markdown fallback** — Five targeted DB-layer fixes. All surgical changes to existing files.
 
 **Cluster 3 — WAL/SHM orphan cleanup (commit 1c9032a70):**
 In `src/resources/extensions/hx/auto-worktree.ts`, the `syncProjectRootToWorktree` function deletes an empty `hx.db` but leaves orphan `hx.db-wal` and `hx.db-shm` files. Fix: after deleting (or discovering the main DB is already missing), also delete the companion WAL/SHM if they exist. `unlinkSync` is already imported. Pattern: `for (const suffix of ['-wal', '-shm']) { const companion = wtDb + suffix; if (existsSync(companion)) unlinkSync(companion); }`

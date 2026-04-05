@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-04-05T19:08:40.940Z",
+  "exported_at": "2026-04-05T19:17:15.725Z",
   "milestones": [
     {
       "id": "M001-df6x5t",
@@ -4593,19 +4593,35 @@
       "milestone_id": "M003-ttxmyu",
       "slice_id": "S06",
       "id": "T03",
-      "title": "DB-Level Fixes: WAL/SHM orphan, transaction race, deferred slice, milestone status promotion, seed requirements (Clusters 3, 8, 9, 11, 20)",
-      "status": "pending",
-      "one_liner": "",
-      "narrative": "",
-      "verification_result": "",
+      "title": "Ported five DB-layer fixes: WAL/SHM orphan cleanup, atomic decision ID transaction, deferred-slice status predicates + dispatch hook, milestone title/status preservation on re-plan, and seed-requirements-from-markdown fallback",
+      "status": "complete",
+      "one_liner": "Ported five DB-layer fixes: WAL/SHM orphan cleanup, atomic decision ID transaction, deferred-slice status predicates + dispatch hook, milestone title/status preservation on re-plan, and seed-requirements-from-markdown fallback",
+      "narrative": "Ported five upstream DB-layer fixes across 5 source files and 4 new test files. Cluster 3 (1c9032a70): extended syncProjectRootToWorktree to delete hx.db-wal and hx.db-shm alongside hx.db via a suffix loop, preventing orphaned WAL state. Cluster 8 (18cc75138): wrapped the decision ID assignment + upsertDecision in a db.transaction() in saveDecisionToDb, eliminating the TOCTOU race where two concurrent calls could claim the same ID. Cluster 9 (93295f7b5): added isDeferredStatus/isInactiveStatus to status-guards.ts, added extractDeferredSliceRef to db-writer.ts matching M/S slash and verb patterns, wired non-fatal deferred-slice status update into saveDecisionToDb. Cluster 11 (fea1b7431, 8b43b56f8): added COALESCE(NULLIF(:title,''),title) and equivalent for status to upsertMilestonePlanning's UPDATE SET clause; added getMilestoneSlices import + completed-slice drop guard in handlePlanMilestone; passes title/status to upsertMilestonePlanning. Cluster 20 (a4e43ca41): added parseRequirementsSections import to db-writer.ts; when updateRequirementInDb finds a missing requirement, parses REQUIREMENTS.md and seeds all requirements using INSERT-OR-IGNORE semantics before retrying. All 32 new tests pass; full suite 4266/0.",
+      "verification_result": "tsc --noEmit exits 0. 32 new tests pass across 4 test files. npm run test:unit passes 4266 tests with 0 failures.",
       "duration": "",
-      "completed_at": null,
+      "completed_at": "2026-04-05T19:17:15.654Z",
       "blocker_discovered": false,
-      "deviations": "",
-      "known_issues": "",
-      "key_files": [],
-      "key_decisions": [],
-      "full_summary_md": "",
+      "deviations": "Cluster 8: nextDecisionId() MAX query inlined inside transaction rather than calling the exported function (which would start its own separate implicit transaction). The exported nextDecisionId() function is preserved for standalone callers. Cluster 9: decision text check reads all three of fields.decision/rationale/choice for 'defer' pattern rather than just fields.decision.",
+      "known_issues": "None.",
+      "key_files": [
+        "src/resources/extensions/hx/auto-worktree.ts",
+        "src/resources/extensions/hx/status-guards.ts",
+        "src/resources/extensions/hx/db-writer.ts",
+        "src/resources/extensions/hx/hx-db.ts",
+        "src/resources/extensions/hx/tools/plan-milestone.ts",
+        "src/resources/extensions/hx/tests/worktree-db-respawn-truncation.test.ts",
+        "src/resources/extensions/hx/tests/deferred-slice-dispatch.test.ts",
+        "src/resources/extensions/hx/tests/plan-milestone-title.test.ts",
+        "src/resources/extensions/hx/tests/insert-slice-no-wipe.test.ts"
+      ],
+      "key_decisions": [
+        "COALESCE(NULLIF(:val,''),col) pattern for title/status in upsertMilestonePlanning — empty string treated as 'no update', preserving original value",
+        "Transaction wraps MAX(id) query + upsertDecision atomically — id var let-assigned outside transaction to remain accessible for rollback",
+        "extractDeferredSliceRef supports two text patterns: M/S slash and verb 'defer Sxx from Mxx'",
+        "Completed-slice drop guard in handlePlanMilestone: getMilestoneSlices inside transaction, isClosedStatus filter, error returned before insertSlice loop",
+        "Seed loop uses getRequirementById guard before upsertRequirement — INSERT OR IGNORE semantics without DB schema change"
+      ],
+      "full_summary_md": "---\nid: T03\nparent: S06\nmilestone: M003-ttxmyu\nkey_files:\n  - src/resources/extensions/hx/auto-worktree.ts\n  - src/resources/extensions/hx/status-guards.ts\n  - src/resources/extensions/hx/db-writer.ts\n  - src/resources/extensions/hx/hx-db.ts\n  - src/resources/extensions/hx/tools/plan-milestone.ts\n  - src/resources/extensions/hx/tests/worktree-db-respawn-truncation.test.ts\n  - src/resources/extensions/hx/tests/deferred-slice-dispatch.test.ts\n  - src/resources/extensions/hx/tests/plan-milestone-title.test.ts\n  - src/resources/extensions/hx/tests/insert-slice-no-wipe.test.ts\nkey_decisions:\n  - COALESCE(NULLIF(:val,''),col) pattern for title/status in upsertMilestonePlanning — empty string treated as 'no update', preserving original value\n  - Transaction wraps MAX(id) query + upsertDecision atomically — id var let-assigned outside transaction to remain accessible for rollback\n  - extractDeferredSliceRef supports two text patterns: M/S slash and verb 'defer Sxx from Mxx'\n  - Completed-slice drop guard in handlePlanMilestone: getMilestoneSlices inside transaction, isClosedStatus filter, error returned before insertSlice loop\n  - Seed loop uses getRequirementById guard before upsertRequirement — INSERT OR IGNORE semantics without DB schema change\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-04-05T19:17:15.654Z\nblocker_discovered: false\n---\n\n# T03: Ported five DB-layer fixes: WAL/SHM orphan cleanup, atomic decision ID transaction, deferred-slice status predicates + dispatch hook, milestone title/status preservation on re-plan, and seed-requirements-from-markdown fallback\n\n**Ported five DB-layer fixes: WAL/SHM orphan cleanup, atomic decision ID transaction, deferred-slice status predicates + dispatch hook, milestone title/status preservation on re-plan, and seed-requirements-from-markdown fallback**\n\n## What Happened\n\nPorted five upstream DB-layer fixes across 5 source files and 4 new test files. Cluster 3 (1c9032a70): extended syncProjectRootToWorktree to delete hx.db-wal and hx.db-shm alongside hx.db via a suffix loop, preventing orphaned WAL state. Cluster 8 (18cc75138): wrapped the decision ID assignment + upsertDecision in a db.transaction() in saveDecisionToDb, eliminating the TOCTOU race where two concurrent calls could claim the same ID. Cluster 9 (93295f7b5): added isDeferredStatus/isInactiveStatus to status-guards.ts, added extractDeferredSliceRef to db-writer.ts matching M/S slash and verb patterns, wired non-fatal deferred-slice status update into saveDecisionToDb. Cluster 11 (fea1b7431, 8b43b56f8): added COALESCE(NULLIF(:title,''),title) and equivalent for status to upsertMilestonePlanning's UPDATE SET clause; added getMilestoneSlices import + completed-slice drop guard in handlePlanMilestone; passes title/status to upsertMilestonePlanning. Cluster 20 (a4e43ca41): added parseRequirementsSections import to db-writer.ts; when updateRequirementInDb finds a missing requirement, parses REQUIREMENTS.md and seeds all requirements using INSERT-OR-IGNORE semantics before retrying. All 32 new tests pass; full suite 4266/0.\n\n## Verification\n\ntsc --noEmit exits 0. 32 new tests pass across 4 test files. npm run test:unit passes 4266 tests with 0 failures.\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `npx tsc --noEmit` | 0 | ✅ pass | 4400ms |\n| 2 | `node --test dist-test/.../worktree-db-respawn-truncation.test.js dist-test/.../deferred-slice-dispatch.test.js dist-test/.../plan-milestone-title.test.js dist-test/.../insert-slice-no-wipe.test.js` | 0 | ✅ pass (32/32) | 2100ms |\n| 3 | `npm run test:unit -- --reporter=dot` | 0 | ✅ pass (4266/4266) | 74900ms |\n\n\n## Deviations\n\nCluster 8: nextDecisionId() MAX query inlined inside transaction rather than calling the exported function (which would start its own separate implicit transaction). The exported nextDecisionId() function is preserved for standalone callers. Cluster 9: decision text check reads all three of fields.decision/rationale/choice for 'defer' pattern rather than just fields.decision.\n\n## Known Issues\n\nNone.\n\n## Files Created/Modified\n\n- `src/resources/extensions/hx/auto-worktree.ts`\n- `src/resources/extensions/hx/status-guards.ts`\n- `src/resources/extensions/hx/db-writer.ts`\n- `src/resources/extensions/hx/hx-db.ts`\n- `src/resources/extensions/hx/tools/plan-milestone.ts`\n- `src/resources/extensions/hx/tests/worktree-db-respawn-truncation.test.ts`\n- `src/resources/extensions/hx/tests/deferred-slice-dispatch.test.ts`\n- `src/resources/extensions/hx/tests/plan-milestone-title.test.ts`\n- `src/resources/extensions/hx/tests/insert-slice-no-wipe.test.ts`\n",
       "description": "Five targeted DB-layer fixes. All surgical changes to existing files.\n\n**Cluster 3 — WAL/SHM orphan cleanup (commit 1c9032a70):**\nIn `src/resources/extensions/hx/auto-worktree.ts`, the `syncProjectRootToWorktree` function deletes an empty `hx.db` but leaves orphan `hx.db-wal` and `hx.db-shm` files. Fix: after deleting (or discovering the main DB is already missing), also delete the companion WAL/SHM if they exist. `unlinkSync` is already imported. Pattern: `for (const suffix of ['-wal', '-shm']) { const companion = wtDb + suffix; if (existsSync(companion)) unlinkSync(companion); }`\n\n**Cluster 8 — Decision/requirement transaction race (commit 18cc75138):**\nIn `src/resources/extensions/hx/db-writer.ts`, wrap the requirement ID assignment + insert in `db.transaction()`. Find the `saveDecisionToDb` or equivalent section. Look for requirement ID auto-assignment (the sequential ID logic like R001, R002...). Wrap it in a transaction: `db._getAdapter()?.transaction(() => { /* id assignment + insert */ })()`.\n\n**Cluster 9 — Deferred slice dispatch prevention (commit 93295f7b5):**\nIn `src/resources/extensions/hx/status-guards.ts`:\n- Add `export function isDeferredStatus(status: string): boolean { return status === 'deferred'; }`\n- Add `export function isInactiveStatus(status: string): boolean { return isClosedStatus(status) || isDeferredStatus(status); }`\nIn `src/resources/extensions/hx/db-writer.ts`:\n- Add `extractDeferredSliceRef(decisionText: string): { milestoneId: string; sliceId: string } | null` helper — extract milestone+slice IDs from decision text that mentions deferring a slice\n- In `saveDecisionToDb` (or the decision save path): when a decision defers a slice, call `db.updateSliceStatus(milestoneId, sliceId, 'deferred')` wrapped in try/catch (non-fatal)\n\n**Cluster 11 — Milestone status promotion on re-plan (commits fea1b7431, 8b43b56f8):**\nIn `src/resources/extensions/hx/hx-db.ts`, in `upsertMilestonePlanning()`, add `title` and `status` to the UPDATE SET clause:\n```sql\ntitle = COALESCE(NULLIF(:title,''),title),\nstatus = COALESCE(NULLIF(:status,''),status)\n```\nAccept optional `title`/`status` in the params binding.\nIn `src/resources/extensions/hx/tools/plan-milestone.ts`: add a guard that refuses to re-plan if any completed slices would be dropped. Before applying the new plan, load existing slices from DB; if any have status 'complete'/'done' and are absent from the new slice list, return an error or preserve them.\n\n**Cluster 20 — Seed requirements from REQUIREMENTS.md (commit a4e43ca41):**\nIn `src/resources/extensions/hx/db-writer.ts`, in `updateRequirementInDb`: when `db.getRequirementById(id)` returns null (requirement not in DB), parse REQUIREMENTS.md via `parseRequirementsSections()` and seed all requirements into the DB before retrying the lookup. Pattern: load file → parse → for each requirement, call `db.upsertRequirement(r)` with INSERT OR IGNORE semantics (skip if already exists). This addresses the K-note: 'Requirements DB vs REQUIREMENTS.md: always seed the DB before using hx_requirement_update'.\n\n**Test files:**\n- `src/resources/extensions/hx/tests/worktree-db-respawn-truncation.test.ts` — new: verifies WAL/SHM files are cleaned when main DB is deleted or missing\n- `src/resources/extensions/hx/tests/deferred-slice-dispatch.test.ts` — new: verifies isDeferredStatus, isInactiveStatus, extractDeferredSliceRef\n- `src/resources/extensions/hx/tests/plan-milestone-title.test.ts` — new: verifies title/status survive re-plan via upsertMilestonePlanning\n- `src/resources/extensions/hx/tests/insert-slice-no-wipe.test.ts` — new: verifies completed slices are preserved on milestone re-plan",
       "estimate": "45m",
       "files": [
@@ -7992,6 +8008,39 @@
       "verdict": "✅ pass",
       "duration_ms": 73900,
       "created_at": "2026-04-05T19:08:40.874Z"
+    },
+    {
+      "id": 267,
+      "task_id": "T03",
+      "slice_id": "S06",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npx tsc --noEmit",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 4400,
+      "created_at": "2026-04-05T19:17:15.654Z"
+    },
+    {
+      "id": 268,
+      "task_id": "T03",
+      "slice_id": "S06",
+      "milestone_id": "M003-ttxmyu",
+      "command": "node --test dist-test/.../worktree-db-respawn-truncation.test.js dist-test/.../deferred-slice-dispatch.test.js dist-test/.../plan-milestone-title.test.js dist-test/.../insert-slice-no-wipe.test.js",
+      "exit_code": 0,
+      "verdict": "✅ pass (32/32)",
+      "duration_ms": 2100,
+      "created_at": "2026-04-05T19:17:15.654Z"
+    },
+    {
+      "id": 269,
+      "task_id": "T03",
+      "slice_id": "S06",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npm run test:unit -- --reporter=dot",
+      "exit_code": 0,
+      "verdict": "✅ pass (4266/4266)",
+      "duration_ms": 74900,
+      "created_at": "2026-04-05T19:17:15.654Z"
     }
   ]
 }

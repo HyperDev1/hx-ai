@@ -1153,10 +1153,12 @@ export function insertMilestone(m: {
   });
 }
 
-export function upsertMilestonePlanning(milestoneId: string, planning: Partial<MilestonePlanningRecord>): void {
+export function upsertMilestonePlanning(milestoneId: string, planning: Partial<MilestonePlanningRecord> & { title?: string; status?: string }): void {
   if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   currentDb.prepare(
     `UPDATE milestones SET
+      title = COALESCE(NULLIF(:title,''),title),
+      status = COALESCE(NULLIF(:status,''),status),
       vision = COALESCE(:vision, vision),
       success_criteria = COALESCE(:success_criteria, success_criteria),
       key_risks = COALESCE(:key_risks, key_risks),
@@ -1171,6 +1173,8 @@ export function upsertMilestonePlanning(milestoneId: string, planning: Partial<M
      WHERE id = :id`,
   ).run({
     ":id": milestoneId,
+    ":title": planning.title ?? "",
+    ":status": planning.status ?? "",
     ":vision": planning.vision ?? null,
     ":success_criteria": planning.successCriteria ? JSON.stringify(planning.successCriteria) : null,
     ":key_risks": planning.keyRisks ? JSON.stringify(planning.keyRisks) : null,
