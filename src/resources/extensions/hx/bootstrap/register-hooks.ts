@@ -16,6 +16,7 @@ import { deriveState } from "../state.js";
 import { getAutoDashboardData, isAutoActive, isAutoPaused, markToolEnd, markToolStart } from "../auto.js";
 import { isParallelActive, shutdownParallel } from "../parallel-orchestrator.js";
 import { checkToolCallLoop, resetToolCallLoopGuard } from "./tool-call-loop-guard.js";
+import { resetAskUserQuestionsCache } from "../../ask-user-questions.js";
 import { saveActivityLog } from "../activity-log.js";
 import { startRtkStatusUpdates, stopRtkStatusUpdates } from "../rtk-status.js";
 import { rewriteCommandWithRtk } from "../../shared/rtk.js";
@@ -41,6 +42,7 @@ export function registerHooks(pi: ExtensionAPI): void {
   pi.on("session_start", async (_event, ctx) => {
     resetWriteGateState();
     resetToolCallLoopGuard();
+    resetAskUserQuestionsCache();
     await syncServiceTierStatus(ctx);
     startRtkStatusUpdates(ctx);
 
@@ -84,6 +86,7 @@ export function registerHooks(pi: ExtensionAPI): void {
   pi.on("session_switch", async (_event, ctx) => {
     resetWriteGateState();
     resetToolCallLoopGuard();
+    resetAskUserQuestionsCache();
     clearDiscussionFlowState();
     await syncServiceTierStatus(ctx);
     loadToolApiKeys();
@@ -100,6 +103,7 @@ export function registerHooks(pi: ExtensionAPI): void {
 
   pi.on("agent_end", async (event, ctx: ExtensionContext) => {
     resetToolCallLoopGuard();
+    resetAskUserQuestionsCache();
     await handleAgentEnd(pi, event, ctx);
   });
 

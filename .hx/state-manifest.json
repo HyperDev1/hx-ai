@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-04-05T19:01:22.724Z",
+  "exported_at": "2026-04-05T19:08:40.940Z",
   "milestones": [
     {
       "id": "M001-df6x5t",
@@ -4539,19 +4539,29 @@
       "milestone_id": "M003-ttxmyu",
       "slice_id": "S06",
       "id": "T02",
-      "title": "Ask-User-Questions Dedup + Loop Guard Strict Mode (Cluster 2)",
-      "status": "pending",
-      "one_liner": "",
-      "narrative": "",
-      "verification_result": "",
+      "title": "Added per-turn dedup cache to ask-user-questions and strict 1-call loop guard threshold for ask_user_questions tool",
+      "status": "complete",
+      "one_liner": "Added per-turn dedup cache to ask-user-questions and strict 1-call loop guard threshold for ask_user_questions tool",
+      "narrative": "Ported the ask-user-questions dedup cluster from upstream commits 7bd8fe47d, b75af3bc2, and 4c9073f62. Added turnCache module var, exported resetAskUserQuestionsCache and questionSignature to ask-user-questions.ts; wired cache reset into session_start/session_switch/agent_end in register-hooks.ts; added STRICT_LOOP_TOOLS set with MAX_CONSECUTIVE_STRICT=1 to tool-call-loop-guard.ts; moved tryRemoteQuestions before the hasUI guard. Created ask-user-questions-dedup.test.ts with 8 scenarios; updated tool-call-loop-guard.test.ts to reflect strict-mode semantics.",
+      "verification_result": "tsc --noEmit exits 0. Both new test files pass when run directly. npm run test:unit passes 4234 tests with 0 failures.",
       "duration": "",
-      "completed_at": null,
+      "completed_at": "2026-04-05T19:08:40.874Z",
       "blocker_discovered": false,
-      "deviations": "",
-      "known_issues": "",
-      "key_files": [],
-      "key_decisions": [],
-      "full_summary_md": "",
+      "deviations": "RPC fallback path result caching added (plan omitted this detail) — semantically correct and consistent with remote/local paths.",
+      "known_issues": "None.",
+      "key_files": [
+        "src/resources/extensions/ask-user-questions.ts",
+        "src/resources/extensions/hx/bootstrap/register-hooks.ts",
+        "src/resources/extensions/hx/bootstrap/tool-call-loop-guard.ts",
+        "src/resources/extensions/hx/tests/ask-user-questions-dedup.test.ts",
+        "src/resources/extensions/hx/tests/tool-call-loop-guard.test.ts"
+      ],
+      "key_decisions": [
+        "Cache only successful results (not cancelled/error paths)",
+        "STRICT_LOOP_TOOLS threshold=1 means block on 2nd identical call — distinct from default threshold of 4",
+        "tryRemoteQuestions unconditionally attempted before hasUI check so remote mode works in non-interactive sessions"
+      ],
+      "full_summary_md": "---\nid: T02\nparent: S06\nmilestone: M003-ttxmyu\nkey_files:\n  - src/resources/extensions/ask-user-questions.ts\n  - src/resources/extensions/hx/bootstrap/register-hooks.ts\n  - src/resources/extensions/hx/bootstrap/tool-call-loop-guard.ts\n  - src/resources/extensions/hx/tests/ask-user-questions-dedup.test.ts\n  - src/resources/extensions/hx/tests/tool-call-loop-guard.test.ts\nkey_decisions:\n  - Cache only successful results (not cancelled/error paths)\n  - STRICT_LOOP_TOOLS threshold=1 means block on 2nd identical call — distinct from default threshold of 4\n  - tryRemoteQuestions unconditionally attempted before hasUI check so remote mode works in non-interactive sessions\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-04-05T19:08:40.875Z\nblocker_discovered: false\n---\n\n# T02: Added per-turn dedup cache to ask-user-questions and strict 1-call loop guard threshold for ask_user_questions tool\n\n**Added per-turn dedup cache to ask-user-questions and strict 1-call loop guard threshold for ask_user_questions tool**\n\n## What Happened\n\nPorted the ask-user-questions dedup cluster from upstream commits 7bd8fe47d, b75af3bc2, and 4c9073f62. Added turnCache module var, exported resetAskUserQuestionsCache and questionSignature to ask-user-questions.ts; wired cache reset into session_start/session_switch/agent_end in register-hooks.ts; added STRICT_LOOP_TOOLS set with MAX_CONSECUTIVE_STRICT=1 to tool-call-loop-guard.ts; moved tryRemoteQuestions before the hasUI guard. Created ask-user-questions-dedup.test.ts with 8 scenarios; updated tool-call-loop-guard.test.ts to reflect strict-mode semantics.\n\n## Verification\n\ntsc --noEmit exits 0. Both new test files pass when run directly. npm run test:unit passes 4234 tests with 0 failures.\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `npx tsc --noEmit` | 0 | ✅ pass | 4300ms |\n| 2 | `node --test dist-test/src/resources/extensions/hx/tests/ask-user-questions-dedup.test.js dist-test/src/resources/extensions/hx/tests/tool-call-loop-guard.test.js` | 0 | ✅ pass | 2200ms |\n| 3 | `npm run test:unit -- --reporter=dot` | 0 | ✅ pass | 73900ms |\n\n\n## Deviations\n\nRPC fallback path result caching added (plan omitted this detail) — semantically correct and consistent with remote/local paths.\n\n## Known Issues\n\nNone.\n\n## Files Created/Modified\n\n- `src/resources/extensions/ask-user-questions.ts`\n- `src/resources/extensions/hx/bootstrap/register-hooks.ts`\n- `src/resources/extensions/hx/bootstrap/tool-call-loop-guard.ts`\n- `src/resources/extensions/hx/tests/ask-user-questions-dedup.test.ts`\n- `src/resources/extensions/hx/tests/tool-call-loop-guard.test.ts`\n",
       "description": "Port the ask-user-questions dedup cluster from commits 7bd8fe47d, b75af3bc2, 4c9073f62. Adds a per-turn signature cache that prevents the same question set from being dispatched twice in one turn, and adds a strict single-dispatch threshold for ask_user_questions in the loop guard.\n\nSteps:\n1. In `src/resources/extensions/ask-user-questions.ts`:\n   - Import `createHash` from `'crypto'` (or use existing hash utility)\n   - Add `const turnCache = new Map<string, { questions: unknown[]; result: unknown }>()` module var\n   - Export `resetAskUserQuestionsCache(): void` — clears turnCache\n   - Add `questionSignature(questions: unknown[]): string` — stringify + sha256 the canonicalized array (sort by id, include header, question, options, allowMultiple)\n   - In `execute()`: compute sig = questionSignature(params.questions); check turnCache before dispatching; cache results on success (non-error, non-timeout)\n   - Move the `tryRemoteQuestions` call BEFORE the `!ctx.hasUI` guard (this is the remote-questions interactive mode fix from commit b75af3bc2 — remote questions should be attempted even in non-interactive sessions)\n\n2. In `src/resources/extensions/hx/bootstrap/register-hooks.ts`:\n   - Import `resetAskUserQuestionsCache` from the ask-user-questions extension\n   - Wire it into `session_start`, `session_switch`, and `agent_end` hooks (add the import and the call)\n\n3. In `src/resources/extensions/hx/bootstrap/tool-call-loop-guard.ts`:\n   - Add `const STRICT_LOOP_TOOLS = new Set([\"ask_user_questions\"])` constant\n   - Add `const MAX_CONSECUTIVE_STRICT = 1` constant  \n   - Add `let lastToolName: string | null = null` state var\n   - In the loop detection logic: when `toolName` is in `STRICT_LOOP_TOOLS`, use `MAX_CONSECUTIVE_STRICT` as the threshold instead of `MAX_CONSECUTIVE`\n   - Reset `lastToolName = null` in `resetToolCallLoopGuard()`\n\n4. Create test files:\n   - `src/resources/extensions/hx/tests/ask-user-questions-dedup.test.ts`: tests for cache hit on identical signature, cache miss on different questions, cache reset on session_start/session_switch/agent_end hooks\n   - `src/resources/extensions/hx/tests/tool-call-loop-guard.test.ts` (update existing): add test for STRICT_LOOP_TOOLS threshold — ask_user_questions triggers loop guard after 1 consecutive call instead of the default threshold",
       "estimate": "35m",
       "files": [
@@ -7949,6 +7959,39 @@
       "verdict": "✅ pass",
       "duration_ms": 240,
       "created_at": "2026-04-05T19:01:22.663Z"
+    },
+    {
+      "id": 264,
+      "task_id": "T02",
+      "slice_id": "S06",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npx tsc --noEmit",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 4300,
+      "created_at": "2026-04-05T19:08:40.874Z"
+    },
+    {
+      "id": 265,
+      "task_id": "T02",
+      "slice_id": "S06",
+      "milestone_id": "M003-ttxmyu",
+      "command": "node --test dist-test/src/resources/extensions/hx/tests/ask-user-questions-dedup.test.js dist-test/src/resources/extensions/hx/tests/tool-call-loop-guard.test.js",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 2200,
+      "created_at": "2026-04-05T19:08:40.874Z"
+    },
+    {
+      "id": 266,
+      "task_id": "T02",
+      "slice_id": "S06",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npm run test:unit -- --reporter=dot",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 73900,
+      "created_at": "2026-04-05T19:08:40.874Z"
     }
   ]
 }

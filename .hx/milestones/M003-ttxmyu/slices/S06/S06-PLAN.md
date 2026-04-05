@@ -59,7 +59,7 @@ Steps:
   - Estimate: 60m
   - Files: packages/pi-coding-agent/src/core/resolve-config-value.ts, packages/pi-coding-agent/src/core/settings-manager.ts, packages/pi-coding-agent/src/index.ts, src/resources/extensions/search-the-web/url-utils.ts, src/security-overrides.ts, src/cli.ts, packages/pi-coding-agent/src/core/resolve-config-value-override.test.ts, packages/pi-coding-agent/src/core/settings-manager-security.test.ts, src/tests/security-overrides.test.ts, src/tests/url-utils-override.test.ts
   - Verify: npx tsc --noEmit && npm run test:unit -- --reporter=dot 2>&1 | tail -3
-- [ ] **T02: Ask-User-Questions Dedup + Loop Guard Strict Mode (Cluster 2)** — Port the ask-user-questions dedup cluster from commits 7bd8fe47d, b75af3bc2, 4c9073f62. Adds a per-turn signature cache that prevents the same question set from being dispatched twice in one turn, and adds a strict single-dispatch threshold for ask_user_questions in the loop guard.
+- [x] **T02: Added per-turn dedup cache to ask-user-questions and strict 1-call loop guard threshold for ask_user_questions tool** — Port the ask-user-questions dedup cluster from commits 7bd8fe47d, b75af3bc2, 4c9073f62. Adds a per-turn signature cache that prevents the same question set from being dispatched twice in one turn, and adds a strict single-dispatch threshold for ask_user_questions in the loop guard.
 
 Steps:
 1. In `src/resources/extensions/ask-user-questions.ts`:
