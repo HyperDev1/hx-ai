@@ -212,6 +212,18 @@ The pattern handles cold-start re-injection (the agent was stopped and restarted
 
 **Pattern:** `const { loadEffectiveHXPreferences } = await import("../preferences.js")` inside the hook handler body. The extra await cost is negligible (cached module, single evaluation) and the safety is real.
 
+## Workflow-logger import path: same-directory files use './workflow-logger.js', not '../' (M003/S04/T02)
+
+**Rule:** `workflow-logger.ts` lives in `src/resources/extensions/hx/`. Files in the same directory import it as `'./workflow-logger.js'`. The S04 plan mistakenly wrote `'../workflow-logger.js'` for `triage-resolution.ts` — both files are in the same `hx/` directory, so the correct relative path is `'./'`.
+
+**Pattern:** Before wiring any import to `workflow-logger.js`, check the importer's directory. Only files in subdirectories (e.g., `auto/phases.ts`, `bootstrap/register-hooks.ts`) use `'../workflow-logger.js'`.
+
+## Audit-log severity guard: inner guard inside outer path check (M003/S04/T01)
+
+**Rule:** In `workflow-logger.ts _push()`, the audit path check (`if (_auditBasePath)`) and the severity guard (`if (severity === 'error')`) are nested, not parallel. The severity guard is the inner condition. This means the `try/catch` block wrapping `mkdirSync`+`appendFileSync` also moves inside the severity guard — the structure is `if (_auditBasePath) { if (severity === 'error') { try { ... } catch { ... } } }`.
+
+**Pattern:** When auditing the current structure, look for the outer `if (_auditBasePath)` block at line ~233 and confirm the inner guard wraps the filesystem writes.
+
 ## findTurnBoundary returns 0 when fewer than keepRecentTurns assistant turns exist (M003/S03)
 
 **Rule:** `createObservationMask`'s internal `findTurnBoundary` scans messages from the end counting assistant turns. When the conversation has fewer assistant turns than `keepRecentTurns`, the loop exits with `i < 0` never being true and returns `boundary = 0`. The mask condition `index < boundary` is then always false — nothing is masked. This is correct "mask nothing" behavior, not a bug.

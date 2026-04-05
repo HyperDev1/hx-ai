@@ -230,6 +230,13 @@ const NESTED_COMPLETIONS: CompletionMap = {
     { cmd: "pause", desc: "Pause custom workflow auto-mode" },
     { cmd: "resume", desc: "Resume paused custom workflow auto-mode" },
   ],
+  codebase: [
+    { cmd: "generate", desc: "Generate a new codebase map" },
+    { cmd: "update", desc: "Update existing codebase map" },
+    { cmd: "stats", desc: "Show codebase map statistics" },
+    { cmd: "help", desc: "Show codebase command help" },
+    { cmd: "--collapse-threshold", desc: "Collapse directories with N or fewer files" },
+  ],
 };
 
 function filterOptions(

@@ -43,3 +43,9 @@ See `.hx/REQUIREMENTS.md` for the explicit capability contract, requirement stat
 - [x] M001-df6x5t: GSD → HX Complete Rename — **COMPLETE** — Eliminated all residual GSD identifiers across 377 files. Zero GSD hits outside migrate-gsd-to-hx.ts. typecheck:extensions exits 0.
 - [x] M002-yle1ri: Upstream v2.59.0 Bugfix Port — **COMPLETE** — Ported all 95 upstream gsd-2 v2.59.0 bugfix commits with GSD→HX naming adaptation across 6 slices. 422 files changed. 4113 tests pass / 0 fail. npx tsc --noEmit exits 0. R001–R014 validated.
 - [ ] M003-ttxmyu: Upstream v2.60.0–v2.63.0 Port + v2.59.0 Feature Backfill — Port ~82 upstream commits (fix/feat/refactor) from v2.59.0→v2.63.0 plus v2.59.0 deferred features: capability routing, slice parallelism, context optimization, workflow-logger, MCP readers, misc.
+  - S01 ✅ Capability-Aware Model Routing + DB Reconciliation — tsc clean baseline, routing selectionMethod logging
+  - S02 ✅ Slice-Level Parallelism — orchestrator/conflict/eligibility files, HX_SLICE_LOCK, 3 test files
+  - S03 ✅ Context Optimization (Masking + Phase Anchors) — context-masker.ts, phase-anchor.ts, tests pass
+  - S04 ✅ Workflow-Logger Centralization + Auto-mode Hardening — audit errors-only, stop/backtrack captures, auto-wrapup-guard, 5 silent catches → logWarning, 14 new tests; 4187 pass / 0 fail
+  - S05 ⬜ MCP Server Readers + Misc Features
+  - S06 ⬜ Remaining Bugfixes, Security + Final Verification

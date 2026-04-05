@@ -96,6 +96,7 @@ export const KNOWN_PREFERENCE_KEYS = new Set<string>([
   "language",
   "experimental",
   "context_management",
+  "codebase",
 ]);
 
 /** Canonical list of all dispatch unit types. */
@@ -214,6 +215,15 @@ export interface ContextManagementConfig {
   tool_result_max_chars?: number;
 }
 
+export interface CodebaseMapPreferences {
+  /** Glob patterns to exclude from the codebase map. Merged with built-in defaults. */
+  exclude_patterns?: string[];
+  /** Maximum number of files to include in the map. Default: 500. */
+  max_files?: number;
+  /** Collapse directories that contain N or fewer files into a single entry. Default: 3. */
+  collapse_threshold?: number;
+}
+
 export interface HXPreferences {
   version?: number;
   mode?: WorkflowMode;
@@ -279,6 +289,8 @@ export interface HXPreferences {
   experimental?: ExperimentalPreferences;
   /** Context management configuration — observation masking, compaction thresholds, tool result limits. */
   context_management?: ContextManagementConfig;
+  /** Codebase map generation preferences — exclude patterns, file limits, collapse threshold. */
+  codebase?: CodebaseMapPreferences;
 }
 
 export interface LoadedHXPreferences {

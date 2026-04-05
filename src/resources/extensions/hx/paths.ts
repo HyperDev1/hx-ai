@@ -264,6 +264,7 @@ export const HX_ROOT_FILES = {
   REQUIREMENTS: "REQUIREMENTS.md",
   OVERRIDES: "OVERRIDES.md",
   KNOWLEDGE: "KNOWLEDGE.md",
+  CODEBASE: "CODEBASE.md",
 } as const;
 
 export type HXRootFileKey = keyof typeof HX_ROOT_FILES;
@@ -276,6 +277,7 @@ const LEGACY_HX_ROOT_FILES: Record<HXRootFileKey, string> = {
   REQUIREMENTS: "requirements.md",
   OVERRIDES: "overrides.md",
   KNOWLEDGE: "knowledge.md",
+  CODEBASE: "codebase.md",
 };
 
 // ─── HX Root Discovery ───────────────────────────────────────────────────────

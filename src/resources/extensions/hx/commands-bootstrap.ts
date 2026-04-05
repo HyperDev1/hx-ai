@@ -45,6 +45,7 @@ const TOP_LEVEL_SUBCOMMANDS = [
   { cmd: "start", desc: "Start a workflow template" },
   { cmd: "templates", desc: "List available workflow templates" },
   { cmd: "extensions", desc: "Manage extensions" },
+  { cmd: "codebase", desc: "Generate and manage codebase map (.hx/CODEBASE.md)" },
 ] as const;
 
 function filterStartsWith(
