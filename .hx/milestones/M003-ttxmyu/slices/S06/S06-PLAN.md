@@ -234,7 +234,7 @@ Follow the existing validation pattern in the file (look at how other nested pre
   - Estimate: 55m
   - Files: src/resources/extensions/shared/interview-ui.ts, src/resources/extensions/hx/auto/phases.ts, src/resources/extensions/hx/worktree-manager.ts, src/resources/extensions/hx/auto-worktree.ts, src/resources/extensions/hx/auto-post-unit.ts, src/resources/extensions/hx/workflow-projections.ts, src/resources/extensions/hx/preferences-validation.ts, src/resources/extensions/hx/skill-discovery.ts, src/resources/extensions/hx/preferences-skills.ts, src/resources/extensions/hx/skill-catalog.ts, packages/pi-coding-agent/src/core/lsp/config.ts, packages/pi-coding-agent/src/core/retry-handler.ts, packages/pi-coding-agent/src/core/agent-session.ts, packages/pi-ai/src/utils/repair-tool-json.ts, packages/pi-ai/src/index.ts, packages/pi-coding-agent/src/modes/interactive/controllers/input-controller.ts, packages/pi-coding-agent/src/modes/interactive/slash-command-handlers.ts, src/resources/extensions/hx/tests/interview-ui-notes-loop.test.ts, src/resources/extensions/hx/tests/worktree-health-monorepo.test.ts, src/resources/extensions/hx/tests/worktree-teardown-safety.test.ts, packages/pi-coding-agent/src/core/lsp/lsp-legacy-alias.test.ts
   - Verify: npx tsc --noEmit && npm run test:unit -- --reporter=dot 2>&1 | tail -3
-- [ ] **T06: Final Verification + Requirement Status Updates** — Run the full verification pass and update requirement statuses.
+- [x] **T06: All three verification gates pass: tsc clean, 4298 tests, 0 GSD regressions — R010/R014/R017/R018 promoted to validated in REQUIREMENTS.md** — Run the full verification pass and update requirement statuses.
 
 Steps:
 1. Run `npx tsc --noEmit` — must exit 0. Fix any remaining type errors.

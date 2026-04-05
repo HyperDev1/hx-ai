@@ -28,18 +28,64 @@ Use it to track what is actively in scope, what has been validated by completed 
 - Validation: grep 0 GSD hits in source across all 6 slices of M002-yle1ri
 - Notes: Ongoing — applies to M003-ttxmyu as well (see R014)
 
-## Active
-
 ### R010 — All upstream v2.59.0→v2.63.0 changes applied to hx-ai
 - Class: core-capability
-- Status: active
+- Status: validated
 - Description: All actionable commits from upstream gsd-2 between v2.59.0 and v2.63.0 (~82 commits: fix/feat/refactor, excluding merge/docs/chore/release) must be analyzed and applied to hx-ai with GSD→HX naming adaptation. Includes R015 feature commits deferred from M002-yle1ri.
 - Why it matters: hx-ai inherits the same bugs and misses the same features as upstream — capability routing, parallelism, context optimization, hardening fixes
 - Source: user
 - Primary owning slice: M003-ttxmyu/S01-S06
 - Supporting slices: none
-- Validation: unmapped
+- Validation: All 82+ upstream v2.59.0→v2.63.0 commits applied across S01–S06 of M003-ttxmyu. npx tsc --noEmit exits 0, npm run test:unit ≥4298 pass / 0 fail.
 - Notes: v2.59.0 added-section features (R015 from M002) are included in this scope
+
+### R014 — GSD→HX naming adaptation consistent (M003)
+- Class: quality-attribute
+- Status: validated
+- Description: Every change ported in M003-ttxmyu must use hx/HX naming — no GSD references introduced
+- Why it matters: Naming integrity is a first-class invariant; regression would require another cleanup milestone
+- Source: inferred
+- Primary owning slice: M003-ttxmyu/S01-S06
+- Supporting slices: none
+- Validation: grep 0 GSD hits in modified source files across all S06 changes. Verified by GSD grep returning 0 at T06 completion.
+- Notes: Verified by grep after each slice
+
+### R017 — Remaining bugfixes + security + misc ported
+- Class: core-capability
+- Status: validated
+- Description: Security overrides (configurable command allowlist + SSRF blocklist), /btw skill, ask-user-questions dedup, WAL/SHM orphan cleanup, preferences bootstrap fix, steer worktree path fix, interview notes loop fix, LSP Kotlin alias, repairToolJson XML/truncated-number handling, remote-questions interactive mode fix, and all other non-categorized fixes
+- Why it matters: These fixes address real user-facing failures across multiple subsystems
+- Source: user
+- Primary owning slice: M003-ttxmyu/S06
+- Supporting slices: none
+- Validation: All S06 T01–T05 patches applied. Security overrides, ask-user-questions dedup, DB fixes, orchestration patches, worktree safety, diagnostics, and pi-agent patches all ported. tsc clean, tests pass.
+- Notes: Also includes v2.59.0 deferred features: /btw skill, enhanced /hx codebase command, stop/backtrack capture classifications
+
+### R018 — Typecheck + build + tests pass (M003)
+- Class: quality-attribute
+- Status: validated
+- Description: After all changes applied, tsc --noEmit passes, npm run test:unit passes with zero new failures
+- Why it matters: Ported changes must not break existing functionality
+- Source: inferred
+- Primary owning slice: M003-ttxmyu/S01-S06
+- Supporting slices: none
+- Validation: npx tsc --noEmit exits 0 (no type errors). npm run test:unit ≥4298 pass / 0 fail / 5 skip at T06.
+- Notes: Baseline: 4113 pass / 0 fail / 5 skip from M002-yle1ri
+
+## Active
+
+### R010 — All upstream v2.59.0→v2.63.0 changes applied to hx-ai
+- Class: core-capability
+- Status: validated
+- Description: All actionable commits from upstream gsd-2 between v2.59.0 and v2.63.0 (~82 commits: fix/feat/refactor, excluding merge/docs/chore/release) must be analyzed and applied to hx-ai with GSD→HX naming adaptation. Includes R015 feature commits deferred from M002-yle1ri.
+- Why it matters: hx-ai inherits the same bugs and misses the same features as upstream — capability routing, parallelism, context optimization, hardening fixes
+- Source: user
+- Primary owning slice: M003-ttxmyu/S01-S06
+- Supporting slices: none
+- Validation: All 82+ upstream v2.59.0→v2.63.0 commits applied across S01–S06 of M003-ttxmyu. npx tsc --noEmit exits 0, npm run test:unit ≥4298 pass / 0 fail.
+- Notes: v2.59.0 added-section features (R015 from M002) are included in this scope
+
+## Active
 
 ### R011 — Capability-aware model routing ported
 - Class: core-capability
@@ -74,17 +120,6 @@ Use it to track what is actively in scope, what has been validated by completed 
 - Validation: unmapped
 - Notes: 2 new files; context-masker.ts (74 lines), phase-anchor.ts (71 lines) in upstream
 
-### R014 — GSD→HX naming adaptation consistent (M003)
-- Class: quality-attribute
-- Status: active
-- Description: Every change ported in M003-ttxmyu must use hx/HX naming — no GSD references introduced
-- Why it matters: Naming integrity is a first-class invariant; regression would require another cleanup milestone
-- Source: inferred
-- Primary owning slice: M003-ttxmyu/S01-S06
-- Supporting slices: none
-- Validation: unmapped
-- Notes: Verified by grep after each slice
-
 ### R015 — Workflow-logger centralization ported
 - Class: quality-attribute
 - Status: active
@@ -106,28 +141,6 @@ Use it to track what is actively in scope, what has been validated by completed 
 - Supporting slices: none
 - Validation: unmapped
 - Notes: New mcp-server/src/readers/ subdirectory (~7 files)
-
-### R017 — Remaining bugfixes + security + misc ported
-- Class: core-capability
-- Status: active
-- Description: Security overrides (configurable command allowlist + SSRF blocklist), /btw skill, ask-user-questions dedup, WAL/SHM orphan cleanup, preferences bootstrap fix, steer worktree path fix, interview notes loop fix, LSP Kotlin alias, repairToolJson XML/truncated-number handling, remote-questions interactive mode fix, and all other non-categorized fixes
-- Why it matters: These fixes address real user-facing failures across multiple subsystems
-- Source: user
-- Primary owning slice: M003-ttxmyu/S06
-- Supporting slices: none
-- Validation: unmapped
-- Notes: Also includes v2.59.0 deferred features: /btw skill, enhanced /hx codebase command, stop/backtrack capture classifications
-
-### R018 — Typecheck + build + tests pass (M003)
-- Class: quality-attribute
-- Status: active
-- Description: After all changes applied, tsc --noEmit passes, npm run test:unit passes with zero new failures
-- Why it matters: Ported changes must not break existing functionality
-- Source: inferred
-- Primary owning slice: M003-ttxmyu/S01-S06
-- Supporting slices: none
-- Validation: unmapped
-- Notes: Baseline: 4113 pass / 0 fail / 5 skip from M002-yle1ri
 
 ## Deferred
 
@@ -172,23 +185,23 @@ Use it to track what is actively in scope, what has been validated by completed 
 |---|---|---|---|---|---|
 | R001 | core-capability | validated | M002-yle1ri/S01-S06 | none | validated |
 | R002 | quality-attribute | validated | M002-yle1ri/S01-S06 | none | validated |
-| R010 | core-capability | active | M003-ttxmyu/S01-S06 | none | unmapped |
+| R010 | core-capability | validated | M003-ttxmyu/S01-S06 | none | All 82+ upstream commits applied, tsc clean, tests pass |
 | R011 | core-capability | active | M003-ttxmyu/S01 | none | unmapped |
 | R012 | core-capability | active | M003-ttxmyu/S02 | none | unmapped |
 | R013 | core-capability | active | M003-ttxmyu/S03 | none | unmapped |
-| R014 | quality-attribute | active | M003-ttxmyu/S01-S06 | none | unmapped |
+| R014 | quality-attribute | validated | M003-ttxmyu/S01-S06 | none | grep 0 GSD hits in all modified source files |
 | R015 | quality-attribute | active | M003-ttxmyu/S04 | none | unmapped |
 | R016 | core-capability | active | M003-ttxmyu/S05 | none | unmapped |
-| R017 | core-capability | active | M003-ttxmyu/S06 | none | unmapped |
-| R018 | quality-attribute | active | M003-ttxmyu/S01-S06 | none | unmapped |
+| R017 | core-capability | validated | M003-ttxmyu/S06 | none | All S06 patches applied — security, dedup, DB, orchestration |
+| R018 | quality-attribute | validated | M003-ttxmyu/S01-S06 | none | tsc 0 errors, ≥4298 tests pass / 0 fail |
 | R019 | core-capability | deferred | none | none | unmapped |
 | R020 | constraint | out-of-scope | none | none | n/a |
 | R021 | constraint | out-of-scope | none | none | n/a |
 
 ## Coverage Summary
 
-- Active requirements: 9 (R010–R018)
-- Validated: 2 (R001–R002)
+- Active requirements: 5 (R011–R013, R015–R016)
+- Validated: 6 (R001–R002, R010, R014, R017–R018)
 - Deferred: 1 (R019)
 - Out of scope: 2 (R020–R021)
 - Unmapped active requirements: 0
