@@ -12,7 +12,7 @@
   - Estimate: 60m
   - Files: src/resources/extensions/hx/slice-parallel-eligibility.ts, src/resources/extensions/hx/tests/slice-parallel-eligibility.test.ts
   - Verify: npx tsc --noEmit && npm run test:unit 2>&1 | grep -E 'pass|fail' && grep -rn '\bGSD\b\|\bgsd\b' src/resources/extensions/hx/slice-parallel-eligibility.ts | wc -l | xargs test 0 -eq
-- [ ] **T03: Implement slice-parallel-conflict.ts and tests** — Create slice-parallel-conflict.ts implementing detectSliceConflicts() and buildSliceFileSets(). Uses getSliceTasks from hx-db.ts to build per-slice file sets, then set intersection for overlap detection. Pattern: adapt parallel-merge.ts conflict detection to the slice level. Create matching test file.
+- [x] **T03: Created slice-parallel-conflict.ts with detectSliceConflicts() and buildSliceFileSets(), 4 tests pass** — Create slice-parallel-conflict.ts implementing detectSliceConflicts() and buildSliceFileSets(). Uses getSliceTasks from hx-db.ts to build per-slice file sets, then set intersection for overlap detection. Pattern: adapt parallel-merge.ts conflict detection to the slice level. Create matching test file.
   - Estimate: 45m
   - Files: src/resources/extensions/hx/slice-parallel-conflict.ts, src/resources/extensions/hx/tests/slice-parallel-conflict.test.ts
   - Verify: npx tsc --noEmit && npm run test:unit 2>&1 | grep -E 'pass|fail' && grep -rn '\bGSD\b\|\bgsd\b' src/resources/extensions/hx/slice-parallel-conflict.ts | wc -l | xargs test 0 -eq
