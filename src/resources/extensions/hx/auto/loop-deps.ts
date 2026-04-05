@@ -20,6 +20,7 @@ import type { DispatchAction } from "../auto-dispatch.js";
 import type { WorktreeResolver } from "../worktree-resolver.js";
 import type { CmuxLogLevel } from "../../cmux/index.js";
 import type { JournalEntry } from "../journal.js";
+import type { TaskMetadata } from "../complexity-classifier.js";
 
 /**
  * Dependencies injected by the caller (auto.ts startAuto) so autoLoop
@@ -209,6 +210,7 @@ export interface LoopDeps {
     verbose: boolean,
     startModel: { provider: string; id: string } | null,
     retryContext?: { isRetry: boolean; previousTier?: string },
+    metadata?: TaskMetadata,
   ) => Promise<{
     routing: { tier: string; modelDowngraded: boolean } | null;
     appliedModel: { provider: string; id: string } | null;

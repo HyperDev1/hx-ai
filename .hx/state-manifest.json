@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-04-05T14:38:07.459Z",
+  "exported_at": "2026-04-05T14:42:12.006Z",
   "milestones": [
     {
       "id": "M001-df6x5t",
@@ -3591,19 +3591,28 @@
       "milestone_id": "M003-ttxmyu",
       "slice_id": "S01",
       "id": "T03",
-      "title": "TaskMetadata additions + selectAndApplyModel wiring",
-      "status": "pending",
-      "one_liner": "",
-      "narrative": "",
-      "verification_result": "",
+      "title": "Wired TaskMetadata capability fields (toolUsage/visionRequired/requiresReasoning) through selectAndApplyModel stack with capability-score routing log suffix",
+      "status": "complete",
+      "one_liner": "Wired TaskMetadata capability fields (toolUsage/visionRequired/requiresReasoning) through selectAndApplyModel stack with capability-score routing log suffix",
+      "narrative": "Added three optional fields to TaskMetadata interface (toolUsage, visionRequired, requiresReasoning) and populated them in extractTaskMetadata. Added metadata? param to selectAndApplyModel in auto-model-selection.ts, imported TaskMetadata, passed metadata to classifyUnitComplexity, and updated the wasDowngraded routing notify to append (capability-score) suffix when selectionMethod is capability-score. Updated loop-deps.ts type signature and phases.ts call site with undefined 10th arg.",
+      "verification_result": "npx tsc --noEmit exits 0. grep confirms all three new fields in complexity-classifier.ts. grep confirms selectionMethod used in auto-model-selection.ts. npm run test:unit passes 4113 tests with 0 failures.",
       "duration": "",
-      "completed_at": null,
+      "completed_at": "2026-04-05T14:42:11.980Z",
       "blocker_discovered": false,
-      "deviations": "",
-      "known_issues": "",
-      "key_files": [],
-      "key_decisions": [],
-      "full_summary_md": "",
+      "deviations": "None.",
+      "known_issues": "None.",
+      "key_files": [
+        "src/resources/extensions/hx/complexity-classifier.ts",
+        "src/resources/extensions/hx/auto-model-selection.ts",
+        "src/resources/extensions/hx/auto/loop-deps.ts",
+        "src/resources/extensions/hx/auto/phases.ts"
+      ],
+      "key_decisions": [
+        "TaskMetadata import in auto-model-selection.ts uses a separate import type line after existing complexity-classifier imports",
+        "selectionMethod suffix uses a local methodSuffix variable for readability",
+        "phases.ts adds undefined as 10th arg — no-op, satisfies TS, not yet wiring DB metadata"
+      ],
+      "full_summary_md": "---\nid: T03\nparent: S01\nmilestone: M003-ttxmyu\nkey_files:\n  - src/resources/extensions/hx/complexity-classifier.ts\n  - src/resources/extensions/hx/auto-model-selection.ts\n  - src/resources/extensions/hx/auto/loop-deps.ts\n  - src/resources/extensions/hx/auto/phases.ts\nkey_decisions:\n  - TaskMetadata import in auto-model-selection.ts uses a separate import type line after existing complexity-classifier imports\n  - selectionMethod suffix uses a local methodSuffix variable for readability\n  - phases.ts adds undefined as 10th arg — no-op, satisfies TS, not yet wiring DB metadata\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-04-05T14:42:11.980Z\nblocker_discovered: false\n---\n\n# T03: Wired TaskMetadata capability fields (toolUsage/visionRequired/requiresReasoning) through selectAndApplyModel stack with capability-score routing log suffix\n\n**Wired TaskMetadata capability fields (toolUsage/visionRequired/requiresReasoning) through selectAndApplyModel stack with capability-score routing log suffix**\n\n## What Happened\n\nAdded three optional fields to TaskMetadata interface (toolUsage, visionRequired, requiresReasoning) and populated them in extractTaskMetadata. Added metadata? param to selectAndApplyModel in auto-model-selection.ts, imported TaskMetadata, passed metadata to classifyUnitComplexity, and updated the wasDowngraded routing notify to append (capability-score) suffix when selectionMethod is capability-score. Updated loop-deps.ts type signature and phases.ts call site with undefined 10th arg.\n\n## Verification\n\nnpx tsc --noEmit exits 0. grep confirms all three new fields in complexity-classifier.ts. grep confirms selectionMethod used in auto-model-selection.ts. npm run test:unit passes 4113 tests with 0 failures.\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `npx tsc --noEmit` | 0 | ✅ pass | 4300ms |\n| 2 | `grep -n 'toolUsage\\|visionRequired\\|requiresReasoning' src/resources/extensions/hx/complexity-classifier.ts` | 0 | ✅ pass (8 hits) | 50ms |\n| 3 | `grep -n 'selectionMethod' src/resources/extensions/hx/auto-model-selection.ts` | 0 | ✅ pass (1 hit) | 50ms |\n| 4 | `npm run test:unit 2>&1 | tail -8` | 0 | ✅ pass (4113 passed, 0 failed) | 71100ms |\n\n\n## Deviations\n\nNone.\n\n## Known Issues\n\nNone.\n\n## Files Created/Modified\n\n- `src/resources/extensions/hx/complexity-classifier.ts`\n- `src/resources/extensions/hx/auto-model-selection.ts`\n- `src/resources/extensions/hx/auto/loop-deps.ts`\n- `src/resources/extensions/hx/auto/phases.ts`\n",
       "description": "Wire the capability scoring inputs through the stack: add new fields to TaskMetadata, update extractTaskMetadata, add taskMetadata? param to selectAndApplyModel, update loop-deps.ts type, update phases.ts call site, update selectionMethod log in notify.\n\nSteps:\n1. Read complexity-classifier.ts. Add three optional fields to TaskMetadata interface:\n   ```typescript\n   toolUsage?: string[];          // tool names referenced in plan (bash, browser, etc.)\n   visionRequired?: boolean;      // plan mentions screenshot/image/vision\n   requiresReasoning?: boolean;   // plan mentions multi-step deduction/analysis\n   ```\n   In extractTaskMetadata, populate them:\n   - toolUsage: scan for \\bbash\\b, \\bbrowser\\b, \\blsp\\b, \\bmac_\\b patterns in content; collect matches\n   - visionRequired: content.match(/\\b(screenshot|image|vision|visual)\\b/i) !== null\n   - requiresReasoning: content.match(/\\b(reason|deduc|infer|analyz|diagnos)\\b/i) !== null\n\n2. Read auto-model-selection.ts. In selectAndApplyModel:\n   a. Add optional `metadata?: TaskMetadata` parameter (after retryContext)\n   b. Import TaskMetadata from complexity-classifier.js\n   c. Pass metadata to classifyUnitComplexity call (it already has a 5th optional param)\n   d. After the `if (routingResult.wasDowngraded)` block, check routingResult.selectionMethod — if it is 'capability-score', change the notify message from `Dynamic routing [${tierLabel}]:` to `Dynamic routing [${tierLabel}] (capability-score):`\n\n3. Read loop-deps.ts. Update the selectAndApplyModel type signature to add `metadata?: TaskMetadata` after retryContext param. Import or inline TaskMetadata type as needed.\n\n4. Read phases.ts around line 1005. The call `deps.selectAndApplyModel(...)` currently passes 9 args. Add `undefined` as the 10th arg (metadata) to match the updated signature — this is a no-op for now but satisfies TypeScript. The executor may choose to wire richer metadata from the DB record if straightforward.\n\n5. Run `npx tsc --noEmit` — must exit 0.\n6. Run `npm run test:unit 2>&1 | tail -5` — must still pass.",
       "estimate": "60m",
       "files": [
@@ -6029,6 +6038,50 @@
       "verdict": "✅ pass (4113 passed, 0 failed)",
       "duration_ms": 71700,
       "created_at": "2026-04-05T14:38:07.431Z"
+    },
+    {
+      "id": 196,
+      "task_id": "T03",
+      "slice_id": "S01",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npx tsc --noEmit",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 4300,
+      "created_at": "2026-04-05T14:42:11.980Z"
+    },
+    {
+      "id": 197,
+      "task_id": "T03",
+      "slice_id": "S01",
+      "milestone_id": "M003-ttxmyu",
+      "command": "grep -n 'toolUsage\\|visionRequired\\|requiresReasoning' src/resources/extensions/hx/complexity-classifier.ts",
+      "exit_code": 0,
+      "verdict": "✅ pass (8 hits)",
+      "duration_ms": 50,
+      "created_at": "2026-04-05T14:42:11.980Z"
+    },
+    {
+      "id": 198,
+      "task_id": "T03",
+      "slice_id": "S01",
+      "milestone_id": "M003-ttxmyu",
+      "command": "grep -n 'selectionMethod' src/resources/extensions/hx/auto-model-selection.ts",
+      "exit_code": 0,
+      "verdict": "✅ pass (1 hit)",
+      "duration_ms": 50,
+      "created_at": "2026-04-05T14:42:11.980Z"
+    },
+    {
+      "id": 199,
+      "task_id": "T03",
+      "slice_id": "S01",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npm run test:unit 2>&1 | tail -8",
+      "exit_code": 0,
+      "verdict": "✅ pass (4113 passed, 0 failed)",
+      "duration_ms": 71100,
+      "created_at": "2026-04-05T14:42:11.980Z"
     }
   ]
 }

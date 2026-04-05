@@ -10,6 +10,7 @@ import type { HXPreferences } from "./preferences.js";
 import { resolveModelWithFallbacksForUnit, resolveDynamicRoutingConfig } from "./preferences.js";
 import type { ComplexityTier } from "./complexity-classifier.js";
 import { classifyUnitComplexity, tierLabel } from "./complexity-classifier.js";
+import type { TaskMetadata } from "./complexity-classifier.js";
 import { resolveModelForComplexity, escalateTier } from "./model-router.js";
 import { getLedger, getProjectTotals } from "./metrics.js";
 import { unitPhaseLabel } from "./auto-dashboard.js";
@@ -58,6 +59,7 @@ export async function selectAndApplyModel(
   verbose: boolean,
   autoModeStartModel: { provider: string; id: string } | null,
   retryContext?: { isRetry: boolean; previousTier?: string },
+  metadata?: TaskMetadata,
 ): Promise<ModelSelectionResult> {
   const modelConfig = resolvePreferredModelConfig(unitType, autoModeStartModel);
   let routing: { tier: string; modelDowngraded: boolean } | null = null;
@@ -86,7 +88,7 @@ export async function selectAndApplyModel(
       const shouldClassify = !isHook || routingConfig.hooks !== false;
 
       if (shouldClassify) {
-        let classification = classifyUnitComplexity(unitType, unitId, basePath, budgetPct);
+        let classification = classifyUnitComplexity(unitType, unitId, basePath, budgetPct, metadata);
         const availableModelIds = availableModels.map(m => m.id);
 
         // Escalate tier on retry when escalate_on_failure is enabled (default: true)
@@ -115,8 +117,11 @@ export async function selectAndApplyModel(
             fallbacks: routingResult.fallbacks,
           };
           if (verbose) {
+            const methodSuffix = routingResult.selectionMethod === "capability-score"
+              ? ` (capability-score)`
+              : ``;
             ctx.ui.notify(
-              `Dynamic routing [${tierLabel(classification.tier)}]: ${routingResult.modelId} (${classification.reason})`,
+              `Dynamic routing [${tierLabel(classification.tier)}]${methodSuffix}: ${routingResult.modelId} (${classification.reason})`,
               "info",
             );
           }

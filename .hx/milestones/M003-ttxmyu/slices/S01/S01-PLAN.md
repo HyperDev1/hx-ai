@@ -89,7 +89,7 @@ Steps:
   - Estimate: 75m
   - Files: src/resources/extensions/hx/model-router.ts
   - Verify: npx tsc --noEmit && grep -n 'selectionMethod' src/resources/extensions/hx/model-router.ts && grep -n 'capability_routing' src/resources/extensions/hx/model-router.ts && npm run test:unit 2>&1 | tail -5
-- [ ] **T03: TaskMetadata additions + selectAndApplyModel wiring** — Wire the capability scoring inputs through the stack: add new fields to TaskMetadata, update extractTaskMetadata, add taskMetadata? param to selectAndApplyModel, update loop-deps.ts type, update phases.ts call site, update selectionMethod log in notify.
+- [x] **T03: Wired TaskMetadata capability fields (toolUsage/visionRequired/requiresReasoning) through selectAndApplyModel stack with capability-score routing log suffix** — Wire the capability scoring inputs through the stack: add new fields to TaskMetadata, update extractTaskMetadata, add taskMetadata? param to selectAndApplyModel, update loop-deps.ts type, update phases.ts call site, update selectionMethod log in notify.
 
 Steps:
 1. Read complexity-classifier.ts. Add three optional fields to TaskMetadata interface:
