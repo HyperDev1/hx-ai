@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-04-05T15:32:59.097Z",
+  "exported_at": "2026-04-05T15:57:02.872Z",
   "milestones": [
     {
       "id": "M001-df6x5t",
@@ -474,16 +474,16 @@
       "milestone_id": "M003-ttxmyu",
       "id": "S02",
       "title": "Slice-Level Parallelism",
-      "status": "pending",
+      "status": "complete",
       "risk": "high",
       "depends": [
         "S01"
       ],
       "demo": "After this: slice parallel orchestrator files exist with HX naming; 3 test files pass; state.ts handles HX_SLICE_LOCK in both paths",
       "created_at": "2026-04-05T13:56:28.716Z",
-      "completed_at": null,
-      "full_summary_md": "",
-      "full_uat_md": "",
+      "completed_at": "2026-04-05T15:36:45.702Z",
+      "full_summary_md": "---\nid: S02\nparent: M003-ttxmyu\nmilestone: M003-ttxmyu\nprovides:\n  - HX_SLICE_LOCK isolation in state.ts (both deriveStateFromDb and _deriveStateImpl)\n  - HX_SLICE_LOCK isolation in dispatch-guard.ts positional ordering check\n  - slice-parallel-eligibility.ts: analyzeSliceParallelEligibility() + formatSliceEligibilityReport()\n  - slice-parallel-conflict.ts: detectSliceConflicts() + buildSliceFileSets()\n  - slice-parallel-orchestrator.ts: startSliceParallel() + stopSliceParallel() + getSliceWorkerStatuses()\n  - hx-db.ts: slice_locks table in initSchema (fix for :memory: DB test correctness)\n  - 19 new passing tests covering all subsystem behaviors\nrequires:\n  []\naffects:\n  - S03\n  - S04\n  - S05\n  - S06\nkey_files:\n  - src/resources/extensions/hx/state.ts\n  - src/resources/extensions/hx/dispatch-guard.ts\n  - src/resources/extensions/hx/slice-parallel-eligibility.ts\n  - src/resources/extensions/hx/slice-parallel-conflict.ts\n  - src/resources/extensions/hx/slice-parallel-orchestrator.ts\n  - src/resources/extensions/hx/hx-db.ts\n  - src/resources/extensions/hx/tests/derive-state-db.test.ts\n  - src/resources/extensions/hx/tests/dispatch-guard.test.ts\n  - src/resources/extensions/hx/tests/slice-parallel-eligibility.test.ts\n  - src/resources/extensions/hx/tests/slice-parallel-conflict.test.ts\n  - src/resources/extensions/hx/tests/slice-parallel-orchestrator.test.ts\nkey_decisions:\n  - HX_SLICE_LOCK format is MID/SID; SID extracted via split('/')[1] (simpler than parseUnitId, consistent with milestone lock pattern)\n  - analyzeSliceParallelEligibility is synchronous — all its DB calls are sync, making async unnecessary and callers simpler\n  - file overlap is a warning not a disqualifier in eligibility analysis — matches upstream milestone-level behavior\n  - detectSliceConflicts is async (Promise) for API compatibility with the orchestrator\n  - buildSliceFileSets exported as separate synchronous helper for independent testability\n  - HX_PARALLEL_DEPTH guards nested slice spawn — distinct from HX_PARALLEL_WORKER used by milestone orchestrator\n  - slice_locks added to initSchema to fix fresh :memory: DB gap (v15 migration skipped when DB stamped at v15 on init)\n  - basePath param retained in eligibility/conflict APIs for symmetry with milestone-level counterparts but unused\npatterns_established:\n  - Parallel subsystem pattern: eligibility module (sync, 3-rule analysis) → conflict module (async, pairwise intersection) → orchestrator (lock acquisition + spawn + lifecycle)\n  - In-memory DB test pattern for lock-table tests: openDatabase(':memory:') with beforeEach/afterEach; initSchema must include the table\n  - Exported reset helper (_resetSliceWorkers) for orchestrator test teardown — avoids test pollution between test runs\n  - HX_PARALLEL_DEPTH env var guards against nested parallel spawning at the slice level\nobservability_surfaces:\n  - getSliceWorkerStatuses() returns live status for all active slice workers (pid, sliceId, milestoneId, status, startedAt)\n  - startSliceParallel returns {success, reason} — reason populated on failure (already running, lock failed, nested spawn blocked)\n  - formatSliceEligibilityReport() produces human-readable eligibility report for debugging dispatch decisions\ndrill_down_paths:\n  - .hx/milestones/M003-ttxmyu/slices/S02/tasks/T01-SUMMARY.md\n  - .hx/milestones/M003-ttxmyu/slices/S02/tasks/T02-SUMMARY.md\n  - .hx/milestones/M003-ttxmyu/slices/S02/tasks/T03-SUMMARY.md\n  - .hx/milestones/M003-ttxmyu/slices/S02/tasks/T04-SUMMARY.md\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-04-05T15:36:45.704Z\nblocker_discovered: false\n---\n\n# S02: Slice-Level Parallelism\n\n**Ported the complete slice-level parallelism subsystem: HX_SLICE_LOCK isolation in state.ts and dispatch-guard.ts, plus three new modules (eligibility, conflict, orchestrator) with 19 passing tests and 0 GSD regressions.**\n\n## What Happened\n\nS02 delivered the full slice-level parallelism subsystem across 4 tasks, each building on the previous without blockers.\n\n**T01** added HX_SLICE_LOCK env var isolation to both state derivation paths (deriveStateFromDb and _deriveStateImpl) and to the positional-ordering check in dispatch-guard.ts. The pattern mirrors HX_MILESTONE_LOCK exactly: both state.ts paths filter eligible slices before the activeSlice selection loop; dispatch-guard.ts uses `continue` in the positional else branch so locked slice workers skip the positional check but declared dependency checks still run. Format is MID/SID; SID extracted via split('/')[1]. 6 HX_SLICE_LOCK occurrences confirmed. 4 new tests added (3 in derive-state-db.test.ts, 1 in dispatch-guard.test.ts).\n\n**T02** created slice-parallel-eligibility.ts with analyzeSliceParallelEligibility() and formatSliceEligibilityReport(). Key deviation from plan: made synchronous (not async) because getMilestoneSlices and getSliceTasks are synchronous DB calls — simplifies callers. Applies the same 3-rule eligibility model as the milestone-level parallel-eligibility.ts: skip complete/parked slices, enforce declared depends, detect file overlap as warning (not disqualifier). basePath param retained for API symmetry but unused. 9 tests cover all 4 required scenarios plus 3 formatting tests.\n\n**T03** created slice-parallel-conflict.ts with detectSliceConflicts() (async, Promise return per plan spec) and buildSliceFileSets() (synchronous helper, separately exported for testability). Pairwise set intersection for overlap detection; returns conflicts/conflictingSlices/cleanSlices with sorted arrays. 6 tests (4 required + dedup invariant test).\n\n**T04** created slice-parallel-orchestrator.ts implementing startSliceParallel/stopSliceParallel/getSliceWorkerStatuses. Guards on HX_PARALLEL_DEPTH (distinct from HX_PARALLEL_WORKER used by milestone orchestrator) to prevent nested slice spawning. Workers spawn via child_process spawn with HX_SLICE_LOCK=MID/SID env var; no worktree creation (slice workers share the milestone filesystem). Lock acquisition via acquireSliceLock/releaseSliceLock from hx-db.ts. Critical fix: slice_locks table was missing from initSchema in hx-db.ts — present only in the v15 migration which is skipped on fresh :memory: DBs (stamped as version 15 at init). Added CREATE TABLE to initSchema. _resetSliceWorkers() exported for test teardown. 4 tests pass; spawn fires but fails gracefully with ENOENT in the test environment (no HX binary), which is the correct test path.\n\nFinal slice verification: tsc --noEmit clean, 4155 passed / 0 failed / 5 skipped (19 net-new tests from S02: 4+9+6+4 minus 4 already in baseline). GSD grep: 0 matches across all 3 new source files. HX_SLICE_LOCK: 6 hits in state.ts + dispatch-guard.ts, 4 hits in orchestrator.\n\n## Verification\n\nSlice-level verification checks all passed:\n1. `grep -n 'HX_SLICE_LOCK' state.ts dispatch-guard.ts | wc -l` → 6 (≥4 required) ✅\n2. `npx tsc --noEmit` → exit 0, no errors ✅\n3. `npm run test:unit` → 4155 passed, 0 failed, 5 skipped ✅\n4. GSD grep across all 3 new source files → 0 matches ✅\n5. `grep -c 'HX_SLICE_LOCK' slice-parallel-orchestrator.ts` → 4 (>0 required) ✅\n6. All 3 test files exist and pass targeted runs ✅\n\n## Requirements Advanced\n\n- R012 — slice-parallel-orchestrator.ts, slice-parallel-conflict.ts, slice-parallel-eligibility.ts implemented with HX_SLICE_LOCK; state.ts and dispatch-guard.ts updated\n- R014 — 0 GSD references in all 3 new source files confirmed by grep\n- R018 — tsc --noEmit clean, 4155/0/5 test suite after all S02 changes\n\n## Requirements Validated\n\n- R012 — All 3 orchestrator files exist with HX naming; state.ts handles HX_SLICE_LOCK in both paths; dispatch-guard.ts skips positional check for locked workers; 19 tests pass covering eligibility, conflict, orchestrator, and lock isolation\n\n## New Requirements Surfaced\n\nNone.\n\n## Requirements Invalidated or Re-scoped\n\nNone.\n\n## Deviations\n\nanalyzeSliceParallelEligibility made synchronous (not async) — all DB calls it uses are synchronous, so async was unnecessary. detectSliceConflicts kept as async per plan spec. spawnSliceWorker exported (plan said internal) for independent testability, matching T03 pattern. slice_locks added to initSchema in hx-db.ts (not in plan) to fix fresh :memory: DB gap — required for test correctness.\n\n## Known Limitations\n\nstartSliceParallel spawns HX workers via child_process spawn. In the test environment no HX binary exists, so spawn fails with ENOENT — the orchestrator handles this gracefully and tests verify lock/status behavior without actual child processes. Production behavior (actual parallel execution) is not exercised by the test suite; tests cover the locking, lifecycle state, and status reporting paths.\n\n## Follow-ups\n\nS03 (context optimization) and S04 (workflow-logger) can proceed independently — they depend only on S01 (complete). The slice parallelism subsystem is complete but not wired into auto-mode dispatch (no caller in phases.ts or auto.ts yet). Future slice or milestone work may add an opt-in flag to activate parallel execution using these modules.\n\n## Files Created/Modified\n\n- `src/resources/extensions/hx/state.ts` — Added HX_SLICE_LOCK isolation to deriveStateFromDb and _deriveStateImpl (eligibleSlices filter before activeSlice loop)\n- `src/resources/extensions/hx/dispatch-guard.ts` — Added HX_SLICE_LOCK check in positional-ordering else branch; locked workers issue continue to skip the check\n- `src/resources/extensions/hx/hx-db.ts` — Added slice_locks CREATE TABLE to initSchema (was missing — v15 migration skipped on fresh :memory: DBs)\n- `src/resources/extensions/hx/slice-parallel-eligibility.ts` — New: analyzeSliceParallelEligibility() and formatSliceEligibilityReport(); synchronous; 3-rule eligibility model\n- `src/resources/extensions/hx/slice-parallel-conflict.ts` — New: detectSliceConflicts() (async) and buildSliceFileSets() (sync); pairwise set intersection for overlap detection\n- `src/resources/extensions/hx/slice-parallel-orchestrator.ts` — New: startSliceParallel/stopSliceParallel/getSliceWorkerStatuses; HX_PARALLEL_DEPTH guard; lock acquisition + child_process spawn\n- `src/resources/extensions/hx/tests/derive-state-db.test.ts` — Added HX_SLICE_LOCK isolation test suite (3 new tests)\n- `src/resources/extensions/hx/tests/dispatch-guard.test.ts` — Added HX_SLICE_LOCK positional-skip test (1 new test)\n- `src/resources/extensions/hx/tests/slice-parallel-eligibility.test.ts` — New: 9 tests covering 4 eligibility scenarios plus report formatting\n- `src/resources/extensions/hx/tests/slice-parallel-conflict.test.ts` — New: 6 tests covering no-overlap, partial overlap, full overlap, and dedup invariant\n- `src/resources/extensions/hx/tests/slice-parallel-orchestrator.test.ts` — New: 4 tests covering lock acquisition, nested-spawn guard, status reporting, and stop lifecycle\n",
+      "full_uat_md": "# S02: Slice-Level Parallelism — UAT\n\n**Milestone:** M003-ttxmyu\n**Written:** 2026-04-05T15:36:45.705Z\n\n## UAT Type\nUAT mode: runtime-executable\n\n## Overview\nVerify that the slice-level parallelism subsystem built in S02 functions correctly: HX_SLICE_LOCK isolation in state.ts and dispatch-guard.ts, plus the three new modules (eligibility, conflict, orchestrator).\n\n## Preconditions\n- Working directory: `/Users/beratcan/Desktop/GithubProjects/hx-ai`\n- Node.js available, `npm run test:unit` functional\n- `npx tsc` available\n\n---\n\n## Test Cases\n\n### TC01: TypeScript compilation clean\n**Verify:** No type errors introduced by S02 changes.\n\n```bash\nnpx tsc --noEmit\n```\n**Expected:** Exit code 0, no output.\n\n---\n\n### TC02: Full test suite passes with S02 tests included\n**Verify:** All tests pass, count ≥ 4155 (baseline was 4136 before S02).\n\n```bash\nnpm run test:unit 2>&1 | tail -3\n```\n**Expected:** `✔ 4155 passed, 0 failed` (or higher if other tests have been added).\n\n---\n\n### TC03: HX_SLICE_LOCK present in state.ts and dispatch-guard.ts\n**Verify:** At least 4 occurrences of HX_SLICE_LOCK across both files.\n\n```bash\ngrep -n 'HX_SLICE_LOCK' src/resources/extensions/hx/state.ts src/resources/extensions/hx/dispatch-guard.ts | wc -l\n```\n**Expected:** Output ≥ 4.\n\n---\n\n### TC04: No GSD references in new source files\n**Verify:** The three new parallelism modules are GSD-free.\n\n```bash\ngrep -rn '\\bGSD\\b\\|\\bgsd\\b' \\\n  src/resources/extensions/hx/slice-parallel-eligibility.ts \\\n  src/resources/extensions/hx/slice-parallel-conflict.ts \\\n  src/resources/extensions/hx/slice-parallel-orchestrator.ts \\\n  | wc -l\n```\n**Expected:** Output `0`.\n\n---\n\n### TC05: slice-parallel-eligibility tests pass\n**Verify:** 9 eligibility tests pass (4 DB-backed scenarios + 3 formatting tests + baseline).\n\n```bash\nnode --test dist-test/src/resources/extensions/hx/tests/slice-parallel-eligibility.test.js 2>&1 | tail -5\n```\n**Expected:** `✔ 9 passed, 0 failed` (or similar pass line with 0 failures).\n\n---\n\n### TC06: slice-parallel-conflict tests pass\n**Verify:** Conflict detection tests pass (no-overlap, partial overlap, full overlap, dedup).\n\n```bash\nnode --test dist-test/src/resources/extensions/hx/tests/slice-parallel-conflict.test.js 2>&1 | tail -5\n```\n**Expected:** `✔ 4 passed, 0 failed` (or ≥4 passed, 0 failed).\n\n---\n\n### TC07: slice-parallel-orchestrator tests pass\n**Verify:** Orchestrator tests pass (lock acquisition, nested-spawn guard, status, stop lifecycle).\n\n```bash\nnode --test dist-test/src/resources/extensions/hx/tests/slice-parallel-orchestrator.test.js 2>&1 | tail -5\n```\n**Expected:** `✔ 4 passed, 0 failed`.\n\n---\n\n### TC08: HX_SLICE_LOCK count in orchestrator\n**Verify:** Orchestrator references HX_SLICE_LOCK in at least 1 place (env var passed to child process).\n\n```bash\ngrep -c 'HX_SLICE_LOCK' src/resources/extensions/hx/slice-parallel-orchestrator.ts\n```\n**Expected:** ≥ 1.\n\n---\n\n### TC09: slice_locks table in initSchema\n**Verify:** hx-db.ts initSchema includes slice_locks (fix for :memory: DB test correctness).\n\n```bash\ngrep -n 'slice_locks' src/resources/extensions/hx/hx-db.ts | head -5\n```\n**Expected:** At least 2 matches (one in initSchema CREATE TABLE, one in the v15 migration).\n\n---\n\n### TC10: HX_SLICE_LOCK derive-state tests\n**Verify:** State derivation HX_SLICE_LOCK tests pass in isolation.\n\n```bash\nnode --test dist-test/src/resources/extensions/hx/tests/derive-state-db.test.js 2>&1 | grep -E 'HX_SLICE_LOCK|passed|failed' | tail -5\n```\n**Expected:** HX_SLICE_LOCK tests mentioned with 0 failures.\n\n---\n\n### TC11: HX_PARALLEL_DEPTH guard present in orchestrator\n**Verify:** Orchestrator uses HX_PARALLEL_DEPTH to prevent nested slice spawning.\n\n```bash\ngrep -n 'HX_PARALLEL_DEPTH' src/resources/extensions/hx/slice-parallel-orchestrator.ts\n```\n**Expected:** At least 1 line showing the env var read and guard condition.\n\n---\n\n## Edge Cases\n\n**EC01: dispatch-guard still enforces declared deps for locked workers**\nA slice worker identified by HX_SLICE_LOCK should skip positional ordering but NOT skip declared dependency checks. Verify by reading dispatch-guard.ts and confirming the `continue` statement is inside the positional else branch only, not before the dependency check block.\n\n```bash\ngrep -A5 -B5 'HX_SLICE_LOCK' src/resources/extensions/hx/dispatch-guard.ts\n```\n**Expected:** `continue` appears inside the positional check branch; the dependency enforcement block comes after (is not skipped).\n\n**EC02: eligibility marks file-overlapping slices as warned but eligible**\nIn the eligibility report, slices that share files with other candidates should appear with a WARNING annotation, not be excluded.\nConfirmed by TC05 (9 tests pass, including the overlap-warning scenario).\n\n**EC03: fresh :memory: DB includes slice_locks table**\nTests that use `openDatabase(':memory:')` and then call orchestrator/lock functions must find the slice_locks table without running migrations.\nConfirmed by TC07 (4 orchestrator tests pass using in-memory DB).\n\n",
       "goal": "Port the slice-level parallelism subsystem from upstream into hx-ai: add HX_SLICE_LOCK isolation to state.ts (both paths) and dispatch-guard.ts, then implement slice-parallel-eligibility.ts, slice-parallel-conflict.ts, and slice-parallel-orchestrator.ts with full HX naming and tests.",
       "success_criteria": "- `HX_SLICE_LOCK` isolation in state.ts (deriveStateFromDb + _deriveStateImpl) filters eligible slices to only the locked slice when the env var matches the active milestone\n- `HX_SLICE_LOCK` awareness in dispatch-guard.ts skips positional-ordering check for non-locked slices when a worker is locked\n- `slice-parallel-eligibility.ts` exists with analyzeSliceParallelEligibility + formatSliceEligibilityReport; tests pass\n- `slice-parallel-conflict.ts` exists with detectSliceConflicts + buildSliceFileSets; tests pass\n- `slice-parallel-orchestrator.ts` exists with startSliceParallel + stopSliceParallel + getSliceWorkerStatuses; uses acquireSliceLock/releaseSliceLock from hx-db.ts; sets HX_SLICE_LOCK env var on workers; tests pass\n- `npx tsc --noEmit` exits 0\n- `npm run test:unit` passes with 4132 + new tests, 0 failures\n- GSD grep across all 5 touched/new files returns 0 hits",
       "proof_level": "contract — new files exist with correct APIs and all tests pass; no runtime auto-trigger wiring required",
@@ -506,11 +506,11 @@
       "completed_at": null,
       "full_summary_md": "",
       "full_uat_md": "",
-      "goal": "Port context-masker.ts (observation masking) and phase-anchor.ts (phase boundary handoff); wire into system-context.ts injection and auto-mode preferences; port related preference fields (contextMasking, phaseAnchors)",
-      "success_criteria": "context-masker.ts and phase-anchor.ts exist with HX naming; context-masker.test.ts and phase-anchor.test.ts pass; tsc clean",
-      "proof_level": "contract: new test files pass; files exist and type-check",
-      "integration_closure": "context-masker wired into observation processing path; phase-anchor.json written at phase boundaries; system-context.ts injects phase anchor on agent start",
-      "observability_impact": "phase-anchor.json written to .hx/runtime/ at phase boundaries; masking decisions logged at debug level",
+      "goal": "Port context-masker.ts and phase-anchor.ts from upstream, wire observation masking into the before_provider_request hook, add ContextManagementConfig preferences, and write phase anchors at research/plan phase boundaries so downstream agents inherit decisions without re-reading full history.",
+      "success_criteria": "- `context-masker.ts` and `phase-anchor.ts` exist with HX naming\n- 11 new tests pass (7 context-masker + 4 phase-anchor)\n- `ContextManagementConfig` in preferences-types.ts; `context_management` in KNOWN_PREFERENCE_KEYS and HXPreferences; merge logic in preferences.ts\n- `before_provider_request` hook applies observation masking + tool truncation before service tier block; returns payload (not bare return)\n- `writePhaseAnchor` called in `runUnitPhase` after successful research/plan unit; anchor file written to `.hx/milestones/<MID>/anchors/<phase>.json`\n- `buildPlanMilestonePrompt`, `buildPlanSlicePrompt`, `buildExecuteTaskPrompt` inject phase anchors; `{{phaseAnchorSection}}` placeholder in execute-task.md\n- `npx tsc --noEmit` exits 0\n- `npm run test:unit` passes with ~4143+ tests (4132 baseline + 11 new)\n- 0 GSD hits in all new/modified files",
+      "proof_level": "contract — tsc clean + unit tests + grep verification; no real runtime execution required",
+      "integration_closure": "Upstream surfaces consumed: before_provider_request hook in register-hooks.ts (already exists), runUnitPhase in phases.ts (mid is in scope), buildPlanMilestonePrompt/buildPlanSlicePrompt/buildExecuteTaskPrompt in auto-prompts.ts, execute-task.md template. New wiring: context-masker feeds into the hook; phase-anchor feeds into phases.ts and all 3 prompt builders. What remains before end-to-end use: nothing — anchor files are written and read within the same auto-mode run.",
+      "observability_impact": "Observation masking is wrapped in try/catch (non-fatal). Phase anchor write is wrapped in try/catch (advisory only). No new log surfaces — failures are silent by design, consistent with upstream. A future agent can inspect anchor presence via `ls .hx/milestones/<MID>/anchors/`.",
       "sequence": 0,
       "replan_triggered_at": null
     },
@@ -3867,6 +3867,165 @@
       "observability_impact": "Worker PID and state tracked in SliceWorkerInfo; getSliceWorkerStatuses() provides inspection surface. Lock acquisition failures logged (slice skipped when acquireSliceLock returns false).",
       "full_plan_md": "",
       "sequence": 0
+    },
+    {
+      "milestone_id": "M003-ttxmyu",
+      "slice_id": "S03",
+      "id": "T01",
+      "title": "Created context-masker.ts and phase-anchor.ts (HX naming) with 11 passing unit tests, tsc clean, no GSD tokens",
+      "status": "complete",
+      "one_liner": "Created context-masker.ts and phase-anchor.ts (HX naming) with 11 passing unit tests, tsc clean, no GSD tokens",
+      "narrative": "Both source files written as purely additive modules. context-masker.ts exports createObservationMask(keepRecentTurns=8) — a pure function that scans messages from the end counting assistant turns, then returns a new array replacing maskable messages (role:toolResult or bash-result user messages) older than the boundary with a compact placeholder. Role-based predicate: a user message with type:toolResult is not masked. phase-anchor.ts exports PhaseAnchor interface and three functions: writePhaseAnchor (creates .hx/milestones/<mid>/anchors/<phase>.json), readPhaseAnchor (returns null for missing files), formatAnchorForPrompt (compact markdown block). Both test files use node:test with TypeScript imports consistent with the rest of the suite — 11/11 pass.",
+      "verification_result": "1) Direct test run: node --test dist-test/.../context-masker.test.js phase-anchor.test.js → 11/11 pass. 2) npm run test:unit (full suite) → 4168 pass, 0 fail. 3) npx tsc --noEmit → exit 0. 4) grep for GSD/gsd in both new source files → no matches.",
+      "duration": "",
+      "completed_at": "2026-04-05T15:57:02.833Z",
+      "blocker_discovered": false,
+      "deviations": "findTurnBoundary returns 0 when fewer than keepRecentTurns assistant turns exist. The mask condition i < boundary with boundary=0 means nothing is masked — which correctly handles the 'all messages within window' case. This is an implementation-level clarification, not a deviation from spec.",
+      "known_issues": "None.",
+      "key_files": [
+        "src/resources/extensions/hx/context-masker.ts",
+        "src/resources/extensions/hx/phase-anchor.ts",
+        "src/resources/extensions/hx/tests/context-masker.test.ts",
+        "src/resources/extensions/hx/tests/phase-anchor.test.ts"
+      ],
+      "key_decisions": [
+        "findTurnBoundary returns 0 (mask nothing) when fewer than keepRecentTurns assistant turns exist — i < 0 never true, so nothing is masked",
+        "isMaskableMessage checks role field only, ignores type field",
+        "Phase anchor path: .hx/milestones/<mid>/anchors/<phase>.json"
+      ],
+      "full_summary_md": "---\nid: T01\nparent: S03\nmilestone: M003-ttxmyu\nkey_files:\n  - src/resources/extensions/hx/context-masker.ts\n  - src/resources/extensions/hx/phase-anchor.ts\n  - src/resources/extensions/hx/tests/context-masker.test.ts\n  - src/resources/extensions/hx/tests/phase-anchor.test.ts\nkey_decisions:\n  - findTurnBoundary returns 0 (mask nothing) when fewer than keepRecentTurns assistant turns exist — i < 0 never true, so nothing is masked\n  - isMaskableMessage checks role field only, ignores type field\n  - Phase anchor path: .hx/milestones/<mid>/anchors/<phase>.json\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-04-05T15:57:02.834Z\nblocker_discovered: false\n---\n\n# T01: Created context-masker.ts and phase-anchor.ts (HX naming) with 11 passing unit tests, tsc clean, no GSD tokens\n\n**Created context-masker.ts and phase-anchor.ts (HX naming) with 11 passing unit tests, tsc clean, no GSD tokens**\n\n## What Happened\n\nBoth source files written as purely additive modules. context-masker.ts exports createObservationMask(keepRecentTurns=8) — a pure function that scans messages from the end counting assistant turns, then returns a new array replacing maskable messages (role:toolResult or bash-result user messages) older than the boundary with a compact placeholder. Role-based predicate: a user message with type:toolResult is not masked. phase-anchor.ts exports PhaseAnchor interface and three functions: writePhaseAnchor (creates .hx/milestones/<mid>/anchors/<phase>.json), readPhaseAnchor (returns null for missing files), formatAnchorForPrompt (compact markdown block). Both test files use node:test with TypeScript imports consistent with the rest of the suite — 11/11 pass.\n\n## Verification\n\n1) Direct test run: node --test dist-test/.../context-masker.test.js phase-anchor.test.js → 11/11 pass. 2) npm run test:unit (full suite) → 4168 pass, 0 fail. 3) npx tsc --noEmit → exit 0. 4) grep for GSD/gsd in both new source files → no matches.\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `node --test dist-test/src/resources/extensions/hx/tests/context-masker.test.js dist-test/src/resources/extensions/hx/tests/phase-anchor.test.js` | 0 | ✅ pass | 238ms |\n| 2 | `npm run test:unit -- --grep 'context-masker|phase-anchor'` | 0 | ✅ pass | 75100ms |\n| 3 | `npx tsc --noEmit` | 0 | ✅ pass | 7800ms |\n| 4 | `grep -rn '\\bGSD\\b|\\bgsd\\b' src/resources/extensions/hx/context-masker.ts src/resources/extensions/hx/phase-anchor.ts` | 1 | ✅ pass | 50ms |\n\n\n## Deviations\n\nfindTurnBoundary returns 0 when fewer than keepRecentTurns assistant turns exist. The mask condition i < boundary with boundary=0 means nothing is masked — which correctly handles the 'all messages within window' case. This is an implementation-level clarification, not a deviation from spec.\n\n## Known Issues\n\nNone.\n\n## Files Created/Modified\n\n- `src/resources/extensions/hx/context-masker.ts`\n- `src/resources/extensions/hx/phase-anchor.ts`\n- `src/resources/extensions/hx/tests/context-masker.test.ts`\n- `src/resources/extensions/hx/tests/phase-anchor.test.ts`\n",
+      "description": "Create the two new source files (with HX naming) and their test files. This is purely additive — no existing files are modified.\n\n**context-masker.ts** (`src/resources/extensions/hx/context-masker.ts`, ~75 lines):\n- Port verbatim from upstream with doc-comment adaptation (GSD→HX in comments only)\n- No imports needed\n- Exports: `createObservationMask(keepRecentTurns: number = 8)`\n- `findTurnBoundary`: scans messages from end, counts assistant turns, returns index of the boundary\n- `isBashResultUserMessage`: checks `m.role === 'user'` and content[0].text starts with `'Ran \\`'`\n- `isMaskableMessage`: returns true if `m.role === 'toolResult'` OR `isBashResultUserMessage(m)` — NOT by type field\n- `createObservationMask`: returns a function that replaces content of maskable messages older than the boundary with `MASK_CONTENT_BLOCK = [{ type: 'text', text: '[result masked — within summarized history]' }]`\n\n**phase-anchor.ts** (`src/resources/extensions/hx/phase-anchor.ts`, ~71 lines):\n- Port with one import change: `import { hxRoot } from './paths.js'` (not gsdRoot)\n- Exports: `PhaseAnchor` interface, `writePhaseAnchor(basePath, milestoneId, anchor)`, `readPhaseAnchor(basePath, milestoneId, phase)`, `formatAnchorForPrompt(anchor)`\n- `writePhaseAnchor`: writes to `hxRoot(basePath)/milestones/<mid>/anchors/<phase>.json` via `mkdirSync({ recursive: true })` + `writeFileSync`\n- `readPhaseAnchor`: reads and JSON-parses the anchor file; returns null if file doesn't exist\n- `formatAnchorForPrompt`: returns a markdown block with the anchor fields\n\n**context-masker.test.ts** (`src/resources/extensions/hx/tests/context-masker.test.ts`, 7 tests):\n- Helper: `toolResultMsg(text)` → `{ role: 'toolResult', content: [{ type: 'text', text }] }`\n- Helper: `assistantMsg()` → `{ role: 'assistant', content: [{ type: 'text', text: 'reply' }] }`\n- Helper: `bashResultMsg(text)` → `{ role: 'user', content: [{ type: 'text', text: `Ran \\`${text}\\`` }] }`\n- Test 1: masks nothing when all messages within keepRecentTurns\n- Test 2: masks tool results older than keepRecentTurns boundary\n- Test 3: never masks assistant messages\n- Test 4: never masks plain user messages (without `Ran \\`` prefix)\n- Test 5: masks bash result user messages (Ran \\` prefix)\n- Test 6: returns same array length after masking\n- Test 7: masks toolResult by role (not by type field — a message with role:'user' type:'toolResult' is NOT masked)\n\n**phase-anchor.test.ts** (`src/resources/extensions/hx/tests/phase-anchor.test.ts`, 4 tests):\n- Helper: `makeTempBase()` — creates a temp dir with `.hx/` subdir (using `fs.mkdtempSync`), returns cleanup fn\n- Test 1: `writePhaseAnchor` creates anchor file at correct path (`.hx/milestones/M001/anchors/discuss.json`)\n- Test 2: `readPhaseAnchor` returns the written anchor\n- Test 3: `readPhaseAnchor` returns null when no anchor exists\n- Test 4: `formatAnchorForPrompt` produces non-empty string with phase name and intent",
+      "estimate": "45m",
+      "files": [
+        "src/resources/extensions/hx/context-masker.ts",
+        "src/resources/extensions/hx/phase-anchor.ts",
+        "src/resources/extensions/hx/tests/context-masker.test.ts",
+        "src/resources/extensions/hx/tests/phase-anchor.test.ts"
+      ],
+      "verify": "npm run test:unit -- --grep 'context-masker|phase-anchor' 2>&1 | tail -5 && npx tsc --noEmit && grep -rn '\\bGSD\\b\\|\\bgsd\\b' src/resources/extensions/hx/context-masker.ts src/resources/extensions/hx/phase-anchor.ts",
+      "inputs": [
+        "src/resources/extensions/hx/paths.ts"
+      ],
+      "expected_output": [
+        "src/resources/extensions/hx/context-masker.ts",
+        "src/resources/extensions/hx/phase-anchor.ts",
+        "src/resources/extensions/hx/tests/context-masker.test.ts",
+        "src/resources/extensions/hx/tests/phase-anchor.test.ts"
+      ],
+      "observability_impact": "None — new files only, no runtime hooks wired yet.",
+      "full_plan_md": "",
+      "sequence": 0
+    },
+    {
+      "milestone_id": "M003-ttxmyu",
+      "slice_id": "S03",
+      "id": "T02",
+      "title": "Add ContextManagementConfig to preferences",
+      "status": "pending",
+      "one_liner": "",
+      "narrative": "",
+      "verification_result": "",
+      "duration": "",
+      "completed_at": null,
+      "blocker_discovered": false,
+      "deviations": "",
+      "known_issues": "",
+      "key_files": [],
+      "key_decisions": [],
+      "full_summary_md": "",
+      "description": "Three files need purely additive changes. No logic changes.\n\n**preferences-types.ts** (`src/resources/extensions/hx/preferences-types.ts`):\n1. Add `ContextManagementConfig` interface before `HXPreferences` (or near the other config interfaces):\n```typescript\nexport interface ContextManagementConfig {\n  observation_masking?: boolean;          // default: true\n  observation_mask_turns?: number;        // default: 8, range: 1-50\n  compaction_threshold_percent?: number;  // default: 0.70, range: 0.5-0.95\n  tool_result_max_chars?: number;         // default: 800, range: 200-10000\n}\n```\n2. Add `'context_management'` to the `KNOWN_PREFERENCE_KEYS` Set\n3. Add `context_management?: ContextManagementConfig` to the `HXPreferences` interface\n\n**preferences.ts** (`src/resources/extensions/hx/preferences.ts`):\n1. Import `ContextManagementConfig` from `./preferences-types.js` (it may already be in a barrel re-export — check first)\n2. Add `context_management` merge to the `mergePreferences` function:\n```typescript\ncontext_management: (base.context_management || override.context_management)\n  ? { ...(base.context_management ?? {}), ...(override.context_management ?? {}) } as ContextManagementConfig\n  : undefined,\n```\n\nNote: `ContextManagementConfig` may already be exported via the preferences-types re-export in preferences.ts — check the existing export list before adding a new import.",
+      "estimate": "20m",
+      "files": [
+        "src/resources/extensions/hx/preferences-types.ts",
+        "src/resources/extensions/hx/preferences.ts"
+      ],
+      "verify": "npx tsc --noEmit && npm run test:unit -- --grep 'preferences' 2>&1 | tail -5",
+      "inputs": [
+        "src/resources/extensions/hx/preferences-types.ts",
+        "src/resources/extensions/hx/preferences.ts"
+      ],
+      "expected_output": [
+        "src/resources/extensions/hx/preferences-types.ts",
+        "src/resources/extensions/hx/preferences.ts"
+      ],
+      "observability_impact": "",
+      "full_plan_md": "",
+      "sequence": 0
+    },
+    {
+      "milestone_id": "M003-ttxmyu",
+      "slice_id": "S03",
+      "id": "T03",
+      "title": "Expand before_provider_request hook with observation masking and tool truncation",
+      "status": "pending",
+      "one_liner": "",
+      "narrative": "",
+      "verification_result": "",
+      "duration": "",
+      "completed_at": null,
+      "blocker_discovered": false,
+      "deviations": "",
+      "known_issues": "",
+      "key_files": [],
+      "key_decisions": [],
+      "full_summary_md": "",
+      "description": "Rewrite the `before_provider_request` handler in `register-hooks.ts` to add observation masking and tool-result truncation before the existing service tier logic.\n\n**Critical constraint:** The current handler ends with `return payload` only after the service-tier block. After this change, the entire handler must return `payload` (not bare `return`) at the end. Bare `return` drops the mutation — the service tier won't apply after masking.\n\nThe full new handler body (replace everything between `pi.on('before_provider_request', async (event) => {` and its closing `});`):\n\n```typescript\npi.on(\"before_provider_request\", async (event) => {\n  const payload = event.payload as Record<string, unknown> | null;\n  if (!payload || typeof payload !== \"object\") return;\n\n  // ── Observation Masking ──────────────────────────────────────────\n  if (isAutoActive()) {\n    try {\n      const { loadEffectiveHXPreferences } = await import(\"../preferences.js\");\n      const prefs = loadEffectiveHXPreferences();\n      const cmConfig = prefs?.preferences.context_management;\n\n      if (cmConfig?.observation_masking !== false) {\n        const keepTurns = cmConfig?.observation_mask_turns ?? 8;\n        const { createObservationMask } = await import(\"../context-masker.js\");\n        const mask = createObservationMask(keepTurns);\n        const messages = payload.messages;\n        if (Array.isArray(messages)) {\n          payload.messages = mask(messages);\n        }\n      }\n\n      // Tool result truncation (immutable — create new objects)\n      const maxChars = cmConfig?.tool_result_max_chars ?? 800;\n      const msgs = payload.messages;\n      if (Array.isArray(msgs)) {\n        payload.messages = msgs.map((msg: Record<string, unknown>) => {\n          if (msg?.role === \"toolResult\" && Array.isArray(msg.content)) {\n            const blocks = msg.content as Array<Record<string, unknown>>;\n            const totalLen = blocks.reduce((sum: number, b) =>\n              sum + (typeof b.text === \"string\" ? b.text.length : 0), 0);\n            if (totalLen > maxChars) {\n              const truncated = blocks.map(b => {\n                if (typeof b.text === \"string\" && b.text.length > maxChars) {\n                  return { ...b, text: b.text.slice(0, maxChars) + \"\\n…[truncated]\" };\n                }\n                return b;\n              });\n              return { ...msg, content: truncated };\n            }\n          }\n          return msg;\n        });\n      }\n    } catch { /* non-fatal */ }\n  }\n\n  // ── Service Tier ─────────────────────────────────────────────────\n  const modelId = event.model?.id;\n  if (!modelId) return payload;\n  const { getEffectiveServiceTier, supportsServiceTier } = await import(\"../service-tier.js\");\n  const tier = getEffectiveServiceTier();\n  if (!tier || !supportsServiceTier(modelId)) return payload;\n  payload.service_tier = tier;\n  return payload;\n});\n```\n\nThe original handler structure to replace spans from the `pi.on('before_provider_request'` line through its closing `});` — read the file first to get exact text for the Edit tool.",
+      "estimate": "25m",
+      "files": [
+        "src/resources/extensions/hx/bootstrap/register-hooks.ts"
+      ],
+      "verify": "npx tsc --noEmit && grep -c 'createObservationMask' src/resources/extensions/hx/bootstrap/register-hooks.ts && grep -rn '\\bGSD\\b\\|\\bgsd\\b' src/resources/extensions/hx/bootstrap/register-hooks.ts",
+      "inputs": [
+        "src/resources/extensions/hx/bootstrap/register-hooks.ts",
+        "src/resources/extensions/hx/context-masker.ts",
+        "src/resources/extensions/hx/preferences.ts"
+      ],
+      "expected_output": [
+        "src/resources/extensions/hx/bootstrap/register-hooks.ts"
+      ],
+      "observability_impact": "Masking and truncation are wrapped in try/catch (non-fatal). Service tier still applies via return payload. No new logs.",
+      "full_plan_md": "",
+      "sequence": 0
+    },
+    {
+      "milestone_id": "M003-ttxmyu",
+      "slice_id": "S03",
+      "id": "T04",
+      "title": "Wire phase anchors in phases.ts, auto-prompts.ts, and execute-task.md",
+      "status": "pending",
+      "one_liner": "",
+      "narrative": "",
+      "verification_result": "",
+      "duration": "",
+      "completed_at": null,
+      "blocker_discovered": false,
+      "deviations": "",
+      "known_issues": "",
+      "key_files": [],
+      "key_decisions": [],
+      "full_summary_md": "",
+      "description": "Four files need changes to write and inject phase anchors.\n\n**phases.ts** (`src/resources/extensions/hx/auto/phases.ts`):\nInsert anchor write after `s.unitRecoveryCount.delete(...)` and before `deps.emitJournalEvent(...)` (around line 1197-1200). The `mid` variable is already in scope (destructured from `iterData` at line 868):\n```typescript\n// Write phase handoff anchor after successful research/planning completion\nconst anchorPhases = new Set([\"research-milestone\", \"research-slice\", \"plan-milestone\", \"plan-slice\"]);\nif (artifactVerified && mid && anchorPhases.has(unitType)) {\n  try {\n    const { writePhaseAnchor } = await import(\"../phase-anchor.js\");\n    writePhaseAnchor(s.basePath, mid, {\n      phase: unitType,\n      milestoneId: mid,\n      generatedAt: new Date().toISOString(),\n      intent: `Completed ${unitType} for ${unitId}`,\n      decisions: [],\n      blockers: [],\n      nextSteps: [],\n    });\n  } catch { /* non-fatal — anchor is advisory */ }\n}\n```\n\n**auto-prompts.ts** (`src/resources/extensions/hx/auto-prompts.ts`):\nThree injections — read the full relevant function bodies before editing:\n\n1. `buildPlanMilestonePrompt`: After the existing `inlined.push(...)` calls and before `const inlinedContext = capPreamble(...)`, add:\n```typescript\nconst researchAnchor = readPhaseAnchor(base, mid, \"research-milestone\");\nif (researchAnchor) inlined.unshift(formatAnchorForPrompt(researchAnchor));\n```\n(use `inlined.unshift` to put it first)\n\n2. `buildPlanSlicePrompt`: After the existing `inlined.push(...)` calls and before `const depContent = ...`, add:\n```typescript\nconst researchSliceAnchor = readPhaseAnchor(base, mid, \"research-slice\");\nif (researchSliceAnchor) inlined.unshift(formatAnchorForPrompt(researchSliceAnchor));\n```\n\n3. `buildExecuteTaskPrompt`: Before the `return loadPrompt('execute-task', {...})` call, add:\n```typescript\nconst planSliceAnchor = readPhaseAnchor(base, mid, \"plan-slice\");\nconst phaseAnchorSection = planSliceAnchor ? formatAnchorForPrompt(planSliceAnchor) : \"\";\n```\nThen add `phaseAnchorSection` to the `loadPrompt(\"execute-task\", {...})` arguments object.\n\nAt the top of `auto-prompts.ts`, add the import (check if it already exists first):\n```typescript\nimport { readPhaseAnchor, formatAnchorForPrompt } from \"./phase-anchor.js\";\n```\n\n**execute-task.md** (`src/resources/extensions/hx/prompts/execute-task.md`):\nRead the file first. Add `{{phaseAnchorSection}}` between `{{runtimeContext}}` and `{{resumeSection}}`:\n```\n{{runtimeContext}}\n{{phaseAnchorSection}}\n{{resumeSection}}\n```\n\nAfter all changes: run tsc, full test suite, and GSD grep across all 4 modified files.",
+      "estimate": "40m",
+      "files": [
+        "src/resources/extensions/hx/auto/phases.ts",
+        "src/resources/extensions/hx/auto-prompts.ts",
+        "src/resources/extensions/hx/prompts/execute-task.md"
+      ],
+      "verify": "npx tsc --noEmit && npm run test:unit 2>&1 | tail -5 && grep -rn '\\bGSD\\b\\|\\bgsd\\b' src/resources/extensions/hx/auto/phases.ts src/resources/extensions/hx/auto-prompts.ts src/resources/extensions/hx/prompts/execute-task.md",
+      "inputs": [
+        "src/resources/extensions/hx/auto/phases.ts",
+        "src/resources/extensions/hx/auto-prompts.ts",
+        "src/resources/extensions/hx/prompts/execute-task.md",
+        "src/resources/extensions/hx/phase-anchor.ts"
+      ],
+      "expected_output": [
+        "src/resources/extensions/hx/auto/phases.ts",
+        "src/resources/extensions/hx/auto-prompts.ts",
+        "src/resources/extensions/hx/prompts/execute-task.md"
+      ],
+      "observability_impact": "Phase anchor files written to `.hx/milestones/<MID>/anchors/<phase>.json` after each research/plan unit — inspectable via `ls .hx/milestones/<MID>/anchors/`.",
+      "full_plan_md": "",
+      "sequence": 0
     }
   ],
   "decisions": [
@@ -6518,6 +6677,50 @@
       "verdict": "✅ pass",
       "duration_ms": 50,
       "created_at": "2026-04-05T15:32:59.055Z"
+    },
+    {
+      "id": 222,
+      "task_id": "T01",
+      "slice_id": "S03",
+      "milestone_id": "M003-ttxmyu",
+      "command": "node --test dist-test/src/resources/extensions/hx/tests/context-masker.test.js dist-test/src/resources/extensions/hx/tests/phase-anchor.test.js",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 238,
+      "created_at": "2026-04-05T15:57:02.833Z"
+    },
+    {
+      "id": 223,
+      "task_id": "T01",
+      "slice_id": "S03",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npm run test:unit -- --grep 'context-masker|phase-anchor'",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 75100,
+      "created_at": "2026-04-05T15:57:02.833Z"
+    },
+    {
+      "id": 224,
+      "task_id": "T01",
+      "slice_id": "S03",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npx tsc --noEmit",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 7800,
+      "created_at": "2026-04-05T15:57:02.833Z"
+    },
+    {
+      "id": 225,
+      "task_id": "T01",
+      "slice_id": "S03",
+      "milestone_id": "M003-ttxmyu",
+      "command": "grep -rn '\\bGSD\\b|\\bgsd\\b' src/resources/extensions/hx/context-masker.ts src/resources/extensions/hx/phase-anchor.ts",
+      "exit_code": 1,
+      "verdict": "✅ pass",
+      "duration_ms": 50,
+      "created_at": "2026-04-05T15:57:02.833Z"
     }
   ]
 }
