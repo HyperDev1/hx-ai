@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-04-05T14:33:02.645Z",
+  "exported_at": "2026-04-05T14:38:07.459Z",
   "milestones": [
     {
       "id": "M001-df6x5t",
@@ -3550,19 +3550,26 @@
       "milestone_id": "M003-ttxmyu",
       "slice_id": "S01",
       "id": "T02",
-      "title": "model-router.ts: ModelCapabilities scoring layer",
-      "status": "pending",
-      "one_liner": "",
-      "narrative": "",
-      "verification_result": "",
+      "title": "Added ModelCapabilities scoring layer to model-router.ts: profiles for 17 models, BASE_REQUIREMENTS, scoreModel/scoreEligibleModels, capability_routing flag, and selectionMethod on RoutingDecision",
+      "status": "complete",
+      "one_liner": "Added ModelCapabilities scoring layer to model-router.ts: profiles for 17 models, BASE_REQUIREMENTS, scoreModel/scoreEligibleModels, capability_routing flag, and selectionMethod on RoutingDecision",
+      "narrative": "Read model-router.ts (261 lines) and complexity-classifier.ts. Added ModelCapabilities interface and MODEL_CAPABILITY_PROFILES covering all 17 models in MODEL_CAPABILITY_TIER. Added BASE_REQUIREMENTS map for the 11 UNIT_TYPE_TIERS unit types. Added three internal functions: computeTaskRequirements (merges BASE_REQUIREMENTS with TaskMetadata signals), scoreModel (0-1 score with depth ordering for reasoningDepth), and scoreEligibleModels (sort by score desc). Added capability_routing?: boolean to DynamicRoutingConfig and defaultRoutingConfig returns capability_routing: false. Added selectionMethod: 'capability-score' | 'tier-only' as a required field on RoutingDecision — all 5 return paths updated. Extended resolveModelForComplexity with optional unitType/metadata params; when capability_routing is true, scores tier candidates and picks highest. Existing test suite passes unchanged (selectionMethod not asserted in existing tests).",
+      "verification_result": "npx tsc --noEmit exits 0. grep for selectionMethod returns 8 hits, capability_routing returns 3 hits. npm run test:unit passes 4113 tests with 0 failures.",
       "duration": "",
-      "completed_at": null,
+      "completed_at": "2026-04-05T14:38:07.431Z",
       "blocker_discovered": false,
-      "deviations": "",
-      "known_issues": "",
-      "key_files": [],
-      "key_decisions": [],
-      "full_summary_md": "",
+      "deviations": "None. TaskMetadata was already available with complexityKeywords and tags fields — no new fields needed for T02 (those are added in T03).",
+      "known_issues": "None.",
+      "key_files": [
+        "src/resources/extensions/hx/model-router.ts"
+      ],
+      "key_decisions": [
+        "selectionMethod added as required (not optional) field on RoutingDecision — all return paths set it so no caller breaks",
+        "scoreModel returns 1.0 for unknown models (no profile) to preserve pass-through semantics",
+        "reasoningDepth comparison uses ordered depth map so deep satisfies medium requirement",
+        "computeTaskRequirements uses existing TaskMetadata.complexityKeywords and tags fields — no new fields needed in T02"
+      ],
+      "full_summary_md": "---\nid: T02\nparent: S01\nmilestone: M003-ttxmyu\nkey_files:\n  - src/resources/extensions/hx/model-router.ts\nkey_decisions:\n  - selectionMethod added as required (not optional) field on RoutingDecision — all return paths set it so no caller breaks\n  - scoreModel returns 1.0 for unknown models (no profile) to preserve pass-through semantics\n  - reasoningDepth comparison uses ordered depth map so deep satisfies medium requirement\n  - computeTaskRequirements uses existing TaskMetadata.complexityKeywords and tags fields — no new fields needed in T02\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-04-05T14:38:07.431Z\nblocker_discovered: false\n---\n\n# T02: Added ModelCapabilities scoring layer to model-router.ts: profiles for 17 models, BASE_REQUIREMENTS, scoreModel/scoreEligibleModels, capability_routing flag, and selectionMethod on RoutingDecision\n\n**Added ModelCapabilities scoring layer to model-router.ts: profiles for 17 models, BASE_REQUIREMENTS, scoreModel/scoreEligibleModels, capability_routing flag, and selectionMethod on RoutingDecision**\n\n## What Happened\n\nRead model-router.ts (261 lines) and complexity-classifier.ts. Added ModelCapabilities interface and MODEL_CAPABILITY_PROFILES covering all 17 models in MODEL_CAPABILITY_TIER. Added BASE_REQUIREMENTS map for the 11 UNIT_TYPE_TIERS unit types. Added three internal functions: computeTaskRequirements (merges BASE_REQUIREMENTS with TaskMetadata signals), scoreModel (0-1 score with depth ordering for reasoningDepth), and scoreEligibleModels (sort by score desc). Added capability_routing?: boolean to DynamicRoutingConfig and defaultRoutingConfig returns capability_routing: false. Added selectionMethod: 'capability-score' | 'tier-only' as a required field on RoutingDecision — all 5 return paths updated. Extended resolveModelForComplexity with optional unitType/metadata params; when capability_routing is true, scores tier candidates and picks highest. Existing test suite passes unchanged (selectionMethod not asserted in existing tests).\n\n## Verification\n\nnpx tsc --noEmit exits 0. grep for selectionMethod returns 8 hits, capability_routing returns 3 hits. npm run test:unit passes 4113 tests with 0 failures.\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `npx tsc --noEmit` | 0 | ✅ pass | 4200ms |\n| 2 | `grep -n 'selectionMethod' src/resources/extensions/hx/model-router.ts` | 0 | ✅ pass (8 hits) | 50ms |\n| 3 | `grep -n 'capability_routing' src/resources/extensions/hx/model-router.ts` | 0 | ✅ pass (3 hits) | 50ms |\n| 4 | `npm run test:unit 2>&1 | tail -10` | 0 | ✅ pass (4113 passed, 0 failed) | 71700ms |\n\n\n## Deviations\n\nNone. TaskMetadata was already available with complexityKeywords and tags fields — no new fields needed for T02 (those are added in T03).\n\n## Known Issues\n\nNone.\n\n## Files Created/Modified\n\n- `src/resources/extensions/hx/model-router.ts`\n",
       "description": "Add capability-aware scoring on top of the existing tier-based router. This is a pure additive change — existing behavior is unchanged when capability_routing is false (the default).\n\nSteps:\n1. Read model-router.ts in full to understand current structure.\n2. Add the following types and constants after the existing `MODEL_COST_PER_1K_INPUT` block:\n\n   **Interface:**\n   ```typescript\n   export interface ModelCapabilities {\n     contextWindow: number;       // tokens\n     supportsVision: boolean;\n     supportsCode: boolean;\n     reasoningDepth: \"shallow\" | \"medium\" | \"deep\";\n     supportsTools: boolean;\n   }\n   ```\n\n   **Profiles map** covering all 17 models in MODEL_CAPABILITY_TIER. Unknown models are handled by the existing fallthrough logic. Example entries:\n   - claude-opus-4-6: { contextWindow: 200000, supportsVision: true, supportsCode: true, reasoningDepth: \"deep\", supportsTools: true }\n   - claude-haiku-4-5: { contextWindow: 200000, supportsVision: true, supportsCode: true, reasoningDepth: \"shallow\", supportsTools: true }\n   - gpt-4o-mini: { contextWindow: 128000, supportsVision: true, supportsCode: true, reasoningDepth: \"shallow\", supportsTools: true }\n   - o1/o3: { contextWindow: 128000, supportsVision: false, supportsCode: true, reasoningDepth: \"deep\", supportsTools: false }\n   - gemini-2.0-flash: { contextWindow: 1000000, supportsVision: true, supportsCode: true, reasoningDepth: \"shallow\", supportsTools: true }\n   - deepseek-chat: { contextWindow: 65536, supportsVision: false, supportsCode: true, reasoningDepth: \"medium\", supportsTools: true }\n\n   **BASE_REQUIREMENTS map** — default requirements per UNIT_TYPE_TIERS unit type (11 entries + hook/* fallthrough):\n   ```typescript\n   const BASE_REQUIREMENTS: Record<string, Partial<ModelCapabilities>> = {\n     \"execute-task\":     { supportsCode: true, supportsTools: true },\n     \"plan-slice\":       { supportsCode: true },\n     \"plan-milestone\":   { supportsCode: true },\n     \"replan-slice\":     { supportsCode: true, reasoningDepth: \"deep\" },\n     \"reassess-roadmap\": { supportsCode: true, reasoningDepth: \"deep\" },\n     \"research-slice\":   {},\n     \"research-milestone\": {},\n     \"discuss-slice\":    {},\n     \"discuss-milestone\": {},\n     \"complete-slice\":   {},\n     \"run-uat\":          {},\n   };\n   ```\n\n3. Add three scoring functions (internal, not exported):\n   - `computeTaskRequirements(unitType, metadata?)`: merges BASE_REQUIREMENTS[unitType] with metadata signals (e.g. visionRequired → supportsVision: true, requiresReasoning → reasoningDepth: \"deep\", toolUsage → supportsTools: true)\n   - `scoreModel(modelId, requirements)`: returns 0–1 score; for each requirement field present, check if model meets it; score = matched/total. Returns 1.0 for models with no profile (unknown models pass through).\n   - `scoreEligibleModels(modelIds, requirements)`: maps each id through scoreModel, returns sorted array of `{id, score}`\n\n4. Update `DynamicRoutingConfig` — add `capability_routing?: boolean`.\n\n5. Update `RoutingDecision` — add `selectionMethod: \"capability-score\" | \"tier-only\"`.\n\n6. Update `resolveModelForComplexity`: at the point where `findModelForTier` is called, if `routingConfig.capability_routing` is true, instead call `scoreEligibleModels` on the tier-filtered candidates and pick the highest-scoring one. Set `selectionMethod` accordingly on the returned decision.\n\n7. Update `defaultRoutingConfig` to include `capability_routing: false`.\n\n8. Run `npx tsc --noEmit` and `npm run test:unit 2>&1 | tail -5` — both must pass.",
       "estimate": "75m",
       "files": [
@@ -5978,6 +5985,50 @@
       "verdict": "✅ pass (4107 passed; 1 pre-existing failure unrelated to this task)",
       "duration_ms": 452000,
       "created_at": "2026-04-05T14:33:02.617Z"
+    },
+    {
+      "id": 192,
+      "task_id": "T02",
+      "slice_id": "S01",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npx tsc --noEmit",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 4200,
+      "created_at": "2026-04-05T14:38:07.431Z"
+    },
+    {
+      "id": 193,
+      "task_id": "T02",
+      "slice_id": "S01",
+      "milestone_id": "M003-ttxmyu",
+      "command": "grep -n 'selectionMethod' src/resources/extensions/hx/model-router.ts",
+      "exit_code": 0,
+      "verdict": "✅ pass (8 hits)",
+      "duration_ms": 50,
+      "created_at": "2026-04-05T14:38:07.431Z"
+    },
+    {
+      "id": 194,
+      "task_id": "T02",
+      "slice_id": "S01",
+      "milestone_id": "M003-ttxmyu",
+      "command": "grep -n 'capability_routing' src/resources/extensions/hx/model-router.ts",
+      "exit_code": 0,
+      "verdict": "✅ pass (3 hits)",
+      "duration_ms": 50,
+      "created_at": "2026-04-05T14:38:07.431Z"
+    },
+    {
+      "id": 195,
+      "task_id": "T02",
+      "slice_id": "S01",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npm run test:unit 2>&1 | tail -10",
+      "exit_code": 0,
+      "verdict": "✅ pass (4113 passed, 0 failed)",
+      "duration_ms": 71700,
+      "created_at": "2026-04-05T14:38:07.431Z"
     }
   ]
 }

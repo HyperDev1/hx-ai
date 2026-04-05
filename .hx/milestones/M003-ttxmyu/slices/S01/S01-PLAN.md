@@ -30,7 +30,7 @@ Steps:
   - Estimate: 45m
   - Files: src/resources/extensions/hx/hx-db.ts
   - Verify: npx tsc --noEmit && grep -n 'SCHEMA_VERSION = 15' src/resources/extensions/hx/hx-db.ts && grep -n 'slice_locks' src/resources/extensions/hx/hx-db.ts | wc -l | awk '{if($1>=4) print "OK"; else print "FAIL: expected >=4 slice_locks references"}'
-- [ ] **T02: model-router.ts: ModelCapabilities scoring layer** — Add capability-aware scoring on top of the existing tier-based router. This is a pure additive change — existing behavior is unchanged when capability_routing is false (the default).
+- [x] **T02: Added ModelCapabilities scoring layer to model-router.ts: profiles for 17 models, BASE_REQUIREMENTS, scoreModel/scoreEligibleModels, capability_routing flag, and selectionMethod on RoutingDecision** — Add capability-aware scoring on top of the existing tier-based router. This is a pure additive change — existing behavior is unchanged when capability_routing is false (the default).
 
 Steps:
 1. Read model-router.ts in full to understand current structure.
