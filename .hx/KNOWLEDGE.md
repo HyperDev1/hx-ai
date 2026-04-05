@@ -179,3 +179,21 @@ The `compile-tests.mjs` script does **not** clean `dist-test/` before rebuilding
 3. In `system-context.ts`: handle `customType === "hx-<type>"` to inject as a named context block
 
 The pattern handles cold-start re-injection (the agent was stopped and restarted) correctly because the marker persists on disk across process restarts.
+
+## Capability-routing: scoreModel returns 1.0 for unknown model profiles (M003/S01)
+
+**Rule:** `scoreModel` returns 1.0 (perfect score) for models with no entry in `MODEL_CAPABILITY_PROFILES`, not 0 or a penalty. This preserves pass-through semantics — unknown models should not be silently demoted.
+
+**Pattern:** When adding new models to the capability layer, they will silently score 1.0 (winning over known models that don't fully match requirements) until a profile entry is added. Always add a profile entry alongside any new model addition to MODEL_CAPABILITY_TIER.
+
+## Capability-routing: test vision requirements via metadata.tags not metadata.visionRequired (M003/S01/T04)
+
+**Rule:** `computeTaskRequirements` reads `metadata.tags` (e.g., `['vision']`) to detect vision requirements, NOT the `metadata.visionRequired` boolean. The boolean is set in `extractTaskMetadata` from content scanning, but `computeTaskRequirements` checks for the `'vision'` string in the tags array.
+
+**Pattern:** In capability-router tests, set `tags: ['vision']` to simulate a vision task. Setting `visionRequired: true` directly on metadata will NOT trigger vision routing unless the tags path is also activated.
+
+## selectionMethod is a required field on RoutingDecision — all return paths must set it (M003/S01/T02)
+
+**Rule:** `selectionMethod` was added as a required (non-optional) field on `RoutingDecision`. All 5 return paths in `resolveModelForComplexity` set it explicitly. Do not make it optional — callers that log or switch on it would need null-checks everywhere.
+
+**Pattern:** When extending RoutingDecision with new required fields, trace all return paths in resolveModelForComplexity (early-exit for unknown model, downgrade path, escalate path, default-model path, normal path) and update each one.

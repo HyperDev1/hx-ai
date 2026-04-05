@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-04-05T14:46:39.909Z",
+  "exported_at": "2026-04-05T15:13:48.170Z",
   "milestones": [
     {
       "id": "M001-df6x5t",
@@ -454,14 +454,14 @@
       "milestone_id": "M003-ttxmyu",
       "id": "S01",
       "title": "Capability-Aware Model Routing + DB Reconciliation",
-      "status": "pending",
+      "status": "complete",
       "risk": "high",
       "depends": [],
       "demo": "After this: routing log shows selectionMethod: 'capability-score' or 'tier-only'; capability-router tests pass; tsc clean baseline for S02–S06",
       "created_at": "2026-04-05T13:56:28.716Z",
-      "completed_at": null,
-      "full_summary_md": "",
-      "full_uat_md": "",
+      "completed_at": "2026-04-05T14:50:13.154Z",
+      "full_summary_md": "---\nid: S01\nparent: M003-ttxmyu\nmilestone: M003-ttxmyu\nprovides:\n  - acquireSliceLock/releaseSliceLock/getSliceLock/cleanExpiredSliceLocks functions in hx-db.ts for S02 parallelism\n  - ModelCapabilities interface and MODEL_CAPABILITY_PROFILES (17 models) for any future routing extensions\n  - BASE_REQUIREMENTS map (11 unit types) consumable by S02–S06 routing logic\n  - capability_routing: false default in DynamicRoutingConfig — zero-cost opt-in\n  - tsc-clean baseline at 4132/0/5 tests for S02–S06\nrequires:\n  []\naffects:\n  - S02\n  - S03\n  - S04\n  - S05\n  - S06\nkey_files:\n  - src/resources/extensions/hx/hx-db.ts\n  - src/resources/extensions/hx/model-router.ts\n  - src/resources/extensions/hx/complexity-classifier.ts\n  - src/resources/extensions/hx/auto-model-selection.ts\n  - src/resources/extensions/hx/auto/loop-deps.ts\n  - src/resources/extensions/hx/auto/phases.ts\n  - src/resources/extensions/hx/tests/capability-router.test.ts\n  - src/resources/extensions/hx/tests/hx-db.test.ts\nkey_decisions:\n  - selectionMethod added as required (not optional) on RoutingDecision — all 5 return paths set it explicitly\n  - scoreModel returns 1.0 for unknown model profiles to preserve pass-through semantics\n  - reasoningDepth uses ordered depth map (shallow < medium < deep) so deep satisfies medium requirement\n  - capability_routing defaults to false — zero behavior change until explicitly enabled\n  - acquireSliceLock uses INSERT OR IGNORE for DB-atomic lock acquisition without transactions\n  - releaseSliceLock guards on worker_pid to prevent cross-worker stomping\n  - visionRequired tested via metadata.tags=['vision'] not metadata.visionRequired boolean — computeTaskRequirements reads tags array\n  - phases.ts passes undefined as 10th metadata arg — no-op, satisfies TypeScript, defers DB-wired metadata to a future task\npatterns_established:\n  - Capability scoring is additive over tier routing: tier filtering happens first, then scoreEligibleModels picks the best match within the tier\n  - New DB schema migrations: add currentVersion < N block, CREATE TABLE IF NOT EXISTS, INSERT INTO schema_version; bump SCHEMA_VERSION constant at top\n  - Internal scoring functions (scoreModel, computeTaskRequirements) tested indirectly via public resolveModelForComplexity rather than exported\n  - TaskMetadata capability fields (toolUsage, visionRequired, requiresReasoning) populated via regex content scanning in extractTaskMetadata\nobservability_surfaces:\n  - routing notify log appends '(capability-score)' suffix when selectionMethod === capability-score, visible in auto-mode session output\ndrill_down_paths:\n  - .hx/milestones/M003-ttxmyu/slices/S01/tasks/T01-SUMMARY.md\n  - .hx/milestones/M003-ttxmyu/slices/S01/tasks/T02-SUMMARY.md\n  - .hx/milestones/M003-ttxmyu/slices/S01/tasks/T03-SUMMARY.md\n  - .hx/milestones/M003-ttxmyu/slices/S01/tasks/T04-SUMMARY.md\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-04-05T14:50:13.155Z\nblocker_discovered: false\n---\n\n# S01: Capability-Aware Model Routing + DB Reconciliation\n\n**Ported capability-aware model routing (ModelCapabilities, scoreModel, 17-model profiles, BASE_REQUIREMENTS, TaskMetadata passthrough) and added slice_locks schema v15 for S02 parallelism, establishing a tsc-clean 4132-test baseline.**\n\n## What Happened\n\nS01 delivered the capability-routing foundation across four tasks.\n\n**T01 — slice_locks schema v15:** Bumped SCHEMA_VERSION from 14 to 15. Added a `currentVersion < 15` migration block that creates the `slice_locks` table (composite PK on milestone_id+slice_id, with worker_pid, acquired_at, expires_at columns). Added four exported accessor functions: `acquireSliceLock` (INSERT OR IGNORE → bool), `releaseSliceLock` (DELETE WHERE pid matches), `getSliceLock` (returns typed row or null), `cleanExpiredSliceLocks` (DELETE expired → count). Updated five test files that hardcoded schema version 14 to 15. The run() return-type is `unknown` under tsconfig.extensions.json; used the existing `(result as { changes?: number }).changes ?? 0` cast pattern for consistency.\n\n**T02 — ModelCapabilities scoring layer:** Added `ModelCapabilities` interface (contextWindow, supportsVision, supportsCode, reasoningDepth, supportsTools) and `MODEL_CAPABILITY_PROFILES` covering all 17 models in MODEL_CAPABILITY_TIER. Added `BASE_REQUIREMENTS` map for the 11 UNIT_TYPE_TIERS unit types. Added three internal functions: `computeTaskRequirements` (merges BASE_REQUIREMENTS with TaskMetadata signals via tags), `scoreModel` (0–1 score with depth ordering — \"deep\" satisfies \"medium\" requirement), and `scoreEligibleModels` (sorts by score desc). Added `capability_routing?: boolean` to `DynamicRoutingConfig` (defaults false in `defaultRoutingConfig`). Added `selectionMethod: 'capability-score' | 'tier-only'` as a required field on `RoutingDecision` — all 5 return paths updated. Extended `resolveModelForComplexity` with optional `unitType`/`metadata` params; when `capability_routing: true`, scores tier candidates and picks highest-scoring.\n\n**T03 — TaskMetadata passthrough:** Added three optional fields to TaskMetadata interface: `toolUsage?: string[]`, `visionRequired?: boolean`, `requiresReasoning?: boolean`. Populated them in `extractTaskMetadata` (regex-based content scanning). Added `metadata?: TaskMetadata` param to `selectAndApplyModel` in auto-model-selection.ts, imported TaskMetadata, passed metadata to `classifyUnitComplexity`, and updated the routing notify to append `(capability-score)` suffix when `selectionMethod === 'capability-score'`. Updated loop-deps.ts type signature and phases.ts call site with `undefined` as 10th arg.\n\n**T04 — capability-router tests:** Created `capability-router.test.ts` with 19 test cases covering: `defaultRoutingConfig` fields, selectionMethod discrimination (`tier-only` vs `capability-score`), no-downgrade path, vision-tag routing (gpt-4o scores over deepseek-chat), replan-slice BASE_REQUIREMENTS reasoning depth, unknown configured model early-exit path, and all legacy tier downgrade/escalate behaviors. Internal `scoreModel`/`computeTaskRequirements` tested indirectly via `resolveModelForComplexity` public API. Full suite: 4132 passed, 0 failed (19 new tests above T02 baseline of 4113).\n\nAll slice verification criteria passed: tsc clean, 4132/0/5, GSD 0 hits across all touched files.\n\n## Verification\n\n1. `npx tsc --noEmit` → exit 0 (verified at start of close task)\n2. `SCHEMA_VERSION = 15` at line 162 of hx-db.ts ✅\n3. `slice_locks` references in hx-db.ts: 5 (migration CREATE + 4 accessor functions) ✅\n4. `selectionMethod` in model-router.ts: 8 hits ✅\n5. `capability_routing` in model-router.ts: 3 hits ✅\n6. `toolUsage|visionRequired|requiresReasoning` in complexity-classifier.ts: 9 hits ✅\n7. `selectionMethod` in auto-model-selection.ts: 1 hit ✅\n8. GSD grep across all 7 touched files: 0 hits ✅\n9. `npm run test:unit`: 4132 passed, 0 failed, 5 skipped ✅\n\n## Requirements Advanced\n\n- R011 — ModelCapabilities interface, 17-model profiles, BASE_REQUIREMENTS, scoreModel/computeTaskRequirements/scoreEligibleModels, capability_routing flag, selectionMethod, and TaskMetadata passthrough all implemented and tested with 19 capability-router tests\n- R014 — GSD grep across all 7 touched files returns 0 hits\n- R018 — npx tsc --noEmit exits 0; npm run test:unit 4132/0/5 — tsc-clean baseline established for S02–S06\n\n## Requirements Validated\n\n- R011 — 19 capability-router tests pass covering selectionMethod discrimination, vision routing, BASE_REQUIREMENTS depth, and all legacy tier behaviors; tsc clean; 0 GSD hits\n\n## New Requirements Surfaced\n\nNone.\n\n## Requirements Invalidated or Re-scoped\n\nNone.\n\n## Deviations\n\nT01: run() return type is `unknown` under tsconfig.extensions.json — not called out in the task plan. Used the existing `(result as { changes?: number }).changes ?? 0` cast pattern from line 1890 of hx-db.ts rather than changing the DbStatement interface.\n\nT02: `computeTaskRequirements` reused existing TaskMetadata.complexityKeywords and tags fields — no new fields were needed in T02 itself (those came in T03).\n\nT04: The 'unknown model scores 1.0' test was reframed to test the configured-model early-exit path (isKnownModel=false) rather than unknown candidates in scoring, because unknown models default to the 'heavy' tier and would not appear in non-heavy tier candidate lists.\n\n## Known Limitations\n\nphases.ts passes `undefined` as the 10th metadata arg to selectAndApplyModel — metadata from the DB task record is not yet wired through. The routing notify suffix works only when metadata is explicitly supplied by a caller. Real per-task capability routing requires the DB-wired path, which is deferred (no upstream milestone tracked for it).\n\n## Follow-ups\n\nS02 can now consume acquireSliceLock/releaseSliceLock/cleanExpiredSliceLocks from hx-db.ts without further DB changes. The `capability_routing: false` default means no behavior change until an operator explicitly enables it via DynamicRoutingConfig.\n\n## Files Created/Modified\n\n- `src/resources/extensions/hx/hx-db.ts` — SCHEMA_VERSION 14→15; slice_locks migration block + 4 accessor functions (acquireSliceLock, releaseSliceLock, getSliceLock, cleanExpiredSliceLocks)\n- `src/resources/extensions/hx/model-router.ts` — ModelCapabilities interface, MODEL_CAPABILITY_PROFILES (17 models), BASE_REQUIREMENTS (11 unit types), scoreModel/computeTaskRequirements/scoreEligibleModels, capability_routing flag, selectionMethod required field on RoutingDecision\n- `src/resources/extensions/hx/complexity-classifier.ts` — TaskMetadata gains toolUsage/visionRequired/requiresReasoning optional fields; extractTaskMetadata populates them via regex\n- `src/resources/extensions/hx/auto-model-selection.ts` — selectAndApplyModel gains optional metadata param; routing notify appends (capability-score) suffix\n- `src/resources/extensions/hx/auto/loop-deps.ts` — selectAndApplyModel type signature updated with metadata param\n- `src/resources/extensions/hx/auto/phases.ts` — phases.ts call site passes undefined as 10th arg for metadata\n- `src/resources/extensions/hx/tests/capability-router.test.ts` — New file: 19 tests covering capability routing branches\n- `src/resources/extensions/hx/tests/hx-db.test.ts` — Schema version assertion updated 14→15\n- `src/resources/extensions/hx/tests/complete-slice.test.ts` — Schema version assertion updated 14→15\n- `src/resources/extensions/hx/tests/complete-task.test.ts` — Schema version assertion updated 14→15\n- `src/resources/extensions/hx/tests/md-importer.test.ts` — Schema version assertion updated 14→15\n- `src/resources/extensions/hx/tests/memory-store.test.ts` — Schema version assertion updated 14→15\n",
+      "full_uat_md": "# S01: Capability-Aware Model Routing + DB Reconciliation — UAT\n\n**Milestone:** M003-ttxmyu\n**Written:** 2026-04-05T14:50:13.155Z\n\n## UAT Type\nUAT mode: artifact-driven\n\n## Preconditions\n\n- Working directory: `/Users/beratcan/Desktop/GithubProjects/hx-ai`\n- Node.js installed with `npm run test:unit` available\n- `npx tsc --noEmit` resolves against the project tsconfig\n\n---\n\n## Test Cases\n\n### TC-01: Schema version and slice_locks table present\n\n**Verify hx-db.ts has been migrated to v15 with all slice_locks references.**\n\n```bash\ngrep -n 'SCHEMA_VERSION = 15' src/resources/extensions/hx/hx-db.ts\ngrep -n 'slice_locks' src/resources/extensions/hx/hx-db.ts\n```\n\nExpected:\n- Line 162: `const SCHEMA_VERSION = 15;`\n- At least 5 occurrences: one CREATE TABLE in migration block, one INSERT each in acquireSliceLock, releaseSliceLock, getSliceLock, cleanExpiredSliceLocks\n\n---\n\n### TC-02: Four slice_lock accessor functions exported\n\n**Verify all four accessor functions are exported from hx-db.ts.**\n\n```bash\ngrep -n 'export function acquireSliceLock\\|export function releaseSliceLock\\|export function getSliceLock\\|export function cleanExpiredSliceLocks' src/resources/extensions/hx/hx-db.ts\n```\n\nExpected: 4 matching lines, one per accessor.\n\n---\n\n### TC-03: ModelCapabilities interface and profiles present\n\n**Verify ModelCapabilities interface and 17-model profile map exist.**\n\n```bash\ngrep -n 'ModelCapabilities' src/resources/extensions/hx/model-router.ts\ngrep -n 'MODEL_CAPABILITY_PROFILES' src/resources/extensions/hx/model-router.ts\n```\n\nExpected:\n- `ModelCapabilities` appears as interface declaration and in the profiles map type annotation\n- `MODEL_CAPABILITY_PROFILES` appears as constant declaration\n\n---\n\n### TC-04: selectionMethod and capability_routing present in model-router.ts\n\n**Verify the two key new fields on RoutingDecision and DynamicRoutingConfig.**\n\n```bash\ngrep -n 'selectionMethod' src/resources/extensions/hx/model-router.ts\ngrep -n 'capability_routing' src/resources/extensions/hx/model-router.ts\n```\n\nExpected:\n- `selectionMethod` appears ≥8 times (interface definition + all 5 return paths + scoring branch)\n- `capability_routing` appears ≥3 times (interface, defaultRoutingConfig, if-branch)\n\n---\n\n### TC-05: TaskMetadata capability fields in complexity-classifier.ts\n\n**Verify three new optional fields are declared and populated.**\n\n```bash\ngrep -n 'toolUsage\\|visionRequired\\|requiresReasoning' src/resources/extensions/hx/complexity-classifier.ts\n```\n\nExpected: ≥9 hits (declarations in interface + population in extractTaskMetadata for each field).\n\n---\n\n### TC-06: selectionMethod suffix in auto-model-selection.ts\n\n**Verify routing notify uses selectionMethod to append capability-score suffix.**\n\n```bash\ngrep -n 'selectionMethod\\|capability-score' src/resources/extensions/hx/auto-model-selection.ts\n```\n\nExpected: At least 1 hit showing selectionMethod is read to conditionally append routing suffix.\n\n---\n\n### TC-07: GSD naming check — zero hits in all touched files\n\n**Verify no GSD references were introduced.**\n\n```bash\ngrep -rn 'GSD' \\\n  src/resources/extensions/hx/model-router.ts \\\n  src/resources/extensions/hx/hx-db.ts \\\n  src/resources/extensions/hx/complexity-classifier.ts \\\n  src/resources/extensions/hx/auto-model-selection.ts \\\n  src/resources/extensions/hx/auto/loop-deps.ts \\\n  src/resources/extensions/hx/auto/phases.ts \\\n  src/resources/extensions/hx/tests/capability-router.test.ts \\\n  2>/dev/null | grep -v '^Binary' || echo 'GSD check: 0 hits'\n```\n\nExpected output: `GSD check: 0 hits`\n\n---\n\n### TC-08: TypeScript compilation clean\n\n```bash\nnpx tsc --noEmit\necho \"Exit: $?\"\n```\n\nExpected: exit code 0, no diagnostics output.\n\n---\n\n### TC-09: capability-router test file exists with 19 tests\n\n**Verify test file is present and covers required cases.**\n\n```bash\ngrep -c 'test(' src/resources/extensions/hx/tests/capability-router.test.ts\ngrep -n 'capability-score\\|tier-only\\|selectionMethod\\|visionRequired\\|replan-slice' src/resources/extensions/hx/tests/capability-router.test.ts | head -20\n```\n\nExpected: ≥19 `test(` calls; grep shows selectionMethod, capability-score, tier-only, vision, replan-slice are all covered.\n\n---\n\n### TC-10: Full test suite — 4132 pass, 0 fail\n\n```bash\nnpm run test:unit 2>&1 | tail -5\n```\n\nExpected: `✔ 4132 passed, 0 failed, 5 skipped` (or greater if tests were added after T04).\n\n---\n\n## Edge Cases\n\n### EC-01: capability_routing defaults to false (no behavior change without opt-in)\n\n```bash\ngrep -n 'capability_routing: false' src/resources/extensions/hx/model-router.ts\n```\n\nExpected: 1 hit in `defaultRoutingConfig`.\n\n### EC-02: scoreModel returns 1.0 for unknown models (pass-through semantics)\n\n```bash\ngrep -n 'return 1.0\\|return 1 ' src/resources/extensions/hx/model-router.ts | head -5\n```\n\nExpected: at least 1 hit showing the `return 1.0` path for profiles not found in MODEL_CAPABILITY_PROFILES.\n\n### EC-03: releaseSliceLock guards on worker_pid\n\n```bash\ngrep -A5 'export function releaseSliceLock' src/resources/extensions/hx/hx-db.ts | grep 'worker_pid'\n```\n\nExpected: `worker_pid` appears in the WHERE clause of the DELETE statement, preventing cross-worker lock stomping.\n\n",
       "goal": "Port capability-aware model routing from upstream: add ModelCapabilities scoring layer to model-router.ts, wire TaskMetadata passthrough in auto-model-selection.ts, add slice_locks schema v15 to hx-db.ts for S02, and prove with capability-router tests.",
       "success_criteria": "- `npx tsc --noEmit` exits 0 after all tasks\n- `npm run test:unit` shows 0 new failures (baseline: 4113/0/5)\n- New `src/resources/extensions/hx/tests/capability-router.test.ts` passes with ≥6 test cases\n- `RoutingDecision.selectionMethod` is present and typed as `\"capability-score\" | \"tier-only\"`\n- `DynamicRoutingConfig.capability_routing` flag defaults to `false` in `defaultRoutingConfig()`\n- `hx-db.ts` SCHEMA_VERSION bumped to 15 with `slice_locks` table and accessor functions\n- No GSD references introduced (grep check)",
       "proof_level": "contract — tsc + unit tests exercise all new public interfaces",
@@ -484,11 +484,11 @@
       "completed_at": null,
       "full_summary_md": "",
       "full_uat_md": "",
-      "goal": "Port slice-parallel-orchestrator.ts, slice-parallel-conflict.ts, slice-parallel-eligibility.ts; adapt GSD_SLICE_LOCK → HX_SLICE_LOCK; update state.ts slice lock handling in DB-backed and legacy paths; wire into auto.ts/phases.ts dispatch",
-      "success_criteria": "slice-parallel-orchestrator.test.ts, slice-parallel-conflict.test.ts, slice-parallel-eligibility.test.ts all pass; existing parallel-eligibility and parallel-merge tests unchanged; tsc clean",
-      "proof_level": "contract: 3 new test files pass; existing parallel tests unaffected",
-      "integration_closure": "HX_SLICE_LOCK env var read in state.ts; startSliceParallel/stopSliceParallel hooked into auto dispatch",
-      "observability_impact": "HX_SLICE_LOCK logged when slice lock is set; warning logged when locked slice ID not found in activeMilestoneSlices",
+      "goal": "Port the slice-level parallelism subsystem from upstream into hx-ai: add HX_SLICE_LOCK isolation to state.ts (both paths) and dispatch-guard.ts, then implement slice-parallel-eligibility.ts, slice-parallel-conflict.ts, and slice-parallel-orchestrator.ts with full HX naming and tests.",
+      "success_criteria": "- `HX_SLICE_LOCK` isolation in state.ts (deriveStateFromDb + _deriveStateImpl) filters eligible slices to only the locked slice when the env var matches the active milestone\n- `HX_SLICE_LOCK` awareness in dispatch-guard.ts skips positional-ordering check for non-locked slices when a worker is locked\n- `slice-parallel-eligibility.ts` exists with analyzeSliceParallelEligibility + formatSliceEligibilityReport; tests pass\n- `slice-parallel-conflict.ts` exists with detectSliceConflicts + buildSliceFileSets; tests pass\n- `slice-parallel-orchestrator.ts` exists with startSliceParallel + stopSliceParallel + getSliceWorkerStatuses; uses acquireSliceLock/releaseSliceLock from hx-db.ts; sets HX_SLICE_LOCK env var on workers; tests pass\n- `npx tsc --noEmit` exits 0\n- `npm run test:unit` passes with 4132 + new tests, 0 failures\n- GSD grep across all 5 touched/new files returns 0 hits",
+      "proof_level": "contract — new files exist with correct APIs and all tests pass; no runtime auto-trigger wiring required",
+      "integration_closure": "Upstream consumed: acquireSliceLock/releaseSliceLock/getSliceLock/cleanExpiredSliceLocks from hx-db.ts (added in S01); getMilestoneSlices/getSliceTasks from hx-db.ts; HX_MILESTONE_LOCK pattern in state.ts + dispatch-guard.ts as the exact template. New wiring: none beyond the new source files — auto-trigger from phases.ts is deferred (not in S02 success criteria). What remains: phases.ts/auto.ts call-site hookup to startSliceParallel (deferred to a future slice or milestone).",
+      "observability_impact": "Lock acquisition logged by acquireSliceLock return value (bool) — callers in slice-parallel-orchestrator.ts should log skip when false. Worker PIDs tracked in SliceWorkerInfo for getSliceWorkerStatuses() inspection. HX_SLICE_LOCK isolation in state.ts is silent (env var presence is the observable signal).",
       "sequence": 0,
       "replan_triggered_at": null
     },
@@ -3679,6 +3679,171 @@
       "observability_impact": "",
       "full_plan_md": "",
       "sequence": 0
+    },
+    {
+      "milestone_id": "M003-ttxmyu",
+      "slice_id": "S02",
+      "id": "T01",
+      "title": "Added HX_SLICE_LOCK env var isolation to both state derivation paths and dispatch-guard.ts, mirroring the HX_MILESTONE_LOCK pattern; 4 new tests pass",
+      "status": "complete",
+      "one_liner": "Added HX_SLICE_LOCK env var isolation to both state derivation paths and dispatch-guard.ts, mirroring the HX_MILESTONE_LOCK pattern; 4 new tests pass",
+      "narrative": "Read the existing HX_MILESTONE_LOCK patterns as templates, then applied HX_SLICE_LOCK isolation in three places: (1) deriveStateFromDb in state.ts — eligibleSlices filter before the activeSlice selection loop; (2) _deriveStateImpl in state.ts — same filter on activeRoadmap.slices; (3) dispatch-guard.ts — in the positional-ordering else branch, a locked slice worker issues continue to skip the check. Added two test suites: a new describe block in derive-state-db.test.ts with DB-backed and filesystem path tests, and a new test in dispatch-guard.test.ts verifying the skip and that declared deps are still enforced.",
+      "verification_result": "grep confirmed 6 HX_SLICE_LOCK occurrences (≥4). npx tsc --noEmit clean. npm run test:unit: 4136 passed, 0 failed. Targeted TAP run on both test files: 36 tests, 0 failures, including all 3 new HX_SLICE_LOCK tests.",
+      "duration": "",
+      "completed_at": "2026-04-05T15:13:48.132Z",
+      "blocker_discovered": false,
+      "deviations": "None. Used split('/')[1] for SID extraction rather than parseUnitId — simpler and consistent with the milestone lock pattern.",
+      "known_issues": "None.",
+      "key_files": [
+        "src/resources/extensions/hx/state.ts",
+        "src/resources/extensions/hx/dispatch-guard.ts",
+        "src/resources/extensions/hx/tests/derive-state-db.test.ts",
+        "src/resources/extensions/hx/tests/dispatch-guard.test.ts"
+      ],
+      "key_decisions": [
+        "HX_SLICE_LOCK format is MID/SID; SID extracted via split('/')[1]",
+        "dispatch-guard.ts uses continue in the positional else branch — declared dep checks still run",
+        "Both state.ts paths use eligibleSlices filter before the activeSlice loop"
+      ],
+      "full_summary_md": "---\nid: T01\nparent: S02\nmilestone: M003-ttxmyu\nkey_files:\n  - src/resources/extensions/hx/state.ts\n  - src/resources/extensions/hx/dispatch-guard.ts\n  - src/resources/extensions/hx/tests/derive-state-db.test.ts\n  - src/resources/extensions/hx/tests/dispatch-guard.test.ts\nkey_decisions:\n  - HX_SLICE_LOCK format is MID/SID; SID extracted via split('/')[1]\n  - dispatch-guard.ts uses continue in the positional else branch — declared dep checks still run\n  - Both state.ts paths use eligibleSlices filter before the activeSlice loop\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-04-05T15:13:48.133Z\nblocker_discovered: false\n---\n\n# T01: Added HX_SLICE_LOCK env var isolation to both state derivation paths and dispatch-guard.ts, mirroring the HX_MILESTONE_LOCK pattern; 4 new tests pass\n\n**Added HX_SLICE_LOCK env var isolation to both state derivation paths and dispatch-guard.ts, mirroring the HX_MILESTONE_LOCK pattern; 4 new tests pass**\n\n## What Happened\n\nRead the existing HX_MILESTONE_LOCK patterns as templates, then applied HX_SLICE_LOCK isolation in three places: (1) deriveStateFromDb in state.ts — eligibleSlices filter before the activeSlice selection loop; (2) _deriveStateImpl in state.ts — same filter on activeRoadmap.slices; (3) dispatch-guard.ts — in the positional-ordering else branch, a locked slice worker issues continue to skip the check. Added two test suites: a new describe block in derive-state-db.test.ts with DB-backed and filesystem path tests, and a new test in dispatch-guard.test.ts verifying the skip and that declared deps are still enforced.\n\n## Verification\n\ngrep confirmed 6 HX_SLICE_LOCK occurrences (≥4). npx tsc --noEmit clean. npm run test:unit: 4136 passed, 0 failed. Targeted TAP run on both test files: 36 tests, 0 failures, including all 3 new HX_SLICE_LOCK tests.\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `grep -n 'HX_SLICE_LOCK' state.ts dispatch-guard.ts | wc -l → 6` | 0 | ✅ pass | 100ms |\n| 2 | `npx tsc --noEmit` | 0 | ✅ pass | 4000ms |\n| 3 | `npm run test:unit (4136 passed, 0 failed)` | 0 | ✅ pass | 72200ms |\n| 4 | `TAP run dispatch-guard + derive-state-db (36 passed, 0 failed)` | 0 | ✅ pass | 3100ms |\n\n\n## Deviations\n\nNone. Used split('/')[1] for SID extraction rather than parseUnitId — simpler and consistent with the milestone lock pattern.\n\n## Known Issues\n\nNone.\n\n## Files Created/Modified\n\n- `src/resources/extensions/hx/state.ts`\n- `src/resources/extensions/hx/dispatch-guard.ts`\n- `src/resources/extensions/hx/tests/derive-state-db.test.ts`\n- `src/resources/extensions/hx/tests/dispatch-guard.test.ts`\n",
+      "description": "Add HX_SLICE_LOCK env var isolation to both state derivation paths (deriveStateFromDb and _deriveStateImpl in state.ts) and to the positional-ordering check in dispatch-guard.ts. Mirrors the existing HX_MILESTONE_LOCK pattern exactly. Add tests for the new isolation behavior.",
+      "estimate": "45m",
+      "files": [
+        "src/resources/extensions/hx/state.ts",
+        "src/resources/extensions/hx/dispatch-guard.ts",
+        "src/resources/extensions/hx/tests/derive-state-db.test.ts",
+        "src/resources/extensions/hx/tests/dispatch-guard.test.ts"
+      ],
+      "verify": "grep -n 'HX_SLICE_LOCK' src/resources/extensions/hx/state.ts src/resources/extensions/hx/dispatch-guard.ts | wc -l | xargs -I{} test {} -ge 4 && npx tsc --noEmit && npm run test:unit 2>&1 | grep -E 'pass|fail'",
+      "inputs": [
+        "`src/resources/extensions/hx/state.ts` — existing HX_MILESTONE_LOCK isolation at lines 328-335 (deriveStateFromDb) and 838-845 (_deriveStateImpl) to use as templates",
+        "`src/resources/extensions/hx/dispatch-guard.ts` — existing HX_MILESTONE_LOCK isolation at lines 29-44 to use as template",
+        "`src/resources/extensions/hx/unit-id.ts` — parseUnitId for parsing HX_SLICE_LOCK value",
+        "`src/resources/extensions/hx/tests/dispatch-guard.test.ts` — existing HX_MILESTONE_LOCK test at lines 220-268 as exact pattern for new HX_SLICE_LOCK test",
+        "`src/resources/extensions/hx/tests/derive-state-db.test.ts` — existing test file to add HX_SLICE_LOCK isolation test"
+      ],
+      "expected_output": [
+        "`src/resources/extensions/hx/state.ts` — HX_SLICE_LOCK isolation added to both deriveStateFromDb (~line 619 loop) and _deriveStateImpl (~line 1268 loop)",
+        "`src/resources/extensions/hx/dispatch-guard.ts` — HX_SLICE_LOCK skips positional-ordering fallback for non-locked slices when worker is locked",
+        "`src/resources/extensions/hx/tests/derive-state-db.test.ts` — new test: HX_SLICE_LOCK filters activeSlice to only the locked slice",
+        "`src/resources/extensions/hx/tests/dispatch-guard.test.ts` — new test: HX_SLICE_LOCK skips cross-slice positional check; intra-slice deps still enforced"
+      ],
+      "observability_impact": "None — HX_SLICE_LOCK isolation is silent by design; env var presence is the observable signal.",
+      "full_plan_md": "",
+      "sequence": 0
+    },
+    {
+      "milestone_id": "M003-ttxmyu",
+      "slice_id": "S02",
+      "id": "T02",
+      "title": "Implement slice-parallel-eligibility.ts and tests",
+      "status": "pending",
+      "one_liner": "",
+      "narrative": "",
+      "verification_result": "",
+      "duration": "",
+      "completed_at": null,
+      "blocker_discovered": false,
+      "deviations": "",
+      "known_issues": "",
+      "key_files": [],
+      "key_decisions": [],
+      "full_summary_md": "",
+      "description": "Create slice-parallel-eligibility.ts implementing analyzeSliceParallelEligibility() and formatSliceEligibilityReport(). Uses getMilestoneSlices + getSliceTasks from hx-db.ts. Pattern: adapt parallel-eligibility.ts (milestone-level) to the slice level. Create matching test file covering 4 scenarios.",
+      "estimate": "60m",
+      "files": [
+        "src/resources/extensions/hx/slice-parallel-eligibility.ts",
+        "src/resources/extensions/hx/tests/slice-parallel-eligibility.test.ts"
+      ],
+      "verify": "npx tsc --noEmit && npm run test:unit 2>&1 | grep -E 'pass|fail' && grep -rn '\\bGSD\\b\\|\\bgsd\\b' src/resources/extensions/hx/slice-parallel-eligibility.ts | wc -l | xargs test 0 -eq",
+      "inputs": [
+        "`src/resources/extensions/hx/parallel-eligibility.ts` — milestone-level eligibility template to adapt (analyzeParallelEligibility → analyzeSliceParallelEligibility, milestones → slices)",
+        "`src/resources/extensions/hx/hx-db.ts` — getMilestoneSlices (line ~1620), getSliceTasks (available), acquireSliceLock (line 1755) for type reference",
+        "`src/resources/extensions/hx/tests/capability-router.test.ts` — pattern for DB-backed test setup with insertSlice/insertTask helpers"
+      ],
+      "expected_output": [
+        "`src/resources/extensions/hx/slice-parallel-eligibility.ts` — new file: SliceEligibilityResult and SliceParallelCandidates interfaces; analyzeSliceParallelEligibility(basePath, milestoneId) → SliceParallelCandidates; formatSliceEligibilityReport(candidates) → string",
+        "`src/resources/extensions/hx/tests/slice-parallel-eligibility.test.ts` — new file: 4 tests (single eligible slice, two independent slices both eligible, dependent slices only first eligible, file overlap detection)"
+      ],
+      "observability_impact": "",
+      "full_plan_md": "",
+      "sequence": 0
+    },
+    {
+      "milestone_id": "M003-ttxmyu",
+      "slice_id": "S02",
+      "id": "T03",
+      "title": "Implement slice-parallel-conflict.ts and tests",
+      "status": "pending",
+      "one_liner": "",
+      "narrative": "",
+      "verification_result": "",
+      "duration": "",
+      "completed_at": null,
+      "blocker_discovered": false,
+      "deviations": "",
+      "known_issues": "",
+      "key_files": [],
+      "key_decisions": [],
+      "full_summary_md": "",
+      "description": "Create slice-parallel-conflict.ts implementing detectSliceConflicts() and buildSliceFileSets(). Uses getSliceTasks from hx-db.ts to build per-slice file sets, then set intersection for overlap detection. Pattern: adapt parallel-merge.ts conflict detection to the slice level. Create matching test file.",
+      "estimate": "45m",
+      "files": [
+        "src/resources/extensions/hx/slice-parallel-conflict.ts",
+        "src/resources/extensions/hx/tests/slice-parallel-conflict.test.ts"
+      ],
+      "verify": "npx tsc --noEmit && npm run test:unit 2>&1 | grep -E 'pass|fail' && grep -rn '\\bGSD\\b\\|\\bgsd\\b' src/resources/extensions/hx/slice-parallel-conflict.ts | wc -l | xargs test 0 -eq",
+      "inputs": [
+        "`src/resources/extensions/hx/parallel-merge.ts` — file-overlap detection pattern to adapt (milestone-level → slice-level)",
+        "`src/resources/extensions/hx/hx-db.ts` — getSliceTasks for task file lists",
+        "`src/resources/extensions/hx/slice-parallel-eligibility.ts` — produced by T02; SliceParallelCandidates.fileOverlaps shape to keep consistent"
+      ],
+      "expected_output": [
+        "`src/resources/extensions/hx/slice-parallel-conflict.ts` — new file: SliceConflictResult interface; detectSliceConflicts(basePath, milestoneId, sliceIds[]) → Promise<SliceConflictResult>; buildSliceFileSets(milestoneId, sliceIds[]) → Map<string, string[]>",
+        "`src/resources/extensions/hx/tests/slice-parallel-conflict.test.ts` — new file: 3 tests (no overlap → empty conflicts, partial overlap → reported, full overlap → all files listed)"
+      ],
+      "observability_impact": "",
+      "full_plan_md": "",
+      "sequence": 0
+    },
+    {
+      "milestone_id": "M003-ttxmyu",
+      "slice_id": "S02",
+      "id": "T04",
+      "title": "Implement slice-parallel-orchestrator.ts and tests",
+      "status": "pending",
+      "one_liner": "",
+      "narrative": "",
+      "verification_result": "",
+      "duration": "",
+      "completed_at": null,
+      "blocker_discovered": false,
+      "deviations": "",
+      "known_issues": "",
+      "key_files": [],
+      "key_decisions": [],
+      "full_summary_md": "",
+      "description": "Create slice-parallel-orchestrator.ts implementing startSliceParallel(), stopSliceParallel(), getSliceWorkerStatuses(). Uses acquireSliceLock/releaseSliceLock from hx-db.ts. Workers spawn via child_process spawn with HX_SLICE_LOCK=MID/SID env var. No worktree creation — slice workers share the milestone's filesystem. Pattern: simplified parallel-orchestrator.ts (omit worktree creation, budget splitting, monitor overlay). Create matching test file.",
+      "estimate": "90m",
+      "files": [
+        "src/resources/extensions/hx/slice-parallel-orchestrator.ts",
+        "src/resources/extensions/hx/tests/slice-parallel-orchestrator.test.ts"
+      ],
+      "verify": "npx tsc --noEmit && npm run test:unit 2>&1 | grep -E 'pass|fail' && grep -rn '\\bGSD\\b\\|\\bgsd\\b' src/resources/extensions/hx/slice-parallel-orchestrator.ts | wc -l | xargs test 0 -eq && grep -c 'HX_SLICE_LOCK' src/resources/extensions/hx/slice-parallel-orchestrator.ts | xargs test 0 -lt",
+      "inputs": [
+        "`src/resources/extensions/hx/parallel-orchestrator.ts` — full milestone orchestrator as structural template (lines 536-600: spawnWorker pattern; lines 47-60: WorkerInfo interface; lines 313-350: getWorkerStatuses)",
+        "`src/resources/extensions/hx/hx-db.ts` — acquireSliceLock (line 1755), releaseSliceLock (line 1782), cleanExpiredSliceLocks (line 1808)",
+        "`src/resources/extensions/hx/slice-parallel-eligibility.ts` — produced by T02",
+        "`src/resources/extensions/hx/slice-parallel-conflict.ts` — produced by T03",
+        "`src/resources/extensions/hx/tests/dispatch-guard.test.ts` — insertSlice/setupRepo test helper patterns"
+      ],
+      "expected_output": [
+        "`src/resources/extensions/hx/slice-parallel-orchestrator.ts` — new file: SliceWorkerInfo interface; module-level workers Map<string, SliceWorkerInfo>; startSliceParallel(basePath, milestoneId, sliceIds[]) → Promise<{started, errors}>; stopSliceParallel(basePath, sliceId?) → Promise<void>; getSliceWorkerStatuses() → SliceWorkerInfo[]; internal spawnSliceWorker(basePath, milestoneId, sliceId) → boolean; HX_SLICE_LOCK=MID/SID set on spawned child env; HX_PARALLEL_DEPTH prevents nested spawn",
+        "`src/resources/extensions/hx/tests/slice-parallel-orchestrator.test.ts` — new file: 4 tests (lock acquisition success path, lock already held → skip, getSliceWorkerStatuses returns correct state, stopSliceParallel cleans up + releases lock)"
+      ],
+      "observability_impact": "Worker PID and state tracked in SliceWorkerInfo; getSliceWorkerStatuses() provides inspection surface. Lock acquisition failures logged (slice skipped when acquireSliceLock returns false).",
+      "full_plan_md": "",
+      "sequence": 0
     }
   ],
   "decisions": [
@@ -6143,6 +6308,50 @@
       "verdict": "✅ pass (0 hits)",
       "duration_ms": 50,
       "created_at": "2026-04-05T14:46:39.883Z"
+    },
+    {
+      "id": 205,
+      "task_id": "T01",
+      "slice_id": "S02",
+      "milestone_id": "M003-ttxmyu",
+      "command": "grep -n 'HX_SLICE_LOCK' state.ts dispatch-guard.ts | wc -l → 6",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 100,
+      "created_at": "2026-04-05T15:13:48.132Z"
+    },
+    {
+      "id": 206,
+      "task_id": "T01",
+      "slice_id": "S02",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npx tsc --noEmit",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 4000,
+      "created_at": "2026-04-05T15:13:48.132Z"
+    },
+    {
+      "id": 207,
+      "task_id": "T01",
+      "slice_id": "S02",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npm run test:unit (4136 passed, 0 failed)",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 72200,
+      "created_at": "2026-04-05T15:13:48.132Z"
+    },
+    {
+      "id": 208,
+      "task_id": "T01",
+      "slice_id": "S02",
+      "milestone_id": "M003-ttxmyu",
+      "command": "TAP run dispatch-guard + derive-state-db (36 passed, 0 failed)",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 3100,
+      "created_at": "2026-04-05T15:13:48.132Z"
     }
   ]
 }

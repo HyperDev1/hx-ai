@@ -612,10 +612,20 @@ export async function deriveStateFromDb(basePath: string): Promise<HXState> {
     activeMilestoneSlices.filter(s => isClosedStatus(s.status)).map(s => s.id)
   );
 
+  // Parallel worker isolation: when HX_SLICE_LOCK is set, this worker is
+  // scoped to a single slice within the active milestone. Filter the slice
+  // list so this worker only sees its assigned slice as a candidate for
+  // activeSlice. Mirrors the HX_MILESTONE_LOCK pattern above.
+  const sliceLock = process.env.HX_SLICE_LOCK;
+  const sliceLockSid = sliceLock ? sliceLock.split('/')[1] : undefined;
+  const eligibleSlices = sliceLockSid
+    ? activeMilestoneSlices.filter(s => s.id === sliceLockSid)
+    : activeMilestoneSlices;
+
   let activeSlice: ActiveRef | null = null;
   let activeSliceRow: SliceRow | null = null;
 
-  for (const s of activeMilestoneSlices) {
+  for (const s of eligibleSlices) {
     if (isClosedStatus(s.status)) continue;
     if (s.depends.every(dep => doneSliceIds.has(dep))) {
       activeSlice = { id: s.id, title: s.title };
@@ -1263,9 +1273,19 @@ export async function _deriveStateImpl(basePath: string): Promise<HXState> {
 
   // Find the active slice (first incomplete with deps satisfied)
   const doneSliceIds = new Set(activeRoadmap.slices.filter(s => s.done).map(s => s.id));
+
+  // Parallel worker isolation: when HX_SLICE_LOCK is set, this worker is
+  // scoped to a single slice. Filter to only the locked slice as candidate.
+  // Mirrors the HX_MILESTONE_LOCK pattern and the DB-backed path above.
+  const sliceLock = process.env.HX_SLICE_LOCK;
+  const sliceLockSid = sliceLock ? sliceLock.split('/')[1] : undefined;
+  const eligibleSlices = sliceLockSid
+    ? activeRoadmap.slices.filter(s => s.id === sliceLockSid)
+    : activeRoadmap.slices;
+
   let activeSlice: ActiveRef | null = null;
 
-  for (const s of activeRoadmap.slices) {
+  for (const s of eligibleSlices) {
     if (s.done) continue;
     if (s.depends.every(dep => doneSliceIds.has(dep))) {
       activeSlice = { id: s.id, title: s.title };

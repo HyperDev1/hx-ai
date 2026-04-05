@@ -6,7 +6,7 @@ Port all ~82 actionable upstream gsd-2 commits between v2.59.0 and v2.63.0 into 
 ## Slice Overview
 | ID | Slice | Risk | Depends | Done | After this |
 |----|-------|------|---------|------|------------|
-| S01 | Capability-Aware Model Routing + DB Reconciliation | high | — | ⬜ | After this: routing log shows selectionMethod: 'capability-score' or 'tier-only'; capability-router tests pass; tsc clean baseline for S02–S06 |
+| S01 | Capability-Aware Model Routing + DB Reconciliation | high | — | ✅ | After this: routing log shows selectionMethod: 'capability-score' or 'tier-only'; capability-router tests pass; tsc clean baseline for S02–S06 |
 | S02 | Slice-Level Parallelism | high | S01 | ⬜ | After this: slice parallel orchestrator files exist with HX naming; 3 test files pass; state.ts handles HX_SLICE_LOCK in both paths |
 | S03 | Context Optimization (Masking + Phase Anchors) | medium | S01 | ⬜ | After this: context-masker.ts and phase-anchor.ts exist; tests pass; phase-anchor.json written in auto-mode session |
 | S04 | Workflow-Logger Centralization + Auto-mode Hardening | medium | S01 | ⬜ | After this: workflow-logger-audit, silent-catch-diagnostics, tool-call-loop-guard, auto-wrapup-inflight-guard tests pass; no empty catch blocks in modified files |
