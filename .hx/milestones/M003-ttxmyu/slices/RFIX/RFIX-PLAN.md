@@ -30,7 +30,7 @@ Do NOT touch the auto-confirm block (lines ~87+) — stop/backtrack already requ
   - Estimate: 15m
   - Files: src/resources/extensions/hx/triage-ui.ts, src/resources/extensions/ask-user-questions.ts
   - Verify: npx tsc --project tsconfig.resources.json --noEmit && npx tsc --project tsconfig.extensions.json --noEmit && npm run build 2>&1 | tail -5
-- [ ] **T02: Validate R011–R016 in REQUIREMENTS.md with S01–S05 evidence** — Read S01–S05 slice summaries and confirm each Active requirement (R011, R012, R013, R015, R016) was delivered. Update REQUIREMENTS.md to move each from Active to Validated with a one-sentence evidence note.
+- [x] **T02: Moved R011/R012/R013/R015/R016 from Active to Validated in REQUIREMENTS.md with S01–S05 evidence; Coverage Summary updated to Active=0, Validated=11** — Read S01–S05 slice summaries and confirm each Active requirement (R011, R012, R013, R015, R016) was delivered. Update REQUIREMENTS.md to move each from Active to Validated with a one-sentence evidence note.
 
 Requirements to validate:
 - **R011** — Capability-aware model routing (S01): Check S01-SUMMARY.md confirms capability-router.ts, MODEL_CAPABILITY_PROFILES, scoreModel, before_model_select hook, capability_routing config flag ported

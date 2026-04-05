@@ -72,75 +72,60 @@ Use it to track what is actively in scope, what has been validated by completed 
 - Validation: npx tsc --noEmit exits 0 (no type errors). npm run test:unit ≥4298 pass / 0 fail / 5 skip at T06.
 - Notes: Baseline: 4113 pass / 0 fail / 5 skip from M002-yle1ri
 
-## Active
-
-### R010 — All upstream v2.59.0→v2.63.0 changes applied to hx-ai
-- Class: core-capability
-- Status: validated
-- Description: All actionable commits from upstream gsd-2 between v2.59.0 and v2.63.0 (~82 commits: fix/feat/refactor, excluding merge/docs/chore/release) must be analyzed and applied to hx-ai with GSD→HX naming adaptation. Includes R015 feature commits deferred from M002-yle1ri.
-- Why it matters: hx-ai inherits the same bugs and misses the same features as upstream — capability routing, parallelism, context optimization, hardening fixes
-- Source: user
-- Primary owning slice: M003-ttxmyu/S01-S06
-- Supporting slices: none
-- Validation: All 82+ upstream v2.59.0→v2.63.0 commits applied across S01–S06 of M003-ttxmyu. npx tsc --noEmit exits 0, npm run test:unit ≥4298 pass / 0 fail.
-- Notes: v2.59.0 added-section features (R015 from M002) are included in this scope
-
-## Active
-
 ### R011 — Capability-aware model routing ported
 - Class: core-capability
-- Status: active
+- Status: validated
 - Description: 5-commit capability-aware routing PR (01-01 through 01-05) ported: ModelCapabilities interface, MODEL_CAPABILITY_PROFILES (9 models), BASE_REQUIREMENTS (11 unit types), scoreModel/computeTaskRequirements/scoreEligibleModels functions, before_model_select hook, taskMetadata passthrough, capability_routing config flag
 - Why it matters: Model selection becomes smarter — right model for the task instead of blanket tier-only selection
 - Source: user
 - Primary owning slice: M003-ttxmyu/S01
 - Supporting slices: none
-- Validation: unmapped
+- Validation: S01 delivered ModelCapabilities interface, 17-model profiles, BASE_REQUIREMENTS (11 unit types), scoreModel/computeTaskRequirements/scoreEligibleModels, capability_routing flag, selectionMethod, and TaskMetadata passthrough — 19 capability-router tests pass; tsc clean; 4132/0/5.
 - Notes: Upstream model-router.ts (504 lines) maps to hx auto-model-selection.ts (230 lines) — significant expansion
 
 ### R012 — Slice-level parallelism ported
 - Class: core-capability
-- Status: active
+- Status: validated
 - Description: slice-parallel-orchestrator.ts, slice-parallel-conflict.ts, slice-parallel-eligibility.ts ported with GSD_SLICE_LOCK → HX_SLICE_LOCK adaptation; state.ts slice lock handling; dependency-aware dispatch
 - Why it matters: Independent slices within a milestone can now run in parallel worktrees, reducing total execution time
 - Source: user
 - Primary owning slice: M003-ttxmyu/S02
 - Supporting slices: none
-- Validation: unmapped
-- Notes: New subsystem — 3 new files, touches state.ts and auto.ts/phases.ts
+- Validation: S02 delivered all 3 orchestrator files with HX naming; state.ts handles HX_SLICE_LOCK in both derivation paths; dispatch-guard.ts skips positional check for locked workers; 19 tests pass covering eligibility, conflict, orchestrator, and lock isolation; tsc clean; 4155/0/5.
+- Notes: New subsystem — 3 new files, touches state.ts and dispatch-guard.ts
 
 ### R013 — Context optimization (masking + phase anchors) ported
 - Class: core-capability
-- Status: active
+- Status: validated
 - Description: context-masker.ts (observation masking for auto-mode), phase-anchor.ts (phase boundary handoff artifacts), system-context.ts injection, preferences integration
 - Why it matters: Reduces context bloat in long auto-mode sessions; phase anchors give downstream agents decision context without full history
 - Source: user
 - Primary owning slice: M003-ttxmyu/S03
 - Supporting slices: none
-- Validation: unmapped
-- Notes: 2 new files; context-masker.ts (74 lines), phase-anchor.ts (71 lines) in upstream
+- Validation: S03 delivered context-masker.ts and phase-anchor.ts; ContextManagementConfig preferences integrated; masking wired in register-hooks.ts; phase anchors written at research/plan phases and read into prompt builders; 11 unit tests pass; tsc clean; 4168/0/5.
+- Notes: 2 new files; observation masking is role-based; phase anchors write to .hx/milestones/<mid>/anchors/<phase>.json
 
 ### R015 — Workflow-logger centralization ported
 - Class: quality-attribute
-- Status: active
+- Status: validated
 - Description: All catch blocks migrated to centralized workflow-logger; audit log hardened (errors-only, sanitized); diagnostic logging added to empty catch blocks in auto-mode; tool-call-loop-guard.ts ported
 - Why it matters: Silent catch blocks hide failures — centralized logging makes debugging possible
 - Source: user
 - Primary owning slice: M003-ttxmyu/S04
 - Supporting slices: none
-- Validation: unmapped
-- Notes: workflow-logger.ts already exists in hx-ai; this is a migration of callers
+- Validation: S04 hardened audit log to errors-only (4 tests), migrated 5 silent catch blocks to logWarning (8 static-analysis assertions), added stop/backtrack classifications, created auto-wrapup-inflight guard (6 tests); tsc clean; 4187/0/5.
+- Notes: workflow-logger.ts already existed in hx-ai; S04 migrated callers and hardened the audit path
 
 ### R016 — MCP server read-only tools ported
 - Class: core-capability
-- Status: active
+- Status: validated
 - Description: 6 new read-only tools added to packages/mcp-server: readProgress, readRoadmap, readHistory, readCaptures, readKnowledge, runDoctorLite; new readers/ barrel module
 - Why it matters: External tools can query hx project state via MCP without a running session
 - Source: user
 - Primary owning slice: M003-ttxmyu/S05
 - Supporting slices: none
-- Validation: unmapped
-- Notes: New mcp-server/src/readers/ subdirectory (~7 files)
+- Validation: S05 created packages/mcp-server/src/readers/ with 7 files; 6 tools registered in server.ts (grep -c 'server.tool(' → 12 total); 31 reader tests pass; 0 GSD refs in source; tsc clean; 4215/0/5.
+- Notes: New mcp-server/src/readers/ subdirectory with paths, state, roadmap, metrics, captures, knowledge, doctor-lite modules
 
 ## Deferred
 
@@ -186,12 +171,12 @@ Use it to track what is actively in scope, what has been validated by completed 
 | R001 | core-capability | validated | M002-yle1ri/S01-S06 | none | validated |
 | R002 | quality-attribute | validated | M002-yle1ri/S01-S06 | none | validated |
 | R010 | core-capability | validated | M003-ttxmyu/S01-S06 | none | All 82+ upstream commits applied, tsc clean, tests pass |
-| R011 | core-capability | active | M003-ttxmyu/S01 | none | unmapped |
-| R012 | core-capability | active | M003-ttxmyu/S02 | none | unmapped |
-| R013 | core-capability | active | M003-ttxmyu/S03 | none | unmapped |
+| R011 | core-capability | validated | M003-ttxmyu/S01 | none | S01: ModelCapabilities, 17-model profiles, BASE_REQUIREMENTS, scoreModel, capability_routing flag, 19 tests pass |
+| R012 | core-capability | validated | M003-ttxmyu/S02 | none | S02: slice-parallel-orchestrator/conflict/eligibility + HX_SLICE_LOCK in state.ts; 19 tests pass |
+| R013 | core-capability | validated | M003-ttxmyu/S03 | none | S03: context-masker.ts + phase-anchor.ts; masking wired in register-hooks.ts; 11 tests pass |
 | R014 | quality-attribute | validated | M003-ttxmyu/S01-S06 | none | grep 0 GSD hits in all modified source files |
-| R015 | quality-attribute | active | M003-ttxmyu/S04 | none | unmapped |
-| R016 | core-capability | active | M003-ttxmyu/S05 | none | unmapped |
+| R015 | quality-attribute | validated | M003-ttxmyu/S04 | none | S04: audit log errors-only, 5 silent catches migrated to logWarning, auto-wrapup guard; 14 tests pass |
+| R016 | core-capability | validated | M003-ttxmyu/S05 | none | S05: 6 MCP reader tools in packages/mcp-server/src/readers/; 31 reader tests pass |
 | R017 | core-capability | validated | M003-ttxmyu/S06 | none | All S06 patches applied — security, dedup, DB, orchestration |
 | R018 | quality-attribute | validated | M003-ttxmyu/S01-S06 | none | tsc 0 errors, ≥4298 tests pass / 0 fail |
 | R019 | core-capability | deferred | none | none | unmapped |
@@ -200,8 +185,8 @@ Use it to track what is actively in scope, what has been validated by completed 
 
 ## Coverage Summary
 
-- Active requirements: 5 (R011–R013, R015–R016)
-- Validated: 6 (R001–R002, R010, R014, R017–R018)
+- Active requirements: 0
+- Validated: 11 (R001–R003, R010–R013, R014–R018)
 - Deferred: 1 (R019)
 - Out of scope: 2 (R020–R021)
 - Unmapped active requirements: 0
