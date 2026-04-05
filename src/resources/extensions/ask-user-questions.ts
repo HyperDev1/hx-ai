@@ -256,13 +256,13 @@ export default function AskUserQuestions(pi: ExtensionAPI) {
 			const hasAnswers = Object.keys(result.answers).length > 0;
 			if (!hasAnswers) {
 				return {
-					content: [{ type: "text", text: "ask_user_questions was cancelled before receiving a response" }],
+					content: [{ type: "text" as const, text: "ask_user_questions was cancelled before receiving a response" }],
 					details: { questions: params.questions, response: null, cancelled: true } satisfies LocalResultDetails,
 				};
 			}
 
 			const successResult = {
-				content: [{ type: "text", text: formatForLLM(result) }],
+				content: [{ type: "text" as const, text: formatForLLM(result) }],
 				details: { questions: params.questions, response: result, cancelled: false } satisfies LocalResultDetails,
 			};
 			turnCache.set(sig, { questions: params.questions as unknown[], result: successResult });

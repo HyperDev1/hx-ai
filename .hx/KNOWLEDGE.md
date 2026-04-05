@@ -241,3 +241,39 @@ The pattern handles cold-start re-injection (the agent was stopped and restarted
 **Rule:** `generateCodebaseMap` in `codebase-generator.ts` is fully synchronous (returns a value, not a Promise). The `await generateCodebaseMap(...)` in `init-wizard.ts` is harmless — awaiting a non-Promise returns the value unchanged — but it's not necessary. Left in place for forward compatibility.
 
 **Pattern:** When porting functions from upstream, check the actual return type before adding await. A synchronous function with `await` produces no error but can mislead readers about performance characteristics.
+
+## checkRemoteAutoSession return shape — .running not .isRunning (M003/S06/T04)
+
+**Rule:** `checkRemoteAutoSession(basePath)` returns `{ running: boolean }`, NOT `{ isRunning: boolean }`. The steer worktree routing condition must read `.running`.
+
+**Pattern:** `const isActive = wtPath && (isAutoActive() || checkRemoteAutoSession(basePath).running)`. Using `.isRunning` silently evaluates as undefined (falsy) and breaks steer routing when a remote session is active but local `isAutoActive()` is false.
+
+## GLOBAL_ONLY_KEYS enforcement pattern for security-sensitive settings (M003/S06/T01)
+
+**Rule:** Any settings fields that have security implications (e.g., command prefix allowlists, fetch URL allowlists) must be in a `GLOBAL_ONLY_KEYS` Set and stripped from project-level settings at 3 SettingsManager merge sites: `fromStorage`, `reload`, and `saveProjectSettings`.
+
+**Pattern:** `const GLOBAL_ONLY_KEYS = new Set(['allowedCommandPrefixes', 'fetchAllowedUrls'])` + `stripGlobalOnlyKeys(settings)` removes these keys before any project-level application. Global settings retain them. This prevents a malicious project repo from escalating its own command permissions via a `.hx/PREFERENCES.md` entry.
+
+## ask-user-questions per-turn cache resets via hook, not ad-hoc (M003/S06/T02)
+
+**Rule:** The per-turn signature cache in ask-user-questions.ts is reset via `session_start`, `session_switch`, and `agent_end` hooks in `register-hooks.ts`, not by a timer or manual call. The cache is `Map<string, { questions: unknown[]; result: unknown }>` — keyed by SHA-256 of the canonicalized question set.
+
+**Pattern:** Cache only successful results (non-error, non-timeout paths). RPC fallback path also caches. On duplicate signature within a turn, return the cached result immediately, bypassing dispatch. This prevents agent loops where a stuck agent re-asks the same question set on every iteration.
+
+## COALESCE(NULLIF) SQL pattern for non-destructive upserts (M003/S06/T03)
+
+**Rule:** When an UPDATE SET clause must preserve existing values when the new value is empty, use `COALESCE(NULLIF(:val, ''), col)`. Empty string maps to NULL via NULLIF, then COALESCE picks the existing column value.
+
+**Pattern:** In `upsertMilestonePlanning`: `title = COALESCE(NULLIF(:title,''),title), status = COALESCE(NULLIF(:status,''),status)`. A re-plan that omits title/status doesn't wipe them. A re-plan that provides them overwrites correctly.
+
+## pi-coding-agent package tests not in main test suite — run from package dist/ (M003/S06/T01)
+
+**Rule:** `compile-tests.mjs` covers `src/`, not `packages/`. Tests in `packages/pi-coding-agent/src/core/` are NOT compiled to `dist-test/` and are NOT included in `npm run test:unit`. They must be run separately from the package's own `dist/` directory after rebuilding the package.
+
+**Pattern:** `cd packages/pi-coding-agent && npm run build && node --test dist/core/my.test.js`. Include this in T-level verification steps whenever adding tests to the pi-coding-agent package. The main `test:unit` count will not reflect these tests.
+
+## resolveModelWithFallbacksForUnit('execute-task') not 'default' for preferences bootstrap (M003/S06/T04)
+
+**Rule:** When resolving the preferred model for `startModelSnapshot` in `auto-start.ts`, use `resolveModelWithFallbacksForUnit('execute-task')` — NOT `'default'`. The `'default'` unit type returns `undefined` because there's no switch case for it. `'execute-task'` hits the case that returns the user-configured execution model.
+
+**Pattern:** When the plan says "use the session-default model", check the actual `resolveModelWithFallbacksForUnit` switch statement to find which unit type resolves to a meaningful model. `'default'` is not a valid unit type in this implementation.
