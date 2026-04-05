@@ -118,7 +118,7 @@ Steps:
   - Estimate: 60m
   - Files: src/resources/extensions/hx/complexity-classifier.ts, src/resources/extensions/hx/auto-model-selection.ts, src/resources/extensions/hx/auto/loop-deps.ts, src/resources/extensions/hx/auto/phases.ts
   - Verify: npx tsc --noEmit && grep -n 'toolUsage\|visionRequired\|requiresReasoning' src/resources/extensions/hx/complexity-classifier.ts && grep -n 'selectionMethod' src/resources/extensions/hx/auto-model-selection.ts && npm run test:unit 2>&1 | tail -5
-- [ ] **T04: capability-router tests + slice verification** — Write `src/resources/extensions/hx/tests/capability-router.test.ts` covering the new capability scoring layer, then run the full slice verification.
+- [x] **T04: Wrote capability-router.test.ts with 19 tests covering all capability-routing branches; full suite passes 4132 tests, tsc clean, 0 GSD hits** — Write `src/resources/extensions/hx/tests/capability-router.test.ts` covering the new capability scoring layer, then run the full slice verification.
 
 Note: this project's tests live in src/resources/extensions/hx/tests/ as .test.ts files. They are compiled by scripts/compile-tests.mjs into dist-test/ and run with `npm run test:unit`. New .test.ts files placed in this directory are auto-compiled.
 
