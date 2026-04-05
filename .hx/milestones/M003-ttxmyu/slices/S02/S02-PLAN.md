@@ -8,7 +8,7 @@
   - Estimate: 45m
   - Files: src/resources/extensions/hx/state.ts, src/resources/extensions/hx/dispatch-guard.ts, src/resources/extensions/hx/tests/derive-state-db.test.ts, src/resources/extensions/hx/tests/dispatch-guard.test.ts
   - Verify: grep -n 'HX_SLICE_LOCK' src/resources/extensions/hx/state.ts src/resources/extensions/hx/dispatch-guard.ts | wc -l | xargs -I{} test {} -ge 4 && npx tsc --noEmit && npm run test:unit 2>&1 | grep -E 'pass|fail'
-- [ ] **T02: Implement slice-parallel-eligibility.ts and tests** — Create slice-parallel-eligibility.ts implementing analyzeSliceParallelEligibility() and formatSliceEligibilityReport(). Uses getMilestoneSlices + getSliceTasks from hx-db.ts. Pattern: adapt parallel-eligibility.ts (milestone-level) to the slice level. Create matching test file covering 4 scenarios.
+- [x] **T02: Created slice-parallel-eligibility.ts with analyzeSliceParallelEligibility() and formatSliceEligibilityReport(), plus 9 passing tests covering all 4 required scenarios** — Create slice-parallel-eligibility.ts implementing analyzeSliceParallelEligibility() and formatSliceEligibilityReport(). Uses getMilestoneSlices + getSliceTasks from hx-db.ts. Pattern: adapt parallel-eligibility.ts (milestone-level) to the slice level. Create matching test file covering 4 scenarios.
   - Estimate: 60m
   - Files: src/resources/extensions/hx/slice-parallel-eligibility.ts, src/resources/extensions/hx/tests/slice-parallel-eligibility.test.ts
   - Verify: npx tsc --noEmit && npm run test:unit 2>&1 | grep -E 'pass|fail' && grep -rn '\bGSD\b\|\bgsd\b' src/resources/extensions/hx/slice-parallel-eligibility.ts | wc -l | xargs test 0 -eq
