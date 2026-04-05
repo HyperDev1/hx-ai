@@ -7,6 +7,7 @@
  */
 
 import { loadFile, parseContinue, parseSummary, loadActiveOverrides, formatOverridesSection, parseTaskPlanFile } from "./files.js";
+import { readPhaseAnchor, formatAnchorForPrompt } from "./phase-anchor.js";
 import type { Override, UatType } from "./files.js";
 import { hasVerdict, getUatType } from "./verdict-parser.js";
 import { loadPrompt, inlineTemplate } from "./prompt-loader.js";
@@ -944,6 +945,9 @@ export async function buildPlanMilestonePrompt(mid: string, midTitle: string, ba
     inlined.push(inlineTemplate("task-plan", "Task Plan"));
   }
 
+  const researchAnchor = readPhaseAnchor(base, mid, "research-milestone");
+  if (researchAnchor) inlined.unshift(formatAnchorForPrompt(researchAnchor));
+
   const inlinedContext = capPreamble(`## Inlined Context (preloaded — do not re-read these files)\n\n${inlined.join("\n\n---\n\n")}`);
 
   const outputRelPath = relMilestoneFile(base, mid, "ROADMAP");
@@ -1058,6 +1062,9 @@ export async function buildPlanSlicePrompt(
   if (inlineLevel === "full") {
     inlined.push(inlineTemplate("task-plan", "Task Plan"));
   }
+
+  const researchSliceAnchor = readPhaseAnchor(base, mid, "research-slice");
+  if (researchSliceAnchor) inlined.unshift(formatAnchorForPrompt(researchSliceAnchor));
 
   const depContent = await inlineDependencySummaries(mid, sid, base);
   const planActiveOverrides = await loadActiveOverrides(base);
@@ -1215,9 +1222,13 @@ export async function buildExecuteTaskPrompt(
       `   No \`verification_commands\` defined in project preferences. Auto-detect: look for \`pytest\`, \`npm test\`, \`vitest\`, \`jest\`, or the test command in \`package.json\` / \`pyproject.toml\` / \`Makefile\`. Run whatever exists. If you changed code, the test suite MUST run.`;
   }
 
+  const planSliceAnchor = readPhaseAnchor(base, mid, "plan-slice");
+  const phaseAnchorSection = planSliceAnchor ? formatAnchorForPrompt(planSliceAnchor) : "";
+
   return loadPrompt("execute-task", {
     overridesSection,
     runtimeContext,
+    phaseAnchorSection,
     workingDirectory: base,
     milestoneId: mid, sliceId: sid, sliceTitle: sTitle, taskId: tid, taskTitle: tTitle,
     planPath: join(base, relSliceFile(base, mid, sid, "PLAN")),

@@ -139,7 +139,7 @@ The original handler structure to replace spans from the `pi.on('before_provider
   - Estimate: 25m
   - Files: src/resources/extensions/hx/bootstrap/register-hooks.ts
   - Verify: npx tsc --noEmit && grep -c 'createObservationMask' src/resources/extensions/hx/bootstrap/register-hooks.ts && grep -rn '\bGSD\b\|\bgsd\b' src/resources/extensions/hx/bootstrap/register-hooks.ts
-- [ ] **T04: Wire phase anchors in phases.ts, auto-prompts.ts, and execute-task.md** — Four files need changes to write and inject phase anchors.
+- [x] **T04: Wired phase anchor writes after research/plan completion in phases.ts and anchor reads into all three plan/execute prompt builders; tsc clean, 4168 tests pass** — Four files need changes to write and inject phase anchors.
 
 **phases.ts** (`src/resources/extensions/hx/auto/phases.ts`):
 Insert anchor write after `s.unitRecoveryCount.delete(...)` and before `deps.emitJournalEvent(...)` (around line 1197-1200). The `mid` variable is already in scope (destructured from `iterData` at line 868):
