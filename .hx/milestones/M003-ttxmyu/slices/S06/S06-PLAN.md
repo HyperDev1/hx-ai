@@ -175,7 +175,7 @@ In `src/resources/extensions/hx/auto-prompts.ts`:
   - Estimate: 55m
   - Files: src/resources/extensions/hx/commands-handlers.ts, src/resources/extensions/hx/auto-start.ts, src/resources/extensions/hx/auto.ts, src/resources/extensions/hx/auto-dashboard.ts, src/resources/extensions/hx/auto/session.ts, src/resources/extensions/hx/auto/phases.ts, src/resources/extensions/hx/roadmap-slices.ts, src/resources/extensions/hx/worktree-resolver.ts, src/resources/extensions/hx/auto-prompts.ts, src/resources/extensions/hx/bootstrap/sanitize-complete-milestone.ts, src/resources/extensions/hx/bootstrap/db-tools.ts, src/resources/extensions/hx/tests/steer-worktree-path.test.ts, src/resources/extensions/hx/tests/cold-resume-db-reopen.test.ts, src/resources/extensions/hx/tests/dashboard-model-label-ordering.test.ts
   - Verify: npx tsc --noEmit && npm run test:unit -- --reporter=dot 2>&1 | tail -3
-- [ ] **T05: Worktree + Health + Misc + Pi-Coding-Agent Fixes (Clusters 6, 7, 12, 16, 17, 18, 19, 22)** — Eight clusters covering worktree safety, interview UI regression, LSP alias, diagnostics, preferences validation, skill dirs, and pi-coding-agent patches.
+- [x] **T05: Eight-cluster port: interview notes loop, LSP alias, worktree monorepo + safety, diagnostics, preferences validation, skill dirs, and pi-agent patches — tsc clean, 4298 tests pass (17 new)** — Eight clusters covering worktree safety, interview UI regression, LSP alias, diagnostics, preferences validation, skill dirs, and pi-coding-agent patches.
 
 **Cluster 6 — Interview notes loop fix (commit f517a8534):**
 In `src/resources/extensions/shared/interview-ui.ts`, in `goNextOrSubmit()` (line ~293), the auto-open notes guard is:

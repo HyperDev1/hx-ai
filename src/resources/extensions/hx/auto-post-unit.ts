@@ -34,6 +34,7 @@ import {
   resolveExpectedArtifactPath,
 } from "./auto-recovery.js";
 import { regenerateIfMissing } from "./workflow-projections.js";
+import { diagnoseExpectedArtifact } from "./auto-artifact-paths.js";
 import { syncStateToProjectRoot } from "./auto-worktree.js";
 import { isDbAvailable, getTask, getSlice, getMilestone, updateTaskStatus, _getAdapter } from "./hx-db.js";
 import { renderPlanCheckboxes } from "./markdown-renderer.js";
@@ -473,7 +474,11 @@ export async function postUnitPreVerification(pctx: PostUnitContext, opts?: PreV
           s.verificationRetryCount.set(retryKey, attempt);
           s.pendingVerificationRetry = {
             unitId: s.currentUnit.id,
-            failureContext: `Artifact verification failed: expected artifact for ${s.currentUnit.type} "${s.currentUnit.id}" was not found on disk after unit execution (attempt ${attempt}).`,
+            failureContext: (() => {
+              const diagnosis = diagnoseExpectedArtifact(s.currentUnit.type, s.currentUnit.id, s.basePath);
+              const base = `Artifact verification failed: expected artifact for ${s.currentUnit.type} "${s.currentUnit.id}" was not found on disk after unit execution (attempt ${attempt}).`;
+              return diagnosis ? `${base} Expected: ${diagnosis}` : base;
+            })(),
             attempt,
           };
           debugLog("postUnit", { phase: "artifact-verify-retry", unitType: s.currentUnit.type, unitId: s.currentUnit.id, attempt });

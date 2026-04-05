@@ -97,7 +97,9 @@ export function renderRoadmapContent(milestoneRow: MilestoneRow, sliceRows: Slic
   lines.push(`# ${milestoneRow.id}: ${milestoneRow.title}`);
   lines.push("");
   lines.push("## Vision");
-  lines.push(milestoneRow.vision || milestoneRow.title || "TBD");
+  // Strip a leading "## Vision" line if it's already embedded in the vision text
+  const visionText = milestoneRow.vision || milestoneRow.title || "TBD";
+  lines.push(visionText.startsWith("## Vision") ? visionText.replace(/^##\s*Vision\s*\n?/, "") : visionText);
   lines.push("");
   lines.push("## Slice Overview");
   lines.push("| ID | Slice | Risk | Depends | Done | After this |");
@@ -189,7 +191,9 @@ export function renderSummaryContent(taskRow: TaskRow, sliceId: string, mileston
   }
 
   lines.push("## What Happened");
-  lines.push(taskRow.full_summary_md || taskRow.narrative || "No summary recorded.");
+  // Strip double-prefix if full_summary_md already starts with "## What Happened"
+  const whatHappenedText = taskRow.full_summary_md || taskRow.narrative || "No summary recorded.";
+  lines.push(whatHappenedText.startsWith("## What Happened") ? whatHappenedText.replace(/^##\s*What Happened\s*\n?/, "") : whatHappenedText);
   lines.push("");
 
   // Deviations (if present)

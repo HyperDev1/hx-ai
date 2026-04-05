@@ -35,6 +35,7 @@ import {
   removeWorktree,
   resolveGitDir,
   worktreePath,
+  isInsideWorktreesDir,
 } from "./worktree-manager.js";
 import {
   detectWorktreeName,
@@ -43,7 +44,7 @@ import {
 } from "./worktree.js";
 import { MergeConflictError, readIntegrationBranch, RUNTIME_EXCLUSION_PATHS } from "./git-service.js";
 import { debugLog } from "./debug-logger.js";
-import { logWarning } from "./workflow-logger.js";
+import { logWarning, logError } from "./workflow-logger.js";
 import { loadEffectiveHXPreferences } from "./preferences.js";
 import {
   nativeGetCurrentBranch,
@@ -1081,7 +1082,11 @@ export function teardownAutoWorktree(
     );
     // Attempt a direct filesystem removal as a fallback
     try {
-      rmSync(wtDir, { recursive: true, force: true });
+      if (!isInsideWorktreesDir(originalBasePath, wtDir)) {
+        logError("reconcile", `Safety: refusing to remove ${wtDir} — not inside worktrees dir`, { basePath: originalBasePath, wtDir });
+      } else {
+        rmSync(wtDir, { recursive: true, force: true });
+      }
     } catch {
       // Non-fatal — the warning above tells the user how to clean up
     }

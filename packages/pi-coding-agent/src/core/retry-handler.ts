@@ -61,6 +61,18 @@ export class RetryHandler {
 	}
 
 	/**
+	 * Clear any queued retry state. Call on explicit model switch to prevent
+	 * stale retries from firing after the model has changed.
+	 */
+	clearQueued(): void {
+		this._retryPromise = undefined;
+		this._retryResolve = undefined;
+		this._retryAbortController?.abort();
+		this._retryAbortController = undefined;
+		this._retryAttempt = 0;
+	}
+
+	/**
 	 * Create a retry promise synchronously for agent_end events.
 	 * Must be called synchronously from the agent event handler before
 	 * any async processing, so that waitForRetry() doesn't miss in-flight retries.

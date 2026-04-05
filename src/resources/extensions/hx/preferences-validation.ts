@@ -829,5 +829,52 @@ export function validatePreferences(preferences: HXPreferences): {
     }
   }
 
+  // ─── Codebase Map Preferences ─────────────────────────────────────
+  if (preferences.codebase !== undefined) {
+    if (typeof preferences.codebase === "object" && preferences.codebase !== null) {
+      const codebase = preferences.codebase as unknown as Record<string, unknown>;
+      const validCodebase: import("./preferences-types.js").CodebaseMapPreferences = {};
+
+      if (codebase.exclude_patterns !== undefined) {
+        if (Array.isArray(codebase.exclude_patterns) && codebase.exclude_patterns.every((p: unknown) => typeof p === "string")) {
+          validCodebase.exclude_patterns = codebase.exclude_patterns as string[];
+        } else {
+          errors.push("codebase.exclude_patterns must be an array of strings");
+        }
+      }
+
+      if (codebase.max_files !== undefined) {
+        const n = Number(codebase.max_files);
+        if (Number.isInteger(n) && n > 0) {
+          validCodebase.max_files = n;
+        } else {
+          errors.push("codebase.max_files must be a positive integer");
+        }
+      }
+
+      if (codebase.collapse_threshold !== undefined) {
+        const n = Number(codebase.collapse_threshold);
+        if (Number.isInteger(n) && n > 0) {
+          validCodebase.collapse_threshold = n;
+        } else {
+          errors.push("codebase.collapse_threshold must be a positive integer");
+        }
+      }
+
+      const knownCodebaseKeys = new Set(["exclude_patterns", "max_files", "collapse_threshold"]);
+      for (const key of Object.keys(codebase)) {
+        if (!knownCodebaseKeys.has(key)) {
+          warnings.push(`unknown codebase key "${key}" — ignored`);
+        }
+      }
+
+      if (Object.keys(validCodebase).length > 0) {
+        validated.codebase = validCodebase;
+      }
+    } else {
+      errors.push("codebase must be an object");
+    }
+  }
+
   return { preferences: validated, errors, warnings };
 }

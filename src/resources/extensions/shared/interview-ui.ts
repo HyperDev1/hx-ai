@@ -293,7 +293,7 @@ export async function showInterviewRound(
 		function goNextOrSubmit() {
 			if (!isMultiSelect(currentIdx)) {
 				states[currentIdx].committedIndex = states[currentIdx].cursorIndex;
-				if (!isMultiSelect(currentIdx) && states[currentIdx].cursorIndex === noneOrDoneIdx(currentIdx)) {
+				if (!isMultiSelect(currentIdx) && states[currentIdx].cursorIndex === noneOrDoneIdx(currentIdx) && !states[currentIdx].notes) {
 					states[currentIdx].notesVisible = true;
 					focusNotes = true;
 					loadStateToEditor();

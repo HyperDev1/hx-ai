@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-04-05T19:33:09.338Z",
+  "exported_at": "2026-04-05T19:47:38.885Z",
   "milestones": [
     {
       "id": "M001-df6x5t",
@@ -4749,19 +4749,46 @@
       "milestone_id": "M003-ttxmyu",
       "slice_id": "S06",
       "id": "T05",
-      "title": "Worktree + Health + Misc + Pi-Coding-Agent Fixes (Clusters 6, 7, 12, 16, 17, 18, 19, 22)",
-      "status": "pending",
-      "one_liner": "",
-      "narrative": "",
-      "verification_result": "",
+      "title": "Eight-cluster port: interview notes loop, LSP alias, worktree monorepo + safety, diagnostics, preferences validation, skill dirs, and pi-agent patches — tsc clean, 4298 tests pass (17 new)",
+      "status": "complete",
+      "one_liner": "Eight-cluster port: interview notes loop, LSP alias, worktree monorepo + safety, diagnostics, preferences validation, skill dirs, and pi-agent patches — tsc clean, 4298 tests pass (17 new)",
+      "narrative": "All eight clusters implemented: (6) interview-ui notes loop fix adding !states[currentIdx].notes guard; (7) LSP LEGACY_ALIASES for kotlin-language-server→kotlin-lsp in mergeServers; (12) worktree health monorepo support with parent-dir walk + Xcode bundle scan; (16) isInsideWorktreesDir safety guard on all rmSync calls in worktree teardown paths; (17) diagnoseExpectedArtifact enrichment in auto-post-unit retry messages + double-prefix guards in workflow-projections rendering; (18) full codebase preferences validation block (exclude_patterns, max_files, collapse_threshold); (19) ~/.claude/skills added to skill-discovery and preferences-skills; (22) RetryHandler.clearQueued() wired into setModel(), repair-tool-json utilities created, unrecognized slash commands routed to session.prompt(). Metrics dedup was already present. Four test files written (17 tests), all passing.",
+      "verification_result": "npx tsc --noEmit → 0 errors. npm run test:unit --reporter=dot → 4298 passed, 0 failed, 5 skipped. Targeted 3-file HX test run → 17/17 pass. GSD grep → 0 regressions.",
       "duration": "",
-      "completed_at": null,
+      "completed_at": "2026-04-05T19:47:38.811Z",
       "blocker_discovered": false,
-      "deviations": "",
-      "known_issues": "",
-      "key_files": [],
-      "key_decisions": [],
-      "full_summary_md": "",
+      "deviations": "Metrics dedup (0684f6fe7) already present — no change. skill-catalog.ts not modified (curates skills.sh packs, not local dirs). lsp test moved to core/ level. listSkillDirs refactored to return 'dir:name' entries.",
+      "known_issues": "None.",
+      "key_files": [
+        "src/resources/extensions/shared/interview-ui.ts",
+        "src/resources/extensions/hx/auto/phases.ts",
+        "src/resources/extensions/hx/worktree-manager.ts",
+        "src/resources/extensions/hx/auto-worktree.ts",
+        "src/resources/extensions/hx/auto-post-unit.ts",
+        "src/resources/extensions/hx/workflow-projections.ts",
+        "src/resources/extensions/hx/preferences-validation.ts",
+        "src/resources/extensions/hx/skill-discovery.ts",
+        "src/resources/extensions/hx/preferences-skills.ts",
+        "packages/pi-coding-agent/src/core/lsp/config.ts",
+        "packages/pi-coding-agent/src/core/retry-handler.ts",
+        "packages/pi-coding-agent/src/core/agent-session.ts",
+        "packages/pi-ai/src/utils/repair-tool-json.ts",
+        "packages/pi-ai/src/index.ts",
+        "packages/pi-coding-agent/src/modes/interactive/controllers/input-controller.ts",
+        "src/resources/extensions/hx/tests/interview-ui-notes-loop.test.ts",
+        "src/resources/extensions/hx/tests/worktree-health-monorepo.test.ts",
+        "src/resources/extensions/hx/tests/worktree-teardown-safety.test.ts",
+        "packages/pi-coding-agent/src/core/lsp-legacy-alias.test.ts"
+      ],
+      "key_decisions": [
+        "listSkillDirs returns 'dir:name' qualified entries to support scanning both ~/.agents/skills and ~/.claude/skills without refactoring callers",
+        "repairTruncatedNumber is conservative — only repairs trailing digit truncation",
+        "isInsideWorktreesDir uses string prefix check after normalize-to-forward-slash for Windows compatibility",
+        "lsp test moved to core level so it's picked up by test:packages glob",
+        "skill-catalog.ts not modified — manages skills.sh repo packs not local scan dirs",
+        "metrics dedup already in place — no change needed for 0684f6fe7"
+      ],
+      "full_summary_md": "---\nid: T05\nparent: S06\nmilestone: M003-ttxmyu\nkey_files:\n  - src/resources/extensions/shared/interview-ui.ts\n  - src/resources/extensions/hx/auto/phases.ts\n  - src/resources/extensions/hx/worktree-manager.ts\n  - src/resources/extensions/hx/auto-worktree.ts\n  - src/resources/extensions/hx/auto-post-unit.ts\n  - src/resources/extensions/hx/workflow-projections.ts\n  - src/resources/extensions/hx/preferences-validation.ts\n  - src/resources/extensions/hx/skill-discovery.ts\n  - src/resources/extensions/hx/preferences-skills.ts\n  - packages/pi-coding-agent/src/core/lsp/config.ts\n  - packages/pi-coding-agent/src/core/retry-handler.ts\n  - packages/pi-coding-agent/src/core/agent-session.ts\n  - packages/pi-ai/src/utils/repair-tool-json.ts\n  - packages/pi-ai/src/index.ts\n  - packages/pi-coding-agent/src/modes/interactive/controllers/input-controller.ts\n  - src/resources/extensions/hx/tests/interview-ui-notes-loop.test.ts\n  - src/resources/extensions/hx/tests/worktree-health-monorepo.test.ts\n  - src/resources/extensions/hx/tests/worktree-teardown-safety.test.ts\n  - packages/pi-coding-agent/src/core/lsp-legacy-alias.test.ts\nkey_decisions:\n  - listSkillDirs returns 'dir:name' qualified entries to support scanning both ~/.agents/skills and ~/.claude/skills without refactoring callers\n  - repairTruncatedNumber is conservative — only repairs trailing digit truncation\n  - isInsideWorktreesDir uses string prefix check after normalize-to-forward-slash for Windows compatibility\n  - lsp test moved to core level so it's picked up by test:packages glob\n  - skill-catalog.ts not modified — manages skills.sh repo packs not local scan dirs\n  - metrics dedup already in place — no change needed for 0684f6fe7\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-04-05T19:47:38.812Z\nblocker_discovered: false\n---\n\n# T05: Eight-cluster port: interview notes loop, LSP alias, worktree monorepo + safety, diagnostics, preferences validation, skill dirs, and pi-agent patches — tsc clean, 4298 tests pass (17 new)\n\n**Eight-cluster port: interview notes loop, LSP alias, worktree monorepo + safety, diagnostics, preferences validation, skill dirs, and pi-agent patches — tsc clean, 4298 tests pass (17 new)**\n\n## What Happened\n\nAll eight clusters implemented: (6) interview-ui notes loop fix adding !states[currentIdx].notes guard; (7) LSP LEGACY_ALIASES for kotlin-language-server→kotlin-lsp in mergeServers; (12) worktree health monorepo support with parent-dir walk + Xcode bundle scan; (16) isInsideWorktreesDir safety guard on all rmSync calls in worktree teardown paths; (17) diagnoseExpectedArtifact enrichment in auto-post-unit retry messages + double-prefix guards in workflow-projections rendering; (18) full codebase preferences validation block (exclude_patterns, max_files, collapse_threshold); (19) ~/.claude/skills added to skill-discovery and preferences-skills; (22) RetryHandler.clearQueued() wired into setModel(), repair-tool-json utilities created, unrecognized slash commands routed to session.prompt(). Metrics dedup was already present. Four test files written (17 tests), all passing.\n\n## Verification\n\nnpx tsc --noEmit → 0 errors. npm run test:unit --reporter=dot → 4298 passed, 0 failed, 5 skipped. Targeted 3-file HX test run → 17/17 pass. GSD grep → 0 regressions.\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `npx tsc --noEmit` | 0 | ✅ pass | 4400ms |\n| 2 | `npm run test:unit -- --reporter=dot` | 0 | ✅ pass | 74200ms |\n| 3 | `targeted 3-file HX test run (17 new tests)` | 0 | ✅ pass | 2400ms |\n| 4 | `grep GSD regressions` | 0 | ✅ pass | 200ms |\n\n\n## Deviations\n\nMetrics dedup (0684f6fe7) already present — no change. skill-catalog.ts not modified (curates skills.sh packs, not local dirs). lsp test moved to core/ level. listSkillDirs refactored to return 'dir:name' entries.\n\n## Known Issues\n\nNone.\n\n## Files Created/Modified\n\n- `src/resources/extensions/shared/interview-ui.ts`\n- `src/resources/extensions/hx/auto/phases.ts`\n- `src/resources/extensions/hx/worktree-manager.ts`\n- `src/resources/extensions/hx/auto-worktree.ts`\n- `src/resources/extensions/hx/auto-post-unit.ts`\n- `src/resources/extensions/hx/workflow-projections.ts`\n- `src/resources/extensions/hx/preferences-validation.ts`\n- `src/resources/extensions/hx/skill-discovery.ts`\n- `src/resources/extensions/hx/preferences-skills.ts`\n- `packages/pi-coding-agent/src/core/lsp/config.ts`\n- `packages/pi-coding-agent/src/core/retry-handler.ts`\n- `packages/pi-coding-agent/src/core/agent-session.ts`\n- `packages/pi-ai/src/utils/repair-tool-json.ts`\n- `packages/pi-ai/src/index.ts`\n- `packages/pi-coding-agent/src/modes/interactive/controllers/input-controller.ts`\n- `src/resources/extensions/hx/tests/interview-ui-notes-loop.test.ts`\n- `src/resources/extensions/hx/tests/worktree-health-monorepo.test.ts`\n- `src/resources/extensions/hx/tests/worktree-teardown-safety.test.ts`\n- `packages/pi-coding-agent/src/core/lsp-legacy-alias.test.ts`\n",
       "description": "Eight clusters covering worktree safety, interview UI regression, LSP alias, diagnostics, preferences validation, skill dirs, and pi-coding-agent patches.\n\n**Cluster 6 — Interview notes loop fix (commit f517a8534):**\nIn `src/resources/extensions/shared/interview-ui.ts`, in `goNextOrSubmit()` (line ~293), the auto-open notes guard is:\n```typescript\nif (!isMultiSelect(currentIdx) && states[currentIdx].cursorIndex === noneOrDoneIdx(currentIdx)) {\n  states[currentIdx].notesVisible = true;\n  ...\n}\n```\nAdd `&& !states[currentIdx].notes` to the condition so notes only auto-open when still empty:\n```typescript\nif (!isMultiSelect(currentIdx) && states[currentIdx].cursorIndex === noneOrDoneIdx(currentIdx) && !states[currentIdx].notes) {\n```\nCreate `src/resources/extensions/hx/tests/interview-ui-notes-loop.test.ts`: regression test for #3502 — notes field does not re-open when cursor returns to 'None of the above' and notes are already filled.\n\n**Cluster 7 — LSP Kotlin alias (commit 8efd651d7):**\nIn `packages/pi-coding-agent/src/core/lsp/config.ts`, in `mergeServers()`:\n- Add `const LEGACY_ALIASES: Record<string, string> = { 'kotlin-language-server': 'kotlin-lsp' }` before the function\n- In `mergeServers()`, before merging a server, apply alias: `const effectiveName = LEGACY_ALIASES[server.name] ?? server.name`\n- Create `packages/pi-coding-agent/src/core/lsp/lsp-legacy-alias.test.ts`: test that kotlin-language-server config merges under kotlin-lsp key\n\n**Cluster 12 — Worktree health monorepo support (commit 1adee33d0 + 08e9c1013):**\nIn `src/resources/extensions/hx/auto/phases.ts`, in the worktree health check (around line 893 where `hasProjectFile` is computed):\n- After the existing `hasProjectFile` check, add parent-directory walk (up to git root) to detect project markers in parent directories: `hasProjectFileInParent`\n- Add `hasXcodeBundle` scan: `readdirSync(s.basePath).some(f => f.endsWith('.xcodeproj') || f.endsWith('.xcworkspace'))` wrapped in try/catch\n- Update the greenfield warning condition to also pass when `hasXcodeBundle || hasProjectFileInParent`\n- Create `src/resources/extensions/hx/tests/worktree-health-monorepo.test.ts`: tests that monorepo subdir with project file in parent does not trigger greenfield warning\n\n**Cluster 16 — Worktree teardown path validation (commit f3342a1a6):**\n- In `src/resources/extensions/hx/worktree-manager.ts`: add `export function isInsideWorktreesDir(basePath: string, targetPath: string): boolean` — verifies targetPath starts with `join(basePath, '.hx', 'worktrees')`\n- Apply as safety gate before `rmSync` in `removeWorktree()`: `if (!isInsideWorktreesDir(basePath, wtPath)) { logError(...); return; }`\n- In `src/resources/extensions/hx/auto-worktree.ts`: import `isInsideWorktreesDir`; guard fallback `rmSync` with the same check\n- Create `src/resources/extensions/hx/tests/worktree-teardown-safety.test.ts`: tests that rmSync is not called when path is outside worktrees dir\n\n**Cluster 17 — Diagnostic messages + misc (commits 039c13321, a5cab49ee, 0684f6fe7):**\n- `039c13321` (enrich diagnostic messages): In `src/resources/extensions/hx/auto-post-unit.ts`, import `diagnoseExpectedArtifact` from `'../auto-artifact-paths.js'`; in the artifact-missing error message construction, call `diagnoseExpectedArtifact(artifactType, unitId, basePath)` and append the returned description to the error message.\n- `a5cab49ee` (prevent artifact rendering corruption): In `src/resources/extensions/hx/workflow-projections.ts` and/or `src/resources/extensions/hx/tools/complete-milestone.ts`, add guards against double-prefix in renderPlanContent/renderRoadmapContent/renderStateContent. Search for prefix patterns like `## S` or `# Milestone` and ensure they're not prepended twice.\n- `0684f6fe7` (metrics dedup): In `src/resources/extensions/hx/auto.ts` or `src/resources/extensions/hx/forensics.ts` (check which file has idle-watchdog metrics), add deduplication to prevent double-logging idle-watchdog entries. Existing `tests/metrics.test.ts` already covers 'snapshotUnitMetrics handles simulated idle-watchdog duplicate pattern' — verify it passes with the fix.\n\n**Cluster 18 — Preferences codebase validation (commit d0e1eeb46):**\nIn `src/resources/extensions/hx/preferences-validation.ts`, add a codebase validation section for fields defined in `CodebaseMapPreferences` (from `preferences-types.ts`):\n- Validate `codebase.exclude_patterns`: must be an array of strings\n- Validate `codebase.max_files`: must be a positive integer\n- Validate `codebase.collapse_threshold`: must be a positive integer\nFollow the existing validation pattern in the file (look at how other nested preference objects are validated).\n\n**Cluster 19 — Claude Code skill directories (commit dd92b9703):**\n- In `src/resources/extensions/hx/skill-discovery.ts`: find where `~/.agents/skills` is added to skill scan dirs; add `~/.claude/skills` alongside it\n- In `src/resources/extensions/hx/preferences-skills.ts`: add Claude Code skill dir entries (follow existing pattern for ~/.agents/skills)\n- In `src/resources/extensions/hx/skill-catalog.ts`: add `~/.claude/skills` to catalog scan\n\n**Cluster 22 — Pi-coding-agent patches:**\n- `22ff184a6` (stale retries after model switch): In `packages/pi-coding-agent/src/core/retry-handler.ts`, add `clearQueued(): void` method that clears any queued retry state. In `packages/pi-coding-agent/src/core/agent-session.ts`, call `this.retryHandler.clearQueued()` (or the RetryHandler instance method) on explicit model switch (find the model-switch path).\n- `9c43fc281` (repairToolJson XML + truncated numbers): `packages/pi-ai/src/utils/repair-tool-json.ts` does NOT exist in this repo — create it as a new utility with `stripXmlParameterTags(json: string): string` (strips `<parameter>...</parameter>` wrapper tags) and `repairTruncatedNumber(json: string): string` (appends closing `}` if JSON ends mid-number). Export both from `packages/pi-ai/src/index.ts`.\n- `5d35fd107` (route non-builtin slash commands): In `packages/pi-coding-agent/src/modes/interactive/controllers/input-controller.ts` and `packages/pi-coding-agent/src/modes/interactive/slash-command-handlers.ts`, add routing for unrecognized slash commands to the session (forward them as user input rather than silently dropping).",
       "estimate": "55m",
       "files": [
@@ -8094,6 +8121,50 @@
       "verdict": "✅ pass",
       "duration_ms": 7200,
       "created_at": "2026-04-05T19:33:09.262Z"
+    },
+    {
+      "id": 273,
+      "task_id": "T05",
+      "slice_id": "S06",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npx tsc --noEmit",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 4400,
+      "created_at": "2026-04-05T19:47:38.811Z"
+    },
+    {
+      "id": 274,
+      "task_id": "T05",
+      "slice_id": "S06",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npm run test:unit -- --reporter=dot",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 74200,
+      "created_at": "2026-04-05T19:47:38.811Z"
+    },
+    {
+      "id": 275,
+      "task_id": "T05",
+      "slice_id": "S06",
+      "milestone_id": "M003-ttxmyu",
+      "command": "targeted 3-file HX test run (17 new tests)",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 2400,
+      "created_at": "2026-04-05T19:47:38.811Z"
+    },
+    {
+      "id": 276,
+      "task_id": "T05",
+      "slice_id": "S06",
+      "milestone_id": "M003-ttxmyu",
+      "command": "grep GSD regressions",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 200,
+      "created_at": "2026-04-05T19:47:38.811Z"
     }
   ]
 }

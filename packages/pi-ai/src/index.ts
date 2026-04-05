@@ -28,3 +28,4 @@ export type {
 export * from "./utils/overflow.js";
 export * from "./utils/typebox-helpers.js";
 export * from "./utils/validation.js";
+export * from "./utils/repair-tool-json.js";

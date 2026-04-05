@@ -27,7 +27,7 @@ import { debugLog } from "../debug-logger.js";
 import { PROJECT_FILES } from "../detection.js";
 import { MergeConflictError } from "../git-service.js";
 import { join } from "node:path";
-import { existsSync, cpSync } from "node:fs";
+import { existsSync, cpSync, readdirSync } from "node:fs";
 import { logWarning, logError } from "../workflow-logger.js";
 import { hxRoot } from "../paths.js";
 import { atomicWriteSync } from "../atomic-write.js";
@@ -892,11 +892,38 @@ export async function runUnitPhase(
     }
     const hasProjectFile = PROJECT_FILES.some((f) => deps.existsSync(join(s.basePath, f)));
     const hasSrcDir = deps.existsSync(join(s.basePath, "src"));
-    if (!hasProjectFile && !hasSrcDir) {
+
+    // Monorepo support: walk parent dirs up to git root for project file markers
+    let hasProjectFileInParent = false;
+    try {
+      let dir = join(s.basePath, "..");
+      for (let depth = 0; depth < 5; depth++) {
+        const resolved = dir;
+        if (PROJECT_FILES.some((f) => existsSync(join(resolved, f)))) {
+          hasProjectFileInParent = true;
+          break;
+        }
+        // Stop at filesystem root or git boundary
+        if (existsSync(join(resolved, ".git"))) break;
+        const parent = join(resolved, "..");
+        if (parent === resolved) break;
+        dir = parent;
+      }
+    } catch { /* ignore errors during parent walk */ }
+
+    // Xcode bundle detection (monorepo support)
+    let hasXcodeBundle = false;
+    try {
+      hasXcodeBundle = readdirSync(s.basePath).some(
+        (f) => f.endsWith(".xcodeproj") || f.endsWith(".xcworkspace"),
+      );
+    } catch { /* ignore readdir errors */ }
+
+    if (!hasProjectFile && !hasSrcDir && !hasXcodeBundle && !hasProjectFileInParent) {
       // Greenfield projects won't have project files yet — the first task creates them.
       // Log a warning but allow execution to proceed. The .git check above is sufficient
       // to ensure we're in a valid working directory.
-      debugLog("runUnitPhase", { phase: "worktree-health-warn-greenfield", basePath: s.basePath, hasProjectFile, hasSrcDir });
+      debugLog("runUnitPhase", { phase: "worktree-health-warn-greenfield", basePath: s.basePath, hasProjectFile, hasSrcDir, hasXcodeBundle, hasProjectFileInParent });
       ctx.ui.notify(`Warning: ${s.basePath} has no recognized project files — proceeding as greenfield project`, "warning");
     }
   }

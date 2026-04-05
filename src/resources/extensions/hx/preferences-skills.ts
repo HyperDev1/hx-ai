@@ -30,6 +30,7 @@ export type { HXSkillRule, SkillDiscoveryMode, SkillResolution, SkillResolutionR
 export function getSkillSearchDirs(cwd: string): Array<{ dir: string; method: SkillResolution["method"] }> {
   const dirs: Array<{ dir: string; method: SkillResolution["method"] }> = [
     { dir: join(homedir(), ".agents", "skills"), method: "user-skill" },
+    { dir: join(homedir(), ".claude", "skills"), method: "user-skill" },
     { dir: join(cwd, ".agents", "skills"), method: "project-skill" },
   ];
   // Legacy fallback — read skills from old HX directory only if migration hasn't completed

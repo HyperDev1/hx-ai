@@ -15,6 +15,9 @@ import { homedir } from "node:os";
 /** Industry-standard skills.sh global skills directory */
 const SKILLS_DIR = join(homedir(), ".agents", "skills");
 
+/** Claude Code skills directory */
+const CLAUDE_SKILLS_DIR = join(homedir(), ".claude", "skills");
+
 export interface DiscoveredSkill {
   name: string;
   description: string;
@@ -55,17 +58,22 @@ export function detectNewSkills(): DiscoveredSkill[] {
   const current = listSkillDirs();
   const newSkills: DiscoveredSkill[] = [];
 
-  for (const dir of current) {
-    if (baselineSkills.has(dir)) continue;
+  for (const entry of current) {
+    if (baselineSkills.has(entry)) continue;
 
-    const skillMdPath = join(SKILLS_DIR, dir, "SKILL.md");
+    // entry format is "baseDir:skillName"
+    const colonIdx = entry.indexOf(":");
+    if (colonIdx === -1) continue;
+    const baseDir = entry.slice(0, colonIdx);
+    const skillName = entry.slice(colonIdx + 1);
+    const skillMdPath = join(baseDir, skillName, "SKILL.md");
     if (!existsSync(skillMdPath)) continue;
 
     const meta = parseSkillFrontmatter(skillMdPath);
     if (meta) {
       newSkills.push({
-        name: meta.name || dir,
-        description: meta.description || `Skill: ${dir}`,
+        name: meta.name || skillName,
+        description: meta.description || `Skill: ${skillName}`,
         location: skillMdPath,
       });
     }
@@ -98,14 +106,17 @@ ${entries}
 // ─── Internals ────────────────────────────────────────────────────────────────
 
 function listSkillDirs(): string[] {
-  if (!existsSync(SKILLS_DIR)) return [];
-  try {
-    return readdirSync(SKILLS_DIR, { withFileTypes: true })
-      .filter(d => d.isDirectory())
-      .map(d => d.name);
-  } catch {
-    return [];
+  const results: string[] = [];
+  for (const dir of [SKILLS_DIR, CLAUDE_SKILLS_DIR]) {
+    if (!existsSync(dir)) continue;
+    try {
+      const names = readdirSync(dir, { withFileTypes: true })
+        .filter(d => d.isDirectory())
+        .map(d => `${dir}:${d.name}`);
+      results.push(...names);
+    } catch { /* ignore */ }
   }
+  return results;
 }
 
 function parseSkillFrontmatter(path: string): { name?: string; description?: string } | null {
