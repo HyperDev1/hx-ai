@@ -25,6 +25,8 @@ For each capture, classify it as one of:
 - **defer**: Belongs in a future slice or milestone. Not urgent for current work. Examples: performance optimization, feature that depends on unbuilt infrastructure, nice-to-have enhancement.
 - **replan**: Changes the shape of remaining work in the current slice. Existing incomplete tasks may need rewriting. Examples: "the approach is wrong, we need to use X instead of Y", discovering a fundamental constraint.
 - **note**: Informational only. No action needed right now. Good context for future reference. Examples: "remember that the API has a rate limit", observations about code quality.
+- **stop**: Halt auto-mode execution immediately. Use when continuing would cause harm or the session is fundamentally off-track and no replan can fix it.
+- **backtrack**: Rewind to a specific previous slice. Include the target slice ID (e.g. S02) in the Resolution field.
 
 ## Decision Guidelines
 

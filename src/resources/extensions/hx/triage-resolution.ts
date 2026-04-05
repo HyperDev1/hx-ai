@@ -24,6 +24,7 @@ import {
   markCaptureExecuted,
 } from "./captures.js";
 import { isDbAvailable, insertTask, getSliceTasks } from "./hx-db.js";
+import { logWarning } from "./workflow-logger.js";
 
 // ─── Resolution Executors ─────────────────────────────────────────────────────
 
@@ -349,6 +350,10 @@ export interface TriageExecutionResult {
   replanned: number;
   /** Number of defer milestone directories created */
   deferredMilestones: number;
+  /** Number of stop triggers written */
+  stopped: number;
+  /** Number of backtrack triggers written */
+  backtracks: number;
   /** Captures classified as quick-task that need dispatch */
   quickTasks: CaptureEntry[];
   /** Details of each action taken, for logging */
@@ -378,6 +383,8 @@ export function executeTriageResolutions(
     injected: 0,
     replanned: 0,
     deferredMilestones: 0,
+    stopped: 0,
+    backtracks: 0,
     quickTasks: [],
     actions: [],
   };
@@ -445,6 +452,49 @@ export function executeTriageResolutions(
         // Quick-tasks are collected for dispatch, not executed inline
         result.quickTasks.push(capture);
         result.actions.push(`Quick-task queued from ${capture.id}: "${capture.text}"`);
+        break;
+      }
+      case "stop": {
+        const stopDir = join(hxRoot(basePath), "runtime");
+        mkdirSync(stopDir, { recursive: true });
+        writeFileSync(
+          join(stopDir, "stop-trigger.json"),
+          JSON.stringify({
+            trigger: "stop",
+            captureId: capture.id,
+            captureText: capture.text,
+            ts: new Date().toISOString(),
+          }),
+          "utf-8",
+        );
+        markCaptureExecuted(basePath, capture.id);
+        result.stopped++;
+        result.actions.push(`Stop trigger written from ${capture.id}: "${capture.text}"`);
+        break;
+      }
+      case "backtrack": {
+        const sliceMatch = capture.resolution?.match(/\b(S\d{2})\b/);
+        const sliceId = sliceMatch?.[1];
+        if (sliceId) {
+          const backtrackDir = join(hxRoot(basePath), "runtime");
+          mkdirSync(backtrackDir, { recursive: true });
+          writeFileSync(
+            join(backtrackDir, "backtrack-trigger.json"),
+            JSON.stringify({
+              trigger: "backtrack",
+              targetSlice: sliceId,
+              captureId: capture.id,
+              ts: new Date().toISOString(),
+            }),
+            "utf-8",
+          );
+          result.actions.push(`Backtrack trigger written from ${capture.id} targeting ${sliceId}`);
+        } else {
+          logWarning("engine", "backtrack capture has no parseable slice ID", { captureId: capture.id });
+          result.actions.push(`Backtrack from ${capture.id} skipped — no slice ID in resolution`);
+        }
+        markCaptureExecuted(basePath, capture.id);
+        result.backtracks++;
         break;
       }
     }

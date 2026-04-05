@@ -20,7 +20,7 @@
   - Estimate: 45m
   - Files: src/resources/extensions/hx/workflow-logger.ts, src/resources/extensions/hx/tests/workflow-logger-audit.test.ts
   - Verify: npm run test:unit 2>&1 | grep -E 'workflow-logger-audit|passed|failed' | tail -5; npx tsc --noEmit
-- [ ] **T02: Add stop/backtrack capture classifications + triage-resolution handling** — Extend captures.ts with 'stop' and 'backtrack' Classification values, wire them into VALID_CLASSIFICATIONS and loadActionableCaptures, add case handlers in triage-resolution.ts, and update the triage-captures.md prompt.
+- [x] **T02: Extended Classification type with 'stop'/'backtrack', wired both into captures.ts filter and triage-resolution.ts switch, and documented in triage-captures.md** — Extend captures.ts with 'stop' and 'backtrack' Classification values, wire them into VALID_CLASSIFICATIONS and loadActionableCaptures, add case handlers in triage-resolution.ts, and update the triage-captures.md prompt.
 
 ## Steps
 

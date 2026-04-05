@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-04-05T17:25:16.799Z",
+  "exported_at": "2026-04-05T17:33:29.371Z",
   "milestones": [
     {
       "id": "M001-df6x5t",
@@ -4095,19 +4095,26 @@
       "milestone_id": "M003-ttxmyu",
       "slice_id": "S04",
       "id": "T02",
-      "title": "Add stop/backtrack capture classifications + triage-resolution handling",
-      "status": "pending",
-      "one_liner": "",
-      "narrative": "",
-      "verification_result": "",
+      "title": "Extended Classification type with 'stop'/'backtrack', wired both into captures.ts filter and triage-resolution.ts switch, and documented in triage-captures.md",
+      "status": "complete",
+      "one_liner": "Extended Classification type with 'stop'/'backtrack', wired both into captures.ts filter and triage-resolution.ts switch, and documented in triage-captures.md",
+      "narrative": "Added 'stop' and 'backtrack' to the Classification type union and VALID_CLASSIFICATIONS array in captures.ts, then extended loadActionableCaptures() to include both in its filter. Added stopped/backtracks fields to TriageExecutionResult and initialized to 0. Added stop and backtrack case handlers in executeTriageResolutions: stop writes stop-trigger.json, backtrack parses a slice ID regex and writes backtrack-trigger.json or calls logWarning if no slice ID found — both always markCaptureExecuted. Fixed a plan typo in the import path (plan said '../workflow-logger.js'; correct is './workflow-logger.js'). Updated triage-captures.md with stop/backtrack documentation after the note entry.",
+      "verification_result": "npx tsc --noEmit clean. npm run test:unit: 4173 passed, 0 failed, 5 skipped. grep -c 'stop|backtrack' captures.ts → 4.",
       "duration": "",
-      "completed_at": null,
+      "completed_at": "2026-04-05T17:33:29.323Z",
       "blocker_discovered": false,
-      "deviations": "",
-      "known_issues": "",
-      "key_files": [],
-      "key_decisions": [],
-      "full_summary_md": "",
+      "deviations": "Import path correction: plan specified '../workflow-logger.js' but the correct path is './workflow-logger.js' — both files live in src/resources/extensions/hx/. The first test run caught the wrong path via a module-not-found error in the compiled dist-test output.",
+      "known_issues": "None.",
+      "key_files": [
+        "src/resources/extensions/hx/captures.ts",
+        "src/resources/extensions/hx/triage-resolution.ts",
+        "src/resources/extensions/hx/prompts/triage-captures.md"
+      ],
+      "key_decisions": [
+        "Fixed plan's import path error: '../workflow-logger.js' → './workflow-logger.js' (both files live in extensions/hx/)",
+        "backtrack always calls markCaptureExecuted even when no slice ID found, to prevent retry loops"
+      ],
+      "full_summary_md": "---\nid: T02\nparent: S04\nmilestone: M003-ttxmyu\nkey_files:\n  - src/resources/extensions/hx/captures.ts\n  - src/resources/extensions/hx/triage-resolution.ts\n  - src/resources/extensions/hx/prompts/triage-captures.md\nkey_decisions:\n  - Fixed plan's import path error: '../workflow-logger.js' → './workflow-logger.js' (both files live in extensions/hx/)\n  - backtrack always calls markCaptureExecuted even when no slice ID found, to prevent retry loops\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-04-05T17:33:29.324Z\nblocker_discovered: false\n---\n\n# T02: Extended Classification type with 'stop'/'backtrack', wired both into captures.ts filter and triage-resolution.ts switch, and documented in triage-captures.md\n\n**Extended Classification type with 'stop'/'backtrack', wired both into captures.ts filter and triage-resolution.ts switch, and documented in triage-captures.md**\n\n## What Happened\n\nAdded 'stop' and 'backtrack' to the Classification type union and VALID_CLASSIFICATIONS array in captures.ts, then extended loadActionableCaptures() to include both in its filter. Added stopped/backtracks fields to TriageExecutionResult and initialized to 0. Added stop and backtrack case handlers in executeTriageResolutions: stop writes stop-trigger.json, backtrack parses a slice ID regex and writes backtrack-trigger.json or calls logWarning if no slice ID found — both always markCaptureExecuted. Fixed a plan typo in the import path (plan said '../workflow-logger.js'; correct is './workflow-logger.js'). Updated triage-captures.md with stop/backtrack documentation after the note entry.\n\n## Verification\n\nnpx tsc --noEmit clean. npm run test:unit: 4173 passed, 0 failed, 5 skipped. grep -c 'stop|backtrack' captures.ts → 4.\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `npx tsc --noEmit` | 0 | ✅ pass | 8100ms |\n| 2 | `npm run test:unit` | 0 | ✅ pass | 75700ms |\n| 3 | `grep -c 'stop\\|backtrack' src/resources/extensions/hx/captures.ts` | 0 | ✅ pass (4) | 50ms |\n\n\n## Deviations\n\nImport path correction: plan specified '../workflow-logger.js' but the correct path is './workflow-logger.js' — both files live in src/resources/extensions/hx/. The first test run caught the wrong path via a module-not-found error in the compiled dist-test output.\n\n## Known Issues\n\nNone.\n\n## Files Created/Modified\n\n- `src/resources/extensions/hx/captures.ts`\n- `src/resources/extensions/hx/triage-resolution.ts`\n- `src/resources/extensions/hx/prompts/triage-captures.md`\n",
       "description": "Extend captures.ts with 'stop' and 'backtrack' Classification values, wire them into VALID_CLASSIFICATIONS and loadActionableCaptures, add case handlers in triage-resolution.ts, and update the triage-captures.md prompt.\n\n## Steps\n\n1. Read `src/resources/extensions/hx/captures.ts` lines 18 and 43–47 (Classification type + VALID_CLASSIFICATIONS array).\n2. Update Classification type union: add `| 'stop' | 'backtrack'` to the existing 5 values.\n3. Add `'stop'` and `'backtrack'` to the `VALID_CLASSIFICATIONS` readonly array.\n4. Update `loadActionableCaptures()` filter (lines 259–268): add `c.classification === 'stop'` and `c.classification === 'backtrack'` to the OR chain.\n5. Read `src/resources/extensions/hx/triage-resolution.ts` lines 345–360 (TriageExecutionResult interface) and lines 420–455 (the switch statement).\n6. Add `stopped: number; backtracks: number;` to TriageExecutionResult interface. Initialize both to 0 in the result object.\n7. Add `case 'stop':` and `case 'backtrack':` to the switch in executeTriageResolutions:\n   - `stop`: write `{ trigger: 'stop', captureId: capture.id, captureText: capture.text, ts: new Date().toISOString() }` as JSON to `.hx/runtime/stop-trigger.json` using `join(hxRoot(basePath), 'runtime', 'stop-trigger.json')`. Use `mkdirSync({ recursive: true })` on the dir first. Then `markCaptureExecuted` and increment `result.stopped`.\n   - `backtrack`: parse a slice ID from `capture.resolution` using `/\\b(S\\d{2})\\b/` regex. If found, write `{ trigger: 'backtrack', targetSlice: sliceId, captureId: capture.id, ts: new Date().toISOString() }` to `.hx/runtime/backtrack-trigger.json`. If not found, call `logWarning('engine', 'backtrack capture has no parseable slice ID', { captureId: capture.id })` — but still `markCaptureExecuted` to avoid retry loops. Import `logWarning` from `'../workflow-logger.js'` if not already imported. Increment `result.backtracks`.\n8. Update `src/resources/extensions/hx/prompts/triage-captures.md`: add `stop` and `backtrack` to the Classification Criteria section (after `note`):\n   - **stop**: Halt auto-mode execution immediately. Use when continuing would cause harm or the session is fundamentally off-track and no replan can fix it.\n   - **backtrack**: Rewind to a specific previous slice. Include the target slice ID (e.g. S02) in the Resolution field.\n9. Run `npx tsc --noEmit` and `npm run test:unit` — expect 0 new failures (no new test file needed; captures.test.ts covers parse behavior, triage integration is runtime).",
       "estimate": "45m",
       "files": [
@@ -7049,6 +7056,39 @@
       "verdict": "✅ pass",
       "duration_ms": 15000,
       "created_at": "2026-04-05T17:25:16.751Z"
+    },
+    {
+      "id": 239,
+      "task_id": "T02",
+      "slice_id": "S04",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npx tsc --noEmit",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 8100,
+      "created_at": "2026-04-05T17:33:29.323Z"
+    },
+    {
+      "id": 240,
+      "task_id": "T02",
+      "slice_id": "S04",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npm run test:unit",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 75700,
+      "created_at": "2026-04-05T17:33:29.323Z"
+    },
+    {
+      "id": 241,
+      "task_id": "T02",
+      "slice_id": "S04",
+      "milestone_id": "M003-ttxmyu",
+      "command": "grep -c 'stop\\|backtrack' src/resources/extensions/hx/captures.ts",
+      "exit_code": 0,
+      "verdict": "✅ pass (4)",
+      "duration_ms": 50,
+      "created_at": "2026-04-05T17:33:29.323Z"
     }
   ]
 }
