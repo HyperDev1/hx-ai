@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-04-05T15:24:04.705Z",
+  "exported_at": "2026-04-05T15:32:59.097Z",
   "milestones": [
     {
       "id": "M001-df6x5t",
@@ -3824,19 +3824,28 @@
       "milestone_id": "M003-ttxmyu",
       "slice_id": "S02",
       "id": "T04",
-      "title": "Implement slice-parallel-orchestrator.ts and tests",
-      "status": "pending",
-      "one_liner": "",
-      "narrative": "",
-      "verification_result": "",
+      "title": "Created slice-parallel-orchestrator.ts with startSliceParallel/stopSliceParallel/getSliceWorkerStatuses and 4 passing tests; fixed :memory: DB missing slice_locks table in initSchema",
+      "status": "complete",
+      "one_liner": "Created slice-parallel-orchestrator.ts with startSliceParallel/stopSliceParallel/getSliceWorkerStatuses and 4 passing tests; fixed :memory: DB missing slice_locks table in initSchema",
+      "narrative": "Read parallel-orchestrator.ts as structural template and hx-db.ts lock functions. Implemented SliceWorkerInfo interface, module-level workers Map, startSliceParallel (guards on HX_PARALLEL_DEPTH, tries lock acquisition, spawns with HX_SLICE_LOCK=MID/SID env), stopSliceParallel (SIGTERM + lock release + map cleanup), getSliceWorkerStatuses, spawnSliceWorker, and _resetSliceWorkers for test teardown. During test development discovered that slice_locks table was missing from initSchema in hx-db.ts — present only in the v15 migration, but fresh :memory: DBs are stamped as version 15 at init so the migration skips. Added the CREATE TABLE to initSchema. Tests cover all 4 required scenarios using in-memory DB; spawn fires but fails gracefully with ENOENT since no HX binary exists in test environment, which is the expected path for lock-only testing.",
+      "verification_result": "TypeScript clean. 4 orchestrator tests pass. Full suite: 4155 passed, 0 failed (up from 4151). GSD grep: 0 matches. HX_SLICE_LOCK count: 4 occurrences (> 0).",
       "duration": "",
-      "completed_at": null,
+      "completed_at": "2026-04-05T15:32:59.055Z",
       "blocker_discovered": false,
-      "deviations": "",
-      "known_issues": "",
-      "key_files": [],
-      "key_decisions": [],
-      "full_summary_md": "",
+      "deviations": "Added slice_locks to initSchema in hx-db.ts to fix fresh :memory: DB gap — not in original plan but required for tests. Exported spawnSliceWorker (plan listed as internal) for independent testability, matching T03 pattern.",
+      "known_issues": "None.",
+      "key_files": [
+        "src/resources/extensions/hx/slice-parallel-orchestrator.ts",
+        "src/resources/extensions/hx/tests/slice-parallel-orchestrator.test.ts",
+        "src/resources/extensions/hx/hx-db.ts"
+      ],
+      "key_decisions": [
+        "HX_PARALLEL_DEPTH guards nested slice spawn — distinct from HX_PARALLEL_WORKER used by milestone orchestrator",
+        "Lock functions need DbAdapter arg — obtained via _getAdapter() internally",
+        "slice_locks table added to initSchema so fresh :memory: DBs include it (was missing — v15 migration skipped on new DBs)",
+        "_resetSliceWorkers() exported for test teardown"
+      ],
+      "full_summary_md": "---\nid: T04\nparent: S02\nmilestone: M003-ttxmyu\nkey_files:\n  - src/resources/extensions/hx/slice-parallel-orchestrator.ts\n  - src/resources/extensions/hx/tests/slice-parallel-orchestrator.test.ts\n  - src/resources/extensions/hx/hx-db.ts\nkey_decisions:\n  - HX_PARALLEL_DEPTH guards nested slice spawn — distinct from HX_PARALLEL_WORKER used by milestone orchestrator\n  - Lock functions need DbAdapter arg — obtained via _getAdapter() internally\n  - slice_locks table added to initSchema so fresh :memory: DBs include it (was missing — v15 migration skipped on new DBs)\n  - _resetSliceWorkers() exported for test teardown\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-04-05T15:32:59.056Z\nblocker_discovered: false\n---\n\n# T04: Created slice-parallel-orchestrator.ts with startSliceParallel/stopSliceParallel/getSliceWorkerStatuses and 4 passing tests; fixed :memory: DB missing slice_locks table in initSchema\n\n**Created slice-parallel-orchestrator.ts with startSliceParallel/stopSliceParallel/getSliceWorkerStatuses and 4 passing tests; fixed :memory: DB missing slice_locks table in initSchema**\n\n## What Happened\n\nRead parallel-orchestrator.ts as structural template and hx-db.ts lock functions. Implemented SliceWorkerInfo interface, module-level workers Map, startSliceParallel (guards on HX_PARALLEL_DEPTH, tries lock acquisition, spawns with HX_SLICE_LOCK=MID/SID env), stopSliceParallel (SIGTERM + lock release + map cleanup), getSliceWorkerStatuses, spawnSliceWorker, and _resetSliceWorkers for test teardown. During test development discovered that slice_locks table was missing from initSchema in hx-db.ts — present only in the v15 migration, but fresh :memory: DBs are stamped as version 15 at init so the migration skips. Added the CREATE TABLE to initSchema. Tests cover all 4 required scenarios using in-memory DB; spawn fires but fails gracefully with ENOENT since no HX binary exists in test environment, which is the expected path for lock-only testing.\n\n## Verification\n\nTypeScript clean. 4 orchestrator tests pass. Full suite: 4155 passed, 0 failed (up from 4151). GSD grep: 0 matches. HX_SLICE_LOCK count: 4 occurrences (> 0).\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `npx tsc --noEmit` | 0 | ✅ pass | 4500ms |\n| 2 | `node --test dist-test/src/resources/extensions/hx/tests/slice-parallel-orchestrator.test.js` | 0 | ✅ pass | 1650ms |\n| 3 | `npm run test:unit (4155 passed, 0 failed)` | 0 | ✅ pass | 73200ms |\n| 4 | `grep -rn '\\bGSD\\b|\\bgsd\\b' slice-parallel-orchestrator.ts | wc -l | xargs test 0 -eq` | 0 | ✅ pass | 50ms |\n| 5 | `grep -c 'HX_SLICE_LOCK' slice-parallel-orchestrator.ts | xargs test 0 -lt` | 0 | ✅ pass | 50ms |\n\n\n## Deviations\n\nAdded slice_locks to initSchema in hx-db.ts to fix fresh :memory: DB gap — not in original plan but required for tests. Exported spawnSliceWorker (plan listed as internal) for independent testability, matching T03 pattern.\n\n## Known Issues\n\nNone.\n\n## Files Created/Modified\n\n- `src/resources/extensions/hx/slice-parallel-orchestrator.ts`\n- `src/resources/extensions/hx/tests/slice-parallel-orchestrator.test.ts`\n- `src/resources/extensions/hx/hx-db.ts`\n",
       "description": "Create slice-parallel-orchestrator.ts implementing startSliceParallel(), stopSliceParallel(), getSliceWorkerStatuses(). Uses acquireSliceLock/releaseSliceLock from hx-db.ts. Workers spawn via child_process spawn with HX_SLICE_LOCK=MID/SID env var. No worktree creation — slice workers share the milestone's filesystem. Pattern: simplified parallel-orchestrator.ts (omit worktree creation, budget splitting, monitor overlay). Create matching test file.",
       "estimate": "90m",
       "files": [
@@ -6454,6 +6463,61 @@
       "verdict": "✅ pass",
       "duration_ms": 50,
       "created_at": "2026-04-05T15:24:04.668Z"
+    },
+    {
+      "id": 217,
+      "task_id": "T04",
+      "slice_id": "S02",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npx tsc --noEmit",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 4500,
+      "created_at": "2026-04-05T15:32:59.055Z"
+    },
+    {
+      "id": 218,
+      "task_id": "T04",
+      "slice_id": "S02",
+      "milestone_id": "M003-ttxmyu",
+      "command": "node --test dist-test/src/resources/extensions/hx/tests/slice-parallel-orchestrator.test.js",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 1650,
+      "created_at": "2026-04-05T15:32:59.055Z"
+    },
+    {
+      "id": 219,
+      "task_id": "T04",
+      "slice_id": "S02",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npm run test:unit (4155 passed, 0 failed)",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 73200,
+      "created_at": "2026-04-05T15:32:59.055Z"
+    },
+    {
+      "id": 220,
+      "task_id": "T04",
+      "slice_id": "S02",
+      "milestone_id": "M003-ttxmyu",
+      "command": "grep -rn '\\bGSD\\b|\\bgsd\\b' slice-parallel-orchestrator.ts | wc -l | xargs test 0 -eq",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 50,
+      "created_at": "2026-04-05T15:32:59.055Z"
+    },
+    {
+      "id": 221,
+      "task_id": "T04",
+      "slice_id": "S02",
+      "milestone_id": "M003-ttxmyu",
+      "command": "grep -c 'HX_SLICE_LOCK' slice-parallel-orchestrator.ts | xargs test 0 -lt",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 50,
+      "created_at": "2026-04-05T15:32:59.055Z"
     }
   ]
 }

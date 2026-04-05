@@ -399,6 +399,18 @@ function initSchema(db: DbAdapter, fileBacked: boolean): void {
       )
     `);
 
+    // Slice lock table (v15) — advisory locks for parallel slice execution
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS slice_locks (
+        milestone_id TEXT NOT NULL,
+        slice_id TEXT NOT NULL,
+        worker_pid INTEGER NOT NULL,
+        acquired_at TEXT NOT NULL,
+        expires_at TEXT NOT NULL,
+        PRIMARY KEY (milestone_id, slice_id)
+      )
+    `);
+
     db.exec("CREATE INDEX IF NOT EXISTS idx_memories_active ON memories(superseded_by)");
     db.exec("CREATE INDEX IF NOT EXISTS idx_replan_history_milestone ON replan_history(milestone_id, created_at)");
 

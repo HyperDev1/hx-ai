@@ -197,3 +197,11 @@ The pattern handles cold-start re-injection (the agent was stopped and restarted
 **Rule:** `selectionMethod` was added as a required (non-optional) field on `RoutingDecision`. All 5 return paths in `resolveModelForComplexity` set it explicitly. Do not make it optional — callers that log or switch on it would need null-checks everywhere.
 
 **Pattern:** When extending RoutingDecision with new required fields, trace all return paths in resolveModelForComplexity (early-exit for unknown model, downgrade path, escalate path, default-model path, normal path) and update each one.
+
+## initSchema vs migrateSchema gap — new tables in migrations only (M003/S02/T04)
+
+**Rule:** When `openDatabase(":memory:")` initializes a fresh DB, `initSchema` creates all tables AND stamps the schema at `SCHEMA_VERSION` (currently 15). Then `migrateSchema` checks `MAX(version)` — finds 15 ≥ 15 — and skips all migrations. Any table introduced in a numbered migration (e.g., `slice_locks` at v15) that is NOT also in `initSchema` will be missing from fresh in-memory DBs.
+
+**Pattern:** Whenever a new migration adds a table, also add the same `CREATE TABLE IF NOT EXISTS` to `initSchema`. The migration and initSchema entries are redundant for existing file-backed DBs, but the initSchema entry is required for test correctness with `:memory:`.
+
+**Symptom:** Tests that `openDatabase(":memory:")` and then call functions that use the new table will fail with `Error: no such table: <table>`.
