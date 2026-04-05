@@ -43,7 +43,7 @@
   - Estimate: 45m
   - Files: src/resources/extensions/hx/context-masker.ts, src/resources/extensions/hx/phase-anchor.ts, src/resources/extensions/hx/tests/context-masker.test.ts, src/resources/extensions/hx/tests/phase-anchor.test.ts
   - Verify: npm run test:unit -- --grep 'context-masker|phase-anchor' 2>&1 | tail -5 && npx tsc --noEmit && grep -rn '\bGSD\b\|\bgsd\b' src/resources/extensions/hx/context-masker.ts src/resources/extensions/hx/phase-anchor.ts
-- [ ] **T02: Add ContextManagementConfig to preferences** — Three files need purely additive changes. No logic changes.
+- [x] **T02: Added ContextManagementConfig interface, registered context_management in KNOWN_PREFERENCE_KEYS and HXPreferences, wired shallow merge in mergePreferences — tsc clean, 4168 tests pass** — Three files need purely additive changes. No logic changes.
 
 **preferences-types.ts** (`src/resources/extensions/hx/preferences-types.ts`):
 1. Add `ContextManagementConfig` interface before `HXPreferences` (or near the other config interfaces):

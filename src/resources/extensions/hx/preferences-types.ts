@@ -95,6 +95,7 @@ export const KNOWN_PREFERENCE_KEYS = new Set<string>([
   "show_token_cost",
   "language",
   "experimental",
+  "context_management",
 ]);
 
 /** Canonical list of all dispatch unit types. */
@@ -202,6 +203,17 @@ export interface ExperimentalPreferences {
   rtk?: boolean;
 }
 
+export interface ContextManagementConfig {
+  /** Whether to mask older tool-result observations to reduce context size. Default: true. */
+  observation_masking?: boolean;
+  /** Number of recent assistant turns to keep unmasked. Default: 8. Range: 1–50. */
+  observation_mask_turns?: number;
+  /** Fraction of context window at which compaction is triggered. Default: 0.70. Range: 0.5–0.95. */
+  compaction_threshold_percent?: number;
+  /** Maximum characters to retain per tool result before truncation. Default: 800. Range: 200–10000. */
+  tool_result_max_chars?: number;
+}
+
 export interface HXPreferences {
   version?: number;
   mode?: WorkflowMode;
@@ -265,6 +277,8 @@ export interface HXPreferences {
    * See the preferences reference for details on each feature.
    */
   experimental?: ExperimentalPreferences;
+  /** Context management configuration — observation masking, compaction thresholds, tool result limits. */
+  context_management?: ContextManagementConfig;
 }
 
 export interface LoadedHXPreferences {

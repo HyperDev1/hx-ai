@@ -28,6 +28,7 @@ import {
   type HXPreferences,
   type LoadedHXPreferences,
   type SkillResolution,
+  type ContextManagementConfig,
 } from "./preferences-types.js";
 import { validatePreferences } from "./preferences-validation.js";
 import { formatSkillRef } from "./preferences-skills.js";
@@ -48,6 +49,8 @@ export type {
   AutoSupervisorConfig,
   RemoteQuestionsConfig,
   CmuxPreferences,
+  ExperimentalPreferences,
+  ContextManagementConfig,
   HXPreferences,
   LoadedHXPreferences,
   SkillResolution,
@@ -384,6 +387,9 @@ function mergePreferences(base: HXPreferences, override: HXPreferences): HXPrefe
     language: override.language ?? base.language,
     experimental: (base.experimental || override.experimental)
       ? { ...(base.experimental ?? {}), ...(override.experimental ?? {}) }
+      : undefined,
+    context_management: (base.context_management || override.context_management)
+      ? { ...(base.context_management ?? {}), ...(override.context_management ?? {}) } as ContextManagementConfig
       : undefined,
   };
 }

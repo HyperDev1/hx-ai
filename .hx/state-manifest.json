@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-04-05T15:57:02.872Z",
+  "exported_at": "2026-04-05T16:00:07.574Z",
   "milestones": [
     {
       "id": "M001-df6x5t",
@@ -3920,19 +3920,25 @@
       "milestone_id": "M003-ttxmyu",
       "slice_id": "S03",
       "id": "T02",
-      "title": "Add ContextManagementConfig to preferences",
-      "status": "pending",
-      "one_liner": "",
-      "narrative": "",
-      "verification_result": "",
+      "title": "Added ContextManagementConfig interface, registered context_management in KNOWN_PREFERENCE_KEYS and HXPreferences, wired shallow merge in mergePreferences — tsc clean, 4168 tests pass",
+      "status": "complete",
+      "one_liner": "Added ContextManagementConfig interface, registered context_management in KNOWN_PREFERENCE_KEYS and HXPreferences, wired shallow merge in mergePreferences — tsc clean, 4168 tests pass",
+      "narrative": "Purely additive changes to two files. In preferences-types.ts: added the ContextManagementConfig interface (4 optional fields: observation_masking, observation_mask_turns, compaction_threshold_percent, tool_result_max_chars) after ExperimentalPreferences; added 'context_management' to KNOWN_PREFERENCE_KEYS; added context_management?: ContextManagementConfig to HXPreferences. In preferences.ts: imported ContextManagementConfig as a type; added it to the re-export block; added the shallow-merge entry in mergePreferences using the same (base || override) ? spread : undefined pattern used for all other optional object fields.",
+      "verification_result": "1. npx tsc --noEmit → exit 0, no output (clean). 2. npm run test:unit -- --grep preferences → 4168 passed, 0 failed, 5 skipped.",
       "duration": "",
-      "completed_at": null,
+      "completed_at": "2026-04-05T16:00:07.533Z",
       "blocker_discovered": false,
-      "deviations": "",
-      "known_issues": "",
-      "key_files": [],
-      "key_decisions": [],
-      "full_summary_md": "",
+      "deviations": "None.",
+      "known_issues": "None.",
+      "key_files": [
+        "src/resources/extensions/hx/preferences-types.ts",
+        "src/resources/extensions/hx/preferences.ts"
+      ],
+      "key_decisions": [
+        "ContextManagementConfig placed after ExperimentalPreferences in preferences-types.ts — consistent grouping of config interfaces",
+        "Re-exported ContextManagementConfig from preferences.ts alongside ExperimentalPreferences for consistency"
+      ],
+      "full_summary_md": "---\nid: T02\nparent: S03\nmilestone: M003-ttxmyu\nkey_files:\n  - src/resources/extensions/hx/preferences-types.ts\n  - src/resources/extensions/hx/preferences.ts\nkey_decisions:\n  - ContextManagementConfig placed after ExperimentalPreferences in preferences-types.ts — consistent grouping of config interfaces\n  - Re-exported ContextManagementConfig from preferences.ts alongside ExperimentalPreferences for consistency\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-04-05T16:00:07.534Z\nblocker_discovered: false\n---\n\n# T02: Added ContextManagementConfig interface, registered context_management in KNOWN_PREFERENCE_KEYS and HXPreferences, wired shallow merge in mergePreferences — tsc clean, 4168 tests pass\n\n**Added ContextManagementConfig interface, registered context_management in KNOWN_PREFERENCE_KEYS and HXPreferences, wired shallow merge in mergePreferences — tsc clean, 4168 tests pass**\n\n## What Happened\n\nPurely additive changes to two files. In preferences-types.ts: added the ContextManagementConfig interface (4 optional fields: observation_masking, observation_mask_turns, compaction_threshold_percent, tool_result_max_chars) after ExperimentalPreferences; added 'context_management' to KNOWN_PREFERENCE_KEYS; added context_management?: ContextManagementConfig to HXPreferences. In preferences.ts: imported ContextManagementConfig as a type; added it to the re-export block; added the shallow-merge entry in mergePreferences using the same (base || override) ? spread : undefined pattern used for all other optional object fields.\n\n## Verification\n\n1. npx tsc --noEmit → exit 0, no output (clean). 2. npm run test:unit -- --grep preferences → 4168 passed, 0 failed, 5 skipped.\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `npx tsc --noEmit` | 0 | ✅ pass | 4500ms |\n| 2 | `npm run test:unit -- --grep preferences` | 0 | ✅ pass | 74900ms |\n\n\n## Deviations\n\nNone.\n\n## Known Issues\n\nNone.\n\n## Files Created/Modified\n\n- `src/resources/extensions/hx/preferences-types.ts`\n- `src/resources/extensions/hx/preferences.ts`\n",
       "description": "Three files need purely additive changes. No logic changes.\n\n**preferences-types.ts** (`src/resources/extensions/hx/preferences-types.ts`):\n1. Add `ContextManagementConfig` interface before `HXPreferences` (or near the other config interfaces):\n```typescript\nexport interface ContextManagementConfig {\n  observation_masking?: boolean;          // default: true\n  observation_mask_turns?: number;        // default: 8, range: 1-50\n  compaction_threshold_percent?: number;  // default: 0.70, range: 0.5-0.95\n  tool_result_max_chars?: number;         // default: 800, range: 200-10000\n}\n```\n2. Add `'context_management'` to the `KNOWN_PREFERENCE_KEYS` Set\n3. Add `context_management?: ContextManagementConfig` to the `HXPreferences` interface\n\n**preferences.ts** (`src/resources/extensions/hx/preferences.ts`):\n1. Import `ContextManagementConfig` from `./preferences-types.js` (it may already be in a barrel re-export — check first)\n2. Add `context_management` merge to the `mergePreferences` function:\n```typescript\ncontext_management: (base.context_management || override.context_management)\n  ? { ...(base.context_management ?? {}), ...(override.context_management ?? {}) } as ContextManagementConfig\n  : undefined,\n```\n\nNote: `ContextManagementConfig` may already be exported via the preferences-types re-export in preferences.ts — check the existing export list before adding a new import.",
       "estimate": "20m",
       "files": [
@@ -6721,6 +6727,28 @@
       "verdict": "✅ pass",
       "duration_ms": 50,
       "created_at": "2026-04-05T15:57:02.833Z"
+    },
+    {
+      "id": 226,
+      "task_id": "T02",
+      "slice_id": "S03",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npx tsc --noEmit",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 4500,
+      "created_at": "2026-04-05T16:00:07.533Z"
+    },
+    {
+      "id": 227,
+      "task_id": "T02",
+      "slice_id": "S03",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npm run test:unit -- --grep preferences",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 74900,
+      "created_at": "2026-04-05T16:00:07.533Z"
     }
   ]
 }

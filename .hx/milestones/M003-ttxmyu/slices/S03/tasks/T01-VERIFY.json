@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "taskId": "T01",
+  "unitId": "M003-ttxmyu/S03/T01",
+  "timestamp": 1775404633891,
+  "passed": true,
+  "discoverySource": "task-plan",
+  "checks": [
+    {
+      "command": "npx tsc --noEmit",
+      "exitCode": 0,
+      "durationMs": 4423,
+      "verdict": "pass"
+    }
+  ]
+}
