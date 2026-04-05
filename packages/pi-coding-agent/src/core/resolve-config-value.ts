@@ -24,6 +24,20 @@ export const SAFE_COMMAND_PREFIXES = [
 	"lpass",
 ];
 
+// Runtime-configurable command prefix allowlist (null = use SAFE_COMMAND_PREFIXES)
+let activeCommandPrefixes: string[] | null = null;
+
+/** Set the active command prefix allowlist. Pass null to reset to SAFE_COMMAND_PREFIXES. */
+export function setAllowedCommandPrefixes(prefixes: string[] | null): void {
+	activeCommandPrefixes = prefixes;
+	clearConfigValueCache();
+}
+
+/** Get the currently active command prefix allowlist (null = using SAFE_COMMAND_PREFIXES). */
+export function getAllowedCommandPrefixes(): string[] | null {
+	return activeCommandPrefixes;
+}
+
 /**
  * Resolve a config value (API key, header value, etc.) to an actual value.
  * - If starts with "!", executes the rest as a shell command and uses stdout (cached)
@@ -45,8 +59,9 @@ function executeCommand(commandConfig: string): string | undefined {
 	const command = commandConfig.slice(1);
 	const tokens = command.split(/\s+/).filter(Boolean);
 	const firstToken = tokens[0];
-	if (!SAFE_COMMAND_PREFIXES.includes(firstToken)) {
-		process.stderr.write(`[resolve-config-value] Blocked disallowed command: "${firstToken}". Allowed: ${SAFE_COMMAND_PREFIXES.join(", ")}\n`);
+	const effectivePrefixes = activeCommandPrefixes ?? SAFE_COMMAND_PREFIXES;
+	if (!effectivePrefixes.includes(firstToken)) {
+		process.stderr.write(`[resolve-config-value] Blocked disallowed command: "${firstToken}". Allowed: ${effectivePrefixes.join(", ")}\n`);
 		commandResultCache.set(commandConfig, undefined);
 		return undefined;
 	}

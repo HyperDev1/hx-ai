@@ -21,11 +21,37 @@ const PRIVATE_IP_PATTERNS = [
   /^fe80:/i,
 ];
 
+// Runtime-configurable fetch URL allowlist (null = no allowlist)
+let fetchAllowedHostnames: string[] | null = null;
+
+/** Set the fetch URL allowlist. Pass null to disable. Accepts full URL strings; hostnames are extracted. */
+export function setFetchAllowedUrls(urls: string[] | null): void {
+  if (urls === null) {
+    fetchAllowedHostnames = null;
+    return;
+  }
+  fetchAllowedHostnames = urls.map((u) => {
+    try {
+      return new URL(u).hostname.toLowerCase();
+    } catch {
+      // Treat as bare hostname if not a valid URL
+      return u.toLowerCase();
+    }
+  });
+}
+
+/** Get the current fetch URL allowlist (array of hostnames), or null if not set. */
+export function getFetchAllowedUrls(): string[] | null {
+  return fetchAllowedHostnames;
+}
+
 export function isBlockedUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
     if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return true;
     const hostname = parsed.hostname.toLowerCase();
+    // Check allowlist first — explicitly allowed hostnames bypass block logic
+    if (fetchAllowedHostnames && fetchAllowedHostnames.includes(hostname)) return false;
     if (BLOCKED_HOSTNAMES.has(hostname)) return true;
     for (const pattern of PRIVATE_IP_PATTERNS) {
       if (pattern.test(hostname)) return true;

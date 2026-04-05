@@ -229,3 +229,15 @@ The pattern handles cold-start re-injection (the agent was stopped and restarted
 **Rule:** `createObservationMask`'s internal `findTurnBoundary` scans messages from the end counting assistant turns. When the conversation has fewer assistant turns than `keepRecentTurns`, the loop exits with `i < 0` never being true and returns `boundary = 0`. The mask condition `index < boundary` is then always false — nothing is masked. This is correct "mask nothing" behavior, not a bug.
 
 **Impact:** In a fresh or short session, all messages are within the window and none are masked. Only when assistant turn count exceeds `keepRecentTurns` does masking activate.
+
+## mcp-server readers tests live in the package, not in src/resources/extensions/hx/tests/ (M003/S05/T01)
+
+**Rule:** Test files for `packages/mcp-server/src/readers/` belong in that package at `packages/mcp-server/src/readers/readers.test.ts`, not in the extension test directory. They import package-relative paths (`./paths.js`, `./state.js`, etc.) and are compiled/run via the mcp-server package's own build (`cd packages/mcp-server && npm run build && node --test dist/readers/readers.test.js`).
+
+**Pattern:** Only tests that import from `src/resources/extensions/hx/` go in the `hx/tests/` directory. Tests for sibling packages stay in those packages.
+
+## generateCodebaseMap is synchronous — await is safe but a no-op (M003/S05/T03)
+
+**Rule:** `generateCodebaseMap` in `codebase-generator.ts` is fully synchronous (returns a value, not a Promise). The `await generateCodebaseMap(...)` in `init-wizard.ts` is harmless — awaiting a non-Promise returns the value unchanged — but it's not necessary. Left in place for forward compatibility.
+
+**Pattern:** When porting functions from upstream, check the actual return type before adding await. A synchronous function with `await` produces no error but can mislead readers about performance characteristics.

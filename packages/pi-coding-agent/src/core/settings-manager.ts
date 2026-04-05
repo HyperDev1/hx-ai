@@ -152,6 +152,20 @@ export interface Settings {
 	modelDiscovery?: ModelDiscoverySettings;
 	editMode?: "standard" | "hashline"; // Edit tool mode: "standard" (text match) or "hashline" (LINE#ID anchors). Default: "standard"
 	timestampFormat?: "date-time-iso" | "date-time-us"; // Timestamp display format for messages. Default: "date-time-iso"
+	allowedCommandPrefixes?: string[]; // Global-only: override SAFE_COMMAND_PREFIXES for credential commands
+	fetchAllowedUrls?: string[]; // Global-only: allow specific URLs/hostnames through SSRF protection
+}
+
+/** Keys that may only be set in global settings — stripped from project-level overrides. */
+const GLOBAL_ONLY_KEYS = new Set<keyof Settings>(['allowedCommandPrefixes', 'fetchAllowedUrls']);
+
+/** Remove global-only keys from a project-level settings object. */
+function stripGlobalOnlyKeys(settings: Partial<Settings>): Partial<Settings> {
+	const result = { ...settings };
+	for (const key of GLOBAL_ONLY_KEYS) {
+		delete result[key];
+	}
+	return result;
 }
 
 /** Deep merge settings: project/overrides take precedence, nested objects merge recursively */
@@ -332,7 +346,7 @@ export class SettingsManager {
 		return new SettingsManager(
 			storage,
 			globalLoad.settings,
-			projectLoad.settings,
+			stripGlobalOnlyKeys(projectLoad.settings) as Settings,
 			globalLoad.error,
 			projectLoad.error,
 			initialErrors,
@@ -441,7 +455,7 @@ export class SettingsManager {
 
 		const projectLoad = SettingsManager.tryLoadFromStorage(this.storage, "project");
 		if (!projectLoad.error) {
-			this.projectSettings = projectLoad.settings;
+			this.projectSettings = stripGlobalOnlyKeys(projectLoad.settings) as Settings;
 			this.projectSettingsLoadError = null;
 		} else {
 			this.projectSettingsLoadError = projectLoad.error;
@@ -571,7 +585,7 @@ export class SettingsManager {
 	}
 
 	private saveProjectSettings(settings: Settings): void {
-		this.projectSettings = structuredClone(settings);
+		this.projectSettings = structuredClone(stripGlobalOnlyKeys(settings) as Settings);
 		this.settings = deepMergeSettings(this.globalSettings, this.projectSettings);
 
 		if (this.projectSettingsLoadError) {
@@ -1095,5 +1109,21 @@ export class SettingsManager {
 
 	setTimestampFormat(format: "date-time-iso" | "date-time-us"): void {
 		this.setGlobalSetting("timestampFormat", format);
+	}
+
+	getAllowedCommandPrefixes(): string[] | undefined {
+		return this.globalSettings.allowedCommandPrefixes;
+	}
+
+	setAllowedCommandPrefixes(prefixes: string[]): void {
+		this.setGlobalSetting("allowedCommandPrefixes", prefixes);
+	}
+
+	getFetchAllowedUrls(): string[] | undefined {
+		return this.globalSettings.fetchAllowedUrls;
+	}
+
+	setFetchAllowedUrls(urls: string[]): void {
+		this.setGlobalSetting("fetchAllowedUrls", urls);
 	}
 }
