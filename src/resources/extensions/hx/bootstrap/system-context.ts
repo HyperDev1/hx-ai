@@ -72,6 +72,18 @@ export async function buildBeforeAgentStartResult(
     );
   }
 
+  let codebaseBlock = '';
+  try {
+    const codebasePath = resolveHxRootFile(process.cwd(), 'CODEBASE');
+    if (existsSync(codebasePath)) {
+      const raw = readFileSync(codebasePath, 'utf-8').trim();
+      const capped = raw.length > 8000 ? raw.slice(0, 8000) + '\n... (truncated — run /hx codebase update to refresh)' : raw;
+      codebaseBlock = `\n\n[CODEBASE MAP]\n\n${capped}`;
+    }
+  } catch {
+    // non-fatal
+  }
+
   let memoryBlock = "";
   try {
     const { formatMemoriesForPrompt, getActiveMemoriesRanked } = await import("../memory-store.js");
@@ -98,7 +110,7 @@ export async function buildBeforeAgentStartResult(
 
   const injection = await buildGuidedExecuteContextInjection(event.prompt, process.cwd());
   const worktreeBlock = buildWorktreeContextBlock();
-  const fullSystem = `${event.systemPrompt}\n\n[SYSTEM CONTEXT — HX]\n\n${systemContent}${preferenceBlock}${knowledgeBlock}${memoryBlock}${newSkillsBlock}${worktreeBlock}`;
+  const fullSystem = `${event.systemPrompt}\n\n[SYSTEM CONTEXT — HX]\n\n${systemContent}${preferenceBlock}${knowledgeBlock}${codebaseBlock}${memoryBlock}${newSkillsBlock}${worktreeBlock}`;
 
   stopContextTimer({
     systemPromptSize: fullSystem.length,

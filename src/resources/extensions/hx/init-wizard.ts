@@ -13,6 +13,7 @@ import { showNextAction } from "../shared/tui.js";
 import { nativeIsRepo, nativeInit } from "./native-git-bridge.js";
 import { ensureGitignore, untrackRuntimeFiles } from "./gitignore.js";
 import { hxRoot } from "./paths.js";
+import { generateCodebaseMap, writeCodebaseMap } from './codebase-generator.js';
 import { assertSafeDirectory } from "./validate-directory.js";
 import type { ProjectDetection, ProjectSignals } from "./detection.js";
 import { runSkillInstallStep } from "./skill-catalog.js";
@@ -237,6 +238,13 @@ export async function showProjectInit(
   // Ensure .gitignore
   ensureGitignore(basePath);
   untrackRuntimeFiles(basePath);
+
+  try {
+    const codebaseMap = await generateCodebaseMap(basePath, {});
+    writeCodebaseMap(basePath, codebaseMap);
+  } catch {
+    // non-fatal — codebase generation failure should never block project init
+  }
 
   ctx.ui.notify("HX initialized. Starting your first milestone...", "info");
 

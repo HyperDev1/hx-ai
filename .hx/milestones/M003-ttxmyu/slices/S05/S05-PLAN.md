@@ -125,7 +125,7 @@ Critical constraints:
   - Estimate: 2.5h
   - Files: src/resources/extensions/hx/preferences-types.ts, src/resources/extensions/hx/paths.ts, src/resources/extensions/hx/codebase-generator.ts, src/resources/extensions/hx/commands-codebase.ts, src/resources/extensions/hx/commands/catalog.ts, src/resources/extensions/hx/commands/handlers/ops.ts, src/resources/extensions/hx/commands-bootstrap.ts, src/resources/extensions/hx/tests/codebase-generator.test.ts
   - Verify: npx tsc --noEmit && npm run test:unit 2>&1 | tail -5
-- [ ] **T04: CODEBASE injection in system-context.ts + init-wizard auto-init + final verification** — Two small wiring changes to close the codebase feature loop, then full slice verification.
+- [x] **T04: Wired CODEBASE.md injection into the HX system prompt and added auto-generation on project init — tsc clean, 4215 tests pass, 0 GSD refs in scope** — Two small wiring changes to close the codebase feature loop, then full slice verification.
 
 Step 1 — bootstrap/system-context.ts: add codebaseBlock injection between knowledgeBlock and memoryBlock.
 - existsSync and readFileSync are already imported at line 1
