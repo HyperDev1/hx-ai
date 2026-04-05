@@ -123,7 +123,7 @@ In `src/resources/extensions/hx/db-writer.ts`, in `updateRequirementInDb`: when 
   - Estimate: 45m
   - Files: src/resources/extensions/hx/auto-worktree.ts, src/resources/extensions/hx/db-writer.ts, src/resources/extensions/hx/status-guards.ts, src/resources/extensions/hx/hx-db.ts, src/resources/extensions/hx/tools/plan-milestone.ts, src/resources/extensions/hx/tests/worktree-db-respawn-truncation.test.ts, src/resources/extensions/hx/tests/deferred-slice-dispatch.test.ts, src/resources/extensions/hx/tests/plan-milestone-title.test.ts, src/resources/extensions/hx/tests/insert-slice-no-wipe.test.ts
   - Verify: npx tsc --noEmit && npm run test:unit -- --reporter=dot 2>&1 | tail -3
-- [ ] **T04: Auto-Mode Fixes: steer worktree, preferences bootstrap, cold resume, dashboard model, slice context injection, complete-milestone sanitization (Clusters 4, 5, 10, 13, 14, 15, 21)** — Seven surgical patches to the auto-mode orchestration layer.
+- [x] **T04: Seven surgical patches to auto-mode orchestration: steer worktree routing, preferences model bootstrap, cold-resume DB reopen, dashboard dispatched-model label, heavy checkmark detection, complete-milestone sanitization, and slice CONTEXT.md injection — tsc clean, 4281 tests pass (15 new)** — Seven surgical patches to the auto-mode orchestration layer.
 
 **Cluster 4 — Steer worktree path fix (commits 724e65643, cb3f38c27):**
 In `src/resources/extensions/hx/commands-handlers.ts`, `handleSteer()`:

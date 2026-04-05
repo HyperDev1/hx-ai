@@ -186,7 +186,7 @@ import {
   postUnitPreVerification,
   postUnitPostVerification,
 } from "./auto-post-unit.js";
-import { bootstrapAutoSession, type BootstrapDeps } from "./auto-start.js";
+import { bootstrapAutoSession, openProjectDbIfPresent, type BootstrapDeps } from "./auto-start.js";
 import { autoLoop, resolveAgentEnd, resolveAgentEndCancelled, _resetPendingResolve, isSessionSwitchInFlight, type LoopDeps, type ErrorContext } from "./auto-loop.js";
 import {
   WorktreeResolver,
@@ -1175,6 +1175,7 @@ export async function startAuto(
     );
     restoreHookState(s.basePath);
     try {
+      await openProjectDbIfPresent(s.basePath);
       await rebuildState(s.basePath);
       syncCmuxSidebar(loadEffectiveHXPreferences()?.preferences, await deriveState(s.basePath));
     } catch (e) {
@@ -1319,6 +1320,7 @@ const widgetStateAccessors: WidgetStateAccessors = {
   getBasePath: () => s.basePath,
   isVerbose: () => s.verbose,
   isSessionSwitching: isSessionSwitchInFlight,
+  getCurrentDispatchedModelId: () => s.currentDispatchedModelId,
 };
 
 // ─── Preconditions ────────────────────────────────────────────────────────────

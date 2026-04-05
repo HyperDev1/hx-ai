@@ -910,6 +910,7 @@ export async function runUnitPhase(
   const previousTier = s.currentUnitRouting?.tier;
 
   s.currentUnit = { type: unitType, id: unitId, startedAt: Date.now() };
+  s.currentDispatchedModelId = null; // Reset at unit start; set after model selection
   const unitStartSeq = ic.nextSeq();
   deps.emitJournalEvent({ ts: new Date().toISOString(), flowId: ic.flowId, seq: unitStartSeq, eventType: "unit-start", data: { unitType, unitId } });
   deps.captureAvailableSkills();
@@ -1018,6 +1019,13 @@ export async function runUnitPhase(
     modelResult.routing as AutoSession["currentUnitRouting"];
   s.currentUnitModel =
     modelResult.appliedModel as AutoSession["currentUnitModel"];
+  // Track the dispatched model ID for the dashboard (#f18305c50)
+  if (s.currentUnitModel) {
+    const m = s.currentUnitModel as { provider?: string; id?: string };
+    s.currentDispatchedModelId = (m.provider && m.id)
+      ? `${m.provider}/${m.id}`
+      : m.id ?? null;
+  }
 
   // Apply sidecar/pre-dispatch hook model override (takes priority over standard model selection)
   const hookModelOverride = sidecarItem?.model ?? iterData.hookModelOverride;

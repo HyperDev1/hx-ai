@@ -20,6 +20,7 @@ import {
   resolveSkillDiscoveryMode,
   getIsolationMode,
 } from "./preferences.js";
+import { resolveModelWithFallbacksForUnit } from "./preferences-models.js";
 import { ensureHxSymlink, isInheritedRepo, validateProjectId } from "./repo-identity.js";
 import { migrateToExternalState, recoverFailedMigration } from "./migrate-external.js";
 import { collectSecretsFromManifest } from "../get-secrets-from-user.js";
@@ -105,7 +106,7 @@ export interface BootstrapDeps {
 let _consecutiveCompleteBootstraps = 0;
 const MAX_CONSECUTIVE_COMPLETE_BOOTSTRAPS = 2;
 
-async function openProjectDbIfPresent(basePath: string): Promise<void> {
+export async function openProjectDbIfPresent(basePath: string): Promise<void> {
   const hxDbPath = resolveProjectRootDbPath(basePath);
   if (!existsSync(hxDbPath) || isDbAvailable()) return;
 
@@ -148,12 +149,24 @@ export async function bootstrapAutoSession(
 
   // Capture the user's session model before guided-flow dispatch can apply a
   // phase-specific planning model for a discuss turn (#2829).
+  // Prefer the preferences-resolved model when ctx.model has no provider set (#c79213790).
+  const preferredModel = resolveModelWithFallbacksForUnit("execute-task");
+  const preferredModelParts = preferredModel
+    ? (() => {
+        const slash = preferredModel.primary.indexOf("/");
+        return slash !== -1
+          ? { provider: preferredModel.primary.slice(0, slash), id: preferredModel.primary.slice(slash + 1) }
+          : { provider: undefined, id: preferredModel.primary };
+      })()
+    : null;
   const startModelSnapshot = ctx.model
     ? {
-        provider: ctx.model.provider,
-        id: ctx.model.id,
+        provider: ctx.model.provider || preferredModelParts?.provider || "",
+        id: ctx.model.id || preferredModelParts?.id || "",
       }
-    : null;
+    : preferredModelParts
+      ? { provider: preferredModelParts.provider ?? "", id: preferredModelParts.id }
+      : null;
 
   try {
     // Validate HX_PROJECT_ID early so the user gets immediate feedback

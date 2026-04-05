@@ -1269,6 +1269,11 @@ export async function buildCompleteSlicePrompt(
   const inlined: string[] = [];
   inlined.push(await inlineFile(roadmapPath, roadmapRel, "Milestone Roadmap"));
   inlined.push(await inlineFile(slicePlanPath, slicePlanRel, "Slice Plan"));
+  // Inject slice CONTEXT.md when present (#09a450b2c)
+  const sliceContextPath = resolveSliceFile(base, mid, sid, "CONTEXT");
+  const sliceContextRel = relSliceFile(base, mid, sid, "CONTEXT");
+  const sliceContextInline = await inlineFileOptional(sliceContextPath, sliceContextRel, "Slice Context (from discussion)");
+  if (sliceContextInline) inlined.push(sliceContextInline);
   if (inlineLevel !== "minimal") {
     const requirementsInline = await inlineRequirementsFromDb(base, sid, inlineLevel);
     if (requirementsInline) inlined.push(requirementsInline);
@@ -1520,6 +1525,11 @@ export async function buildReplanSlicePrompt(
   const inlined: string[] = [];
   inlined.push(await inlineFile(roadmapPath, roadmapRel, "Milestone Roadmap"));
   inlined.push(await inlineFile(slicePlanPath, slicePlanRel, "Current Slice Plan"));
+  // Inject slice CONTEXT.md when present (#09a450b2c)
+  const sliceContextPath = resolveSliceFile(base, mid, sid, "CONTEXT");
+  const sliceContextRel = relSliceFile(base, mid, sid, "CONTEXT");
+  const sliceContextInline = await inlineFileOptional(sliceContextPath, sliceContextRel, "Slice Context (from discussion)");
+  if (sliceContextInline) inlined.push(sliceContextInline);
 
   // Find the blocker task summary — the completed task with blocker_discovered: true
   let blockerTaskId = "";
@@ -1637,6 +1647,11 @@ export async function buildReassessRoadmapPrompt(
   const inlined: string[] = [];
   inlined.push(await inlineFile(roadmapPath, roadmapRel, "Current Roadmap"));
   inlined.push(await inlineFile(summaryPath, summaryRel, `${completedSliceId} Summary`));
+  // Inject the completed slice's CONTEXT.md when present (#09a450b2c)
+  const sliceContextPath = resolveSliceFile(base, mid, completedSliceId, "CONTEXT");
+  const sliceContextRel = relSliceFile(base, mid, completedSliceId, "CONTEXT");
+  const sliceContextInline = await inlineFileOptional(sliceContextPath, sliceContextRel, "Slice Context (from discussion)");
+  if (sliceContextInline) inlined.push(sliceContextInline);
   if (inlineLevel !== "minimal") {
     const projectInline = await inlineProjectFromDb(base);
     if (projectInline) inlined.push(projectInline);

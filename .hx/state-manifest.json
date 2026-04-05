@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-04-05T19:17:15.725Z",
+  "exported_at": "2026-04-05T19:33:09.338Z",
   "milestones": [
     {
       "id": "M001-df6x5t",
@@ -4662,19 +4662,39 @@
       "milestone_id": "M003-ttxmyu",
       "slice_id": "S06",
       "id": "T04",
-      "title": "Auto-Mode Fixes: steer worktree, preferences bootstrap, cold resume, dashboard model, slice context injection, complete-milestone sanitization (Clusters 4, 5, 10, 13, 14, 15, 21)",
-      "status": "pending",
-      "one_liner": "",
-      "narrative": "",
-      "verification_result": "",
+      "title": "Seven surgical patches to auto-mode orchestration: steer worktree routing, preferences model bootstrap, cold-resume DB reopen, dashboard dispatched-model label, heavy checkmark detection, complete-milestone sanitization, and slice CONTEXT.md injection — tsc clean, 4281 tests pass (15 new)",
+      "status": "complete",
+      "one_liner": "Seven surgical patches to auto-mode orchestration: steer worktree routing, preferences model bootstrap, cold-resume DB reopen, dashboard dispatched-model label, heavy checkmark detection, complete-milestone sanitization, and slice CONTEXT.md injection — tsc clean, 4281 tests pass (15 new)",
+      "narrative": "Seven cluster patches applied:\n\nCluster 4 (steer worktree): commands-handlers.ts now routes appendOverride to the worktree path when auto is active or a remote session is running, falling back to basePath. Uses getAutoWorktreePath + checkRemoteAutoSession.\n\nCluster 5 (preferences bootstrap): auto-start.ts now resolves the execute-task model from preferences via resolveModelWithFallbacksForUnit and uses it to fill missing provider/id in startModelSnapshot when ctx.model has no provider.\n\nCluster 10 (complete-milestone sanitization): Created bootstrap/sanitize-complete-milestone.ts with sanitizeCompleteMilestoneParams that coerces all fields to typed values. Wired into db-tools.ts before handleCompleteMilestone.\n\nCluster 13 (merge failure): Already correct — worktree-resolver.ts already had /hx dispatch complete-milestone in backticks. No change.\n\nCluster 14 (cold resume + checkmarks): Exported openProjectDbIfPresent from auto-start.ts. In auto.ts resume path, call it before rebuildState. Updated roadmap-slices.ts to accept U+2714 and U+2705 checkmarks alongside U+2713 in all three detection sites.\n\nCluster 15 (dashboard model label): Added currentDispatchedModelId to AutoSession class + reset(). Extended WidgetStateAccessors with getCurrentDispatchedModelId(). Updated auto-dashboard.ts to parse and prefer dispatched model over stale cmdCtx.model. Wired in auto.ts. phases.ts resets at unit start and sets after selectAndApplyModel.\n\nCluster 21 (slice CONTEXT.md injection): Added inlineFileOptional calls for S##-CONTEXT.md in buildCompleteSlicePrompt, buildReplanSlicePrompt, and buildReassessRoadmapPrompt in auto-prompts.ts.\n\nThree test files written (15 tests) using node:test + source-analysis pattern. All 4281 tests pass, tsc clean.",
+      "verification_result": "npx tsc --noEmit → 0 errors. npm run test:unit --reporter=dot → 4281 passed, 0 failed, 5 skipped (15 new tests). Targeted 3-file test run for new tests → 15/15 pass. Grep confirmed Cluster 13 already correct.",
       "duration": "",
-      "completed_at": null,
+      "completed_at": "2026-04-05T19:33:09.262Z",
       "blocker_discovered": false,
-      "deviations": "",
-      "known_issues": "",
-      "key_files": [],
-      "key_decisions": [],
-      "full_summary_md": "",
+      "deviations": "Cluster 4: used .running not .isRunning on checkRemoteAutoSession result. Cluster 5: used 'execute-task' unit type (not 'default' which returns undefined). Test approach: rewrote from vitest to node:test source-analysis pattern. Cluster 14: also updated title-prefix strip regex for U+2714/U+2705.",
+      "known_issues": "None.",
+      "key_files": [
+        "src/resources/extensions/hx/commands-handlers.ts",
+        "src/resources/extensions/hx/auto-start.ts",
+        "src/resources/extensions/hx/auto.ts",
+        "src/resources/extensions/hx/auto-dashboard.ts",
+        "src/resources/extensions/hx/auto/session.ts",
+        "src/resources/extensions/hx/auto/phases.ts",
+        "src/resources/extensions/hx/roadmap-slices.ts",
+        "src/resources/extensions/hx/auto-prompts.ts",
+        "src/resources/extensions/hx/bootstrap/sanitize-complete-milestone.ts",
+        "src/resources/extensions/hx/bootstrap/db-tools.ts",
+        "src/resources/extensions/hx/tests/steer-worktree-path.test.ts",
+        "src/resources/extensions/hx/tests/cold-resume-db-reopen.test.ts",
+        "src/resources/extensions/hx/tests/dashboard-model-label-ordering.test.ts"
+      ],
+      "key_decisions": [
+        "checkRemoteAutoSession returns { running } not { isRunning } — used .running in steer condition",
+        "resolveModelWithFallbacksForUnit('execute-task') used for preferences bootstrap — 'default' would miss the switch case",
+        "Dashboard model display parses provider/id from dispatched model string",
+        "Test files use node:test + readFileSync source analysis (not vitest)",
+        "Cluster 13 already correct — no change needed"
+      ],
+      "full_summary_md": "---\nid: T04\nparent: S06\nmilestone: M003-ttxmyu\nkey_files:\n  - src/resources/extensions/hx/commands-handlers.ts\n  - src/resources/extensions/hx/auto-start.ts\n  - src/resources/extensions/hx/auto.ts\n  - src/resources/extensions/hx/auto-dashboard.ts\n  - src/resources/extensions/hx/auto/session.ts\n  - src/resources/extensions/hx/auto/phases.ts\n  - src/resources/extensions/hx/roadmap-slices.ts\n  - src/resources/extensions/hx/auto-prompts.ts\n  - src/resources/extensions/hx/bootstrap/sanitize-complete-milestone.ts\n  - src/resources/extensions/hx/bootstrap/db-tools.ts\n  - src/resources/extensions/hx/tests/steer-worktree-path.test.ts\n  - src/resources/extensions/hx/tests/cold-resume-db-reopen.test.ts\n  - src/resources/extensions/hx/tests/dashboard-model-label-ordering.test.ts\nkey_decisions:\n  - checkRemoteAutoSession returns { running } not { isRunning } — used .running in steer condition\n  - resolveModelWithFallbacksForUnit('execute-task') used for preferences bootstrap — 'default' would miss the switch case\n  - Dashboard model display parses provider/id from dispatched model string\n  - Test files use node:test + readFileSync source analysis (not vitest)\n  - Cluster 13 already correct — no change needed\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-04-05T19:33:09.263Z\nblocker_discovered: false\n---\n\n# T04: Seven surgical patches to auto-mode orchestration: steer worktree routing, preferences model bootstrap, cold-resume DB reopen, dashboard dispatched-model label, heavy checkmark detection, complete-milestone sanitization, and slice CONTEXT.md injection — tsc clean, 4281 tests pass (15 new)\n\n**Seven surgical patches to auto-mode orchestration: steer worktree routing, preferences model bootstrap, cold-resume DB reopen, dashboard dispatched-model label, heavy checkmark detection, complete-milestone sanitization, and slice CONTEXT.md injection — tsc clean, 4281 tests pass (15 new)**\n\n## What Happened\n\nSeven cluster patches applied:\n\nCluster 4 (steer worktree): commands-handlers.ts now routes appendOverride to the worktree path when auto is active or a remote session is running, falling back to basePath. Uses getAutoWorktreePath + checkRemoteAutoSession.\n\nCluster 5 (preferences bootstrap): auto-start.ts now resolves the execute-task model from preferences via resolveModelWithFallbacksForUnit and uses it to fill missing provider/id in startModelSnapshot when ctx.model has no provider.\n\nCluster 10 (complete-milestone sanitization): Created bootstrap/sanitize-complete-milestone.ts with sanitizeCompleteMilestoneParams that coerces all fields to typed values. Wired into db-tools.ts before handleCompleteMilestone.\n\nCluster 13 (merge failure): Already correct — worktree-resolver.ts already had /hx dispatch complete-milestone in backticks. No change.\n\nCluster 14 (cold resume + checkmarks): Exported openProjectDbIfPresent from auto-start.ts. In auto.ts resume path, call it before rebuildState. Updated roadmap-slices.ts to accept U+2714 and U+2705 checkmarks alongside U+2713 in all three detection sites.\n\nCluster 15 (dashboard model label): Added currentDispatchedModelId to AutoSession class + reset(). Extended WidgetStateAccessors with getCurrentDispatchedModelId(). Updated auto-dashboard.ts to parse and prefer dispatched model over stale cmdCtx.model. Wired in auto.ts. phases.ts resets at unit start and sets after selectAndApplyModel.\n\nCluster 21 (slice CONTEXT.md injection): Added inlineFileOptional calls for S##-CONTEXT.md in buildCompleteSlicePrompt, buildReplanSlicePrompt, and buildReassessRoadmapPrompt in auto-prompts.ts.\n\nThree test files written (15 tests) using node:test + source-analysis pattern. All 4281 tests pass, tsc clean.\n\n## Verification\n\nnpx tsc --noEmit → 0 errors. npm run test:unit --reporter=dot → 4281 passed, 0 failed, 5 skipped (15 new tests). Targeted 3-file test run for new tests → 15/15 pass. Grep confirmed Cluster 13 already correct.\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `npx tsc --noEmit` | 0 | ✅ pass | 4400ms |\n| 2 | `npm run test:unit -- --reporter=dot` | 0 | ✅ pass | 74500ms |\n| 3 | `targeted 3-file test run (15 new tests)` | 0 | ✅ pass | 7200ms |\n\n\n## Deviations\n\nCluster 4: used .running not .isRunning on checkRemoteAutoSession result. Cluster 5: used 'execute-task' unit type (not 'default' which returns undefined). Test approach: rewrote from vitest to node:test source-analysis pattern. Cluster 14: also updated title-prefix strip regex for U+2714/U+2705.\n\n## Known Issues\n\nNone.\n\n## Files Created/Modified\n\n- `src/resources/extensions/hx/commands-handlers.ts`\n- `src/resources/extensions/hx/auto-start.ts`\n- `src/resources/extensions/hx/auto.ts`\n- `src/resources/extensions/hx/auto-dashboard.ts`\n- `src/resources/extensions/hx/auto/session.ts`\n- `src/resources/extensions/hx/auto/phases.ts`\n- `src/resources/extensions/hx/roadmap-slices.ts`\n- `src/resources/extensions/hx/auto-prompts.ts`\n- `src/resources/extensions/hx/bootstrap/sanitize-complete-milestone.ts`\n- `src/resources/extensions/hx/bootstrap/db-tools.ts`\n- `src/resources/extensions/hx/tests/steer-worktree-path.test.ts`\n- `src/resources/extensions/hx/tests/cold-resume-db-reopen.test.ts`\n- `src/resources/extensions/hx/tests/dashboard-model-label-ordering.test.ts`\n",
       "description": "Seven surgical patches to the auto-mode orchestration layer.\n\n**Cluster 4 — Steer worktree path fix (commits 724e65643, cb3f38c27):**\nIn `src/resources/extensions/hx/commands-handlers.ts`, `handleSteer()`:\n- Import `getAutoWorktreePath` from `'./auto-worktree.js'`\n- Import `checkRemoteAutoSession` from `'./auto.js'` (verify this function exists; search the file)\n- Compute `const wtPath = mid !== 'none' ? getAutoWorktreePath(basePath, mid) : null` where `mid` comes from the active session\n- Gate worktree path on active session: `const targetPath = (wtPath && (isAutoActive() || checkRemoteAutoSession(basePath).isRunning)) ? wtPath : basePath`\n- Call `appendOverride(targetPath, change, appliedAt)` instead of `appendOverride(basePath, ...)`\n- Create `src/resources/extensions/hx/tests/steer-worktree-path.test.ts`: 2–3 tests — steer writes to worktree path when auto is active, steer writes to basePath when auto is inactive\n\n**Cluster 5 — Preferences bootstrap fix (commits c79213790, c0f005789):**\nIn `src/resources/extensions/hx/auto-start.ts`, the `startModelSnapshot` (line 151) captures `ctx.model` but doesn't check resolved preferences model first. Fix:\n- Import `resolveModelWithFallbacksForUnit` from `'./preferences-models.js'` (note: `resolveDefaultSessionModel` doesn't exist — use `resolveModelWithFallbacksForUnit('default')` or check what 'session' unit type resolves to)\n- Before building `startModelSnapshot`, resolve the preferred model: `const preferredModel = resolveModelWithFallbacksForUnit('default')` (or the appropriate unit type)\n- Build `startModelSnapshot` preferring `preferredModel` over `ctx.model` when `ctx.model?.provider` is undefined/bare\n- Update `src/resources/extensions/hx/tests/auto-start-model-capture.test.ts` and `src/resources/extensions/hx/tests/model-isolation.test.ts` if relevant assertions change\n\n**Cluster 10 — Complete-milestone input sanitization (commit 3e8e4a540):**\n- Create `src/resources/extensions/hx/bootstrap/sanitize-complete-milestone.ts`: `sanitizeCompleteMilestoneParams(params: unknown): CompleteMilestoneParams` that coerces fields to trimmed strings/booleans/arrays. Export it.\n- In `src/resources/extensions/hx/bootstrap/db-tools.ts`, import `sanitizeCompleteMilestoneParams` and apply it before `handleCompleteMilestone(sanitized, ...)`\n\n**Cluster 13 — Merge failure notification (commit 75507e5b9):**\nIn `src/resources/extensions/hx/worktree-resolver.ts`, check whether the existing merge failure message already has `/hx dispatch complete-milestone` in backticks. If yes, no change needed. If not, wrap it. Grep: `grep -n 'complete-milestone' src/resources/extensions/hx/worktree-resolver.ts`\n\n**Cluster 14 — Cold resume DB reopen + heavy checkmark (commit 62f11b9c3):**\n- In `src/resources/extensions/hx/auto-start.ts`: export the `openProjectDbIfPresent` function (line 108 — currently not exported). Add `export` keyword.\n- In `src/resources/extensions/hx/auto.ts`: import `openProjectDbIfPresent` from `'./auto-start.js'`; call it before `rebuildState(s.basePath)` in the resume path (search for 'rebuildState' and 'resume' in the file)\n- In `src/resources/extensions/hx/roadmap-slices.ts`: on line 85, add U+2714 (✔) to the `[✅☑✓]` character class: `/[✅☑✓✔]/`. On lines 224/228 for `headerPattern` and `prefixCheckPattern` (which match U+2713 `\\u2713`), also accept U+2705 `\\u2705`. Update the patterns accordingly.\n- Create `src/resources/extensions/hx/tests/cold-resume-db-reopen.test.ts`: verifies openProjectDbIfPresent is called in resume path\n\n**Cluster 15 — Dashboard model label fix (commit f18305c50):**\n- In `src/resources/extensions/hx/auto/session.ts`: add `currentDispatchedModelId: string | null = null` property to `AutoSession` class; reset to `null` in `reset()` if that method exists\n- In `src/resources/extensions/hx/auto-dashboard.ts`: add `getCurrentDispatchedModelId(): string | null` to `AutoSessionAccessors` interface; use it to build `modelId`/`modelProvider` display strings (prefer dispatched model over stale `cmdCtx.model`)\n- In `src/resources/extensions/hx/auto.ts`: wire `getCurrentDispatchedModelId: () => s.currentDispatchedModelId` into accessors object\n- In `src/resources/extensions/hx/auto/phases.ts`: set `s.currentDispatchedModelId` after `selectAndApplyModel` call; reset to null at unit start\n- Create `src/resources/extensions/hx/tests/dashboard-model-label-ordering.test.ts`: verifies dispatched model takes precedence over cmdCtx.model\n\n**Cluster 21 — Inject S##-CONTEXT.md into missing prompt builders (commit 09a450b2c):**\nIn `src/resources/extensions/hx/auto-prompts.ts`:\n- In `buildCompleteSlicePrompt` (line ~1259): after the `inlined.push(await inlineFile(slicePlanPath, ...))` line, add:\n  ```typescript\n  const sliceContextPath = resolveSliceFile(base, mid, sid, 'CONTEXT');\n  const sliceContextRel = relSliceFile(base, mid, sid, 'CONTEXT');\n  const sliceContextInline = await inlineFileOptional(sliceContextPath, sliceContextRel, 'Slice Context (from discussion)');\n  if (sliceContextInline) inlined.push(sliceContextInline);\n  ```\n- In `buildReplanSlicePrompt` (line ~1512): same pattern after slice plan inline\n- In `buildReassessRoadmapPrompt` (line ~1628): same pattern using `completedSliceId` as `sid`",
       "estimate": "55m",
       "files": [
@@ -8041,6 +8061,39 @@
       "verdict": "✅ pass (4266/4266)",
       "duration_ms": 74900,
       "created_at": "2026-04-05T19:17:15.654Z"
+    },
+    {
+      "id": 270,
+      "task_id": "T04",
+      "slice_id": "S06",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npx tsc --noEmit",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 4400,
+      "created_at": "2026-04-05T19:33:09.262Z"
+    },
+    {
+      "id": 271,
+      "task_id": "T04",
+      "slice_id": "S06",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npm run test:unit -- --reporter=dot",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 74500,
+      "created_at": "2026-04-05T19:33:09.262Z"
+    },
+    {
+      "id": 272,
+      "task_id": "T04",
+      "slice_id": "S06",
+      "milestone_id": "M003-ttxmyu",
+      "command": "targeted 3-file test run (15 new tests)",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 7200,
+      "created_at": "2026-04-05T19:33:09.262Z"
     }
   ]
 }

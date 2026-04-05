@@ -108,6 +108,8 @@ export class AutoSession {
   originalModelId: string | null = null;
   originalModelProvider: string | null = null;
   lastBudgetAlertLevel: BudgetAlertLevel = 0;
+  /** The model ID of the most recently dispatched unit (set after selectAndApplyModel). */
+  currentDispatchedModelId: string | null = null;
 
   // ── Recovery ─────────────────────────────────────────────────────────────
   pendingCrashRecovery: string | null = null;
@@ -196,6 +198,7 @@ export class AutoSession {
     this.originalModelId = null;
     this.originalModelProvider = null;
     this.lastBudgetAlertLevel = 0;
+    this.currentDispatchedModelId = null;
 
     // Recovery
     this.pendingCrashRecovery = null;

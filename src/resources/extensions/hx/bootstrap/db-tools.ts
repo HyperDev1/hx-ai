@@ -2,6 +2,7 @@ import { Type } from "@sinclair/typebox";
 import type { ExtensionAPI } from "@hyperlab/hx-coding-agent";
 import { Text } from "@hyperlab/hx-tui";
 
+import { sanitizeCompleteMilestoneParams } from "./sanitize-complete-milestone.js";
 import { findMilestoneIds, nextMilestoneId, claimReservedId, getReservedMilestoneIds } from "../guided-flow.js";
 import { loadEffectiveHXPreferences } from "../preferences.js";
 import { ensureDbOpen } from "./dynamic-tools.js";
@@ -818,7 +819,8 @@ export function registerDbTools(pi: ExtensionAPI): void {
     }
     try {
       const { handleCompleteMilestone } = await import("../tools/complete-milestone.js");
-      const result = await handleCompleteMilestone(params, process.cwd());
+      const sanitized = sanitizeCompleteMilestoneParams(params);
+      const result = await handleCompleteMilestone(sanitized, process.cwd());
       if ("error" in result) {
         return {
           content: [{ type: "text" as const, text: `Error completing milestone: ${result.error}` }],
