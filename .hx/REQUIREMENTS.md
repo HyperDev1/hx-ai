@@ -14,203 +14,181 @@ Use it to track what is actively in scope, what has been validated by completed 
 - Source: user
 - Primary owning slice: M002-yle1ri/S01-S06
 - Supporting slices: none
-- Validation: All 95 upstream v2.59.0 bugfix commits applied across S01–S06. S06 summary confirms all accounted for. npm run test:unit 4113/0/5, npx tsc --noEmit exits 0.
-- Notes: Each fix applied or explicitly skipped with documented rationale
+- Validation: All 95 upstream v2.59.0 bugfix commits applied across S01–S06. npm run test:unit 4113/0/5, npx tsc --noEmit exits 0.
+- Notes: Completed in M002-yle1ri
 
 ### R002 — GSD→HX naming adaptation consistent across all ported fixes
 - Class: quality-attribute
 - Status: validated
-- Description: Every ported fix must use hx/HX naming (function names, env vars, file paths, comments, strings) — no GSD references introduced
+- Description: Every ported fix must use hx/HX naming — no GSD references introduced
 - Why it matters: M001-df6x5t eliminated all GSD references; porting upstream code must not reintroduce them
 - Source: inferred
 - Primary owning slice: M002-yle1ri/S01-S06
 - Supporting slices: none
-- Validation: grep -rn '\bgsd\b|\bGSD\b' across all modified source files: 0 hits in all 6 slice verification runs. Only binary .next/ webpack caches matched (not source).
-- Notes: Verified by grep for residual gsd/GSD references after each slice
+- Validation: grep 0 GSD hits in source across all 6 slices of M002-yle1ri
+- Notes: Ongoing — applies to M003-ttxmyu as well (see R014)
 
-### R003 — State/DB reconciliation fixes applied (16 fixes)
+## Active
+
+### R010 — All upstream v2.59.0→v2.63.0 changes applied to hx-ai
 - Class: core-capability
-- Status: validated
-- Description: State machine DB sync, disk→DB reconciliation, SQLite migration, schema recovery, and data loss prevention fixes from upstream applied
-- Why it matters: State corruption and data loss are the most severe class of bugs — these fixes prevent silent data destruction
+- Status: active
+- Description: All actionable commits from upstream gsd-2 between v2.59.0 and v2.63.0 (~82 commits: fix/feat/refactor, excluding merge/docs/chore/release) must be analyzed and applied to hx-ai with GSD→HX naming adaptation. Includes R015 feature commits deferred from M002-yle1ri.
+- Why it matters: hx-ai inherits the same bugs and misses the same features as upstream — capability routing, parallelism, context optimization, hardening fixes
 - Source: user
-- Primary owning slice: M002-yle1ri/S01
+- Primary owning slice: M003-ttxmyu/S01-S06
 - Supporting slices: none
-- Validation: S01 applied 16 state/DB fixes: unit-ownership SQLite, deriveState unconditional DB path, slice reconciliation, ghost check, VACUUM recovery, toNumeric coercion, isInsideWorktree guard, symlink layout detection, retry guard, project relocation + upgrade migration, nativeCommit surfacing, hx_requirement_save tools, parallel-eligibility ghost guard, auto-dashboard reconcile, turn_end workspace invalidation. Tests 17/17 + 28/28 + 6/6 + 11/11 + 1/1 pass.
-- Notes: Includes VACUUM recovery, unit ownership migration, DB column coercion, deriveState reconciliation
+- Validation: unmapped
+- Notes: v2.59.0 added-section features (R015 from M002) are included in this scope
 
-### R004 — Worktree/git merge fixes applied (14 fixes)
+### R011 — Capability-aware model routing ported
 - Class: core-capability
-- Status: validated
-- Description: Worktree merge, MERGE_HEAD cleanup, pre-merge safety, snapshot absorption, nested .git detection, and parallel mode boundary fixes from upstream applied
-- Why it matters: Worktree operations are the most complex git interactions — merge failures can destroy work
+- Status: active
+- Description: 5-commit capability-aware routing PR (01-01 through 01-05) ported: ModelCapabilities interface, MODEL_CAPABILITY_PROFILES (9 models), BASE_REQUIREMENTS (11 unit types), scoreModel/computeTaskRequirements/scoreEligibleModels functions, before_model_select hook, taskMetadata passthrough, capability_routing config flag
+- Why it matters: Model selection becomes smarter — right model for the task instead of blanket tier-only selection
 - Source: user
-- Primary owning slice: M002-yle1ri/S02
+- Primary owning slice: M003-ttxmyu/S01
 - Supporting slices: none
-- Validation: S02 applied 21 worktree/git+auto-mode fixes (absorbSnapshotCommits N/A in hx-ai). DB truncation guard, mcp.json sync, MERGE_HEAD 3-file cleanup, nativeMergeAbort, milestone shelter, isInsideHxWorktree, HX_MILESTONE_LOCK, findNestedGitDirs, isolation-none safety, DB-complete detection — all confirmed present by post-fix grep checks. 3100 tests pass.
-- Notes: Includes 3 separate MERGE_HEAD cleanup fixes, worktree DB sync, parallel milestone scoping
+- Validation: unmapped
+- Notes: Upstream model-router.ts (504 lines) maps to hx auto-model-selection.ts (230 lines) — significant expansion
 
-### R005 — Milestone lifecycle fixes applied (10 fixes)
+### R012 — Slice-level parallelism ported
 - Class: core-capability
-- Status: validated
-- Description: Milestone/slice completion, roadmap parser, validation invalidation, SUMMARY render, plan-milestone guard, and completing-milestone gate fixes from upstream applied
-- Why it matters: Milestone lifecycle bugs cause stuck states, lost progress, and incorrect completion reporting
+- Status: active
+- Description: slice-parallel-orchestrator.ts, slice-parallel-conflict.ts, slice-parallel-eligibility.ts ported with GSD_SLICE_LOCK → HX_SLICE_LOCK adaptation; state.ts slice lock handling; dependency-aware dispatch
+- Why it matters: Independent slices within a milestone can now run in parallel worktrees, reducing total execution time
 - Source: user
-- Primary owning slice: M002-yle1ri/S03
+- Primary owning slice: M003-ttxmyu/S02
 - Supporting slices: none
-- Validation: S03 applied 19 fixes including renderPlanContent/renderRoadmapContent demo fallback, replaySliceComplete guard, post-merge teardown, milestone-validation-gates.ts (MV01-MV04), unified SUMMARY render with VerificationEvidenceRow. 63+ tests pass. typecheck clean.
-- Notes: Includes 4 state corruption fixes in completion, roadmap H3 header parser, milestone title preservation
+- Validation: unmapped
+- Notes: New subsystem — 3 new files, touches state.ts and auto.ts/phases.ts
 
-### R006 — Model/provider routing fixes applied (8 fixes)
+### R013 — Context optimization (masking + phase anchors) ported
 - Class: core-capability
-- Status: validated
-- Description: Model routing, provider resolution, rate-limit classification, OAuth API key resolution, and new provider integration fixes from upstream applied
-- Why it matters: Model routing bugs cause 400/429 errors, wrong provider selection, and failed LLM calls
+- Status: active
+- Description: context-masker.ts (observation masking for auto-mode), phase-anchor.ts (phase boundary handoff artifacts), system-context.ts injection, preferences integration
+- Why it matters: Reduces context bloat in long auto-mode sessions; phase anchors give downstream agents decision context without full history
 - Source: user
-- Primary owning slice: M002-yle1ri/S03
+- Primary owning slice: M003-ttxmyu/S03
 - Supporting slices: none
-- Validation: S03 applied EXTENSION_PROVIDERS-aware bare model ID resolution, Codex/Gemini CLI provider routes + 30s rate-limit cap, pauseTurn stop reason propagation, OAuth API key resolution, stateful claude-code stream adapter with persistSession:true, long-context 429 downgrade. typecheck clean, tests pass.
-- Notes: Includes Codex/Gemini CLI integration, claude-code provider statefulness, bare model ID resolution
+- Validation: unmapped
+- Notes: 2 new files; context-masker.ts (74 lines), phase-anchor.ts (71 lines) in upstream
 
-### R007 — Auto-mode dispatch fixes applied (7 fixes)
-- Class: core-capability
-- Status: validated
-- Description: Auto-mode dispatch, headless routing, ask_user_questions poisoning prevention, stopAuto race guard, and work execution blocking fixes from upstream applied
-- Why it matters: Auto-mode is the primary execution path — dispatch bugs cause hangs, infinite loops, and lost work
-- Source: user
-- Primary owning slice: M002-yle1ri/S02
-- Supporting slices: none
-- Validation: S02 applied hx auto subcommand alias, empty-content abort fast-path, stopAuto null-unit guard with optional chaining, shouldBlockQueueExecution gate, turn_end quick-branch cleanup, autonomous execution guards in 3 prompt files, captures staleness filter/stamp. All confirmed by grep checks. 3100 tests pass.
-- Notes: Includes piped stdout detection, empty-content abort skip, queue mode blocking
-
-### R008 — TUI/UI rendering fixes applied (7 fixes)
+### R014 — GSD→HX naming adaptation consistent (M003)
 - Class: quality-attribute
-- Status: validated
-- Description: TUI layout, flow, rendering, state, border color, widget, tab switching, notification, and non-TTY CPU burn fixes from upstream applied
-- Why it matters: TUI bugs cause visual glitches, CPU waste on non-TTY, and broken interactive workflows
-- Source: user
-- Primary owning slice: M002-yle1ri/S04
+- Status: active
+- Description: Every change ported in M003-ttxmyu must use hx/HX naming — no GSD references introduced
+- Why it matters: Naming integrity is a first-class invariant; regression would require another cleanup milestone
+- Source: inferred
+- Primary owning slice: M003-ttxmyu/S01-S06
 - Supporting slices: none
-- Validation: S04 applied isTTY guard (non-TTY render loop prevention), image-overflow-recovery module, chatUserMessages overflow trim, formatNotificationTitle with project name. 28-file TUI audit: 12 of 15 items already correct in hx-ai, 3 changed. typecheck clean, tests pass.
-- Notes: Includes comprehensive 28-file TUI review fix, skip-render-loop on non-TTY
+- Validation: unmapped
+- Notes: Verified by grep after each slice
 
-### R009 — Error handling / JSON parse fixes applied (4 fixes)
+### R015 — Workflow-logger centralization ported
 - Class: quality-attribute
-- Status: validated
-- Description: STREAM_RE catch-all, YAML bullet list repair, malformed tool-call JSON repair, and prompt explosion prevention fixes from upstream applied
-- Why it matters: Error handling gaps cause silent failures, unrecoverable parse errors, and prompt context poisoning
+- Status: active
+- Description: All catch blocks migrated to centralized workflow-logger; audit log hardened (errors-only, sanitized); diagnostic logging added to empty catch blocks in auto-mode; tool-call-loop-guard.ts ported
+- Why it matters: Silent catch blocks hide failures — centralized logging makes debugging possible
 - Source: user
-- Primary owning slice: M002-yle1ri/S04
+- Primary owning slice: M003-ttxmyu/S04
 - Supporting slices: none
-- Validation: S04 applied STREAM_RE catch-all V8 patterns, repairToolJson YAML-to-JSON repair, compaction chunked-fallback, split().join() template substitution fix. Tests pass for repair-tool-json and compaction. typecheck clean.
-- Notes: Includes catch-all V8 JSON.parse pattern replacing whack-a-mole approach
+- Validation: unmapped
+- Notes: workflow-logger.ts already exists in hx-ai; this is a migration of callers
 
-### R010 — Guided-flow / wizard fixes applied (4 fixes)
+### R016 — MCP server read-only tools ported
 - Class: core-capability
-- Status: validated
-- Description: Guided-flow session isolation, discussion milestone queries, roadmap fallback, allDiscussed routing, and dynamic routing pipeline fixes from upstream applied
-- Why it matters: Guided-flow bugs cause wrong milestone selection, stuck discussions, and session state leaks
+- Status: active
+- Description: 6 new read-only tools added to packages/mcp-server: readProgress, readRoadmap, readHistory, readCaptures, readKnowledge, runDoctorLite; new readers/ barrel module
+- Why it matters: External tools can query hx project state via MCP without a running session
 - Source: user
-- Primary owning slice: M002-yle1ri/S03
+- Primary owning slice: M003-ttxmyu/S05
 - Supporting slices: none
-- Validation: S03 applied Map-based pendingAutoStartMap for session isolation, guided-flow routing fixes, allDiscussed routing, dispatchWorkflow through dynamic routing pipeline. typecheck clean, tests pass.
-- Notes: Includes dispatchWorkflow routing through dynamic routing pipeline
+- Validation: unmapped
+- Notes: New mcp-server/src/readers/ subdirectory (~7 files)
 
-### R011 — Prompt and template fixes applied (5 fixes)
-- Class: quality-attribute
-- Status: validated
-- Description: camelCase parameter naming, web_search→search-the-web replacement, PROJECT.md write tool specification, and template replacement explosion prevention fixes from upstream applied
-- Why it matters: Prompt bugs cause LLM confusion, wrong tool calls, and template corruption
-- Source: user
-- Primary owning slice: M002-yle1ri/S05
-- Supporting slices: none
-- Validation: S05 applied camelCase milestoneId/sliceId/taskId in execute-task/complete-slice/complete-milestone prompts, web_search→search-the-web migration confirmed (no web_search refs remain). S04 applied split().join() template fix. prompt-tool-names.test.ts and prompt-contracts.test.ts pass.
-- Notes: Fixes span execute-task, complete-slice, milestone, and slice prompts
-
-### R012 — Diagnostics (doctor/forensics) fixes applied (4 fixes)
-- Class: quality-attribute
-- Status: validated
-- Description: Doctor audit false positives, forensics duplicate detection ordering, forensics report persistence, and completion status DB read fixes from upstream applied
-- Why it matters: False positives erode trust in diagnostics; missing persistence loses investigation context
-- Source: user
-- Primary owning slice: M002-yle1ri/S05
-- Supporting slices: none
-- Validation: S05 applied forensics DB-backed getDbCompletionCounts, forensics-marker.json persistence + injection, forensics dedup (Decision Gate before Investigation Protocol), doctor isDoctorArtifactOnly guard + !allTasksDone guard + parsers-legacy second-pass. New test files pass: forensics-db-completion, forensics-dedup, forensics-context-persist, doctor-false-positives.
-- Notes: Includes forensics reading completion from DB instead of legacy file
-
-### R013 — Remaining fixes applied (tools, windows, user-interaction, misc)
+### R017 — Remaining bugfixes + security + misc ported
 - Class: core-capability
-- Status: validated
-- Description: read-tool offset clamping, Windows shell guards, ask-user-questions free-text input, MCP server name spaces, OAuth google_search shape, Discord links, and other miscellaneous fixes from upstream applied
-- Why it matters: These fixes address edge cases across multiple subsystems that individually cause user-facing failures
+- Status: active
+- Description: Security overrides (configurable command allowlist + SSRF blocklist), /btw skill, ask-user-questions dedup, WAL/SHM orphan cleanup, preferences bootstrap fix, steer worktree path fix, interview notes loop fix, LSP Kotlin alias, repairToolJson XML/truncated-number handling, remote-questions interactive mode fix, and all other non-categorized fixes
+- Why it matters: These fixes address real user-facing failures across multiple subsystems
 - Source: user
-- Primary owning slice: M002-yle1ri/S06
+- Primary owning slice: M003-ttxmyu/S06
 - Supporting slices: none
-- Validation: S06 applied all 9 remaining fixes; npm run test:unit 4113/0/5; npx tsc --noEmit exits 0. 8 new test files with 32 new passing tests confirmed all fixes.
-- Notes: Mix of platform compat, tool UX, and documentation fixes
+- Validation: unmapped
+- Notes: Also includes v2.59.0 deferred features: /btw skill, enhanced /hx codebase command, stop/backtrack capture classifications
 
-### R014 — Typecheck + build + tests all pass
+### R018 — Typecheck + build + tests pass (M003)
 - Class: quality-attribute
-- Status: validated
-- Description: After all fixes applied, tsc --noEmit passes, build succeeds, and full test suite passes
-- Why it matters: Ported fixes must not break existing functionality
-- Source: user
-- Primary owning slice: M002-yle1ri/S01-S06
+- Status: active
+- Description: After all changes applied, tsc --noEmit passes, npm run test:unit passes with zero new failures
+- Why it matters: Ported changes must not break existing functionality
+- Source: inferred
+- Primary owning slice: M003-ttxmyu/S01-S06
 - Supporting slices: none
-- Validation: npx tsc --noEmit exits 0 (5.0s). npm run test:unit: 4113 passed / 0 failed / 5 skipped. Verified at S06 close and at M002-yle1ri milestone close.
-- Notes: Verified after each slice completion
+- Validation: unmapped
+- Notes: Baseline: 4113 pass / 0 fail / 5 skip from M002-yle1ri
 
 ## Deferred
 
-### R015 — Upstream feature commits port (Ollama, codebase map, vscode redesign, etc.)
+### R019 — v2.63.0 sonrası upstream değişiklikler
 - Class: core-capability
 - Status: deferred
-- Description: 8 feature commits from upstream v2.59.0 (Ollama extension, codebase map, vscode sidebar redesign, dynamic model routing default, widget improvements, extension topological sort, splash header)
-- Why it matters: These add new capabilities but are not stability fixes
-- Source: user
+- Description: Any upstream commits after v2.63.0 tag
+- Why it matters: Continuous upstream tracking is the long-term goal
+- Source: inferred
 - Primary owning slice: none
 - Supporting slices: none
 - Validation: unmapped
-- Notes: Deferred by user decision — bugfixes only for M002-yle1ri
+- Notes: Deferred to a future milestone after M003-ttxmyu completes
 
 ## Out of Scope
 
-### R016 — Upstream CHANGELOG / version bump changes
+### R020 — CHANGELOG / version bump / release metadata
 - Class: constraint
 - Status: out-of-scope
-- Description: CHANGELOG.md updates, package.json version bumps, and release-related changes from upstream are excluded
-- Why it matters: hx-ai has its own versioning and changelog — upstream release metadata is not applicable
+- Description: CHANGELOG.md updates, package.json version bumps, and release-related commits from upstream are excluded
+- Why it matters: hx-ai has its own versioning
 - Source: inferred
 - Primary owning slice: none
 - Supporting slices: none
 - Validation: n/a
-- Notes: hx-ai maintains independent version numbers
+- Notes: none
+
+### R021 — repowise.db, docs/, .mcp.json upstream changes
+- Class: constraint
+- Status: out-of-scope
+- Description: Upstream documentation refreshes, repowise.db, and .mcp.json changes are excluded
+- Why it matters: These are upstream-specific artifacts not applicable to hx-ai
+- Source: inferred
+- Primary owning slice: none
+- Supporting slices: none
+- Validation: n/a
+- Notes: none
 
 ## Traceability
 
 | ID | Class | Status | Primary owner | Supporting | Proof |
 |---|---|---|---|---|---|
-| R001 | core-capability | validated | M002-yle1ri/S01-S06 | none | All 95 upstream fixes applied; npm run test:unit 4113/0/5; tsc exits 0 |
-| R002 | quality-attribute | validated | M002-yle1ri/S01-S06 | none | grep 0 GSD hits in source across all 6 slices |
-| R003 | core-capability | validated | M002-yle1ri/S01 | none | 16 state/DB fixes applied; unit tests pass |
-| R004 | core-capability | validated | M002-yle1ri/S02 | none | 14+ worktree/git fixes applied; grep checks pass; 3100 tests |
-| R005 | core-capability | validated | M002-yle1ri/S03 | none | Milestone lifecycle fixes applied; 63+ tests pass |
-| R006 | core-capability | validated | M002-yle1ri/S03 | none | Model/provider fixes applied; typecheck clean |
-| R007 | core-capability | validated | M002-yle1ri/S02 | none | Auto-mode dispatch fixes applied; 3100 tests pass |
-| R008 | quality-attribute | validated | M002-yle1ri/S04 | none | TUI/UI fixes applied; 28-file audit complete |
-| R009 | quality-attribute | validated | M002-yle1ri/S04 | none | Error handling fixes applied; repair-tool-json tests pass |
-| R010 | core-capability | validated | M002-yle1ri/S03 | none | Guided-flow fixes applied; typecheck clean |
-| R011 | quality-attribute | validated | M002-yle1ri/S05 | none | Prompt/template fixes applied; prompt-tool-names tests pass |
-| R012 | quality-attribute | validated | M002-yle1ri/S05 | none | Diagnostics fixes applied; forensics/doctor tests pass |
-| R013 | core-capability | validated | M002-yle1ri/S06 | none | Remaining fixes applied; 4113/0/5 tests |
-| R014 | quality-attribute | validated | M002-yle1ri/S01-S06 | none | npx tsc exits 0; npm run test:unit 4113/0/5 |
-| R015 | core-capability | deferred | none | none | unmapped |
-| R016 | constraint | out-of-scope | none | none | n/a |
+| R001 | core-capability | validated | M002-yle1ri/S01-S06 | none | validated |
+| R002 | quality-attribute | validated | M002-yle1ri/S01-S06 | none | validated |
+| R010 | core-capability | active | M003-ttxmyu/S01-S06 | none | unmapped |
+| R011 | core-capability | active | M003-ttxmyu/S01 | none | unmapped |
+| R012 | core-capability | active | M003-ttxmyu/S02 | none | unmapped |
+| R013 | core-capability | active | M003-ttxmyu/S03 | none | unmapped |
+| R014 | quality-attribute | active | M003-ttxmyu/S01-S06 | none | unmapped |
+| R015 | quality-attribute | active | M003-ttxmyu/S04 | none | unmapped |
+| R016 | core-capability | active | M003-ttxmyu/S05 | none | unmapped |
+| R017 | core-capability | active | M003-ttxmyu/S06 | none | unmapped |
+| R018 | quality-attribute | active | M003-ttxmyu/S01-S06 | none | unmapped |
+| R019 | core-capability | deferred | none | none | unmapped |
+| R020 | constraint | out-of-scope | none | none | n/a |
+| R021 | constraint | out-of-scope | none | none | n/a |
 
 ## Coverage Summary
 
-- Active requirements: 0
-- Validated: 14 (R001–R014)
-- Deferred: 1 (R015)
-- Out of scope: 1 (R016)
+- Active requirements: 9 (R010–R018)
+- Validated: 2 (R001–R002)
+- Deferred: 1 (R019)
+- Out of scope: 2 (R020–R021)
 - Unmapped active requirements: 0
