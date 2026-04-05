@@ -205,3 +205,15 @@ The pattern handles cold-start re-injection (the agent was stopped and restarted
 **Pattern:** Whenever a new migration adds a table, also add the same `CREATE TABLE IF NOT EXISTS` to `initSchema`. The migration and initSchema entries are redundant for existing file-backed DBs, but the initSchema entry is required for test correctness with `:memory:`.
 
 **Symptom:** Tests that `openDatabase(":memory:")` and then call functions that use the new table will fail with `Error: no such table: <table>`.
+
+## Lazy dynamic imports in before_provider_request prevent circular import issues (M003/S03)
+
+**Rule:** The `before_provider_request` hook in `register-hooks.ts` uses dynamic `import()` for `preferences.js` and `context-masker.js` rather than top-level static imports. This avoids circular dependency issues that occur when the bootstrap module (which registers all hooks at startup) statically imports feature modules that in turn import from the bootstrap layer.
+
+**Pattern:** `const { loadEffectiveHXPreferences } = await import("../preferences.js")` inside the hook handler body. The extra await cost is negligible (cached module, single evaluation) and the safety is real.
+
+## findTurnBoundary returns 0 when fewer than keepRecentTurns assistant turns exist (M003/S03)
+
+**Rule:** `createObservationMask`'s internal `findTurnBoundary` scans messages from the end counting assistant turns. When the conversation has fewer assistant turns than `keepRecentTurns`, the loop exits with `i < 0` never being true and returns `boundary = 0`. The mask condition `index < boundary` is then always false — nothing is masked. This is correct "mask nothing" behavior, not a bug.
+
+**Impact:** In a fresh or short session, all messages are within the window and none are masked. Only when assistant turn count exceeds `keepRecentTurns` does masking activate.

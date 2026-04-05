@@ -238,15 +238,15 @@ describe("workflow-logger", () => {
       cleanup(dir);
     });
 
-    test("writes entry to .hx/audit-log.jsonl after setLogBasePath", () => {
+    test("writes error entry to .hx/audit-log.jsonl after setLogBasePath", () => {
       setLogBasePath(dir);
-      logWarning("engine", "audit test entry");
+      logError("engine", "audit test entry");
 
       const auditPath = join(dir, ".hx", "audit-log.jsonl");
       assert.ok(existsSync(auditPath), "audit-log.jsonl should exist");
       const content = readFileSync(auditPath, "utf-8");
       const entry = JSON.parse(content.trim());
-      assert.equal(entry.severity, "warn");
+      assert.equal(entry.severity, "error");
       assert.equal(entry.component, "engine");
       assert.equal(entry.message, "audit test entry");
     });
@@ -254,7 +254,7 @@ describe("workflow-logger", () => {
     test("_resetLogs does not clear the audit base path", () => {
       setLogBasePath(dir);
       _resetLogs();
-      logWarning("engine", "post-reset entry");
+      logError("engine", "post-reset entry");
 
       const auditPath = join(dir, ".hx", "audit-log.jsonl");
       assert.ok(existsSync(auditPath), "audit-log.jsonl should exist after _resetLogs");
@@ -279,7 +279,7 @@ describe("workflow-logger", () => {
     });
   });
 
-  describe("audit log persistence", () => {
+  describe("audit log persistence (second block)", () => {
     let dir: string;
 
     beforeEach(() => {
@@ -291,15 +291,15 @@ describe("workflow-logger", () => {
       cleanup(dir);
     });
 
-    test("writes entry to .hx/audit-log.jsonl after setLogBasePath", () => {
+    test("writes error entry to .hx/audit-log.jsonl after setLogBasePath", () => {
       setLogBasePath(dir);
-      logWarning("engine", "audit test entry");
+      logError("engine", "audit test entry");
 
       const auditPath = join(dir, ".hx", "audit-log.jsonl");
       assert.ok(existsSync(auditPath), "audit-log.jsonl should exist");
       const content = readFileSync(auditPath, "utf-8");
       const entry = JSON.parse(content.trim());
-      assert.equal(entry.severity, "warn");
+      assert.equal(entry.severity, "error");
       assert.equal(entry.component, "engine");
       assert.equal(entry.message, "audit test entry");
     });
@@ -307,7 +307,7 @@ describe("workflow-logger", () => {
     test("_resetLogs does not clear the audit base path", () => {
       setLogBasePath(dir);
       _resetLogs();
-      logWarning("engine", "post-reset entry");
+      logError("engine", "post-reset entry");
 
       const auditPath = join(dir, ".hx", "audit-log.jsonl");
       assert.ok(existsSync(auditPath), "audit-log.jsonl should exist after _resetLogs");

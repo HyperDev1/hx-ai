@@ -229,14 +229,17 @@ function _push(
   }
 
   // Persist to .hx/audit-log.jsonl so entries survive context resets
+  // Only error-severity entries are written to disk — warn entries stay in-memory and stderr only
   if (_auditBasePath) {
-    try {
-      const auditDir = join(_auditBasePath, ".hx");
-      mkdirSync(auditDir, { recursive: true });
-      appendFileSync(join(auditDir, "audit-log.jsonl"), JSON.stringify(entry) + "\n", "utf-8");
-    } catch (auditErr) {
-      // Best-effort — never let audit write failures bubble up
-      process.stderr.write(`[hx:audit] failed to persist log entry: ${(auditErr as Error).message}\n`);
+    if (severity === "error") {
+      try {
+        const auditDir = join(_auditBasePath, ".hx");
+        mkdirSync(auditDir, { recursive: true });
+        appendFileSync(join(auditDir, "audit-log.jsonl"), JSON.stringify(entry) + "\n", "utf-8");
+      } catch (auditErr) {
+        // Best-effort — never let audit write failures bubble up
+        process.stderr.write(`[hx:audit] failed to persist log entry: ${(auditErr as Error).message}\n`);
+      }
     }
   }
 }

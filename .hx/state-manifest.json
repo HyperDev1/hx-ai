@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-04-05T16:13:14.739Z",
+  "exported_at": "2026-04-05T17:25:16.799Z",
   "milestones": [
     {
       "id": "M001-df6x5t",
@@ -496,16 +496,16 @@
       "milestone_id": "M003-ttxmyu",
       "id": "S03",
       "title": "Context Optimization (Masking + Phase Anchors)",
-      "status": "pending",
+      "status": "complete",
       "risk": "medium",
       "depends": [
         "S01"
       ],
       "demo": "After this: context-masker.ts and phase-anchor.ts exist; tests pass; phase-anchor.json written in auto-mode session",
       "created_at": "2026-04-05T13:56:28.716Z",
-      "completed_at": null,
-      "full_summary_md": "",
-      "full_uat_md": "",
+      "completed_at": "2026-04-05T16:17:10.193Z",
+      "full_summary_md": "---\nid: S03\nparent: M003-ttxmyu\nmilestone: M003-ttxmyu\nprovides:\n  - context-masker.ts: createObservationMask(keepRecentTurns) — ready for use in any hook or message-processing path\n  - phase-anchor.ts: writePhaseAnchor / readPhaseAnchor / formatAnchorForPrompt — ready for use in auto-mode phases\n  - ContextManagementConfig: observation_masking, observation_mask_turns, compaction_threshold_percent, tool_result_max_chars in HXPreferences\n  - before_provider_request hook: observation masking + tool-result truncation active in auto-mode sessions\n  - execute-task.md: {{phaseAnchorSection}} placeholder — plan-slice anchor injected into task agent context\nrequires:\n  - slice: S01\n    provides: tsc clean baseline, HXPreferences type infrastructure, capability-routing hook registration pattern\naffects:\n  - S04 can proceed — no shared files modified that would conflict with workflow-logger or auto-mode hardening changes\n  - S05/S06 can proceed — no shared files modified that block MCP reader or misc fixes work\nkey_files:\n  - src/resources/extensions/hx/context-masker.ts\n  - src/resources/extensions/hx/phase-anchor.ts\n  - src/resources/extensions/hx/tests/context-masker.test.ts\n  - src/resources/extensions/hx/tests/phase-anchor.test.ts\n  - src/resources/extensions/hx/preferences-types.ts\n  - src/resources/extensions/hx/preferences.ts\n  - src/resources/extensions/hx/bootstrap/register-hooks.ts\n  - src/resources/extensions/hx/auto/phases.ts\n  - src/resources/extensions/hx/auto-prompts.ts\n  - src/resources/extensions/hx/prompts/execute-task.md\nkey_decisions:\n  - findTurnBoundary returns 0 (mask nothing) when fewer assistant turns than keepRecentTurns exist — correct empty-window semantics\n  - isMaskableMessage checks role field only, ignores type field — role:user type:toolResult is NOT masked\n  - Masking/truncation guarded by isAutoActive() — non-auto sessions unaffected\n  - Lazy dynamic imports in before_provider_request for preferences.js and context-masker.js — avoids circular import at module load time\n  - Phase anchor writes are non-fatal (try/catch) — anchor is advisory, auto-mode loop must not fail on disk errors\n  - phaseAnchorSection passed as empty string to loadPrompt when no anchor exists — template renders cleanly\n  - {{phaseAnchorSection}} placed between runtimeContext and resumeSection — handoff decisions surface before task-specific resume state\n  - ContextManagementConfig re-exported from preferences.ts alongside ExperimentalPreferences for consistency\npatterns_established:\n  - Observation masking pattern: createObservationMask(keepRecentTurns) → pure function → replaces maskable messages older than assistant-turn boundary with [result masked] placeholder\n  - Phase anchor pattern: research/plan completion → writePhaseAnchor → .hx/milestones/<mid>/anchors/<phase>.json → read in downstream prompt builder → inject via formatAnchorForPrompt\n  - ContextManagementConfig shallow-merge follows the (base || override) ? spread : undefined pattern established by ExperimentalPreferences in mergePreferences\n  - Non-fatal dynamic import pattern in hooks: try { const { fn } = await import('...'); ... } catch { /* advisory */ } before required logic\nobservability_surfaces:\n  - Phase anchor files written to .hx/milestones/<mid>/anchors/<phase>.json after each research/plan phase — readable as structured JSON to audit what context was handed off\n  - tool_result_max_chars truncation appends '\\n…[truncated]' to indicate truncated content in context\ndrill_down_paths:\n  - .hx/milestones/M003-ttxmyu/slices/S03/tasks/T01-SUMMARY.md\n  - .hx/milestones/M003-ttxmyu/slices/S03/tasks/T02-SUMMARY.md\n  - .hx/milestones/M003-ttxmyu/slices/S03/tasks/T03-SUMMARY.md\n  - .hx/milestones/M003-ttxmyu/slices/S03/tasks/T04-SUMMARY.md\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-04-05T16:17:10.195Z\nblocker_discovered: false\n---\n\n# S03: Context Optimization (Masking + Phase Anchors)\n\n**Ported context-masker.ts and phase-anchor.ts from upstream, wired observation masking + tool-result truncation into before_provider_request, integrated ContextManagementConfig preferences, and wired phase anchor writes/reads across the research→plan→execute boundary.**\n\n## What Happened\n\nS03 ported the two-module context optimization subsystem from upstream gsd-2 into hx-ai across four sequential tasks.\n\n**T01 — Core modules:** Two purely additive source files created with HX naming. `context-masker.ts` exports `createObservationMask(keepRecentTurns=8)`, a pure function that scans messages from the end counting assistant turns and replaces older maskable messages (role:toolResult or bash-result user messages starting with 'Ran \\`') with a compact placeholder. Masking is role-based — a user message with type:toolResult is NOT masked. `phase-anchor.ts` exports `PhaseAnchor` interface and three functions: `writePhaseAnchor` (writes JSON to `.hx/milestones/<mid>/anchors/<phase>.json`), `readPhaseAnchor` (returns null for missing files), `formatAnchorForPrompt` (compact markdown block). 11 unit tests across two test files cover all behavioral invariants. Full suite: 4168/0/5, tsc clean, zero GSD tokens.\n\n**T02 — Preferences integration:** Purely additive changes to `preferences-types.ts` and `preferences.ts`. Added `ContextManagementConfig` interface (4 optional fields: observation_masking, observation_mask_turns, compaction_threshold_percent, tool_result_max_chars), registered `context_management` in `KNOWN_PREFERENCE_KEYS`, extended `HXPreferences`, and wired shallow merge in `mergePreferences` using the established `(base || override) ? spread : undefined` pattern. Re-exported `ContextManagementConfig` from `preferences.ts` for consistency with existing config type exports.\n\n**T03 — Hook wiring:** Replaced the existing 8-line `before_provider_request` handler (service-tier only) with a 52-line handler that: (1) guards payload type at the top, (2) when `isAutoActive()`, loads `ContextManagementConfig` via dynamic import and applies `createObservationMask` to `payload.messages`, (3) truncates toolResult content blocks exceeding `tool_result_max_chars` (default 800) using immutable spread, (4) falls through to the unchanged service-tier block. All return statements after mutations carry `payload`. Masking/truncation wrapped in non-fatal try/catch. Dynamic imports used to avoid circular dependency issues at module load time.\n\n**T04 — Phase anchor wiring:** Four files modified to write and inject phase anchors at research/plan phase boundaries. `phases.ts`: anchor write block inserted between `unitRecoveryCount.delete` and `emitJournalEvent`, guarded on `artifactVerified && mid && anchorPhases.has(unitType)`, using dynamic import with try/catch (non-fatal). `auto-prompts.ts`: phase-anchor import added; `buildPlanMilestonePrompt` reads research-milestone anchor and unshifts to front of inlined[]; `buildPlanSlicePrompt` reads research-slice anchor; `buildExecuteTaskPrompt` reads plan-slice anchor and passes `phaseAnchorSection` (empty string when absent) to `loadPrompt`. `execute-task.md`: `{{phaseAnchorSection}}` placeholder added between `{{runtimeContext}}` and `{{resumeSection}}`.\n\nSlice-level verification: 4168/0/5 passing, tsc --noEmit exit 0, zero GSD tokens across all 8 modified/created files, wiring confirmed (createObservationMask count=2, phase-anchor functions count=7 in auto-prompts.ts, phaseAnchorSection count=1 in execute-task.md).\n\n## Verification\n\nSlice-level verification commands run and passed:\n1. `npm run test:unit -- --grep 'context-masker|phase-anchor'` → 4168 passed, 0 failed, 5 skipped (exit 0)\n2. `npx tsc --noEmit` → exit 0 (clean)\n3. `grep -rn '\\bGSD\\b|\\bgsd\\b' [all 8 modified/created files]` → exit 1 (no matches)\n4. `grep -c 'createObservationMask' register-hooks.ts` → 2 (import + usage)\n5. `grep -c 'writePhaseAnchor|readPhaseAnchor|formatAnchorForPrompt' auto-prompts.ts` → 7\n6. `grep -c 'phaseAnchorSection' execute-task.md` → 1\n\n## Requirements Advanced\n\n- R013 — context-masker.ts and phase-anchor.ts ported with HX naming; ContextManagementConfig preferences integrated; masking wired into before_provider_request; phase anchors written at research/plan phases and read into plan/execute prompt builders\n- R014 — Zero GSD tokens in all 8 modified/created files verified by grep\n- R018 — tsc --noEmit exit 0, 4168/0/5 test suite — no new failures introduced\n\n## Requirements Validated\n\n- R013 — context-masker.ts and phase-anchor.ts exist; 11 unit tests pass; masking wired in register-hooks.ts (createObservationMask count=2); phase-anchor wired in phases.ts + auto-prompts.ts + execute-task.md; tsc clean; 4168/0/5\n\n## New Requirements Surfaced\n\nNone.\n\n## Requirements Invalidated or Re-scoped\n\nNone.\n\n## Deviations\n\nfindTurnBoundary returns 0 (mask nothing) when fewer than keepRecentTurns assistant turns exist — the condition i < 0 never becomes true when the loop completes without reaching the count. This is the correct behavior for short/fresh sessions and matches upstream intent. The execute-task.md blank line between runtimeContext and resumeSection was absorbed into the phaseAnchorSection insertion — no double blank line; renders cleanly when phaseAnchorSection is empty string.\n\n## Known Limitations\n\ncompaction_threshold_percent field is present in ContextManagementConfig but no compaction logic is wired in S03 (upstream wires it separately). It is available as a preference key for future slices. tool_result_max_chars truncation applies per-block not per-message — a message with many short blocks is not truncated even if total exceeds threshold.\n\n## Follow-ups\n\nS04: workflow-logger centralization does not depend on S03 artifacts. S05/S06: no phase-anchor dependencies. compaction_threshold_percent wiring deferred to whenever compaction logic is ported.\n\n## Files Created/Modified\n\n- `src/resources/extensions/hx/context-masker.ts` — New: observation masking pure function — createObservationMask(keepRecentTurns=8)\n- `src/resources/extensions/hx/phase-anchor.ts` — New: phase anchor read/write/format functions for research→plan→execute handoff\n- `src/resources/extensions/hx/tests/context-masker.test.ts` — New: 7 unit tests covering masking invariants\n- `src/resources/extensions/hx/tests/phase-anchor.test.ts` — New: 4 unit tests covering anchor write/read/null/format\n- `src/resources/extensions/hx/preferences-types.ts` — Added ContextManagementConfig interface, context_management to KNOWN_PREFERENCE_KEYS, context_management?: ContextManagementConfig to HXPreferences\n- `src/resources/extensions/hx/preferences.ts` — Imported and re-exported ContextManagementConfig; added shallow merge for context_management in mergePreferences\n- `src/resources/extensions/hx/bootstrap/register-hooks.ts` — Rewrote before_provider_request handler to add observation masking and tool-result truncation before service-tier logic\n- `src/resources/extensions/hx/auto/phases.ts` — Added phase anchor write block after research/plan unit completion\n- `src/resources/extensions/hx/auto-prompts.ts` — Added phase-anchor import and three anchor-read injections in plan-milestone, plan-slice, execute-task prompt builders\n- `src/resources/extensions/hx/prompts/execute-task.md` — Added {{phaseAnchorSection}} placeholder between runtimeContext and resumeSection\n",
+      "full_uat_md": "# S03: Context Optimization (Masking + Phase Anchors) — UAT\n\n**Milestone:** M003-ttxmyu\n**Written:** 2026-04-05T16:17:10.195Z\n\n## UAT Type\nUAT mode: runtime-executable\n\n## Preconditions\n- Working directory: `/Users/beratcan/Desktop/GithubProjects/hx-ai`\n- Node.js + TypeScript build available (`npx tsc`, `node --test`)\n- Test suite: `npm run test:unit` (compiles via `scripts/compile-tests.mjs`, runs `dist-test/`)\n\n---\n\n## TC-01: context-masker unit tests pass\n**What it proves:** Core masking logic correct — boundary calculation, role-based predicate, bash-result detection, non-mutation of assistant messages.\n\n**Steps:**\n1. `cd /Users/beratcan/Desktop/GithubProjects/hx-ai`\n2. `node scripts/compile-tests.mjs 2>&1 | tail -3`\n3. `node --import ./scripts/dist-test-resolve.mjs --test dist-test/src/resources/extensions/hx/tests/context-masker.test.js 2>&1`\n\n**Expected:** 7 tests pass, 0 fail. Output includes lines for:\n- \"masks nothing when all messages within keepRecentTurns\"\n- \"masks tool results older than keepRecentTurns\"\n- \"never masks assistant messages\"\n- \"never masks plain user messages\"\n- \"masks bash result user messages\"\n- \"returns same array length after masking\"\n- \"masks toolResult by role not type\"\n\n---\n\n## TC-02: phase-anchor unit tests pass\n**What it proves:** File path construction, JSON roundtrip, null-return for missing anchors, formatAnchorForPrompt output quality.\n\n**Steps:**\n1. `node --import ./scripts/dist-test-resolve.mjs --test dist-test/src/resources/extensions/hx/tests/phase-anchor.test.js 2>&1`\n\n**Expected:** 4 tests pass, 0 fail. Output includes lines for:\n- \"writePhaseAnchor creates anchor file at correct path\"\n- \"readPhaseAnchor returns the written anchor\"\n- \"readPhaseAnchor returns null when no anchor exists\"\n- \"formatAnchorForPrompt produces non-empty string\"\n\n---\n\n## TC-03: ContextManagementConfig present in preferences types\n**What it proves:** Preferences integration — all four fields present, KNOWN_PREFERENCE_KEYS includes context_management, HXPreferences has the field.\n\n**Steps:**\n1. `grep -n 'ContextManagementConfig\\|context_management\\|observation_masking\\|observation_mask_turns\\|compaction_threshold_percent\\|tool_result_max_chars' src/resources/extensions/hx/preferences-types.ts`\n2. `grep -n 'context_management' src/resources/extensions/hx/preferences.ts`\n\n**Expected:**\n- Step 1: At least 7 lines — interface declaration, 4 field lines, KNOWN_PREFERENCE_KEYS entry, HXPreferences field\n- Step 2: At least 3 lines — import, re-export, mergePreferences entry\n\n---\n\n## TC-04: Observation masking wired in before_provider_request\n**What it proves:** Hook integration — createObservationMask called when auto-mode active, tool-result truncation applied, service tier still runs.\n\n**Steps:**\n1. `grep -n 'createObservationMask\\|observation_masking\\|tool_result_max_chars\\|isAutoActive\\|service_tier' src/resources/extensions/hx/bootstrap/register-hooks.ts`\n\n**Expected:** Lines show: `createObservationMask` imported and called (2 occurrences), `observation_masking` config check, `tool_result_max_chars` truncation logic, `isAutoActive()` guard, `service_tier` assignment — confirming both context optimization and service tier are present.\n\n---\n\n## TC-05: Phase anchor write triggered in phases.ts\n**What it proves:** Auto-mode loop writes phase anchors at research/plan phase boundaries.\n\n**Steps:**\n1. `grep -n 'writePhaseAnchor\\|anchorPhases\\|research-milestone\\|research-slice\\|plan-milestone\\|plan-slice' src/resources/extensions/hx/auto/phases.ts`\n\n**Expected:** Lines show anchor write block guarded by `anchorPhases.has(unitType)` with the four phase types listed, `writePhaseAnchor` called with basePath + mid + anchor object.\n\n---\n\n## TC-06: Phase anchor read injected in all three prompt builders\n**What it proves:** Downstream prompt builders receive phase anchor content when available.\n\n**Steps:**\n1. `grep -n 'readPhaseAnchor\\|formatAnchorForPrompt\\|phaseAnchorSection\\|researchAnchor\\|researchSliceAnchor\\|planSliceAnchor' src/resources/extensions/hx/auto-prompts.ts`\n2. `grep -n 'phaseAnchorSection' src/resources/extensions/hx/prompts/execute-task.md`\n\n**Expected:**\n- Step 1: At least 6 lines — readPhaseAnchor called 3 times (research-milestone, research-slice, plan-slice), formatAnchorForPrompt called 3 times, phaseAnchorSection defined\n- Step 2: 1 line showing `{{phaseAnchorSection}}` in the template\n\n---\n\n## TC-07: TypeScript clean across all modified files\n**What it proves:** No type errors introduced.\n\n**Steps:**\n1. `npx tsc --noEmit 2>&1; echo \"exit: $?\"`\n\n**Expected:** No output lines before \"exit: 0\". Any error output is a failure.\n\n---\n\n## TC-08: No GSD tokens in modified/created files\n**What it proves:** Naming integrity maintained (R014).\n\n**Steps:**\n1. `grep -rn '\\bGSD\\b\\|\\bgsd\\b' src/resources/extensions/hx/context-masker.ts src/resources/extensions/hx/phase-anchor.ts src/resources/extensions/hx/bootstrap/register-hooks.ts src/resources/extensions/hx/auto/phases.ts src/resources/extensions/hx/auto-prompts.ts src/resources/extensions/hx/prompts/execute-task.md src/resources/extensions/hx/preferences-types.ts src/resources/extensions/hx/preferences.ts; echo \"exit: $?\"`\n\n**Expected:** No output lines before \"exit: 1\" (grep returns 1 = no matches found).\n\n---\n\n## TC-09: Full unit test suite — no regressions\n**What it proves:** S03 changes do not break any existing tests.\n\n**Steps:**\n1. `npm run test:unit 2>&1 | tail -5`\n\n**Expected:** Final line shows `✔ 4168 passed, 0 failed, 5 skipped` (or higher pass count if tests added). Zero failures required.\n\n---\n\n## Edge Cases\n\n**EC-01: createObservationMask with keepRecentTurns=0**\n- `createObservationMask(0)` — boundary = 0, all messages masked (i < 0 never, but boundary=0 means everything is older than boundary). Verify mask returns placeholder for all maskable messages.\n\n**EC-02: readPhaseAnchor for non-existent milestone**\n- Call `readPhaseAnchor('/tmp/nonexistent', 'M999', 'plan-slice')` — must return null without throwing.\n\n**EC-03: Tool result truncation at exactly maxChars boundary**\n- A toolResult block with text length exactly equal to maxChars should NOT be truncated (only `> maxChars` triggers truncation).\n\n**EC-04: Masking does not modify original array**\n- `createObservationMask()(messages)` returns a new array — original messages array is unchanged (pure function invariant).\n",
       "goal": "Port context-masker.ts and phase-anchor.ts from upstream, wire observation masking into the before_provider_request hook, add ContextManagementConfig preferences, and write phase anchors at research/plan phase boundaries so downstream agents inherit decisions without re-reading full history.",
       "success_criteria": "- `context-masker.ts` and `phase-anchor.ts` exist with HX naming\n- 11 new tests pass (7 context-masker + 4 phase-anchor)\n- `ContextManagementConfig` in preferences-types.ts; `context_management` in KNOWN_PREFERENCE_KEYS and HXPreferences; merge logic in preferences.ts\n- `before_provider_request` hook applies observation masking + tool truncation before service tier block; returns payload (not bare return)\n- `writePhaseAnchor` called in `runUnitPhase` after successful research/plan unit; anchor file written to `.hx/milestones/<MID>/anchors/<phase>.json`\n- `buildPlanMilestonePrompt`, `buildPlanSlicePrompt`, `buildExecuteTaskPrompt` inject phase anchors; `{{phaseAnchorSection}}` placeholder in execute-task.md\n- `npx tsc --noEmit` exits 0\n- `npm run test:unit` passes with ~4143+ tests (4132 baseline + 11 new)\n- 0 GSD hits in all new/modified files",
       "proof_level": "contract — tsc clean + unit tests + grep verification; no real runtime execution required",
@@ -528,11 +528,11 @@
       "completed_at": null,
       "full_summary_md": "",
       "full_uat_md": "",
-      "goal": "Migrate all catch blocks in auto-mode files to workflow-logger; harden audit log persistence (errors-only, sanitized); port tool-call-loop-guard.ts; port auto-wrapup interrupt guard; port stop/backtrack capture classifications; port fail-closed stop guard + backtrack parsing hardening",
-      "success_criteria": "workflow-logger-audit.test.ts passes; silent-catch-diagnostics.test.ts passes; tool-call-loop-guard.test.ts passes; auto-wrapup-inflight-guard.test.ts passes; tsc clean",
-      "proof_level": "contract: 4 test files pass; grep for unguarded empty catch blocks in modified files: 0",
-      "integration_closure": "workflow-logger imported in all modified catch sites; tool-call-loop-guard registered in bootstrap/register-hooks.ts",
-      "observability_impact": "All previously silent catch blocks now emit structured log entries via workflow-logger; audit log persists errors with sanitized context",
+      "goal": "Harden the workflow-logger audit (errors-only), add stop/backtrack capture classifications, create the auto-wrapup-inflight guard module, and migrate targeted silent catch blocks to logWarning — all verified by three new test files.",
+      "success_criteria": "- `npm run test:unit` passes with 3 new test files (workflow-logger-audit, auto-wrapup-inflight-guard, silent-catch-diagnostics) and no regressions from prior 4168-test baseline\n- `npx tsc --noEmit` exits 0\n- `grep -rn \"GSD\" src/resources/extensions/hx/workflow-logger.ts src/resources/extensions/hx/captures.ts src/resources/extensions/hx/triage-resolution.ts src/resources/extensions/hx/bootstrap/auto-wrapup-guard.ts` returns 0 hits\n- audit-log.jsonl receives only error-severity entries (proven by workflow-logger-audit.test.ts)\n- Classification type includes \"stop\" and \"backtrack\"; triage-resolution.ts handles both cases\n- bootstrap/auto-wrapup-guard.ts exists with 4 exported functions\n- No empty catch blocks remain in the 6 migrated locations (proven by silent-catch-diagnostics.test.ts)",
+      "proof_level": "contract — all 3 test files run in-process with no real runtime required",
+      "integration_closure": "workflow-logger.ts is consumed by auto.ts, phases.ts, and 10+ other files — the errors-only change is backward-compatible (buffer still holds all entries; only disk write changes). captures.ts stop/backtrack are additive new enum values; triage-resolution.ts handles them. auto-wrapup-guard.ts is a new module wired into auto-timers.ts and auto.ts but has zero blast radius until inflight state is actually consumed by a guard check.",
+      "observability_impact": "Silent catch blocks in auto.ts, phases.ts, and register-hooks.ts that previously swallowed errors now emit [hx:engine] WARN lines to stderr. audit-log.jsonl now only contains actionable error-severity entries, reducing post-mortem noise.",
       "sequence": 0,
       "replan_triggered_at": null
     },
@@ -4047,6 +4047,170 @@
       "observability_impact": "Phase anchor files written to `.hx/milestones/<MID>/anchors/<phase>.json` after each research/plan unit — inspectable via `ls .hx/milestones/<MID>/anchors/`.",
       "full_plan_md": "",
       "sequence": 0
+    },
+    {
+      "milestone_id": "M003-ttxmyu",
+      "slice_id": "S04",
+      "id": "T01",
+      "title": "Added severity guard in workflow-logger._push() so only error entries persist to audit-log.jsonl, and wrote workflow-logger-audit.test.ts with 4 verifying tests",
+      "status": "complete",
+      "one_liner": "Added severity guard in workflow-logger._push() so only error entries persist to audit-log.jsonl, and wrote workflow-logger-audit.test.ts with 4 verifying tests",
+      "narrative": "Read workflow-logger.ts _push() function to confirm the if (_auditBasePath) block structure. Wrapped the mkdirSync+appendFileSync block in an inner if (severity === 'error') guard, keeping the outer try/catch intact. Two pre-existing duplicate 'audit log persistence' describe blocks in workflow-logger.test.ts both used logWarning for disk-write assertions — both were updated to use logError and assert severity 'error'. Created workflow-logger-audit.test.ts with 4 tests: warnings don't create the file, errors do write to disk, mixed sequences yield only error entries from readAuditLog, and warnings-only sequences return empty array.",
+      "verification_result": "4 new tests pass (workflow-logger-audit.test.ts). All 36 existing workflow-logger.test.ts tests pass. Full test suite: 4173 passed, 0 failed, 5 skipped. npx tsc --noEmit clean.",
+      "duration": "",
+      "completed_at": "2026-04-05T17:25:16.751Z",
+      "blocker_discovered": false,
+      "deviations": "Two pre-existing duplicate audit log persistence describe blocks in workflow-logger.test.ts required updating (plan mentioned the audit section without noting the duplication). Both blocks updated; second renamed to de-duplicate describe labels.",
+      "known_issues": "context-store.test.js sub-5ms timing test is flaky (pre-existing, appeared once across two runs).",
+      "key_files": [
+        "src/resources/extensions/hx/workflow-logger.ts",
+        "src/resources/extensions/hx/tests/workflow-logger-audit.test.ts",
+        "src/resources/extensions/hx/tests/workflow-logger.test.ts"
+      ],
+      "key_decisions": [
+        "Wrapped appendFileSync in if (severity === 'error') guard inside existing if (_auditBasePath) block — minimal footprint, zero structural change to try/catch",
+        "Updated existing workflow-logger.test.ts audit tests to use logError since warnings no longer write to disk"
+      ],
+      "full_summary_md": "---\nid: T01\nparent: S04\nmilestone: M003-ttxmyu\nkey_files:\n  - src/resources/extensions/hx/workflow-logger.ts\n  - src/resources/extensions/hx/tests/workflow-logger-audit.test.ts\n  - src/resources/extensions/hx/tests/workflow-logger.test.ts\nkey_decisions:\n  - Wrapped appendFileSync in if (severity === 'error') guard inside existing if (_auditBasePath) block — minimal footprint, zero structural change to try/catch\n  - Updated existing workflow-logger.test.ts audit tests to use logError since warnings no longer write to disk\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-04-05T17:25:16.752Z\nblocker_discovered: false\n---\n\n# T01: Added severity guard in workflow-logger._push() so only error entries persist to audit-log.jsonl, and wrote workflow-logger-audit.test.ts with 4 verifying tests\n\n**Added severity guard in workflow-logger._push() so only error entries persist to audit-log.jsonl, and wrote workflow-logger-audit.test.ts with 4 verifying tests**\n\n## What Happened\n\nRead workflow-logger.ts _push() function to confirm the if (_auditBasePath) block structure. Wrapped the mkdirSync+appendFileSync block in an inner if (severity === 'error') guard, keeping the outer try/catch intact. Two pre-existing duplicate 'audit log persistence' describe blocks in workflow-logger.test.ts both used logWarning for disk-write assertions — both were updated to use logError and assert severity 'error'. Created workflow-logger-audit.test.ts with 4 tests: warnings don't create the file, errors do write to disk, mixed sequences yield only error entries from readAuditLog, and warnings-only sequences return empty array.\n\n## Verification\n\n4 new tests pass (workflow-logger-audit.test.ts). All 36 existing workflow-logger.test.ts tests pass. Full test suite: 4173 passed, 0 failed, 5 skipped. npx tsc --noEmit clean.\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `node --experimental-strip-types src/resources/extensions/hx/tests/workflow-logger-audit.test.ts` | 0 | ✅ pass | 25ms |\n| 2 | `node --experimental-strip-types src/resources/extensions/hx/tests/workflow-logger.test.ts` | 0 | ✅ pass | 51ms |\n| 3 | `npm run test:unit` | 0 | ✅ pass | 73000ms |\n| 4 | `npx tsc --noEmit` | 0 | ✅ pass | 15000ms |\n\n\n## Deviations\n\nTwo pre-existing duplicate audit log persistence describe blocks in workflow-logger.test.ts required updating (plan mentioned the audit section without noting the duplication). Both blocks updated; second renamed to de-duplicate describe labels.\n\n## Known Issues\n\ncontext-store.test.js sub-5ms timing test is flaky (pre-existing, appeared once across two runs).\n\n## Files Created/Modified\n\n- `src/resources/extensions/hx/workflow-logger.ts`\n- `src/resources/extensions/hx/tests/workflow-logger-audit.test.ts`\n- `src/resources/extensions/hx/tests/workflow-logger.test.ts`\n",
+      "description": "Add a 1-line severity guard in workflow-logger.ts _push() so only error-severity entries are persisted to audit-log.jsonl. Then write workflow-logger-audit.test.ts verifying the new behavior.\n\n## Steps\n\n1. Read `src/resources/extensions/hx/workflow-logger.ts` lines 230–240 to confirm the exact text of the `if (_auditBasePath)` block.\n2. Add a guard: wrap the `appendFileSync` call so it only runs when `severity === 'error'`. The change is: immediately after `if (_auditBasePath) {` add `if (severity === 'error') {` and close that extra brace before the outer `catch`. Keep the existing `try/catch` structure intact — only the `mkdirSync`+`appendFileSync` block moves inside the inner guard.\n3. Create `src/resources/extensions/hx/tests/workflow-logger-audit.test.ts`. Model it on the audit section of the existing `workflow-logger.test.ts` (which uses `mkdtempSync` + `setLogBasePath` + `resetWorkflowLogger`). Write tests:\n   - `logWarning()` does NOT write to audit-log.jsonl\n   - `logError()` DOES write to audit-log.jsonl\n   - Mixed log sequence: `readAuditLog()` returns only the error entries\n   - `readAuditLog()` returns [] when no errors logged (only warnings)\n4. Confirm the existing workflow-logger.test.ts audit section still passes (it also tests logError writing — should still pass after change).\n5. Run `node --experimental-strip-types src/resources/extensions/hx/tests/workflow-logger-audit.test.ts` or `npm run test:unit -- --grep workflow-logger-audit` to verify.",
+      "estimate": "45m",
+      "files": [
+        "src/resources/extensions/hx/workflow-logger.ts",
+        "src/resources/extensions/hx/tests/workflow-logger-audit.test.ts"
+      ],
+      "verify": "npm run test:unit 2>&1 | grep -E 'workflow-logger-audit|passed|failed' | tail -5; npx tsc --noEmit",
+      "inputs": [
+        "`src/resources/extensions/hx/workflow-logger.ts` — _push() function to modify (lines 206–241)",
+        "`src/resources/extensions/hx/tests/workflow-logger.test.ts` — existing audit section to model new test on"
+      ],
+      "expected_output": [
+        "`src/resources/extensions/hx/workflow-logger.ts` — _push() now only persists severity==='error' entries to disk",
+        "`src/resources/extensions/hx/tests/workflow-logger-audit.test.ts` — 4 test cases covering errors-only audit behavior"
+      ],
+      "observability_impact": "audit-log.jsonl now contains only actionable error entries; warn entries remain in in-memory buffer and stderr only",
+      "full_plan_md": "",
+      "sequence": 0
+    },
+    {
+      "milestone_id": "M003-ttxmyu",
+      "slice_id": "S04",
+      "id": "T02",
+      "title": "Add stop/backtrack capture classifications + triage-resolution handling",
+      "status": "pending",
+      "one_liner": "",
+      "narrative": "",
+      "verification_result": "",
+      "duration": "",
+      "completed_at": null,
+      "blocker_discovered": false,
+      "deviations": "",
+      "known_issues": "",
+      "key_files": [],
+      "key_decisions": [],
+      "full_summary_md": "",
+      "description": "Extend captures.ts with 'stop' and 'backtrack' Classification values, wire them into VALID_CLASSIFICATIONS and loadActionableCaptures, add case handlers in triage-resolution.ts, and update the triage-captures.md prompt.\n\n## Steps\n\n1. Read `src/resources/extensions/hx/captures.ts` lines 18 and 43–47 (Classification type + VALID_CLASSIFICATIONS array).\n2. Update Classification type union: add `| 'stop' | 'backtrack'` to the existing 5 values.\n3. Add `'stop'` and `'backtrack'` to the `VALID_CLASSIFICATIONS` readonly array.\n4. Update `loadActionableCaptures()` filter (lines 259–268): add `c.classification === 'stop'` and `c.classification === 'backtrack'` to the OR chain.\n5. Read `src/resources/extensions/hx/triage-resolution.ts` lines 345–360 (TriageExecutionResult interface) and lines 420–455 (the switch statement).\n6. Add `stopped: number; backtracks: number;` to TriageExecutionResult interface. Initialize both to 0 in the result object.\n7. Add `case 'stop':` and `case 'backtrack':` to the switch in executeTriageResolutions:\n   - `stop`: write `{ trigger: 'stop', captureId: capture.id, captureText: capture.text, ts: new Date().toISOString() }` as JSON to `.hx/runtime/stop-trigger.json` using `join(hxRoot(basePath), 'runtime', 'stop-trigger.json')`. Use `mkdirSync({ recursive: true })` on the dir first. Then `markCaptureExecuted` and increment `result.stopped`.\n   - `backtrack`: parse a slice ID from `capture.resolution` using `/\\b(S\\d{2})\\b/` regex. If found, write `{ trigger: 'backtrack', targetSlice: sliceId, captureId: capture.id, ts: new Date().toISOString() }` to `.hx/runtime/backtrack-trigger.json`. If not found, call `logWarning('engine', 'backtrack capture has no parseable slice ID', { captureId: capture.id })` — but still `markCaptureExecuted` to avoid retry loops. Import `logWarning` from `'../workflow-logger.js'` if not already imported. Increment `result.backtracks`.\n8. Update `src/resources/extensions/hx/prompts/triage-captures.md`: add `stop` and `backtrack` to the Classification Criteria section (after `note`):\n   - **stop**: Halt auto-mode execution immediately. Use when continuing would cause harm or the session is fundamentally off-track and no replan can fix it.\n   - **backtrack**: Rewind to a specific previous slice. Include the target slice ID (e.g. S02) in the Resolution field.\n9. Run `npx tsc --noEmit` and `npm run test:unit` — expect 0 new failures (no new test file needed; captures.test.ts covers parse behavior, triage integration is runtime).",
+      "estimate": "45m",
+      "files": [
+        "src/resources/extensions/hx/captures.ts",
+        "src/resources/extensions/hx/triage-resolution.ts",
+        "src/resources/extensions/hx/prompts/triage-captures.md"
+      ],
+      "verify": "npx tsc --noEmit && npm run test:unit 2>&1 | tail -5 && grep -c 'stop\\|backtrack' src/resources/extensions/hx/captures.ts",
+      "inputs": [
+        "`src/resources/extensions/hx/captures.ts` — Classification type and VALID_CLASSIFICATIONS array",
+        "`src/resources/extensions/hx/triage-resolution.ts` — TriageExecutionResult interface and executeTriageResolutions switch",
+        "`src/resources/extensions/hx/prompts/triage-captures.md` — classification criteria section"
+      ],
+      "expected_output": [
+        "`src/resources/extensions/hx/captures.ts` — Classification type includes 'stop'/'backtrack'; VALID_CLASSIFICATIONS updated; loadActionableCaptures includes both",
+        "`src/resources/extensions/hx/triage-resolution.ts` — TriageExecutionResult has stopped/backtracks fields; switch handles both new cases",
+        "`src/resources/extensions/hx/prompts/triage-captures.md` — stop and backtrack documented in Classification Criteria"
+      ],
+      "observability_impact": "",
+      "full_plan_md": "",
+      "sequence": 0
+    },
+    {
+      "milestone_id": "M003-ttxmyu",
+      "slice_id": "S04",
+      "id": "T03",
+      "title": "Create auto-wrapup-guard.ts + wire into auto-timers.ts and auto.ts + write test",
+      "status": "pending",
+      "one_liner": "",
+      "narrative": "",
+      "verification_result": "",
+      "duration": "",
+      "completed_at": null,
+      "blocker_discovered": false,
+      "deviations": "",
+      "known_issues": "",
+      "key_files": [],
+      "key_decisions": [],
+      "full_summary_md": "",
+      "description": "Create the auto-wrapup-inflight guard module, wire setWrapupInflight() into the soft-timeout callback in auto-timers.ts and clearWrapupInflight() into clearUnitTimeout() in auto.ts, then write the test file.\n\n## Steps\n\n1. Create `src/resources/extensions/hx/bootstrap/auto-wrapup-guard.ts`:\n```typescript\n/** Tracks whether an hx-auto-wrapup message has been sent and the triggered turn is still inflight. */\nlet _wrapupInflight = false;\n\n/** Mark that a wrapup message has been sent and a new turn is inflight. */\nexport function setWrapupInflight(): void { _wrapupInflight = true; }\n\n/** Clear the inflight flag — called when the triggered turn completes or the unit ends. */\nexport function clearWrapupInflight(): void { _wrapupInflight = false; }\n\n/** Returns true if a wrapup message has been sent and the turn is still inflight. */\nexport function isWrapupInflight(): boolean { return _wrapupInflight; }\n\n/** Reset guard state — called at session start and session switch. */\nexport function resetWrapupGuard(): void { _wrapupInflight = false; }\n```\n\n2. Wire into `src/resources/extensions/hx/auto-timers.ts`:\n   - Add `import { setWrapupInflight } from './bootstrap/auto-wrapup-guard.js';` at the top imports.\n   - In the soft-timeout callback (around line 116, the `s.wrapupWarningHandle = setTimeout(() => {` block), call `setWrapupInflight()` immediately before the `pi.sendMessage(...)` call.\n   - Also check line ~292 for a second `customType: 'hx-auto-wrapup'` sendMessage — add `setWrapupInflight()` before that one too if it's in a parallel path.\n\n3. Wire into `src/resources/extensions/hx/auto.ts`:\n   - Widen the existing `import { setLogBasePath } from './workflow-logger.js'` to NOT change (setLogBasePath is the only import needed there).\n   - Add a NEW import line: `import { clearWrapupInflight } from './bootstrap/auto-wrapup-guard.js';`\n   - In `clearUnitTimeout()` (around line 477), add `clearWrapupInflight();` at the end of the function body, before the closing brace.\n\n4. Create `src/resources/extensions/hx/tests/auto-wrapup-inflight-guard.test.ts`:\n   - Import the 4 functions from `'../bootstrap/auto-wrapup-guard.js'` (compiled path — check if other tests use `.js` extension for imports from bootstrap/).\n   - Test 1: `isWrapupInflight()` returns false initially\n   - Test 2: after `setWrapupInflight()`, `isWrapupInflight()` returns true\n   - Test 3: after `setWrapupInflight()` then `clearWrapupInflight()`, `isWrapupInflight()` returns false\n   - Test 4: `resetWrapupGuard()` clears inflight state after `setWrapupInflight()`\n   - Test 5 (static): `readFileSync` the compiled auto-timers.ts source and assert it contains `setWrapupInflight()` in the wrapup callback region\n   - Test 6 (static): `readFileSync` auto.ts source and assert it contains `clearWrapupInflight` in the clearUnitTimeout region\n   - Note: reset state between each test via `resetWrapupGuard()` in beforeEach or explicit reset calls\n\n5. Run `npm run test:unit` and `npx tsc --noEmit`.",
+      "estimate": "45m",
+      "files": [
+        "src/resources/extensions/hx/bootstrap/auto-wrapup-guard.ts",
+        "src/resources/extensions/hx/auto-timers.ts",
+        "src/resources/extensions/hx/auto.ts",
+        "src/resources/extensions/hx/tests/auto-wrapup-inflight-guard.test.ts"
+      ],
+      "verify": "npm run test:unit 2>&1 | grep -E 'auto-wrapup-inflight|passed|failed' | tail -5; npx tsc --noEmit",
+      "inputs": [
+        "`src/resources/extensions/hx/auto-timers.ts` — soft-timeout callback where pi.sendMessage({customType: 'hx-auto-wrapup'}) is called",
+        "`src/resources/extensions/hx/auto.ts` — clearUnitTimeout() function at ~line 477",
+        "`src/resources/extensions/hx/bootstrap/tool-call-loop-guard.ts` — reference module for guard module pattern and test import style"
+      ],
+      "expected_output": [
+        "`src/resources/extensions/hx/bootstrap/auto-wrapup-guard.ts` — new module with 4 exported functions",
+        "`src/resources/extensions/hx/auto-timers.ts` — imports setWrapupInflight; calls it before hx-auto-wrapup sendMessage",
+        "`src/resources/extensions/hx/auto.ts` — imports clearWrapupInflight; calls it in clearUnitTimeout()",
+        "`src/resources/extensions/hx/tests/auto-wrapup-inflight-guard.test.ts` — 6 tests: 4 state-machine + 2 static source wiring checks"
+      ],
+      "observability_impact": "isWrapupInflight() state is now inspectable at runtime; future guard logic can check this flag before dispatching a new unit during wrapup window",
+      "full_plan_md": "",
+      "sequence": 0
+    },
+    {
+      "milestone_id": "M003-ttxmyu",
+      "slice_id": "S04",
+      "id": "T04",
+      "title": "Migrate targeted silent catch blocks + write silent-catch-diagnostics.test.ts",
+      "status": "pending",
+      "one_liner": "",
+      "narrative": "",
+      "verification_result": "",
+      "duration": "",
+      "completed_at": null,
+      "blocker_discovered": false,
+      "deviations": "",
+      "known_issues": "",
+      "key_files": [],
+      "key_decisions": [],
+      "full_summary_md": "",
+      "description": "Add logWarning calls to 5 specific empty/silent catch blocks across auto.ts, auto/phases.ts, and bootstrap/register-hooks.ts, then write a static analysis test that proves the migration.\n\n## Steps\n\n1. **auto.ts** — widen the workflow-logger import. Current: `import { setLogBasePath } from './workflow-logger.js'`. Change to: `import { setLogBasePath, logWarning } from './workflow-logger.js'`.\n\n2. **auto.ts line ~664** — catch block after `milestoneComplete = wtSummaryPath !== null`:\n   - Find the catch block: `} catch {` followed by `// Non-fatal — fall through to preserveBranch path`\n   - Change to: `} catch (e) {\\n  logWarning('engine', 'Failed to check milestone SUMMARY existence', { milestone: s.currentMilestoneId ?? 'unknown', error: String(e) });\\n}`\n\n3. **auto.ts line ~865** — catch block after `writeFileSync(join(runtimeDir, 'paused-session.json'), ...)`:\n   - Find: `} catch {` followed by `// Non-fatal — resume will still work via full bootstrap, just without worktree context`\n   - Change to: `} catch (e) {\\n  logWarning('engine', 'Failed to write paused-session.json', { error: String(e) });\\n}`\n\n4. **auto.ts line ~873** — catch block around `closeoutUnit(...)` call:\n   - Find: `} catch {` followed by `// Non-fatal — best-effort closeout on pause`\n   - Change to: `} catch (e) {\\n  logWarning('engine', 'Unit closeout on pause threw', { error: String(e) });\\n}`\n\n5. **auto/phases.ts line ~1214** — catch block after phase anchor write:\n   - Find: `} catch { /* non-fatal — anchor is advisory */ }`\n   - Change to: `} catch (e) { logWarning('engine', 'Phase anchor write failed', { error: String(e) }); }`\n   - NOTE: phases.ts already imports `logWarning` from `'../workflow-logger.js'` at line 31 — no import change needed.\n\n6. **bootstrap/register-hooks.ts line ~51** — preference load catch:\n   - Find: `} catch { /* non-fatal */ }` in the preference load block (around the `show_token_cost` section)\n   - Add import: `import { logWarning } from '../workflow-logger.js';` at the top of the file (after existing imports)\n   - Change catch to: `} catch (e) { logWarning('engine', 'Failed to load preferences for show_token_cost', { error: String(e) }); }`\n\n7. Create `src/resources/extensions/hx/tests/silent-catch-diagnostics.test.ts`:\n   - Use `readFileSync` to read each modified source file\n   - Assert the OLD silent catch patterns are GONE:\n     - auto.ts: does NOT contain `catch {\\n          // Non-fatal — fall through to preserveBranch path`\n     - auto.ts: does NOT contain `catch {\\n    // Non-fatal — resume will still work via full bootstrap`\n     - auto.ts: does NOT contain `catch {\\n      // Non-fatal — best-effort closeout on pause`\n     - phases.ts: does NOT contain `catch { /* non-fatal — anchor is advisory */ }`\n     - register-hooks.ts: does NOT contain first `catch { /* non-fatal */ }` in the preference block\n   - Assert the NEW patterns ARE present:\n     - phases.ts: contains `logWarning('engine', 'Phase anchor write failed'`\n     - auto.ts: contains `logWarning('engine', 'Failed to check milestone SUMMARY existence'`\n     - register-hooks.ts: contains `logWarning('engine', 'Failed to load preferences for show_token_cost'`\n\n8. Run `npm run test:unit` and `npx tsc --noEmit`. Expect no regressions.",
+      "estimate": "45m",
+      "files": [
+        "src/resources/extensions/hx/auto.ts",
+        "src/resources/extensions/hx/auto/phases.ts",
+        "src/resources/extensions/hx/bootstrap/register-hooks.ts",
+        "src/resources/extensions/hx/tests/silent-catch-diagnostics.test.ts"
+      ],
+      "verify": "npm run test:unit 2>&1 | grep -E 'silent-catch|passed|failed' | tail -5; npx tsc --noEmit; grep -c \"logWarning.*Phase anchor write failed\" src/resources/extensions/hx/auto/phases.ts",
+      "inputs": [
+        "`src/resources/extensions/hx/auto.ts` — 3 catch blocks at ~lines 664, 865, 873",
+        "`src/resources/extensions/hx/auto/phases.ts` — 1 catch block at ~line 1214",
+        "`src/resources/extensions/hx/bootstrap/register-hooks.ts` — 1 catch block at ~line 51"
+      ],
+      "expected_output": [
+        "`src/resources/extensions/hx/auto.ts` — logWarning import widened; 3 catch blocks now emit logWarning",
+        "`src/resources/extensions/hx/auto/phases.ts` — anchor write catch now emits logWarning",
+        "`src/resources/extensions/hx/bootstrap/register-hooks.ts` — workflow-logger imported; preference load catch now emits logWarning",
+        "`src/resources/extensions/hx/tests/silent-catch-diagnostics.test.ts` — static analysis test with 8 assertions"
+      ],
+      "observability_impact": "5 previously silent failure modes now emit [hx:engine] WARN to stderr — Failed to check milestone SUMMARY existence, Failed to write paused-session.json, Unit closeout on pause threw, Phase anchor write failed, Failed to load preferences for show_token_cost",
+      "full_plan_md": "",
+      "sequence": 0
     }
   ],
   "decisions": [
@@ -6841,6 +7005,50 @@
       "verdict": "✅ pass",
       "duration_ms": 200,
       "created_at": "2026-04-05T16:13:14.686Z"
+    },
+    {
+      "id": 235,
+      "task_id": "T01",
+      "slice_id": "S04",
+      "milestone_id": "M003-ttxmyu",
+      "command": "node --experimental-strip-types src/resources/extensions/hx/tests/workflow-logger-audit.test.ts",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 25,
+      "created_at": "2026-04-05T17:25:16.751Z"
+    },
+    {
+      "id": 236,
+      "task_id": "T01",
+      "slice_id": "S04",
+      "milestone_id": "M003-ttxmyu",
+      "command": "node --experimental-strip-types src/resources/extensions/hx/tests/workflow-logger.test.ts",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 51,
+      "created_at": "2026-04-05T17:25:16.751Z"
+    },
+    {
+      "id": 237,
+      "task_id": "T01",
+      "slice_id": "S04",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npm run test:unit",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 73000,
+      "created_at": "2026-04-05T17:25:16.751Z"
+    },
+    {
+      "id": 238,
+      "task_id": "T01",
+      "slice_id": "S04",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npx tsc --noEmit",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 15000,
+      "created_at": "2026-04-05T17:25:16.751Z"
     }
   ]
 }
