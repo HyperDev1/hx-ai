@@ -257,13 +257,57 @@ export function registerHooks(pi: ExtensionAPI): void {
   });
 
   pi.on("before_provider_request", async (event) => {
-    const modelId = event.model?.id;
-    if (!modelId) return;
-    const { getEffectiveServiceTier, supportsServiceTier } = await import("../service-tier.js");
-    const tier = getEffectiveServiceTier();
-    if (!tier || !supportsServiceTier(modelId)) return;
     const payload = event.payload as Record<string, unknown> | null;
     if (!payload || typeof payload !== "object") return;
+
+    // ── Observation Masking ──────────────────────────────────────────
+    if (isAutoActive()) {
+      try {
+        const { loadEffectiveHXPreferences } = await import("../preferences.js");
+        const prefs = loadEffectiveHXPreferences();
+        const cmConfig = prefs?.preferences.context_management;
+
+        if (cmConfig?.observation_masking !== false) {
+          const keepTurns = cmConfig?.observation_mask_turns ?? 8;
+          const { createObservationMask } = await import("../context-masker.js");
+          const mask = createObservationMask(keepTurns);
+          const messages = payload.messages;
+          if (Array.isArray(messages)) {
+            payload.messages = mask(messages);
+          }
+        }
+
+        // Tool result truncation (immutable — create new objects)
+        const maxChars = cmConfig?.tool_result_max_chars ?? 800;
+        const msgs = payload.messages;
+        if (Array.isArray(msgs)) {
+          payload.messages = msgs.map((msg: Record<string, unknown>) => {
+            if (msg?.role === "toolResult" && Array.isArray(msg.content)) {
+              const blocks = msg.content as Array<Record<string, unknown>>;
+              const totalLen = blocks.reduce((sum: number, b) =>
+                sum + (typeof b.text === "string" ? b.text.length : 0), 0);
+              if (totalLen > maxChars) {
+                const truncated = blocks.map(b => {
+                  if (typeof b.text === "string" && b.text.length > maxChars) {
+                    return { ...b, text: b.text.slice(0, maxChars) + "\n…[truncated]" };
+                  }
+                  return b;
+                });
+                return { ...msg, content: truncated };
+              }
+            }
+            return msg;
+          });
+        }
+      } catch { /* non-fatal */ }
+    }
+
+    // ── Service Tier ─────────────────────────────────────────────────
+    const modelId = event.model?.id;
+    if (!modelId) return payload;
+    const { getEffectiveServiceTier, supportsServiceTier } = await import("../service-tier.js");
+    const tier = getEffectiveServiceTier();
+    if (!tier || !supportsServiceTier(modelId)) return payload;
     payload.service_tier = tier;
     return payload;
   });

@@ -71,7 +71,7 @@ Note: `ContextManagementConfig` may already be exported via the preferences-type
   - Estimate: 20m
   - Files: src/resources/extensions/hx/preferences-types.ts, src/resources/extensions/hx/preferences.ts
   - Verify: npx tsc --noEmit && npm run test:unit -- --grep 'preferences' 2>&1 | tail -5
-- [ ] **T03: Expand before_provider_request hook with observation masking and tool truncation** — Rewrite the `before_provider_request` handler in `register-hooks.ts` to add observation masking and tool-result truncation before the existing service tier logic.
+- [x] **T03: Rewrote before_provider_request hook in register-hooks.ts to add observation masking and tool-result truncation before service-tier logic; tsc clean, 3447 tests pass** — Rewrite the `before_provider_request` handler in `register-hooks.ts` to add observation masking and tool-result truncation before the existing service tier logic.
 
 **Critical constraint:** The current handler ends with `return payload` only after the service-tier block. After this change, the entire handler must return `payload` (not bare `return`) at the end. Bare `return` drops the mutation — the service tier won't apply after masking.
 

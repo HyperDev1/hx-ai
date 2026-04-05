@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-04-05T16:00:07.574Z",
+  "exported_at": "2026-04-05T16:08:38.939Z",
   "milestones": [
     {
       "id": "M001-df6x5t",
@@ -3962,19 +3962,26 @@
       "milestone_id": "M003-ttxmyu",
       "slice_id": "S03",
       "id": "T03",
-      "title": "Expand before_provider_request hook with observation masking and tool truncation",
-      "status": "pending",
-      "one_liner": "",
-      "narrative": "",
-      "verification_result": "",
+      "title": "Rewrote before_provider_request hook in register-hooks.ts to add observation masking and tool-result truncation before service-tier logic; tsc clean, 3447 tests pass",
+      "status": "complete",
+      "one_liner": "Rewrote before_provider_request hook in register-hooks.ts to add observation masking and tool-result truncation before service-tier logic; tsc clean, 3447 tests pass",
+      "narrative": "Replaced the existing 8-line before_provider_request handler (service-tier only) with the plan-specified 52-line handler. The new handler: (1) guards on payload type at the top, (2) when isAutoActive(), loads ContextManagementConfig preferences and applies createObservationMask to payload.messages, (3) truncates toolResult content blocks exceeding tool_result_max_chars (default 800) using immutable spread, (4) falls through to the unchanged service-tier import/apply block. All return statements after mutations carry payload (not bare return). Both masking and truncation are wrapped in a single try/catch (non-fatal).",
+      "verification_result": "tsc --noEmit: exit 0. grep -c createObservationMask register-hooks.ts: 2. grep for GSD tokens: no matches. HX unit test suite: 3447 passed, 0 failed, 4 skipped in 51.2s.",
       "duration": "",
-      "completed_at": null,
+      "completed_at": "2026-04-05T16:08:38.901Z",
       "blocker_discovered": false,
-      "deviations": "",
-      "known_issues": "",
-      "key_files": [],
-      "key_decisions": [],
-      "full_summary_md": "",
+      "deviations": "None.",
+      "known_issues": "None.",
+      "key_files": [
+        "src/resources/extensions/hx/bootstrap/register-hooks.ts"
+      ],
+      "key_decisions": [
+        "Masking and truncation guarded by isAutoActive() — non-auto sessions unaffected",
+        "Both masking and truncation in a single try/catch to ensure service-tier always runs",
+        "Control flow restructured: payload guard at top, service-tier returns payload (not bare return) to preserve masking mutations",
+        "Lazy dynamic imports for preferences.js and context-masker.js avoid circular import issues at module load time"
+      ],
+      "full_summary_md": "---\nid: T03\nparent: S03\nmilestone: M003-ttxmyu\nkey_files:\n  - src/resources/extensions/hx/bootstrap/register-hooks.ts\nkey_decisions:\n  - Masking and truncation guarded by isAutoActive() — non-auto sessions unaffected\n  - Both masking and truncation in a single try/catch to ensure service-tier always runs\n  - Control flow restructured: payload guard at top, service-tier returns payload (not bare return) to preserve masking mutations\n  - Lazy dynamic imports for preferences.js and context-masker.js avoid circular import issues at module load time\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-04-05T16:08:38.902Z\nblocker_discovered: false\n---\n\n# T03: Rewrote before_provider_request hook in register-hooks.ts to add observation masking and tool-result truncation before service-tier logic; tsc clean, 3447 tests pass\n\n**Rewrote before_provider_request hook in register-hooks.ts to add observation masking and tool-result truncation before service-tier logic; tsc clean, 3447 tests pass**\n\n## What Happened\n\nReplaced the existing 8-line before_provider_request handler (service-tier only) with the plan-specified 52-line handler. The new handler: (1) guards on payload type at the top, (2) when isAutoActive(), loads ContextManagementConfig preferences and applies createObservationMask to payload.messages, (3) truncates toolResult content blocks exceeding tool_result_max_chars (default 800) using immutable spread, (4) falls through to the unchanged service-tier import/apply block. All return statements after mutations carry payload (not bare return). Both masking and truncation are wrapped in a single try/catch (non-fatal).\n\n## Verification\n\ntsc --noEmit: exit 0. grep -c createObservationMask register-hooks.ts: 2. grep for GSD tokens: no matches. HX unit test suite: 3447 passed, 0 failed, 4 skipped in 51.2s.\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `npx tsc --noEmit` | 0 | ✅ pass | 9800ms |\n| 2 | `grep -c 'createObservationMask' src/resources/extensions/hx/bootstrap/register-hooks.ts` | 0 | ✅ pass (count=2) | 50ms |\n| 3 | `grep -rn '\\bGSD\\b|\\bgsd\\b' src/resources/extensions/hx/bootstrap/register-hooks.ts` | 1 | ✅ pass (no matches) | 50ms |\n| 4 | `node --import ./scripts/dist-test-resolve.mjs --test 'dist-test/src/resources/extensions/hx/tests/*.test.js'` | 0 | ✅ pass (3447 passed, 0 failed) | 51200ms |\n\n\n## Deviations\n\nNone.\n\n## Known Issues\n\nNone.\n\n## Files Created/Modified\n\n- `src/resources/extensions/hx/bootstrap/register-hooks.ts`\n",
       "description": "Rewrite the `before_provider_request` handler in `register-hooks.ts` to add observation masking and tool-result truncation before the existing service tier logic.\n\n**Critical constraint:** The current handler ends with `return payload` only after the service-tier block. After this change, the entire handler must return `payload` (not bare `return`) at the end. Bare `return` drops the mutation — the service tier won't apply after masking.\n\nThe full new handler body (replace everything between `pi.on('before_provider_request', async (event) => {` and its closing `});`):\n\n```typescript\npi.on(\"before_provider_request\", async (event) => {\n  const payload = event.payload as Record<string, unknown> | null;\n  if (!payload || typeof payload !== \"object\") return;\n\n  // ── Observation Masking ──────────────────────────────────────────\n  if (isAutoActive()) {\n    try {\n      const { loadEffectiveHXPreferences } = await import(\"../preferences.js\");\n      const prefs = loadEffectiveHXPreferences();\n      const cmConfig = prefs?.preferences.context_management;\n\n      if (cmConfig?.observation_masking !== false) {\n        const keepTurns = cmConfig?.observation_mask_turns ?? 8;\n        const { createObservationMask } = await import(\"../context-masker.js\");\n        const mask = createObservationMask(keepTurns);\n        const messages = payload.messages;\n        if (Array.isArray(messages)) {\n          payload.messages = mask(messages);\n        }\n      }\n\n      // Tool result truncation (immutable — create new objects)\n      const maxChars = cmConfig?.tool_result_max_chars ?? 800;\n      const msgs = payload.messages;\n      if (Array.isArray(msgs)) {\n        payload.messages = msgs.map((msg: Record<string, unknown>) => {\n          if (msg?.role === \"toolResult\" && Array.isArray(msg.content)) {\n            const blocks = msg.content as Array<Record<string, unknown>>;\n            const totalLen = blocks.reduce((sum: number, b) =>\n              sum + (typeof b.text === \"string\" ? b.text.length : 0), 0);\n            if (totalLen > maxChars) {\n              const truncated = blocks.map(b => {\n                if (typeof b.text === \"string\" && b.text.length > maxChars) {\n                  return { ...b, text: b.text.slice(0, maxChars) + \"\\n…[truncated]\" };\n                }\n                return b;\n              });\n              return { ...msg, content: truncated };\n            }\n          }\n          return msg;\n        });\n      }\n    } catch { /* non-fatal */ }\n  }\n\n  // ── Service Tier ─────────────────────────────────────────────────\n  const modelId = event.model?.id;\n  if (!modelId) return payload;\n  const { getEffectiveServiceTier, supportsServiceTier } = await import(\"../service-tier.js\");\n  const tier = getEffectiveServiceTier();\n  if (!tier || !supportsServiceTier(modelId)) return payload;\n  payload.service_tier = tier;\n  return payload;\n});\n```\n\nThe original handler structure to replace spans from the `pi.on('before_provider_request'` line through its closing `});` — read the file first to get exact text for the Edit tool.",
       "estimate": "25m",
       "files": [
@@ -6749,6 +6756,50 @@
       "verdict": "✅ pass",
       "duration_ms": 74900,
       "created_at": "2026-04-05T16:00:07.533Z"
+    },
+    {
+      "id": 228,
+      "task_id": "T03",
+      "slice_id": "S03",
+      "milestone_id": "M003-ttxmyu",
+      "command": "npx tsc --noEmit",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 9800,
+      "created_at": "2026-04-05T16:08:38.901Z"
+    },
+    {
+      "id": 229,
+      "task_id": "T03",
+      "slice_id": "S03",
+      "milestone_id": "M003-ttxmyu",
+      "command": "grep -c 'createObservationMask' src/resources/extensions/hx/bootstrap/register-hooks.ts",
+      "exit_code": 0,
+      "verdict": "✅ pass (count=2)",
+      "duration_ms": 50,
+      "created_at": "2026-04-05T16:08:38.901Z"
+    },
+    {
+      "id": 230,
+      "task_id": "T03",
+      "slice_id": "S03",
+      "milestone_id": "M003-ttxmyu",
+      "command": "grep -rn '\\bGSD\\b|\\bgsd\\b' src/resources/extensions/hx/bootstrap/register-hooks.ts",
+      "exit_code": 1,
+      "verdict": "✅ pass (no matches)",
+      "duration_ms": 50,
+      "created_at": "2026-04-05T16:08:38.901Z"
+    },
+    {
+      "id": 231,
+      "task_id": "T03",
+      "slice_id": "S03",
+      "milestone_id": "M003-ttxmyu",
+      "command": "node --import ./scripts/dist-test-resolve.mjs --test 'dist-test/src/resources/extensions/hx/tests/*.test.js'",
+      "exit_code": 0,
+      "verdict": "✅ pass (3447 passed, 0 failed)",
+      "duration_ms": 51200,
+      "created_at": "2026-04-05T16:08:38.901Z"
     }
   ]
 }
