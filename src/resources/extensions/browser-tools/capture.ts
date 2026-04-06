@@ -54,11 +54,12 @@ export function getScreenshotQualityDefault(fallback: number): number {
 
 export async function captureCompactPageState(
 	p: Page,
-	options: { selectors?: string[]; includeBodyText?: boolean; target?: Page | Frame } = {},
+	options: { selectors?: string[]; includeBodyText?: boolean; target?: Page | Frame; clickTargetSelector?: string } = {},
 ): Promise<CompactPageState> {
 	const selectors = Array.from(new Set((options.selectors ?? []).filter(Boolean)));
+	const clickTargetSelector = options.clickTargetSelector ?? null;
 	const target = options.target ?? p;
-	const domState = await target.evaluate(({ selectors, includeBodyText }) => {
+	const domState = await target.evaluate(({ selectors, includeBodyText, clickTargetSelector }) => {
 		const selectorStates: Record<string, {
 			exists: boolean;
 			visible: boolean;
@@ -102,6 +103,33 @@ export async function captureCompactPageState(
 			};
 		}
 
+		// Click target state capture — done in same evaluate to save a round-trip
+		let clickTargetState: {
+			exists: boolean;
+			ariaExpanded: string | null;
+			ariaPressed: string | null;
+			ariaSelected: string | null;
+			open: boolean | null;
+		} | null = null;
+		if (clickTargetSelector) {
+			try {
+				const el = document.querySelector(clickTargetSelector) as HTMLElement | null;
+				if (!el) {
+					clickTargetState = { exists: false, ariaExpanded: null, ariaPressed: null, ariaSelected: null, open: null };
+				} else {
+					clickTargetState = {
+						exists: true,
+						ariaExpanded: el.getAttribute("aria-expanded"),
+						ariaPressed: el.getAttribute("aria-pressed"),
+						ariaSelected: el.getAttribute("aria-selected"),
+						open: el instanceof HTMLDialogElement ? el.open : el.getAttribute("open") !== null,
+					};
+				}
+			} catch {
+				clickTargetState = { exists: false, ariaExpanded: null, ariaPressed: null, ariaSelected: null, open: null };
+			}
+		}
+
 		const focused = document.activeElement as HTMLElement | null;
 		const focusedDesc = focused && focused !== document.body && focused !== document.documentElement
 			? `${focused.tagName.toLowerCase()}${focused.id ? '#' + focused.id : ''}${focused.getAttribute('aria-label') ? ' "' + focused.getAttribute('aria-label') + '"' : ''}`
@@ -129,10 +157,15 @@ export async function captureCompactPageState(
 				title: dialogTitle,
 			},
 			selectorStates,
+			clickTargetState: clickTargetState ?? undefined,
 		};
-	}, { selectors, includeBodyText: options.includeBodyText === true });
+	}, { selectors, includeBodyText: options.includeBodyText === true, clickTargetSelector });
 	// URL and title always come from the Page, not the frame
-	return { ...domState, url: p.url(), title: await p.title() };
+	const result: CompactPageState = { ...domState, url: p.url(), title: await p.title() };
+	if (domState.clickTargetState) {
+		result.clickTargetState = domState.clickTargetState;
+	}
+	return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -168,6 +201,14 @@ export async function constrainScreenshot(
 	mimeType: string,
 	quality: number,
 ): Promise<Buffer> {
+	// Fast path for PNG: IHDR chunk contains width/height at fixed offsets (bytes 16-23).
+	// This avoids a full sharp metadata decode for images already within limits.
+	if (mimeType === "image/png" && buffer.length >= 24) {
+		const w = buffer.readUInt32BE(16);
+		const h = buffer.readUInt32BE(20);
+		if (w <= MAX_SCREENSHOT_WIDTH && h <= MAX_SCREENSHOT_HEIGHT) return buffer;
+	}
+
 	const meta = await sharp(buffer).metadata();
 	const width = meta.width;
 	const height = meta.height;

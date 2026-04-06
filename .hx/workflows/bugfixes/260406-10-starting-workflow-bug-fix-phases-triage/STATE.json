@@ -1,0 +1,32 @@
+{
+  "template": "bugfix",
+  "templateName": "Bug Fix",
+  "description": "Starting workflow: Bug Fix Phases: triage → fix → verify → ship Artifacts: .hx/workflows/bugfixes/260406-3-test-branch-isimlendirme-denemesi Branch: hx/bugfix/test-branch-isimlendirme-denemesi türkçe isimlendirdi.",
+  "branch": "hx/bugfix/starting-workflow-bug-fix-phases-triage",
+  "phases": [
+    {
+      "name": "triage",
+      "index": 0,
+      "status": "active"
+    },
+    {
+      "name": "fix",
+      "index": 1,
+      "status": "pending"
+    },
+    {
+      "name": "verify",
+      "index": 2,
+      "status": "pending"
+    },
+    {
+      "name": "ship",
+      "index": 3,
+      "status": "pending"
+    }
+  ],
+  "currentPhase": 0,
+  "startedAt": "2026-04-06T14:38:33.488Z",
+  "updatedAt": "2026-04-06T14:38:33.488Z",
+  "artifactDir": "/Users/beratcan/Desktop/GithubProjects/hx-ai/.hx/workflows/bugfixes/260406-10-starting-workflow-bug-fix-phases-triage"
+}
