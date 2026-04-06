@@ -277,3 +277,35 @@ The pattern handles cold-start re-injection (the agent was stopped and restarted
 **Rule:** When resolving the preferred model for `startModelSnapshot` in `auto-start.ts`, use `resolveModelWithFallbacksForUnit('execute-task')` — NOT `'default'`. The `'default'` unit type returns `undefined` because there's no switch case for it. `'execute-task'` hits the case that returns the user-configured execution model.
 
 **Pattern:** When the plan says "use the session-default model", check the actual `resolveModelWithFallbacksForUnit` switch statement to find which unit type resolves to a meaningful model. `'default'` is not a valid unit type in this implementation.
+
+## Safety harness git-checkpoint.ts: use spawnSync with string[] args, not execSync with template literals (M004/S01/T01)
+
+**Rule:** `git-checkpoint.ts` must use `spawnSync(cmd, args[])` with a string array (not `execSync` with template literal interpolation) to pass the cross-platform filesystem safety static-analysis test (Pattern 4 in the test suite).
+
+**Pattern:** Write a `runGit(args: string[]): SpawnSyncReturns<Buffer>` helper that calls `spawnSync('git', args, { encoding: 'buffer' })`. This avoids shell injection risk and satisfies the static-analysis pattern matcher that flags execSync/spawnSync template literal calls.
+
+**Symptom:** Using `execSync(\`git ${cmd}\`)` or `spawnSync('git', [interpolatedStr])` with template interpolation will cause the cross-platform-filesystem-safety test to fail even though the code otherwise works correctly.
+
+## Safety harness auto-post-unit.ts: use dynamic import for logWarning to avoid circular dependencies (M004/S01/T02)
+
+**Rule:** `auto-post-unit.ts` imports `logWarning` via dynamic `import()` inside the safety block body, not as a top-level static import. This matches the K003 lazy-dynamic-import pattern already established for preferences.js and context-masker.js in `before_provider_request`.
+
+**Pattern:** `const { logWarning } = await import("./workflow-logger.js")` inside the async safety block. Top-level static import of workflow-logger from auto-post-unit.ts creates a circular dep through the auto/ chain.
+
+## Safety tool_call recording gated by isAutoActive() — not always-on (M004/S01/T02)
+
+**Rule:** In `register-hooks.ts`, the `safetyRecordToolCall` handler fires on all tool_call events, but `safetyRecordToolResult` is only called when `isAutoActive()` is true. This prevents recording tool results during manual/discussion sessions where there is no safety session context.
+
+**Pattern:** `if (isAutoActive()) { safetyRecordToolResult(...) }` inside the `tool_execution_end` handler. The tool_call handler records unconditionally (destructive command warning is always relevant), but result recording is gated.
+
+## MAX_TIMEOUT_SCALE=6 cap on auto-timers.ts timeoutScale (M004/S01/T02)
+
+**Rule:** `auto-timers.ts` now caps `timeoutScale` at `MAX_TIMEOUT_SCALE = 6` to prevent runaway timeout escalation for tasks with very large estimate values. Without the cap, a 180-minute estimate would produce a 18× scale factor, making the timeout 18× the base — which defeats the timeout's purpose.
+
+**Pattern:** `const MAX_TIMEOUT_SCALE = 6; const timeoutScale = estimateMinutes && estimateMinutes > 0 ? Math.min(MAX_TIMEOUT_SCALE, Math.max(1, estimateMinutes / 10)) : 1;`
+
+## packages/pi-ai must be rebuilt before compiled tests can import new exports (M004/S02/T01)
+
+**Rule:** `dist-test/` imports `@hyperlab/hx-ai` from the installed package at `packages/pi-ai/dist/`. When a new file is added to `packages/pi-ai/src/` (e.g., a new provider), the package must be rebuilt (`cd packages/pi-ai && npm run build`) before `node --test dist-test/...` can find the new exports. `compile-tests.mjs` compiles the test files but does NOT rebuild pi-ai.
+
+**Pattern:** When adding new exports to packages/pi-ai, always run `cd packages/pi-ai && npm run build` as part of verification before running the compiled tests. The tsc --noEmit step will pass without rebuilding (it uses source files), but the test runner uses the dist/ output.

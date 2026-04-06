@@ -50,3 +50,4 @@ See `.hx/REQUIREMENTS.md` for the explicit capability contract, requirement stat
 - [x] M002-yle1ri: Upstream v2.59.0 Bugfix Port — **COMPLETE** — Ported all 95 upstream gsd-2 v2.59.0 bugfix commits with GSD→HX naming adaptation across 6 slices. 422 files changed. 4113 tests pass / 0 fail. npx tsc --noEmit exits 0. R001–R014 validated.
 - [x] M003-ttxmyu: Upstream v2.60.0–v2.63.0 Port + v2.59.0 Feature Backfill — **COMPLETE** — 82+ commits ported with GSD→HX naming. Capability routing, slice parallelism, context optimization, workflow-logger, MCP readers. 4298 tests / 0 fail. R010–R018 validated.
 - [ ] M004-erchk5: Upstream v2.64.0 Port — ~58 commits: LLM safety harness, Ollama native /api/chat, requirements DB seed, slice context injection, DB bash guard, auto-mode loop stability, MCP OAuth, misc fixes.
+  - S01 ✅ LLM Safety Harness — 7-file safety/ subsystem created and wired; git-checkpoint adversarial fix applied; 4 regression tests; tsc clean; 4300 tests pass
