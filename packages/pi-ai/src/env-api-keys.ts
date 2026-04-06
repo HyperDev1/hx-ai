@@ -119,6 +119,14 @@ export function getEnvApiKey(provider: any): string | undefined {
 		}
 	}
 
+	// Google Gemini CLI (Code Assist) uses OAuth via `pi login google-gemini-cli`.
+	// In non-interactive environments a static API key can be provided.
+	if (provider === "google-gemini-cli") {
+		if (process.env.GEMINI_CLI_API_KEY) {
+			return process.env.GEMINI_CLI_API_KEY;
+		}
+	}
+
 	const envMap: Record<string, string> = {
 		openai: "OPENAI_API_KEY",
 		"azure-openai-responses": "AZURE_OPENAI_API_KEY",

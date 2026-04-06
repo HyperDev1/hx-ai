@@ -1282,15 +1282,19 @@ export async function buildCompleteSlicePrompt(
   if (knowledgeInlineCS) inlined.push(knowledgeInlineCS);
 
   // Inline all task summaries for this slice
+  const MAX_TASK_SUMMARY_CHARS = 4000; // cap per-task summary to prevent context exhaustion (#5beb9f61c)
   const tDir = resolveTasksDir(base, mid, sid);
   if (tDir) {
     const summaryFiles = resolveTaskFiles(tDir, "SUMMARY").sort();
     for (const file of summaryFiles) {
       const absPath = join(tDir, file);
-      const content = await loadFile(absPath);
+      let content = await loadFile(absPath);
       const sRel = relSlicePath(base, mid, sid);
       const relPath = `${sRel}/tasks/${file}`;
       if (content) {
+        if (content.length > MAX_TASK_SUMMARY_CHARS) {
+          content = content.slice(0, MAX_TASK_SUMMARY_CHARS) + "\n\n[...summary truncated to prevent context exhaustion]";
+        }
         inlined.push(`### Task Summary: ${file.replace(/-SUMMARY\.md$/i, "")}\nSource: \`${relPath}\`\n\n${content.trim()}`);
       }
     }

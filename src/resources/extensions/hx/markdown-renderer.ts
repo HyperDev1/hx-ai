@@ -521,6 +521,9 @@ export async function renderRoadmapCheckboxes(
 
   if (!absPath) return false;
 
+  // No-op guard: skip write when content is unchanged — prevents stomping concurrent renders (#a5cab49ee)
+  if (updated === content) return true;
+
   await writeAndStore(absPath, artifactPath!, updated, {
     artifact_type: "ROADMAP",
     milestone_id: milestoneId,
@@ -593,6 +596,9 @@ export async function renderPlanCheckboxes(
   }
 
   if (!absPath) return false;
+
+  // No-op guard: skip write when content is unchanged — prevents stomping concurrent renders (#a5cab49ee)
+  if (updated === content) return true;
 
   await writeAndStore(absPath, artifactPath!, updated, {
     artifact_type: "PLAN",

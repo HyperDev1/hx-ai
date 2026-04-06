@@ -36,7 +36,7 @@ import {
 
 import { findMilestoneIds } from './milestone-ids.js';
 import { loadQueueOrder, sortByQueueOrder } from './queue-order.js';
-import { isClosedStatus } from './status-guards.js';
+import { isClosedStatus, isInactiveStatus } from './status-guards.js';
 import { nativeBatchParseHxFiles, type BatchParsedFile } from './native-parser-bridge.js';
 
 import { join, resolve } from 'path';
@@ -571,7 +571,7 @@ export async function deriveStateFromDb(basePath: string): Promise<HXState> {
   // Guard: [].every() === true (vacuous truth). Without the length check,
   // an empty slice array causes a premature phase transition to
   // validating-milestone. See: https://github.com/hx-build/hx-2/issues/2667
-  const allSlicesDone = activeMilestoneSlices.length > 0 && activeMilestoneSlices.every(s => isClosedStatus(s.status));
+  const allSlicesDone = activeMilestoneSlices.length > 0 && activeMilestoneSlices.every(s => isInactiveStatus(s.status));
   if (allSlicesDone) {
     const validationFile = resolveMilestoneFile(basePath, activeMilestone.id, "VALIDATION");
     const validationContent = validationFile ? await loadFile(validationFile) : null;
@@ -604,12 +604,12 @@ export async function deriveStateFromDb(basePath: string): Promise<HXState> {
 
   // ── Find active slice (first incomplete with deps satisfied) ─────────
   const sliceProgress = {
-    done: activeMilestoneSlices.filter(s => isClosedStatus(s.status)).length,
+    done: activeMilestoneSlices.filter(s => isInactiveStatus(s.status)).length,
     total: activeMilestoneSlices.length,
   };
 
   const doneSliceIds = new Set(
-    activeMilestoneSlices.filter(s => isClosedStatus(s.status)).map(s => s.id)
+    activeMilestoneSlices.filter(s => isInactiveStatus(s.status)).map(s => s.id)
   );
 
   // Parallel worker isolation: when HX_SLICE_LOCK is set, this worker is
@@ -626,7 +626,7 @@ export async function deriveStateFromDb(basePath: string): Promise<HXState> {
   let activeSliceRow: SliceRow | null = null;
 
   for (const s of eligibleSlices) {
-    if (isClosedStatus(s.status)) continue;
+    if (isInactiveStatus(s.status)) continue;
     if (s.depends.every(dep => doneSliceIds.has(dep))) {
       activeSlice = { id: s.id, title: s.title };
       activeSliceRow = s;

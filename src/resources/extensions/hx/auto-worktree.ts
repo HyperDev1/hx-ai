@@ -51,6 +51,7 @@ import {
   nativeDetectMainBranch,
   nativeWorkingTreeStatus,
   nativeAddAllWithExclusions,
+  nativeAddTracked,
   nativeCommit,
   nativeCheckoutBranch,
   nativeMergeSquash,
@@ -1235,7 +1236,16 @@ function autoCommitDirtyState(cwd: string): boolean {
   try {
     const status = nativeWorkingTreeStatus(cwd);
     if (!status) return false;
-    nativeAddAllWithExclusions(cwd, RUNTIME_EXCLUSION_PATHS);
+    // When .hx is a symlink, use git add -u (tracked files only) to avoid
+    // accidentally staging files from the external symlink target.
+    const hxPath = join(cwd, ".hx");
+    let hxIsSymlink = false;
+    try { hxIsSymlink = lstatSyncFn(hxPath).isSymbolicLink(); } catch { /* not found — not a symlink */ }
+    if (hxIsSymlink) {
+      nativeAddTracked(cwd);
+    } else {
+      nativeAddAllWithExclusions(cwd, RUNTIME_EXCLUSION_PATHS);
+    }
     const result = nativeCommit(
       cwd,
       "chore: auto-commit before milestone merge",
@@ -1283,8 +1293,8 @@ export function mergeMilestoneToMain(
   // database (#2823).
   if (isDbAvailable()) {
     try {
-      const worktreeDbPath = join(worktreeCwd, ".hx", "hx.db");
-      const mainDbPath = join(originalBasePath_, ".hx", "hx.db");
+      const worktreeDbPath = join(hxRoot(worktreeCwd), "hx.db");
+      const mainDbPath = join(hxRoot(originalBasePath_), "hx.db");
       if (!isSamePath(worktreeDbPath, mainDbPath)) {
         reconcileWorktreeDb(mainDbPath, worktreeDbPath);
       }

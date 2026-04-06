@@ -7,6 +7,7 @@ import {
   getMilestoneSlices,
   insertMilestone,
   insertSlice,
+  updateSliceFields,
   upsertMilestonePlanning,
   upsertSlicePlanning,
 } from "../hx-db.js";
@@ -251,6 +252,14 @@ export async function handlePlanMilestone(
           milestoneId: params.milestoneId,
           title: slice.title,
           status: "pending",
+          risk: slice.risk,
+          depends: slice.depends,
+          demo: slice.demo,
+        });
+        // Update mutable planning fields even for existing rows — INSERT OR IGNORE
+        // preserves status for completed slices but skips title/risk/depends/demo (#8b43b56f8).
+        updateSliceFields(params.milestoneId, slice.sliceId, {
+          title: slice.title,
           risk: slice.risk,
           depends: slice.depends,
           demo: slice.demo,

@@ -89,7 +89,7 @@ export async function checkForUpdates(options: UpdateCheckOptions = {}): Promise
   const timeout = setTimeout(() => controller.abort(), fetchTimeoutMs)
 
   try {
-    const res = await fetch(registryUrl, { signal: controller.signal })
+    const res = await fetch(registryUrl, { signal: controller.signal, cache: 'no-store' })
     clearTimeout(timeout)
 
     if (!res.ok) return
@@ -137,7 +137,7 @@ export async function checkAndPromptForUpdates(options: UpdateCheckOptions = {})
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), fetchTimeoutMs)
     try {
-      const res = await fetch(registryUrl, { signal: controller.signal })
+      const res = await fetch(registryUrl, { signal: controller.signal, cache: 'no-store' })
       clearTimeout(timeout)
       if (res.ok) {
         const data = (await res.json()) as { version?: string }

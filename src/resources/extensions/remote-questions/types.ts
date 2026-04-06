@@ -29,6 +29,9 @@ export interface RemotePrompt {
   questions: RemoteQuestion[];
   context?: {
     source: string;
+    milestoneId?: string;
+    sliceId?: string;
+    unitId?: string;
   };
 }
 
@@ -62,6 +65,9 @@ interface RemotePromptRecordBase {
   lastError?: string;
   context?: {
     source: string;
+    milestoneId?: string;
+    sliceId?: string;
+    unitId?: string;
   };
 }
 
