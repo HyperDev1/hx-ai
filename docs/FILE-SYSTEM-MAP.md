@@ -1,4 +1,4 @@
-# GSD2 File System Map
+# HX File System Map
 # Maps every source file to its system/subsystem labels
 
 ---
@@ -71,7 +71,7 @@
 
 | File | System Label(s) | Description |
 |------|-----------------|-------------|
-| src/app-paths.ts | Config | App directory paths (GSD_HOME, sessions, web PID, prefs) |
+| src/app-paths.ts | Config | App directory paths (HX_HOME, sessions, web PID, prefs) |
 | src/app-paths.js | Config | Compiled JS version |
 | src/bundled-extension-paths.ts | Extension Registry | Serializes/parses bundled extension directory paths |
 | src/bundled-resource-path.ts | Loader/Bootstrap, Extension Registry | Resolves bundled raw resource files from package root |
@@ -683,7 +683,7 @@
 | File | System Label(s) | Description |
 |------|-----------------|-------------|
 | web/app/layout.tsx | Web UI | Root Next.js layout with theme provider and font |
-| web/app/page.tsx | Web UI | Entry page loading GSDAppShell |
+| web/app/page.tsx | Web UI | Entry page loading HXAppShell |
 | web/components/hx/app-shell.tsx | Web UI | Main app shell — sidebar, panels, terminal, commands |
 | web/components/hx/sidebar.tsx | Web UI | Multi-panel sidebar with milestone explorer |
 | web/components/hx/status-bar.tsx | Web UI | Status bar with workspace state and metrics |
@@ -865,7 +865,7 @@
 | native/crates/engine/src/ps.rs | Native/Rust Tools | Cross-platform process tree management |
 | native/crates/engine/src/clipboard.rs | Native/Rust Tools | Clipboard read/write for text and images |
 | native/crates/engine/src/json_parse.rs | Text Processing, Native/Rust Tools | Streaming JSON parser with partial recovery |
-| native/crates/engine/src/gsd_parser.rs | HX Workflow, Native/Rust Tools | .hx/ directory file parser (markdown, frontmatter) |
+| native/crates/engine/src/hx_parser.rs | HX Workflow, Native/Rust Tools | .hx/ directory file parser (markdown, frontmatter) |
 | native/crates/engine/src/ttsr.rs | TTSR, Native/Rust Tools | TTSR regex engine with compiled RegexSet |
 | native/crates/engine/src/stream_process.rs | Text Processing, Native/Rust Tools | Bash stream processor (UTF-8, ANSI strip, binary) |
 | native/crates/engine/src/xxhash.rs | Native/Rust Tools | xxHash32 for hashline edit tool |

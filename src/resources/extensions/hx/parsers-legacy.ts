@@ -261,6 +261,23 @@ function _parsePlanImpl(content: string): SlicePlan {
     if (currentTask) tasks.push(currentTask);
   }
 
+  // Second pass: scan all body lines for task checkboxes that may appear outside
+  // the ## Tasks section boundary (e.g., after an interleaved detail heading).
+  const knownIds = new Set<string>(tasks.map(t => t.id));
+  for (const line of lines) {
+    const cbMatch2 = line.match(/^-\s+\[([ xX])\]\s+\*\*([\w.]+):\s+(.+?)\*\*/);
+    if (cbMatch2 && !knownIds.has(cbMatch2[2])) {
+      knownIds.add(cbMatch2[2]);
+      tasks.push({
+        id: cbMatch2[2],
+        title: cbMatch2[3],
+        description: '',
+        done: cbMatch2[1].toLowerCase() === 'x',
+        estimate: '',
+      });
+    }
+  }
+
   const filesSection = extractSection(body, 'Files Likely Touched');
   const filesLikelyTouched = filesSection ? parseBullets(filesSection) : [];
 

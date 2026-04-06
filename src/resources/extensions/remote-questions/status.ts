@@ -7,7 +7,7 @@ import { join } from "node:path";
 import { homedir } from "node:os";
 import { readPromptRecord } from "./store.js";
 
-function getGsdHome(): string {
+function getHxHome(): string {
   return process.env.HX_HOME || join(homedir(), ".hx");
 }
 
@@ -18,7 +18,7 @@ export interface LatestPromptSummary {
 }
 
 export function getLatestPromptSummary(): LatestPromptSummary | null {
-  const runtimeDir = join(getGsdHome(), "runtime", "remote-questions");
+  const runtimeDir = join(getHxHome(), "runtime", "remote-questions");
   if (!existsSync(runtimeDir)) return null;
   const files = readdirSync(runtimeDir).filter((f) => f.endsWith(".json"));
   if (files.length === 0) return null;

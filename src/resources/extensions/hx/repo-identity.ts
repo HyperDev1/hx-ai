@@ -125,7 +125,7 @@ export function isInheritedRepo(basePath: string): boolean {
 
     // The git root is a proper ancestor. Check whether it already has .hx
     // (i.e. the parent project was initialised with HX).
-    if (isProjectGsd(join(root, ".hx"))) return false;
+    if (isProjectHx(join(root, ".hx"))) return false;
 
     // Walk up from basePath's parent to the git root checking for .hx.
     // Start at dirname(normalizedBase), NOT normalizedBase itself — finding
@@ -133,7 +133,7 @@ export function isInheritedRepo(basePath: string): boolean {
     // says nothing about whether the git repo is inherited from an ancestor.
     let dir = dirname(normalizedBase);
     while (dir !== normalizedRoot && dir !== dirname(dir)) {
-      if (isProjectGsd(join(dir, ".hx"))) return false;
+      if (isProjectHx(join(dir, ".hx"))) return false;
       dir = dirname(dir);
     }
 
@@ -155,23 +155,23 @@ export function isInheritedRepo(basePath: string): boolean {
  * Treating it as a project `.hx` would cause isInheritedRepo() to wrongly
  * conclude that subdirectories are part of the home "project" (#2393).
  */
-function isProjectGsd(gsdPath: string): boolean {
-  if (!existsSync(gsdPath)) return false;
+function isProjectHx(hxPath: string): boolean {
+  if (!existsSync(hxPath)) return false;
 
   try {
-    const stat = lstatSync(gsdPath);
+    const stat = lstatSync(hxPath);
 
-    // Symlinks are always project .hx (created by ensureGsdSymlink).
+    // Symlinks are always project .hx (created by ensureHxSymlink).
     if (stat.isSymbolicLink()) return true;
 
     // For real directories, check that this isn't the global HX home.
-    // Recompute gsdHome dynamically so env overrides (GSD_HOME) are
+    // Recompute hxHome dynamically so env overrides (HX_HOME) are
     // picked up at call time, not just at module load time.
     if (stat.isDirectory()) {
-      const currentGsdHome = process.env.HX_HOME || join(homedir(), ".hx");
-      const normalizedGsdPath = canonicalizeExistingPath(gsdPath);
-      const normalizedGsdHome = canonicalizeExistingPath(currentGsdHome);
-      if (normalizedGsdPath === normalizedGsdHome) return false;
+      const currentHxHome = process.env.HX_HOME || join(homedir(), ".hx");
+      const normalizedHxPath = canonicalizeExistingPath(hxPath);
+      const normalizedHxHome = canonicalizeExistingPath(currentHxHome);
+      if (normalizedHxPath === normalizedHxHome) return false;
       return true;
     }
   } catch {
@@ -261,7 +261,7 @@ function resolveGitRoot(basePath: string): string {
 }
 
 /**
- * Validate a GSD_PROJECT_ID value.
+ * Validate a HX_PROJECT_ID value.
  *
  * Must contain only alphanumeric characters, hyphens, and underscores.
  * Call this once at startup so the user gets immediate feedback on bad values.
@@ -325,7 +325,7 @@ export function externalProjectsRoot(): string {
  * directory, making tracked planning files appear deleted.
  *
  * This helper scans the project root for entries matching `.hx <digits>` and
- * removes them. It is called early in `ensureGsdSymlink()` so that the
+ * removes them. It is called early in `ensureHxSymlink()` so that the
  * canonical `.hx` path is always the one in use.
  */
 const HX_NUMBERED_VARIANT_RE = /^\.hx \d+$/;
@@ -389,12 +389,12 @@ export function ensureHxSymlink(projectPath: string): string {
       const normalizedProject = canonicalizeExistingPath(projectPath);
       const normalizedRoot = canonicalizeExistingPath(gitRoot);
       if (normalizedProject !== normalizedRoot) {
-        const rootGsd = join(gitRoot, ".hx");
-        if (existsSync(rootGsd)) {
+        const rootHx = join(gitRoot, ".hx");
+        if (existsSync(rootHx)) {
           try {
-            const rootStat = lstatSync(rootGsd);
+            const rootStat = lstatSync(rootHx);
             if (rootStat.isSymbolicLink() || rootStat.isDirectory()) {
-              return rootStat.isSymbolicLink() ? realpathSync(rootGsd) : rootGsd;
+              return rootStat.isSymbolicLink() ? realpathSync(rootHx) : rootHx;
             }
           } catch {
             // Fall through to normal logic if we can't stat root .hx
@@ -448,7 +448,7 @@ export function ensureHxSymlink(projectPath: string): string {
 
     if (stat.isDirectory()) {
       // Real directory in the main repo — migration will handle this later.
-      // In worktrees, keep the directory in place and let syncGsdStateToWorktree
+      // In worktrees, keep the directory in place and let syncHxStateToWorktree
       // refresh its contents. Replacing a git-tracked .hx directory with a
       // symlink makes git think tracked planning files were deleted.
       return localHx;

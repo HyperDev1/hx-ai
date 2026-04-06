@@ -38,7 +38,7 @@ The worktree was created as a parallel workspace. It may contain code changes, n
 ### HX Artifact Diff
 
 ```diff
-{{gsdDiff}}
+{{hxDiff}}
 ```
 
 ## Your Task

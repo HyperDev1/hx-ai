@@ -10,8 +10,8 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { ChatMessage, TuiPrompt } from "@/lib/pty-chat-parser"
 import { PendingImage, processImageFile, generateImageId, MAX_PENDING_IMAGES } from "@/lib/image-utils"
 import {
-  useGSDWorkspaceState,
-  useGSDWorkspaceActions,
+  useHXWorkspaceState,
+  useHXWorkspaceActions,
   buildPromptCommand,
   type CompletedToolExecution,
   type ActiveToolExecution,
@@ -32,7 +32,7 @@ import { useTerminalFontSize } from "@/lib/use-terminal-font-size"
  * Top 3 are shown as standalone buttons; the rest live in the overflow menu.
  * All commands dispatch through the main bridge session.
  */
-interface GSDActionDef {
+interface HXActionDef {
   label: string
   command: string
   icon: LucideIcon
@@ -42,7 +42,7 @@ interface GSDActionDef {
   disabledDuringAuto?: boolean
 }
 
-const GSD_ACTIONS: GSDActionDef[] = [
+const HX_ACTIONS: HXActionDef[] = [
   // ── Top 3 (standalone buttons) ──
   { label: "Discuss",   command: "/hx discuss",   icon: MessageCircle,     description: "Start guided milestone/slice discussion",                    category: "workflow",    disabledDuringAuto: true },
   { label: "Next",      command: "/hx next",      icon: Play,              description: "Execute next task, then pause",                              category: "workflow" },
@@ -74,11 +74,11 @@ const GSD_ACTIONS: GSDActionDef[] = [
 ]
 
 /** Top 3 shown as standalone buttons next to chat input */
-const TOP_ACTIONS = GSD_ACTIONS.slice(0, 3)
+const TOP_ACTIONS = HX_ACTIONS.slice(0, 3)
 /** Remaining actions in the overflow menu */
-const OVERFLOW_ACTIONS = GSD_ACTIONS.slice(3)
+const OVERFLOW_ACTIONS = HX_ACTIONS.slice(3)
 
-const CATEGORY_LABELS: Record<GSDActionDef["category"], string> = {
+const CATEGORY_LABELS: Record<HXActionDef["category"], string> = {
   workflow: "Workflow",
   visibility: "Visibility",
   correction: "Course Correction",
@@ -87,8 +87,8 @@ const CATEGORY_LABELS: Record<GSDActionDef["category"], string> = {
   maintenance: "Maintenance",
 }
 
-function groupByCategory(actions: GSDActionDef[]): Array<{ category: GSDActionDef["category"]; label: string; items: GSDActionDef[] }> {
-  const seen = new Map<GSDActionDef["category"], GSDActionDef[]>()
+function groupByCategory(actions: HXActionDef[]): Array<{ category: HXActionDef["category"]; label: string; items: HXActionDef[] }> {
+  const seen = new Map<HXActionDef["category"], HXActionDef[]>()
   for (const a of actions) {
     let group = seen.get(a.category)
     if (!group) {
@@ -115,8 +115,8 @@ function groupByCategory(actions: GSDActionDef[]): Array<{ category: GSDActionDe
  *   - Secondary buttons: data-testid="chat-secondary-action-{command}".
  */
 export function ChatMode({ className }: { className?: string }) {
-  const state = useGSDWorkspaceState()
-  const { sendCommand } = useGSDWorkspaceActions()
+  const state = useHXWorkspaceState()
+  const { sendCommand } = useHXWorkspaceActions()
 
   const bridge = state.boot?.bridge ?? null
 
@@ -165,7 +165,7 @@ interface ChatModeHeaderProps {
  *   - data-testid="chat-secondary-action-{command}" on each secondary button
  */
 function ChatModeHeader({ onPrimaryAction, onSecondaryAction }: ChatModeHeaderProps) {
-  const state = useGSDWorkspaceState()
+  const state = useHXWorkspaceState()
 
   const boot = state.boot
   const workspace = boot?.workspace ?? null
@@ -1166,9 +1166,9 @@ function ChatInputBar({
 }: {
   onSendInput: (data: string, images?: PendingImage[]) => void
   connected: boolean
-  onOpenAction?: (action: GSDActionDef) => void
+  onOpenAction?: (action: HXActionDef) => void
 }) {
-  const autoActive = useGSDWorkspaceState().boot?.auto?.active ?? false
+  const autoActive = useHXWorkspaceState().boot?.auto?.active ?? false
   const [value, setValue] = useState("")
   const [overflowOpen, setOverflowOpen] = useState(false)
   const [pendingImages, setPendingImages] = useState<PendingImage[]>([])
@@ -1592,8 +1592,8 @@ function PlaceholderState({
  * first resolves the request — the store deduplicates.
  */
 function InlineUiRequest({ request }: { request: PendingUiRequest }) {
-  const { respondToUiRequest, dismissUiRequest } = useGSDWorkspaceActions()
-  const isSubmitting = useGSDWorkspaceState().commandInFlight === "extension_ui_response"
+  const { respondToUiRequest, dismissUiRequest } = useHXWorkspaceActions()
+  const isSubmitting = useHXWorkspaceState().commandInFlight === "extension_ui_response"
 
   const handleSubmit = useCallback((value: Record<string, unknown>) => {
     void respondToUiRequest(request.id, value)
@@ -1875,7 +1875,7 @@ interface ChatPaneProps {
   className?: string
   initialCommand?: string
   onCompletionSignal?: () => void
-  onOpenAction?: (action: GSDActionDef) => void
+  onOpenAction?: (action: HXActionDef) => void
   activityLabel?: string
   suppressTerminalChrome?: boolean
   suppressInitialEcho?: boolean
@@ -2010,8 +2010,8 @@ function ToolExecutionBlock({ tool }: { tool: CompletedToolExecution }) {
  *   - ChatInputBar shows "Disconnected" badge when bridge is not connected
  */
 export function ChatPane({ className, onOpenAction }: ChatPaneProps) {
-  const state = useGSDWorkspaceState()
-  const { submitInput, sendCommand, pushChatUserMessage } = useGSDWorkspaceActions()
+  const state = useHXWorkspaceState()
+  const { submitInput, sendCommand, pushChatUserMessage } = useHXWorkspaceActions()
   const [terminalFontSize] = useTerminalFontSize()
 
   const connected = state.connectionState === "connected"

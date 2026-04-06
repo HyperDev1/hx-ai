@@ -13,6 +13,7 @@ import { showNextAction } from "../shared/tui.js";
 import { nativeIsRepo, nativeInit } from "./native-git-bridge.js";
 import { ensureGitignore, untrackRuntimeFiles } from "./gitignore.js";
 import { hxRoot } from "./paths.js";
+import { generateCodebaseMap, writeCodebaseMap } from './codebase-generator.js';
 import { assertSafeDirectory } from "./validate-directory.js";
 import type { ProjectDetection, ProjectSignals } from "./detection.js";
 import { runSkillInstallStep } from "./skill-catalog.js";
@@ -232,11 +233,21 @@ export async function showProjectInit(
   }
 
   // ── Step 9: Bootstrap .hx/ ────────────────────────────────────────────────
-  bootstrapGsdDirectory(basePath, prefs, signals);
+  bootstrapHxDirectory(basePath, prefs, signals);
 
   // Ensure .gitignore
   ensureGitignore(basePath);
   untrackRuntimeFiles(basePath);
+
+  try {
+    const entries = generateCodebaseMap(basePath);
+    if (entries.length > 0) {
+      writeCodebaseMap(basePath, entries);
+      ctx.ui.notify(`Codebase map generated: ${entries.length} entries`, "info");
+    }
+  } catch {
+    // Non-fatal — codebase map generation failure should never block project init
+  }
 
   ctx.ui.notify("HX initialized. Starting your first milestone...", "info");
 
@@ -411,7 +422,7 @@ async function customizeAdvancedPrefs(
 
 // ─── Bootstrap ──────────────────────────────────────────────────────────────────
 
-function bootstrapGsdDirectory(
+function bootstrapHxDirectory(
   basePath: string,
   prefs: ProjectPreferences,
   signals: ProjectSignals,

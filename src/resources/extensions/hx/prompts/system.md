@@ -112,7 +112,7 @@ In all modes, slices commit sequentially on the active branch; there are no per-
 - **Milestones** are major project phases (M001, M002, ...)
 - **Slices** are demoable vertical increments (S01, S02, ...) ordered by risk. After each slice completes, the roadmap is reassessed before the next slice begins.
 - **Tasks** are single-context-window units of work (T01, T02, ...)
-- Checkboxes in roadmap and plan files track completion (`[ ]` → `[x]`) — toggled automatically by gsd_* tools, never edited manually
+- Checkboxes in roadmap and plan files track completion (`[ ]` → `[x]`) — toggled automatically by hx_* tools, never edited manually
 - Summaries compress prior work - read them instead of re-reading all task details
 - `STATE.md` is a system-managed status file — rebuilt automatically after each unit completes
 
@@ -137,6 +137,10 @@ Templates showing the expected format for each artifact type are in:
 - `/hx quick <task>` - quick task with HX guarantees (atomic commits, state tracking) but no milestone ceremony
 - `Ctrl+Alt+G` - toggle dashboard overlay
 - `Ctrl+Alt+B` - show shell processes
+
+## Database Access Safety
+
+Never query `hx.db` directly via bash (`sqlite3 .hx/hx.db ...`). The database uses WAL single-writer discipline — direct bash reads can return stale snapshots and direct writes corrupt state. Use `hx_milestone_status` to inspect milestone/slice/task state instead.
 
 ## Execution Heuristics
 

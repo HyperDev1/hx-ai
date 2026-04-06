@@ -7,12 +7,12 @@ import { join } from "node:path";
 import { homedir } from "node:os";
 import type { RemotePrompt, RemotePromptRecord, RemotePromptRef, RemoteAnswer, RemotePromptStatus } from "./types.js";
 
-function getGsdHome(): string {
+function getHxHome(): string {
   return process.env.HX_HOME || join(homedir(), ".hx");
 }
 
 function runtimeDir(): string {
-  return join(getGsdHome(), "runtime", "remote-questions");
+  return join(getHxHome(), "runtime", "remote-questions");
 }
 
 function recordPath(id: string): string {

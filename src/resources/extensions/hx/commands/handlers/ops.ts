@@ -11,6 +11,7 @@ import { handleExport } from "../../export.js";
 import { handleHistory } from "../../history.js";
 import { handleUndo } from "../../undo.js";
 import { handleRemote } from "../../../remote-questions/mod.js";
+import { handleCodebase } from "../../commands-codebase.js";
 import { projectRoot } from "../context.js";
 
 export async function handleOpsCommand(trimmed: string, ctx: ExtensionCommandContext, pi: ExtensionAPI): Promise<boolean> {
@@ -178,8 +179,8 @@ Examples:
     return true;
   }
   if (trimmed === "hx-to-hx") {
-    const { handleGsdToHxMigration } = await import("../../migrate-gsd-to-hx.js");
-    await handleGsdToHxMigration(ctx);
+    const { handleLegacyMigration } = await import("../../migrate-gsd-to-hx.js");
+    await handleLegacyMigration(ctx);
     return true;
   }
   if (trimmed === "remote" || trimmed.startsWith("remote ")) {
@@ -221,6 +222,10 @@ Examples:
   if (trimmed === "rethink") {
     const { handleRethink } = await import("../../rethink.js");
     await handleRethink(trimmed, ctx, pi);
+    return true;
+  }
+  if (trimmed === "codebase" || trimmed.startsWith("codebase ")) {
+    await handleCodebase(trimmed.replace(/^codebase\s*/, "").trim(), ctx);
     return true;
   }
   return false;

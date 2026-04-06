@@ -11,6 +11,8 @@ description: Create, debug, and iterate on HX extensions (TypeScript modules tha
 - Global extensions: `~/.hx/agent/extensions/*.ts` or `~/.hx/agent/extensions/*/index.ts`
 - Project-local extensions: `.hx/extensions/*.ts` or `.hx/extensions/*/index.ts`
 
+> **Note:** `~/.hx/agent/extensions/hx/` is the bundled HX system extension — do not install community extensions there. Place user extensions at `~/.hx/agent/extensions/my-ext.ts` or `~/.hx/agent/extensions/my-ext/index.ts`. Project-local extensions go in `.hx/extensions/`.
+
 **The three primitives:**
 1. **Events** — Listen and react (`pi.on("event", handler)`). Can block tool calls, modify messages, inject context.
 2. **Tools** — Give the LLM new abilities (`pi.registerTool()`). LLM calls them autonomously.

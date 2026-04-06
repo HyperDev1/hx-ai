@@ -2,6 +2,8 @@ You are executing HX auto-mode.
 
 ## UNIT: Validate Milestone {{milestoneId}} ("{{milestoneTitle}}")
 
+> ⚠️ **Database access**: Never run `sqlite3 .hx/hx.db` or query `hx.db` via bash. Use `hx_milestone_status` to inspect milestone/slice/task status. WAL single-writer discipline — direct bash access corrupts state.
+
 ## Working Directory
 
 Your working directory is `{{workingDirectory}}`. All file reads, writes, and shell commands MUST operate relative to this directory. Do NOT `cd` to any other directory.
@@ -36,10 +38,10 @@ All relevant context has been preloaded below — the roadmap, all slice summari
 
 ## Persist Validation
 
-**Persist validation results through `gsd_validate_milestone`.** Call it with: `milestoneId`, `verdict`, `remediationRound`, `successCriteriaChecklist`, `sliceDeliveryAudit`, `crossSliceIntegration`, `requirementCoverage`, `verificationClasses` (when non-empty), `verdictRationale`, and `remediationPlan` (if verdict is `needs-remediation`). The tool writes the validation to the DB and renders VALIDATION.md to disk.
+**Persist validation results through `hx_validate_milestone`.** Call it with: `milestoneId`, `verdict`, `remediationRound`, `successCriteriaChecklist`, `sliceDeliveryAudit`, `crossSliceIntegration`, `requirementCoverage`, `verificationClasses` (when non-empty), `verdictRationale`, and `remediationPlan` (if verdict is `needs-remediation`). The tool writes the validation to the DB and renders VALIDATION.md to disk.
 
 If verdict is `needs-remediation`:
-- After calling `gsd_validate_milestone`, use `gsd_reassess_roadmap` to add remediation slices. Pass `milestoneId`, a synthetic `completedSliceId` (e.g. "VALIDATION"), `verdict: "roadmap-adjusted"`, `assessment` text, and `sliceChanges` with the new slices in the `added` array. The tool persists the changes to the DB and re-renders ROADMAP.md.
+- After calling `hx_validate_milestone`, use `hx_reassess_roadmap` to add remediation slices. Pass `milestoneId`, a synthetic `completedSliceId` (e.g. "VALIDATION"), `verdict: "roadmap-adjusted"`, `assessment` text, and `sliceChanges` with the new slices in the `added` array. The tool persists the changes to the DB and re-renders ROADMAP.md.
 - These remediation slices will be planned and executed before validation re-runs.
 
 **File system safety:** When scanning milestone directories for evidence, use `ls` or `find` to list directory contents first — never pass a directory path (e.g. `tasks/`, `slices/`) directly to the `read` tool. The `read` tool only accepts file paths, not directories.

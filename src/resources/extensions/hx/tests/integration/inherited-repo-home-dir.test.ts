@@ -37,8 +37,8 @@ function run(cmd: string, args: string[], cwd: string): string {
 describe("isInheritedRepo when git root is HOME (#2393)", () => {
   let fakeHome: string;
   let stateDir: string;
-  let origGsdHome: string | undefined;
-  let origGsdStateDir: string | undefined;
+  let origHxHome: string | undefined;
+  let origHxStateDir: string | undefined;
 
   beforeEach(() => {
     // Create a fake HOME that is itself a git repo (dotfile manager scenario).
@@ -56,17 +56,17 @@ describe("isInheritedRepo when git root is HOME (#2393)", () => {
 
     // Save and override env. Point HX_HOME at fakeHome/.hx so the
     // function recognizes it as the global state directory.
-    origGsdHome = process.env.HX_HOME;
-    origGsdStateDir = process.env.HX_STATE_DIR;
+    origHxHome = process.env.HX_HOME;
+    origHxStateDir = process.env.HX_STATE_DIR;
     process.env.HX_HOME = join(fakeHome, ".hx");
     stateDir = mkdtempSync(join(tmpdir(), "hx-state-"));
     process.env.HX_STATE_DIR = stateDir;
   });
 
   afterEach(() => {
-    if (origGsdHome !== undefined) process.env.HX_HOME = origGsdHome;
+    if (origHxHome !== undefined) process.env.HX_HOME = origHxHome;
     else delete process.env.HX_HOME;
-    if (origGsdStateDir !== undefined) process.env.HX_STATE_DIR = origGsdStateDir;
+    if (origHxStateDir !== undefined) process.env.HX_STATE_DIR = origHxStateDir;
     else delete process.env.HX_STATE_DIR;
 
     rmSync(fakeHome, { recursive: true, force: true });
@@ -94,11 +94,11 @@ describe("isInheritedRepo when git root is HOME (#2393)", () => {
     // .hx is a symlink to an external state directory.
     const externalState = join(stateDir, "projects", "home-project");
     mkdirSync(externalState, { recursive: true });
-    const gsdDir = join(fakeHome, ".hx");
+    const hxDir = join(fakeHome, ".hx");
 
     // Remove the plain directory and replace with a symlink (real project .hx)
-    rmSync(gsdDir, { recursive: true, force: true });
-    symlinkSync(externalState, gsdDir);
+    rmSync(hxDir, { recursive: true, force: true });
+    symlinkSync(externalState, hxDir);
 
     const projectDir = join(fakeHome, "projects", "my-app");
     mkdirSync(projectDir, { recursive: true });
@@ -146,12 +146,12 @@ describe("isInheritedRepo with stale .hx at parent git root", () => {
     const projectDir = join(parentRepo, "my-project");
     mkdirSync(projectDir, { recursive: true });
 
-    // Without fix: isProjectGsd(join(root, ".hx")) returns true because
+    // Without fix: isProjectHx(join(root, ".hx")) returns true because
     // the stale .hx is a real directory that isn't the global HX home,
     // causing isInheritedRepo to return false (false negative).
     //
     // The stale .hx at parent is still treated as a "project .hx" by
-    // isProjectGsd(), so the git root check at line 128 returns false.
+    // isProjectHx(), so the git root check at line 128 returns false.
     // This is the expected behavior for that check — the defense-in-depth
     // fix in auto-start.ts handles this case by checking for local .git.
     //

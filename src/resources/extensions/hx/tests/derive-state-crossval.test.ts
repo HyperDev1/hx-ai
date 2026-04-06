@@ -1,7 +1,7 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 // derive-state-crossval.test.ts — Cross-validation: deriveStateFromDb() vs _deriveStateImpl()
-// Proves both paths produce field-identical GSDState across 7 fixture scenarios,
+// Proves both paths produce field-identical HXState across 7 fixture scenarios,
 // plus an auto-migration round-trip test.
 
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
@@ -21,7 +21,7 @@ import {
   insertTask,
 } from '../hx-db.ts';
 import { migrateHierarchyToDb } from '../md-importer.ts';
-import type { GSDState } from '../types.ts';
+import type { HXState } from '../types.ts';
 
 // ─── Fixture Helpers ───────────────────────────────────────────────────────
 
@@ -42,10 +42,10 @@ function cleanup(base: string): void {
 }
 
 /**
- * Compare every GSDState field between DB and filesystem derivation.
+ * Compare every HXState field between DB and filesystem derivation.
  * prefix identifies the scenario in assertion messages.
  */
-function assertStatesEqual(dbState: GSDState, fileState: GSDState, prefix: string): void {
+function assertStatesEqual(dbState: HXState, fileState: HXState, prefix: string): void {
   // Phase
   assert.deepStrictEqual(dbState.phase, fileState.phase, `${prefix}: phase`);
 

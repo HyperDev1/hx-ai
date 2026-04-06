@@ -19,7 +19,7 @@ import { existsSync, mkdirSync, readFileSync, realpathSync, rmSync } from "node:
 import { execFileSync } from "node:child_process";
 import { join, resolve, sep } from "node:path";
 import { HXError, HX_PARSE_ERROR, HX_STALE_STATE, HX_LOCK_HELD, HX_GIT_ERROR, HX_MERGE_CONFLICT } from "./errors.js";
-import { logWarning } from "./workflow-logger.js";
+import { logWarning, logError } from "./workflow-logger.js";
 import {
   nativeBranchDelete,
   nativeBranchExists,
@@ -109,6 +109,20 @@ export function worktreePath(basePath: string, name: string): string {
   return join(worktreesDir(basePath), name);
 }
 
+/**
+ * Safety guard: verifies that targetPath is inside basePath/.hx/worktrees/.
+ * Prevents accidental rmSync of arbitrary paths.
+ */
+export function isInsideWorktreesDir(basePath: string, targetPath: string): boolean {
+  const worktrees = worktreesDir(basePath);
+  // Normalize by ensuring both have consistent separators and the target
+  // starts with the worktrees dir + path separator (or is exactly worktrees dir).
+  const normalizedTarget = targetPath.replace(/\\/g, "/");
+  const normalizedWorktrees = worktrees.replace(/\\/g, "/");
+  return normalizedTarget === normalizedWorktrees ||
+    normalizedTarget.startsWith(normalizedWorktrees + "/");
+}
+
 export function worktreeBranchName(name: string): string {
   return `worktree/${name}`;
 }
@@ -138,7 +152,11 @@ export function createWorktree(basePath: string, name: string, opts: { branch?: 
     const gitFilePath = join(wtPath, ".git");
     if (!existsSync(gitFilePath)) {
       logWarning("reconcile", `Removing stale worktree directory (no .git file): ${wtPath}`, { worktree: name });
-      rmSync(wtPath, { recursive: true, force: true });
+      if (!isInsideWorktreesDir(basePath, wtPath)) {
+        logError("reconcile", `Safety: refusing to remove ${wtPath} — not inside worktrees dir`, { basePath, wtPath });
+      } else {
+        rmSync(wtPath, { recursive: true, force: true });
+      }
     } else {
       throw new HXError(HX_STALE_STATE, `Worktree "${name}" already exists at ${wtPath}`);
     }
@@ -410,7 +428,7 @@ function parseDiffNameStatus(entries: { status: string; path: string }[]): Workt
  * Diff the .hx/ directory between the worktree branch and main branch.
  * Returns a summary of added, modified, and removed HX artifacts.
  */
-export function diffWorktreeGSD(basePath: string, name: string): WorktreeDiffSummary {
+export function diffWorktreeHX(basePath: string, name: string): WorktreeDiffSummary {
   const branch = worktreeBranchName(name);
   const mainBranch = nativeDetectMainBranch(basePath);
 
@@ -456,7 +474,7 @@ export function diffWorktreeNumstat(basePath: string, name: string): FileLineSta
  * Get the full diff content for .hx/ between the worktree branch and main.
  * Returns the raw unified diff for LLM consumption.
  */
-export function getWorktreeGSDDiff(basePath: string, name: string): string {
+export function getWorktreeHXDiff(basePath: string, name: string): string {
   const branch = worktreeBranchName(name);
   const mainBranch = nativeDetectMainBranch(basePath);
 

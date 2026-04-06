@@ -1,6 +1,6 @@
 // tool-naming — Verifies canonical + alias tool registration for HX DB tools.
 //
-// Each DB tool must register under its canonical gsd_concept_action name
+// Each DB tool must register under its canonical hx_concept_action name
 // AND under a backward-compatible alias name.
 // The alias must share the exact same execute function reference as the canonical tool.
 
@@ -22,19 +22,19 @@ function makeMockPi() {
 // ─── Rename map ───────────────────────────────────────────────────────────────
 
 const RENAME_MAP: Array<{ canonical: string; alias: string }> = [
-  { canonical: "gsd_decision_save", alias: "gsd_save_decision" },
-  { canonical: "gsd_requirement_update", alias: "gsd_update_requirement" },
-  { canonical: "gsd_summary_save", alias: "gsd_save_summary" },
-  { canonical: "gsd_milestone_generate_id", alias: "gsd_generate_milestone_id" },
-  { canonical: "gsd_task_complete", alias: "gsd_complete_task" },
-  { canonical: "gsd_slice_complete", alias: "gsd_complete_slice" },
-  { canonical: "gsd_plan_milestone", alias: "gsd_milestone_plan" },
-  { canonical: "gsd_plan_slice", alias: "gsd_slice_plan" },
-  { canonical: "gsd_plan_task", alias: "gsd_task_plan" },
-  { canonical: "gsd_replan_slice", alias: "gsd_slice_replan" },
-  { canonical: "gsd_reassess_roadmap", alias: "gsd_roadmap_reassess" },
-  { canonical: "gsd_complete_milestone", alias: "gsd_milestone_complete" },
-  { canonical: "gsd_validate_milestone", alias: "gsd_milestone_validate" },
+  { canonical: "hx_decision_save", alias: "hx_save_decision" },
+  { canonical: "hx_requirement_update", alias: "hx_update_requirement" },
+  { canonical: "hx_summary_save", alias: "hx_save_summary" },
+  { canonical: "hx_milestone_generate_id", alias: "hx_generate_milestone_id" },
+  { canonical: "hx_task_complete", alias: "hx_complete_task" },
+  { canonical: "hx_slice_complete", alias: "hx_complete_slice" },
+  { canonical: "hx_plan_milestone", alias: "hx_milestone_plan" },
+  { canonical: "hx_plan_slice", alias: "hx_slice_plan" },
+  { canonical: "hx_plan_task", alias: "hx_task_plan" },
+  { canonical: "hx_replan_slice", alias: "hx_slice_replan" },
+  { canonical: "hx_reassess_roadmap", alias: "hx_roadmap_reassess" },
+  { canonical: "hx_complete_milestone", alias: "hx_milestone_complete" },
+  { canonical: "hx_validate_milestone", alias: "hx_milestone_validate" },
 ];
 
 // ─── Registration count ──────────────────────────────────────────────────────

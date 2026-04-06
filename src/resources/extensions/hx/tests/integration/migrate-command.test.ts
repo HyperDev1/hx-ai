@@ -10,9 +10,9 @@ import { tmpdir } from 'node:os';
 import {
   validatePlanningDirectory,
   parsePlanningDirectory,
-  transformToGSD,
+  transformToHX,
   generatePreview,
-  writeGSDDirectory,
+  writeHXDirectory,
 } from '../../migrate/index.ts';
 import { deriveState } from '../../state.ts';
 import { describe, test, beforeEach, afterEach } from 'node:test';
@@ -270,7 +270,7 @@ test('Full pipeline: parse → transform → preview → write → deriveState',
       assert.ok(Object.keys(parsed.phases).length >= 2, 'pipeline: phases parsed');
 
       // (c) Transform
-      const project = transformToGSD(parsed);
+      const project = transformToHX(parsed);
       assert.ok(project.milestones.length >= 1, 'pipeline: has milestones');
       assert.ok(project.milestones[0].slices.length >= 1, 'pipeline: has slices');
 
@@ -310,7 +310,7 @@ test('Full pipeline: parse → transform → preview → write → deriveState',
       assert.deepStrictEqual(preview.requirements.total, 2, 'pipeline: preview requirements total');
 
       // (e) Write
-      const result = await writeGSDDirectory(project, writeTarget);
+      const result = await writeHXDirectory(project, writeTarget);
       assert.ok(result.paths.length > 0, 'pipeline: files written');
 
       // Key files exist

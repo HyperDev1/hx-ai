@@ -138,15 +138,14 @@ console.log('\n── Loop guard: nested args are not stripped ──');
 
   // Truly identical nested calls should still be detected
   resetToolCallLoopGuard();
-  for (let i = 1; i <= 4; i++) {
-    checkToolCallLoop('ask_user_questions', {
-      questions: [{ id: 'same', question: 'Same?' }],
-    });
-  }
+  // ask_user_questions is a STRICT_LOOP_TOOLS member — blocks after 1 consecutive call
+  checkToolCallLoop('ask_user_questions', {
+    questions: [{ id: 'same', question: 'Same?' }],
+  });
   const blocked = checkToolCallLoop('ask_user_questions', {
     questions: [{ id: 'same', question: 'Same?' }],
   });
-  assert.ok(blocked.block === true, 'Identical nested calls should still be blocked');
+  assert.ok(blocked.block === true, 'Identical nested calls for strict-mode tools should be blocked on 2nd call');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -161,6 +160,62 @@ console.log('\n── Loop guard: nested key order is normalized ──');
   checkToolCallLoop('tool', { outer: { b: 2, a: 1 } });
   const result = checkToolCallLoop('tool', { outer: { a: 1, b: 2 } });
   assert.deepStrictEqual(getToolCallLoopCount(), 2, 'Same nested args in different key order should match');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STRICT_LOOP_TOOLS — ask_user_questions blocked after 1 consecutive call
+// ═══════════════════════════════════════════════════════════════════════════
+
+console.log('\n── Loop guard: strict-mode tools blocked after 1 consecutive call ──');
+
+{
+  resetToolCallLoopGuard();
+
+  // First call allowed
+  const first = checkToolCallLoop('ask_user_questions', { questions: [{ id: 'q1', question: 'Pick one?' }] });
+  assert.ok(first.block === false, '1st ask_user_questions call should be allowed');
+  assert.deepStrictEqual(first.count, 1, 'Count should be 1');
+
+  // Second identical call blocked (strict threshold = 1)
+  const second = checkToolCallLoop('ask_user_questions', { questions: [{ id: 'q1', question: 'Pick one?' }] });
+  assert.ok(second.block === true, '2nd identical ask_user_questions call should be blocked (strict mode)');
+  assert.ok(second.reason!.includes('ask_user_questions'), 'Reason should mention tool name');
+}
+
+// Non-strict tool (e.g. bash) still uses default threshold of 4
+{
+  resetToolCallLoopGuard();
+
+  for (let i = 1; i <= 4; i++) {
+    const r = checkToolCallLoop('bash', { command: 'ls' });
+    assert.ok(r.block === false, `bash call ${i} should still be allowed (default threshold = 4)`);
+  }
+  const blocked = checkToolCallLoop('bash', { command: 'ls' });
+  assert.ok(blocked.block === true, '5th identical bash call should be blocked at default threshold');
+}
+
+// Strict-mode tool with different args each time: not blocked
+{
+  resetToolCallLoopGuard();
+
+  for (let i = 1; i <= 5; i++) {
+    const r = checkToolCallLoop('ask_user_questions', {
+      questions: [{ id: `q${i}`, question: `Unique question ${i}?` }],
+    });
+    assert.ok(r.block === false, `ask_user_questions with unique args (call ${i}) should not be blocked`);
+    assert.deepStrictEqual(r.count, 1, `Each unique call should reset count to 1`);
+  }
+}
+
+// Reset clears lastToolName too
+{
+  resetToolCallLoopGuard();
+  checkToolCallLoop('ask_user_questions', { questions: [{ id: 'q', question: 'Q?' }] });
+  resetToolCallLoopGuard();
+  // After reset, first call of same strict-mode tool should be allowed again
+  const afterReset = checkToolCallLoop('ask_user_questions', { questions: [{ id: 'q', question: 'Q?' }] });
+  assert.ok(afterReset.block === false, 'After reset, first strict-mode call should be allowed again');
+  assert.deepStrictEqual(afterReset.count, 1, 'Count should be 1 after reset');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

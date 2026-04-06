@@ -12,8 +12,8 @@ if (!process.stdin.isTTY && process.env.CI) {
 const tmpDir = mkdtempSync(join(tmpdir(), "hx-smoke-init-"));
 
 try {
-  const binary = process.env.GSD_SMOKE_BINARY || "npx";
-  const args = process.env.GSD_SMOKE_BINARY
+  const binary = process.env.HX_SMOKE_BINARY || "npx";
+  const args = process.env.HX_SMOKE_BINARY
     ? ["init"]
     : ["hx-pi", "init"];
 
@@ -21,11 +21,11 @@ try {
     encoding: "utf8",
     timeout: 30_000,
     cwd: tmpDir,
-    env: { ...process.env, GSD_NON_INTERACTIVE: "1" },
+    env: { ...process.env, HX_NON_INTERACTIVE: "1" },
   });
 
-  const gsdDir = join(tmpDir, ".hx");
-  if (!existsSync(gsdDir)) {
+  const hxDir = join(tmpDir, ".hx");
+  if (!existsSync(hxDir)) {
     console.error(`.hx directory not created in ${tmpDir}`);
     process.exit(1);
   }

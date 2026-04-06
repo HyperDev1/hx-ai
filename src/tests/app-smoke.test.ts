@@ -411,14 +411,14 @@ test("deriveState shape is structurally complete", async (t) => {
 // 7. Doctor health checks — Gap 3
 // ═══════════════════════════════════════════════════════════════════════════
 
-test("runGSDDoctor completes without throwing on empty .hx/ directory", async (t) => {
-  const { runGSDDoctor } = await import("../resources/extensions/hx/doctor.ts");
+test("runHXDoctor completes without throwing on empty .hx/ directory", async (t) => {
+  const { runHXDoctor } = await import("../resources/extensions/hx/doctor.ts");
   const tmp = mkdtempSync(join(tmpdir(), "hx-doctor-smoke-"));
   mkdirSync(join(tmp, ".hx"), { recursive: true });
 
   t.after(() => rmSync(tmp, { recursive: true, force: true }));
   // audit-only mode (fix: false) — should never throw
-  const report = await runGSDDoctor(tmp, { fix: false });
+  const report = await runHXDoctor(tmp, { fix: false });
 
   // Structural assertions on the DoctorReport
   assert.ok(typeof report === "object" && report !== null, "report is an object");
@@ -432,8 +432,8 @@ test("runGSDDoctor completes without throwing on empty .hx/ directory", async (t
   assert.equal(report.fixesApplied.length, 0, "no fixes applied in audit mode");
 });
 
-test("runGSDDoctor issue objects have required fields", async (t) => {
-  const { runGSDDoctor } = await import("../resources/extensions/hx/doctor.ts");
+test("runHXDoctor issue objects have required fields", async (t) => {
+  const { runHXDoctor } = await import("../resources/extensions/hx/doctor.ts");
   const tmp = mkdtempSync(join(tmpdir(), "hx-doctor-fields-"));
   mkdirSync(join(tmp, ".hx"), { recursive: true });
 
@@ -443,7 +443,7 @@ test("runGSDDoctor issue objects have required fields", async (t) => {
   writeFileSync(join(mDir, "M001-CONTEXT.md"), "# Context\n");
 
   t.after(() => rmSync(tmp, { recursive: true, force: true }));
-  const report = await runGSDDoctor(tmp, { fix: false });
+  const report = await runHXDoctor(tmp, { fix: false });
 
   // Should find at least one issue (missing roadmap for M001)
   assert.ok(report.issues.length > 0, "expected at least one issue for milestone missing ROADMAP.md");
@@ -460,8 +460,8 @@ test("runGSDDoctor issue objects have required fields", async (t) => {
   }
 });
 
-test("runGSDDoctor with fix:false never modifies the filesystem", async (t) => {
-  const { runGSDDoctor } = await import("../resources/extensions/hx/doctor.ts");
+test("runHXDoctor with fix:false never modifies the filesystem", async (t) => {
+  const { runHXDoctor } = await import("../resources/extensions/hx/doctor.ts");
   const tmp = mkdtempSync(join(tmpdir(), "hx-doctor-readonly-"));
   const hxDir = join(tmp, ".hx");
   mkdirSync(hxDir, { recursive: true });
@@ -471,7 +471,7 @@ test("runGSDDoctor with fix:false never modifies the filesystem", async (t) => {
   writeFileSync(sentinelPath, "# sentinel\n");
 
   t.after(() => rmSync(tmp, { recursive: true, force: true }));
-  await runGSDDoctor(tmp, { fix: false });
+  await runHXDoctor(tmp, { fix: false });
 
   assert.ok(existsSync(sentinelPath), "sentinel file still exists after audit-only run");
   const content = readFileSync(sentinelPath, "utf-8");

@@ -108,6 +108,8 @@ export class AutoSession {
   originalModelId: string | null = null;
   originalModelProvider: string | null = null;
   lastBudgetAlertLevel: BudgetAlertLevel = 0;
+  /** The model ID of the most recently dispatched unit (set after selectAndApplyModel). */
+  currentDispatchedModelId: string | null = null;
 
   // ── Recovery ─────────────────────────────────────────────────────────────
   pendingCrashRecovery: string | null = null;
@@ -131,6 +133,9 @@ export class AutoSession {
 
   // ── Dispatch circuit breakers ──────────────────────────────────────
   rewriteAttemptCount = 0;
+
+  // ── Safety harness ───────────────────────────────────────────────────────
+  checkpointSha: string | null = null;
 
   // ── Metrics ──────────────────────────────────────────────────────────────
   autoStartTime = 0;
@@ -196,6 +201,7 @@ export class AutoSession {
     this.originalModelId = null;
     this.originalModelProvider = null;
     this.lastBudgetAlertLevel = 0;
+    this.currentDispatchedModelId = null;
 
     // Recovery
     this.pendingCrashRecovery = null;
@@ -214,6 +220,9 @@ export class AutoSession {
     this.rewriteAttemptCount = 0;
     this.isolationDegraded = false;
     this.milestoneMergedInPhases = false;
+
+    // Safety harness
+    this.checkpointSha = null;
 
     // Signal handler
     this.sigtermHandler = null;

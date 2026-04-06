@@ -18,7 +18,7 @@ import type {
 
 import { deriveState } from "./state.js";
 import { parseUnitId } from "./unit-id.js";
-import type { GSDState } from "./types.js";
+import type { HXState } from "./types.js";
 import { getManifestStatus } from "./files.js";
 export { inlinePriorMilestoneSummary } from "./files.js";
 import { collectSecretsFromManifest } from "../get-secrets-from-user.js";
@@ -60,7 +60,7 @@ import {
   getIsolationMode,
 } from "./preferences.js";
 import { sendDesktopNotification } from "./notifications.js";
-import type { GSDPreferences } from "./preferences.js";
+import type { HXPreferences } from "./preferences.js";
 import {
   type BudgetAlertLevel,
   getBudgetAlertLevel,
@@ -91,7 +91,7 @@ import {
   restoreHookState,
   clearPersistedHookState,
 } from "./post-unit-hooks.js";
-import { runGSDDoctor, rebuildState } from "./doctor.js";
+import { runHXDoctor, rebuildState } from "./doctor.js";
 import {
   preDispatchHealthGate,
   recordHealthSnapshot,
@@ -115,7 +115,8 @@ import {
   formatCost,
   formatTokenCount,
 } from "./metrics.js";
-import { setLogBasePath } from "./workflow-logger.js";
+import { setLogBasePath, logWarning } from "./workflow-logger.js";
+import { clearWrapupInflight } from "./bootstrap/auto-wrapup-guard.js";
 import { join } from "node:path";
 import { readFileSync, existsSync, mkdirSync, writeFileSync, unlinkSync } from "node:fs";
 import { atomicWriteSync } from "./atomic-write.js";
@@ -185,7 +186,7 @@ import {
   postUnitPreVerification,
   postUnitPostVerification,
 } from "./auto-post-unit.js";
-import { bootstrapAutoSession, type BootstrapDeps } from "./auto-start.js";
+import { bootstrapAutoSession, openProjectDbIfPresent, type BootstrapDeps } from "./auto-start.js";
 import { autoLoop, resolveAgentEnd, resolveAgentEndCancelled, _resetPendingResolve, isSessionSwitchInFlight, type LoopDeps, type ErrorContext } from "./auto-loop.js";
 import {
   WorktreeResolver,
@@ -492,6 +493,7 @@ function clearUnitTimeout(): void {
     s.continueHereHandle = null;
   }
   clearInFlightTools();
+  clearWrapupInflight();
 }
 
 /** Build snapshot metric opts. */
@@ -661,8 +663,8 @@ export async function stopAuto(
           } else {
             milestoneComplete = true;
           }
-        } catch {
-          // Non-fatal — fall through to preserveBranch path
+        } catch (e) {
+          logWarning('engine', 'Failed to check milestone SUMMARY existence', { milestone: s.currentMilestoneId ?? 'unknown', error: String(e) });
         }
 
         if (milestoneComplete) {
@@ -862,16 +864,16 @@ export async function pauseAuto(
       JSON.stringify(pausedMeta, null, 2),
       "utf-8",
     );
-  } catch {
-    // Non-fatal — resume will still work via full bootstrap, just without worktree context
+  } catch (e) {
+    logWarning('engine', 'Failed to write paused-session.json', { error: String(e) });
   }
 
   // Close out the current unit so its runtime record doesn't stay at "dispatched"
   if (s.currentUnit && ctx) {
     try {
       await closeoutUnit(ctx, s.basePath, s.currentUnit.type, s.currentUnit.id, s.currentUnit.startedAt);
-    } catch {
-      // Non-fatal — best-effort closeout on pause
+    } catch (e) {
+      logWarning('engine', 'Unit closeout on pause threw', { error: String(e) });
     }
     s.currentUnit = null;
   }
@@ -1173,6 +1175,7 @@ export async function startAuto(
     );
     restoreHookState(s.basePath);
     try {
+      await openProjectDbIfPresent(s.basePath);
       await rebuildState(s.basePath);
       syncCmuxSidebar(loadEffectiveHXPreferences()?.preferences, await deriveState(s.basePath));
     } catch (e) {
@@ -1181,7 +1184,7 @@ export async function startAuto(
       });
     }
     try {
-      const report = await runGSDDoctor(s.basePath, { fix: true });
+      const report = await runHXDoctor(s.basePath, { fix: true });
       if (report.fixesApplied.length > 0) {
         ctx.ui.notify(
           `Resume: applied ${report.fixesApplied.length} fix(es) to state.`,
@@ -1293,7 +1296,7 @@ function updateProgressWidget(
   ctx: ExtensionContext,
   unitType: string,
   unitId: string,
-  state: GSDState,
+  state: HXState,
 ): void {
   const badge = s.currentUnitRouting?.tier
     ? ({ light: "L", standard: "S", heavy: "H" }[s.currentUnitRouting.tier] ??
@@ -1317,6 +1320,7 @@ const widgetStateAccessors: WidgetStateAccessors = {
   getBasePath: () => s.basePath,
   isVerbose: () => s.verbose,
   isSessionSwitching: isSessionSwitchInFlight,
+  getCurrentDispatchedModelId: () => s.currentDispatchedModelId,
 };
 
 // ─── Preconditions ────────────────────────────────────────────────────────────
@@ -1329,7 +1333,7 @@ function ensurePreconditions(
   unitType: string,
   unitId: string,
   base: string,
-  state: GSDState,
+  state: HXState,
 ): void {
   const { milestone: mid, slice: sid } = parseUnitId(unitId);
 

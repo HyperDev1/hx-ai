@@ -51,7 +51,7 @@ export interface WorkspaceScopeTarget {
   kind: "project" | "milestone" | "slice" | "task";
 }
 
-export interface GSDWorkspaceIndex {
+export interface HXWorkspaceIndex {
   milestones: WorkspaceMilestoneTarget[];
   active: {
     milestoneId?: string;
@@ -135,7 +135,7 @@ export interface IndexWorkspaceOptions {
   validate?: boolean;
 }
 
-export async function indexWorkspace(basePath: string, opts: IndexWorkspaceOptions = {}): Promise<GSDWorkspaceIndex> {
+export async function indexWorkspace(basePath: string, opts: IndexWorkspaceOptions = {}): Promise<HXWorkspaceIndex> {
   const milestoneIds = findMilestoneIds(basePath);
   const milestones: WorkspaceMilestoneTarget[] = [];
 

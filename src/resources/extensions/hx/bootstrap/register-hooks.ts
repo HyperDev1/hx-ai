@@ -2,6 +2,7 @@ import { join } from "node:path";
 
 import type { ExtensionAPI, ExtensionContext } from "@hyperlab/hx-coding-agent";
 import { isToolCallEventType } from "@hyperlab/hx-coding-agent";
+import { logWarning } from "../workflow-logger.js";
 
 import { buildMilestoneFileName, resolveMilestonePath, resolveSliceFile, resolveSlicePath } from "../paths.js";
 import { buildBeforeAgentStartResult } from "./system-context.js";
@@ -15,9 +16,12 @@ import { deriveState } from "../state.js";
 import { getAutoDashboardData, isAutoActive, isAutoPaused, markToolEnd, markToolStart } from "../auto.js";
 import { isParallelActive, shutdownParallel } from "../parallel-orchestrator.js";
 import { checkToolCallLoop, resetToolCallLoopGuard } from "./tool-call-loop-guard.js";
+import { resetAskUserQuestionsCache } from "../../ask-user-questions.js";
 import { saveActivityLog } from "../activity-log.js";
 import { startRtkStatusUpdates, stopRtkStatusUpdates } from "../rtk-status.js";
 import { rewriteCommandWithRtk } from "../../shared/rtk.js";
+import { recordToolCall as safetyRecordToolCall, recordToolResult as safetyRecordToolResult } from "../safety/evidence-collector.js";
+import { classifyCommand } from "../safety/destructive-guard.js";
 
 // Skip the welcome screen on the very first session_start — cli.ts already
 // printed it before the TUI launched. Only re-print on /clear (subsequent sessions).
@@ -40,6 +44,7 @@ export function registerHooks(pi: ExtensionAPI): void {
   pi.on("session_start", async (_event, ctx) => {
     resetWriteGateState();
     resetToolCallLoopGuard();
+    resetAskUserQuestionsCache();
     await syncServiceTierStatus(ctx);
     startRtkStatusUpdates(ctx);
 
@@ -48,16 +53,16 @@ export function registerHooks(pi: ExtensionAPI): void {
       const { loadEffectiveHXPreferences } = await import("../preferences.js");
       const prefs = loadEffectiveHXPreferences();
       process.env.HX_SHOW_TOKEN_COST = prefs?.preferences.show_token_cost ? "1" : "";
-    } catch { /* non-fatal */ }
+    } catch (e) { logWarning('engine', 'Failed to load preferences for show_token_cost', { error: String(e) }); }
     if (isFirstSession) {
       isFirstSession = false;
     } else {
       try {
-        const gsdBinPath = process.env.HX_BIN_PATH;
-        if (gsdBinPath) {
+        const hxBinPath = process.env.HX_BIN_PATH;
+        if (hxBinPath) {
           const { dirname } = await import("node:path");
           const { printWelcomeScreen } = await import(
-            join(dirname(gsdBinPath), "welcome-screen.js")
+            join(dirname(hxBinPath), "welcome-screen.js")
           ) as { printWelcomeScreen: (opts: { version: string; modelName?: string; provider?: string }) => void };
           printWelcomeScreen({ version: process.env.HX_VERSION || "0.0.0" });
         }
@@ -83,6 +88,7 @@ export function registerHooks(pi: ExtensionAPI): void {
   pi.on("session_switch", async (_event, ctx) => {
     resetWriteGateState();
     resetToolCallLoopGuard();
+    resetAskUserQuestionsCache();
     clearDiscussionFlowState();
     await syncServiceTierStatus(ctx);
     loadToolApiKeys();
@@ -99,6 +105,7 @@ export function registerHooks(pi: ExtensionAPI): void {
 
   pi.on("agent_end", async (event, ctx: ExtensionContext) => {
     resetToolCallLoopGuard();
+    resetAskUserQuestionsCache();
     await handleAgentEnd(pi, event, ctx);
   });
 
@@ -193,6 +200,26 @@ export function registerHooks(pi: ExtensionAPI): void {
     if (result.block) return result;
   });
 
+  pi.on("tool_call", async (event) => {
+    // ── Safety harness: record all tool calls and warn on destructive commands ──
+    if (isAutoActive()) {
+      safetyRecordToolCall(event.toolName, event.input as Record<string, unknown>);
+
+      if (event.toolName === "bash" || event.toolName === "Bash") {
+        const cmd = (event.input as Record<string, unknown>)?.command;
+        if (typeof cmd === "string") {
+          const classification = classifyCommand(cmd);
+          if (classification.isDestructive) {
+            logWarning("safety", `Destructive command: [${classification.label}] ${cmd.slice(0, 120)}`, {
+              toolName: event.toolName,
+              label: classification.label ?? "unknown",
+            });
+          }
+        }
+      }
+    }
+  });
+
   pi.on("tool_result", async (event) => {
     if (event.toolName !== "ask_user_questions") return;
     const milestoneId = getDiscussionMilestoneId();
@@ -250,6 +277,9 @@ export function registerHooks(pi: ExtensionAPI): void {
 
   pi.on("tool_execution_end", async (event) => {
     markToolEnd(event.toolCallId);
+    if (isAutoActive()) {
+      safetyRecordToolResult(event.toolCallId, event.toolName, event.result, event.isError);
+    }
   });
 
   pi.on("model_select", async (_event, ctx) => {
@@ -257,13 +287,57 @@ export function registerHooks(pi: ExtensionAPI): void {
   });
 
   pi.on("before_provider_request", async (event) => {
-    const modelId = event.model?.id;
-    if (!modelId) return;
-    const { getEffectiveServiceTier, supportsServiceTier } = await import("../service-tier.js");
-    const tier = getEffectiveServiceTier();
-    if (!tier || !supportsServiceTier(modelId)) return;
     const payload = event.payload as Record<string, unknown> | null;
     if (!payload || typeof payload !== "object") return;
+
+    // ── Observation Masking ──────────────────────────────────────────
+    if (isAutoActive()) {
+      try {
+        const { loadEffectiveHXPreferences } = await import("../preferences.js");
+        const prefs = loadEffectiveHXPreferences();
+        const cmConfig = prefs?.preferences.context_management;
+
+        if (cmConfig?.observation_masking !== false) {
+          const keepTurns = cmConfig?.observation_mask_turns ?? 8;
+          const { createObservationMask } = await import("../context-masker.js");
+          const mask = createObservationMask(keepTurns);
+          const messages = payload.messages;
+          if (Array.isArray(messages)) {
+            payload.messages = mask(messages);
+          }
+        }
+
+        // Tool result truncation (immutable — create new objects)
+        const maxChars = cmConfig?.tool_result_max_chars ?? 800;
+        const msgs = payload.messages;
+        if (Array.isArray(msgs)) {
+          payload.messages = msgs.map((msg: Record<string, unknown>) => {
+            if (msg?.role === "toolResult" && Array.isArray(msg.content)) {
+              const blocks = msg.content as Array<Record<string, unknown>>;
+              const totalLen = blocks.reduce((sum: number, b) =>
+                sum + (typeof b.text === "string" ? b.text.length : 0), 0);
+              if (totalLen > maxChars) {
+                const truncated = blocks.map(b => {
+                  if (typeof b.text === "string" && b.text.length > maxChars) {
+                    return { ...b, text: b.text.slice(0, maxChars) + "\n…[truncated]" };
+                  }
+                  return b;
+                });
+                return { ...msg, content: truncated };
+              }
+            }
+            return msg;
+          });
+        }
+      } catch { /* non-fatal */ }
+    }
+
+    // ── Service Tier ─────────────────────────────────────────────────
+    const modelId = event.model?.id;
+    if (!modelId) return payload;
+    const { getEffectiveServiceTier, supportsServiceTier } = await import("../service-tier.js");
+    const tier = getEffectiveServiceTier();
+    if (!tier || !supportsServiceTier(modelId)) return payload;
     payload.service_tier = tier;
     return payload;
   });

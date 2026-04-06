@@ -13,6 +13,10 @@
  *
  * Skipped in CI (where the full build pipeline handles this) and when
  * installing as an end-user dependency (no packages/ directory).
+ *
+ * The stale-detection phase is also skipped when there is no .git directory,
+ * since mtime comparisons are unreliable for npm-installed tarballs (all files
+ * share the same extraction timestamp).
  */
 const { existsSync, statSync, readdirSync } = require('fs')
 const { resolve, join } = require('path')
@@ -37,6 +41,38 @@ function newestSrcMtime(dir) {
   return newest
 }
 
+/**
+ * Detect stale workspace packages by comparing src/ mtime against dist/.
+ *
+ * Returns [] immediately when root does not contain a .git directory — mtime
+ * comparisons are not meaningful for npm tarball installs where every file
+ * shares the same extraction timestamp.
+ *
+ * @param {string} root - Repository root (parent of packages/)
+ * @param {string[]} packages - Package names under packages/
+ * @returns {string[]} Names of packages whose dist/ is missing or stale
+ */
+function detectStalePackages(root, packages) {
+  // Skip stale detection outside a git repo (npm tarball / end-user install)
+  if (!existsSync(join(root, '.git'))) return []
+
+  const packagesDir = join(root, 'packages')
+  const stale = []
+  for (const pkg of packages) {
+    const distIndex = join(packagesDir, pkg, 'dist', 'index.js')
+    if (!existsSync(distIndex)) {
+      stale.push(pkg)
+      continue
+    }
+    const distMtime = statSync(distIndex).mtimeMs
+    const srcMtime = newestSrcMtime(join(packagesDir, pkg, 'src'))
+    if (srcMtime > distMtime) {
+      stale.push(pkg)
+    }
+  }
+  return stale
+}
+
 if (require.main === module) {
   const root = resolve(__dirname, '..')
   const packagesDir = join(root, 'packages')
@@ -57,19 +93,7 @@ if (require.main === module) {
     'pi-coding-agent',
   ]
 
-  const stale = []
-  for (const pkg of WORKSPACE_PACKAGES) {
-    const distIndex = join(packagesDir, pkg, 'dist', 'index.js')
-    if (!existsSync(distIndex)) {
-      stale.push(pkg)
-      continue
-    }
-    const distMtime = statSync(distIndex).mtimeMs
-    const srcMtime = newestSrcMtime(join(packagesDir, pkg, 'src'))
-    if (srcMtime > distMtime) {
-      stale.push(pkg)
-    }
-  }
+  const stale = detectStalePackages(root, WORKSPACE_PACKAGES)
 
   if (stale.length === 0) process.exit(0)
 
@@ -87,4 +111,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { newestSrcMtime }
+module.exports = { newestSrcMtime, detectStalePackages }

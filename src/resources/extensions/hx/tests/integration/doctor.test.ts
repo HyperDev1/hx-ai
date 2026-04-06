@@ -4,7 +4,7 @@ import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync, existsSync
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
-import { formatDoctorReport, runGSDDoctor, summarizeDoctorIssues, filterDoctorIssues, selectDoctorScope, validateTitle } from "../../doctor.js";
+import { formatDoctorReport, runHXDoctor, summarizeDoctorIssues, filterDoctorIssues, selectDoctorScope, validateTitle } from "../../doctor.js";
 const tmpBase = mkdtempSync(join(tmpdir(), "hx-doctor-test-"));
 const hx = join(tmpBase, ".hx");
 const mDir = join(hx, "milestones", "M001");
@@ -62,7 +62,7 @@ Implemented.
 
 describe('doctor', async () => {
   test('doctor diagnose', async () => {
-    const report = await runGSDDoctor(tmpBase, { fix: false });
+    const report = await runHXDoctor(tmpBase, { fix: false });
     // Reconciliation issue codes have been removed — doctor should NOT report them
     assert.ok(!report.issues.some(issue => issue.code === "all_tasks_done_missing_slice_summary" as any), "does not report removed code all_tasks_done_missing_slice_summary");
     assert.ok(!report.issues.some(issue => issue.code === "all_tasks_done_missing_slice_uat" as any), "does not report removed code all_tasks_done_missing_slice_uat");
@@ -70,7 +70,7 @@ describe('doctor', async () => {
   });
 
   test('doctor formatting', async () => {
-    const report = await runGSDDoctor(tmpBase, { fix: false });
+    const report = await runHXDoctor(tmpBase, { fix: false });
     const summary = summarizeDoctorIssues(report.issues);
     const scoped = filterDoctorIssues(report.issues, { scope: "M001/S01", includeWarnings: true });
     const text = formatDoctorReport(report, { scope: "M001/S01", includeWarnings: true, maxIssues: 5 });
@@ -83,7 +83,7 @@ describe('doctor', async () => {
   });
 
   test('doctor fix', async () => {
-    const report = await runGSDDoctor(tmpBase, { fix: true });
+    const report = await runHXDoctor(tmpBase, { fix: true });
     // With reconciliation removed, doctor no longer creates placeholder summaries,
     // UAT files, or marks checkboxes. It only applies infrastructure fixes.
     // The task checkbox marking (task_summary_without_done_checkbox) is also removed.
@@ -96,8 +96,8 @@ describe('doctor', async () => {
   // ─── Milestone summary detection: missing summary ──────────────────────
   test('doctor detects missing milestone summary', async () => {
     const msBase = mkdtempSync(join(tmpdir(), "hx-doctor-ms-test-"));
-    const msGsd = join(msBase, ".hx");
-    const msMDir = join(msGsd, "milestones", "M001");
+    const msHx = join(msBase, ".hx");
+    const msMDir = join(msHx, "milestones", "M001");
     const msSDir = join(msMDir, "slices", "S01");
     const msTDir = join(msSDir, "tasks");
     mkdirSync(msTDir, { recursive: true });
@@ -146,7 +146,7 @@ parent: M001
 
     // NO milestone summary — this is the condition we're detecting
 
-    const report = await runGSDDoctor(msBase, { fix: false });
+    const report = await runHXDoctor(msBase, { fix: false });
     assert.ok(
       report.issues.some(issue => issue.code === "all_slices_done_missing_milestone_summary"),
       "detects missing milestone summary when all slices are done"
@@ -163,8 +163,8 @@ parent: M001
   // ─── Milestone summary detection: summary present (no false positive) ──
   test('doctor does NOT flag milestone with summary', async () => {
     const msBase = mkdtempSync(join(tmpdir(), "hx-doctor-ms-ok-test-"));
-    const msGsd = join(msBase, ".hx");
-    const msMDir = join(msGsd, "milestones", "M001");
+    const msHx = join(msBase, ".hx");
+    const msMDir = join(msHx, "milestones", "M001");
     const msSDir = join(msMDir, "slices", "S01");
     const msTDir = join(msSDir, "tasks");
     mkdirSync(msTDir, { recursive: true });
@@ -210,7 +210,7 @@ parent: M001
     // Milestone summary EXISTS
     writeFileSync(join(msMDir, "M001-SUMMARY.md"), `# M001 Summary\n\nMilestone complete.`);
 
-    const report = await runGSDDoctor(msBase, { fix: false });
+    const report = await runHXDoctor(msBase, { fix: false });
     assert.ok(
       !report.issues.some(issue => issue.code === "all_slices_done_missing_milestone_summary"),
       "does NOT report missing milestone summary when summary exists"
@@ -222,8 +222,8 @@ parent: M001
   // ─── blocker_discovered_no_replan detection ────────────────────────────
   test('doctor detects blocker_discovered_no_replan', async () => {
     const bBase = mkdtempSync(join(tmpdir(), "hx-doctor-blocker-test-"));
-    const bGsd = join(bBase, ".hx");
-    const bMDir = join(bGsd, "milestones", "M001");
+    const bHx = join(bBase, ".hx");
+    const bMDir = join(bHx, "milestones", "M001");
     const bSDir = join(bMDir, "slices", "S01");
     const bTDir = join(bSDir, "tasks");
     mkdirSync(bTDir, { recursive: true });
@@ -274,7 +274,7 @@ Discovered an issue.
 `);
 
     // No REPLAN.md — should trigger the issue
-    const report = await runGSDDoctor(bBase, { fix: false });
+    const report = await runHXDoctor(bBase, { fix: false });
     const blockerIssues = report.issues.filter(i => i.code === "blocker_discovered_no_replan");
     assert.ok(blockerIssues.length > 0, "detects blocker_discovered_no_replan");
     assert.deepStrictEqual(blockerIssues[0]?.severity, "warning", "blocker issue has warning severity");
@@ -288,8 +288,8 @@ Discovered an issue.
   // ─── blocker_discovered with REPLAN.md (no false positive) ─────────────
   test('doctor does NOT flag blocker when REPLAN.md exists', async () => {
     const bBase = mkdtempSync(join(tmpdir(), "hx-doctor-blocker-ok-test-"));
-    const bGsd = join(bBase, ".hx");
-    const bMDir = join(bGsd, "milestones", "M001");
+    const bHx = join(bBase, ".hx");
+    const bMDir = join(bHx, "milestones", "M001");
     const bSDir = join(bMDir, "slices", "S01");
     const bTDir = join(bSDir, "tasks");
     mkdirSync(bTDir, { recursive: true });
@@ -334,7 +334,7 @@ Discovered an issue.
     // REPLAN.md exists — should NOT trigger
     writeFileSync(join(bSDir, "S01-REPLAN.md"), `# Replan\n\nAlready replanned.`);
 
-    const report = await runGSDDoctor(bBase, { fix: false });
+    const report = await runHXDoctor(bBase, { fix: false });
     const blockerIssues = report.issues.filter(i => i.code === "blocker_discovered_no_replan");
     assert.deepStrictEqual(blockerIssues.length, 0, "no blocker_discovered_no_replan when REPLAN.md exists");
 
@@ -344,8 +344,8 @@ Discovered an issue.
   // ─── Must-have verification: all addressed → no issue ─────────────────
   test('doctor: done task with must-haves all addressed → no issue', async () => {
     const mhBase = mkdtempSync(join(tmpdir(), "hx-doctor-mh-ok-"));
-    const mhGsd = join(mhBase, ".hx");
-    const mhMDir = join(mhGsd, "milestones", "M001");
+    const mhHx = join(mhBase, ".hx");
+    const mhMDir = join(mhHx, "milestones", "M001");
     const mhSDir = join(mhMDir, "slices", "S01");
     const mhTDir = join(mhSDir, "tasks");
     mkdirSync(mhTDir, { recursive: true });
@@ -359,7 +359,7 @@ Discovered an issue.
     // Summary mentioning both must-haves
     writeFileSync(join(mhTDir, "T01-SUMMARY.md"), `---\nid: T01\nparent: S01\nmilestone: M001\n---\n# T01: Implement\n\n## What Happened\nAdded parseWidgets function. Unit tests pass with zero failures.\n`);
 
-    const report = await runGSDDoctor(mhBase, { fix: false });
+    const report = await runHXDoctor(mhBase, { fix: false });
     assert.ok(
       !report.issues.some(i => i.code === "task_done_must_haves_not_verified"),
       "no must-have issue when all must-haves are addressed"
@@ -371,8 +371,8 @@ Discovered an issue.
   // ─── Must-have verification: not addressed → warning fired ───────────
   test('doctor: done task with must-haves NOT addressed → warning', async () => {
     const mhBase = mkdtempSync(join(tmpdir(), "hx-doctor-mh-fail-"));
-    const mhGsd = join(mhBase, ".hx");
-    const mhMDir = join(mhGsd, "milestones", "M001");
+    const mhHx = join(mhBase, ".hx");
+    const mhMDir = join(mhHx, "milestones", "M001");
     const mhSDir = join(mhMDir, "slices", "S01");
     const mhTDir = join(mhSDir, "tasks");
     mkdirSync(mhTDir, { recursive: true });
@@ -386,7 +386,7 @@ Discovered an issue.
     // Summary mentions only parseWidgets — the other two are missing
     writeFileSync(join(mhTDir, "T01-SUMMARY.md"), `---\nid: T01\nparent: S01\nmilestone: M001\n---\n# T01: Implement\n\n## What Happened\nAdded parseWidgets function.\n`);
 
-    const report = await runGSDDoctor(mhBase, { fix: false });
+    const report = await runHXDoctor(mhBase, { fix: false });
     const mhIssue = report.issues.find(i => i.code === "task_done_must_haves_not_verified");
     assert.ok(!!mhIssue, "must-have issue is fired when summary doesn't address all must-haves");
     assert.deepStrictEqual(mhIssue?.severity, "warning", "must-have issue is warning severity");
@@ -401,8 +401,8 @@ Discovered an issue.
   // ─── Must-have verification: no task plan → no issue ─────────────────
   test('doctor: done task with no task plan file → no issue', async () => {
     const mhBase = mkdtempSync(join(tmpdir(), "hx-doctor-mh-noplan-"));
-    const mhGsd = join(mhBase, ".hx");
-    const mhMDir = join(mhGsd, "milestones", "M001");
+    const mhHx = join(mhBase, ".hx");
+    const mhMDir = join(mhHx, "milestones", "M001");
     const mhSDir = join(mhMDir, "slices", "S01");
     const mhTDir = join(mhSDir, "tasks");
     mkdirSync(mhTDir, { recursive: true });
@@ -413,7 +413,7 @@ Discovered an issue.
     // NO task plan file — just a summary
     writeFileSync(join(mhTDir, "T01-SUMMARY.md"), `---\nid: T01\nparent: S01\nmilestone: M001\n---\n# T01: Implement\n\n## What Happened\nDone.\n`);
 
-    const report = await runGSDDoctor(mhBase, { fix: false });
+    const report = await runHXDoctor(mhBase, { fix: false });
     assert.ok(
       !report.issues.some(i => i.code === "task_done_must_haves_not_verified"),
       "no must-have issue when task plan file doesn't exist"
@@ -425,8 +425,8 @@ Discovered an issue.
   // ─── Must-have verification: plan exists but no Must-Haves section → no issue
   test('doctor: done task with plan but no Must-Haves section → no issue', async () => {
     const mhBase = mkdtempSync(join(tmpdir(), "hx-doctor-mh-nosect-"));
-    const mhGsd = join(mhBase, ".hx");
-    const mhMDir = join(mhGsd, "milestones", "M001");
+    const mhHx = join(mhBase, ".hx");
+    const mhMDir = join(mhHx, "milestones", "M001");
     const mhSDir = join(mhMDir, "slices", "S01");
     const mhTDir = join(mhSDir, "tasks");
     mkdirSync(mhTDir, { recursive: true });
@@ -439,7 +439,7 @@ Discovered an issue.
 
     writeFileSync(join(mhTDir, "T01-SUMMARY.md"), `---\nid: T01\nparent: S01\nmilestone: M001\n---\n# T01: Implement\n\n## What Happened\nDone.\n`);
 
-    const report = await runGSDDoctor(mhBase, { fix: false });
+    const report = await runHXDoctor(mhBase, { fix: false });
     assert.ok(
       !report.issues.some(i => i.code === "task_done_must_haves_not_verified"),
       "no must-have issue when task plan has no Must-Haves section"
@@ -484,8 +484,8 @@ Discovered an issue.
   // ─── doctor detects delimiter_in_title for milestone ───────────────────
   test('doctor detects em dash in milestone title', async () => {
     const dtBase = mkdtempSync(join(tmpdir(), "hx-doctor-dt-test-"));
-    const dtGsd = join(dtBase, ".hx");
-    const dtMDir = join(dtGsd, "milestones", "M001");
+    const dtHx = join(dtBase, ".hx");
+    const dtMDir = join(dtHx, "milestones", "M001");
     const dtSDir = join(dtMDir, "slices", "S01");
     const dtTDir = join(dtSDir, "tasks");
     mkdirSync(dtTDir, { recursive: true });
@@ -495,7 +495,7 @@ Discovered an issue.
     writeFileSync(join(dtSDir, "S01-PLAN.md"), `# S01: Demo Slice\n\n**Goal:** Demo\n**Demo:** Demo\n\n## Tasks\n- [ ] **T01: Implement** \`est:10m\`\n  Task.\n`);
     writeFileSync(join(dtTDir, "T01-PLAN.md"), `# T01: Implement\n\n## Steps\n\n1. Do the thing.\n`);
 
-    const report = await runGSDDoctor(dtBase, { fix: false });
+    const report = await runHXDoctor(dtBase, { fix: false });
     const dtIssues = report.issues.filter(i => i.code === "delimiter_in_title");
     assert.ok(dtIssues.length >= 1, "detects delimiter_in_title for milestone with em dash");
     const milestoneIssue = dtIssues.find(i => i.scope === "milestone");
@@ -511,8 +511,8 @@ Discovered an issue.
   // ─── doctor detects delimiter_in_title for slice ────────────────────────
   test('doctor detects em dash in slice title', async () => {
     const dtBase = mkdtempSync(join(tmpdir(), "hx-doctor-dt-slice-"));
-    const dtGsd = join(dtBase, ".hx");
-    const dtMDir = join(dtGsd, "milestones", "M001");
+    const dtHx = join(dtBase, ".hx");
+    const dtMDir = join(dtHx, "milestones", "M001");
     const dtSDir = join(dtMDir, "slices", "S01");
     const dtTDir = join(dtSDir, "tasks");
     mkdirSync(dtTDir, { recursive: true });
@@ -522,7 +522,7 @@ Discovered an issue.
     writeFileSync(join(dtSDir, "S01-PLAN.md"), `# S01: Core — Foundation\n\n**Goal:** Demo\n**Demo:** Demo\n\n## Tasks\n- [ ] **T01: Implement** \`est:10m\`\n  Task.\n`);
     writeFileSync(join(dtTDir, "T01-PLAN.md"), `# T01: Implement\n\n## Steps\n\n1. Do the thing.\n`);
 
-    const report = await runGSDDoctor(dtBase, { fix: false });
+    const report = await runHXDoctor(dtBase, { fix: false });
     const dtIssues = report.issues.filter(i => i.code === "delimiter_in_title");
     assert.ok(dtIssues.length >= 1, "detects delimiter_in_title for slice with em dash");
     const sliceIssue = dtIssues.find(i => i.scope === "slice");
@@ -536,8 +536,8 @@ Discovered an issue.
   // ─── doctor does NOT flag clean titles ──────────────────────────────────
   test('doctor does NOT flag milestone with clean title', async () => {
     const dtBase = mkdtempSync(join(tmpdir(), "hx-doctor-dt-clean-"));
-    const dtGsd = join(dtBase, ".hx");
-    const dtMDir = join(dtGsd, "milestones", "M001");
+    const dtHx = join(dtBase, ".hx");
+    const dtMDir = join(dtHx, "milestones", "M001");
     const dtSDir = join(dtMDir, "slices", "S01");
     const dtTDir = join(dtSDir, "tasks");
     mkdirSync(dtTDir, { recursive: true });
@@ -547,7 +547,7 @@ Discovered an issue.
     writeFileSync(join(dtSDir, "S01-PLAN.md"), `# S01: Demo Slice\n\n**Goal:** Demo\n**Demo:** Demo\n\n## Tasks\n- [ ] **T01: Implement** \`est:10m\`\n  Task.\n`);
     writeFileSync(join(dtTDir, "T01-PLAN.md"), `# T01: Implement\n\n## Steps\n\n1. Do the thing.\n`);
 
-    const report = await runGSDDoctor(dtBase, { fix: false });
+    const report = await runHXDoctor(dtBase, { fix: false });
     const dtIssues = report.issues.filter(i => i.code === "delimiter_in_title");
     assert.deepStrictEqual(dtIssues.length, 0, "no delimiter_in_title issues for clean titles");
 
@@ -575,7 +575,7 @@ Discovered an issue.
     writeFileSync(join(sDir2, "S01-PLAN.md"), "# S01\n\n**Goal:** g\n**Demo:** d\n\n## Tasks\n- [x] **T01: t** `est:5m`\n");
     writeFileSync(join(tDir2, "T01-SUMMARY.md"), "---\nid: T01\nparent: S01\nmilestone: M001\n---\n# T01\n## What Happened\nDone.\n");
 
-    const r = await runGSDDoctor(base, { fix: false });
+    const r = await runHXDoctor(base, { fix: false });
     const udepIssues = r.issues.filter(i => i.code === "unresolvable_dependency");
     assert.ok(udepIssues.length > 0, "unresolvable_dependency fires for unknown dep S99");
     assert.deepStrictEqual(udepIssues[0]?.severity, "warning", "severity is warning");
@@ -603,7 +603,7 @@ Discovered an issue.
     writeFileSync(join(sDir2, "S01-PLAN.md"), "# S01\n\n**Goal:** g\n**Demo:** d\n\n## Tasks\n- [x] **T01: t** `est:5m`\n");
     writeFileSync(join(tDir2, "T01-SUMMARY.md"), "---\nid: T01\nparent: S01\nmilestone: M001\n---\n# T01\n## What Happened\nDone.\n");
 
-    const r = await runGSDDoctor(base, { fix: false });
+    const r = await runHXDoctor(base, { fix: false });
     const udepIssues = r.issues.filter(i => i.code === "unresolvable_dependency");
     assert.deepStrictEqual(udepIssues.length, 0, "no unresolvable_dependency for valid S01 dep");
 
@@ -623,7 +623,7 @@ Discovered an issue.
     // Orphan: T02-SUMMARY exists but T02 is not in plan
     writeFileSync(join(t, "T02-SUMMARY.md"), "---\nid: T02\n---\n# T02\n## What Happened\nOld work.\n");
 
-    const r = await runGSDDoctor(base, { fix: false });
+    const r = await runHXDoctor(base, { fix: false });
     const orphanIssues = r.issues.filter(i => i.code === "task_file_not_in_plan");
     assert.ok(orphanIssues.length >= 1, "orphan SUMMARY should be reported");
     assert.ok(orphanIssues[0].fixable, "task_file_not_in_plan should be fixable:true");
@@ -643,7 +643,7 @@ Discovered an issue.
     writeFileSync(join(t, "T02-SUMMARY.md"), "---\nid: T02\n---\n# T02\n## What Happened\nOld.\n");
     writeFileSync(join(t, "T02-PLAN.md"), "# T02\n\n**Goal:** old\n");
 
-    await runGSDDoctor(base, { fix: true });
+    await runHXDoctor(base, { fix: true });
     assert.ok(!existsSync(join(t, "T02-SUMMARY.md")), "T02-SUMMARY.md should be removed");
     assert.ok(!existsSync(join(t, "T02-PLAN.md")), "T02-PLAN.md should be removed");
     assert.ok(existsSync(join(t, "T01-SUMMARY.md")), "T01-SUMMARY.md should be preserved");
@@ -665,7 +665,7 @@ Discovered an issue.
     // Summary only mentions "fix" (the matchable word from item 1); item 2 has no signal
     writeFileSync(join(t, "T01-SUMMARY.md"), "---\nid: T01\ncompleted_at: 2026-03-09T00:00:00Z\n---\n# T01\n## What Happened\nImplemented the fix successfully.\n");
 
-    const r = await runGSDDoctor(base, { fix: false });
+    const r = await runHXDoctor(base, { fix: false });
     const mhIssues = r.issues.filter(i => i.code === "task_done_must_haves_not_verified");
     assert.deepStrictEqual(mhIssues.length, 0, "no false positive when must-have has no significant words");
 
@@ -682,7 +682,7 @@ Discovered an issue.
     writeFileSync(roadmap, "# M001: Clean\n\n## Slices\n- [ ] **S01: Database Layer \u2014 Core Models** `risk:low` `depends:[]`\n  > After this: done\n");
     writeFileSync(join(s, "S01-PLAN.md"), "# S01\n\n**Goal:** g\n**Demo:** d\n\n## Tasks\n- [ ] **T01: t** `est:5m`\n");
 
-    await runGSDDoctor(base, { fix: true });
+    await runHXDoctor(base, { fix: true });
     const content = readFileSync(roadmap, "utf-8");
     assert.ok(!content.includes("\u2014"), "em dash should be removed from slice title");
     assert.ok(content.includes("Database Layer - Core Models"), "dash replaced with hyphen");
@@ -698,7 +698,7 @@ Discovered an issue.
     writeFileSync(join(m, "M001-ROADMAP.md"), "# M001: Clean\n\n## Slices\n- [ ] **S01: Layer \u2014 Models** `risk:low` `depends:[]`\n  > After this: done\n");
     writeFileSync(join(s, "S01-PLAN.md"), "# S01\n\n**Goal:** g\n**Demo:** d\n\n## Tasks\n- [ ] **T01: t** `est:5m`\n");
 
-    const r = await runGSDDoctor(base, { fix: false });
+    const r = await runHXDoctor(base, { fix: false });
     const dashIssues = r.issues.filter(i => i.code === "delimiter_in_title" && i.scope === "slice");
     assert.ok(dashIssues.length >= 1, "em dash in slice title should be reported");
     assert.ok(dashIssues[0].fixable, "delimiter_in_title for slice should be fixable:true");

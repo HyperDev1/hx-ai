@@ -102,7 +102,7 @@ const REQUIREMENTS_CONTENT = `# Requirements
 
 describe('derive-state-db', async () => {
 
-  // ─── Test 1: DB-backed deriveState produces identical GSDState ─────────
+  // ─── Test 1: DB-backed deriveState produces identical HXState ─────────
   test('derive-state-db: DB path matches file path', async () => {
     const base = createFixtureBase();
     try {
@@ -1027,18 +1027,18 @@ describe('derive-state-db', async () => {
   });
 
   // ─── Queued milestone row not clobbered by later plan (#2416 root cause) ──
-  test('derive-state-db: queued milestone row survives gsd_plan_milestone INSERT OR IGNORE', async () => {
+  test('derive-state-db: queued milestone row survives hx_plan_milestone INSERT OR IGNORE', async () => {
     try {
       openDatabase(':memory:');
 
-      // Simulates gsd_milestone_generate_id inserting a minimal queued row
+      // Simulates hx_milestone_generate_id inserting a minimal queued row
       insertMilestone({ id: 'M001', status: 'queued' });
 
       const before = getAllMilestones();
       assert.equal(before.length, 1, 'queued-row: one row after generate_id');
       assert.equal(before[0]!.status, 'queued', 'queued-row: status is queued');
 
-      // Simulates gsd_plan_milestone calling insertMilestone (INSERT OR IGNORE)
+      // Simulates hx_plan_milestone calling insertMilestone (INSERT OR IGNORE)
       insertMilestone({ id: 'M001', title: 'Planned Title', status: 'active' });
 
       const after = getAllMilestones();
@@ -1049,6 +1049,111 @@ describe('derive-state-db', async () => {
       closeDatabase();
     } finally {
       closeDatabase();
+    }
+  });
+});
+
+// ─── HX_SLICE_LOCK isolation ─────────────────────────────────────────────────
+describe('derive-state-db: HX_SLICE_LOCK isolation', () => {
+  // ─── DB-backed path: HX_SLICE_LOCK filters activeSlice ───────────────
+  test('derive-state-db: HX_SLICE_LOCK filters activeSlice to locked slice only', async () => {
+    const base = createFixtureBase();
+    try {
+      // M001 has S01 and S02, both pending, no deps.
+      // Without lock: S01 is activeSlice (first eligible).
+      // With HX_SLICE_LOCK=M001/S02: S02 becomes activeSlice.
+      writeFile(base, 'milestones/M001/M001-ROADMAP.md', `# M001: Test
+
+**Vision:** Test slice lock.
+
+## Slices
+
+- [ ] **S01: Foundation** \`risk:low\` \`depends:[]\`
+  > After this: Foundation done.
+
+- [ ] **S02: Feature** \`risk:low\` \`depends:[]\`
+  > After this: Feature done.
+`);
+      writeFile(base, 'milestones/M001/slices/S02/S02-PLAN.md', `# S02: Feature
+
+**Goal:** Test feature.
+**Demo:** Tests pass.
+
+## Tasks
+
+- [ ] **T01: Task** \`est:10m\`
+  Description.
+`);
+
+      openDatabase(':memory:');
+      insertMilestone({ id: 'M001', title: 'Test', status: 'active' });
+      insertSlice({ id: 'S01', milestoneId: 'M001', title: 'Foundation', status: 'pending', risk: 'low', depends: [] });
+      insertSlice({ id: 'S02', milestoneId: 'M001', title: 'Feature', status: 'pending', risk: 'low', depends: [] });
+      insertTask({ id: 'T01', sliceId: 'S02', milestoneId: 'M001', title: 'Task', status: 'pending' });
+
+      // Without lock: S01 is activeSlice (positionally first)
+      delete process.env.HX_SLICE_LOCK;
+      invalidateStateCache();
+      const unlocked = await deriveStateFromDb(base);
+      assert.deepStrictEqual(unlocked.activeSlice?.id, 'S01', 'slice-lock-db: unlocked activeSlice is S01');
+
+      // With lock: S02 becomes activeSlice
+      process.env.HX_SLICE_LOCK = 'M001/S02';
+      invalidateStateCache();
+      const locked = await deriveStateFromDb(base);
+      assert.deepStrictEqual(locked.activeSlice?.id, 'S02', 'slice-lock-db: locked activeSlice is S02');
+
+      closeDatabase();
+    } finally {
+      delete process.env.HX_SLICE_LOCK;
+      closeDatabase();
+      cleanup(base);
+    }
+  });
+
+  // ─── Filesystem path: HX_SLICE_LOCK filters activeSlice ──────────────
+  test('derive-state-db: HX_SLICE_LOCK filters activeSlice in _deriveStateImpl (fs path)', async () => {
+    const base = createFixtureBase();
+    try {
+      // Same scenario via filesystem-based path
+      writeFile(base, 'milestones/M001/M001-ROADMAP.md', `# M001: Test
+
+**Vision:** Test slice lock fs.
+
+## Slices
+
+- [ ] **S01: Foundation** \`risk:low\` \`depends:[]\`
+  > After this: Foundation done.
+
+- [ ] **S02: Feature** \`risk:low\` \`depends:[]\`
+  > After this: Feature done.
+`);
+      writeFile(base, 'milestones/M001/slices/S02/S02-PLAN.md', `# S02: Feature
+
+**Goal:** Test feature.
+**Demo:** Tests pass.
+
+## Tasks
+
+- [ ] **T01: Task** \`est:10m\`
+  Description.
+`);
+
+      // Without lock: S01 is activeSlice (positionally first)
+      delete process.env.HX_SLICE_LOCK;
+      invalidateStateCache();
+      const unlocked = await _deriveStateImpl(base);
+      assert.deepStrictEqual(unlocked.activeSlice?.id, 'S01', 'slice-lock-fs: unlocked activeSlice is S01');
+
+      // With lock: S02 becomes activeSlice
+      process.env.HX_SLICE_LOCK = 'M001/S02';
+      invalidateStateCache();
+      const locked = await _deriveStateImpl(base);
+      assert.deepStrictEqual(locked.activeSlice?.id, 'S02', 'slice-lock-fs: locked activeSlice is S02');
+
+    } finally {
+      delete process.env.HX_SLICE_LOCK;
+      cleanup(base);
     }
   });
 });

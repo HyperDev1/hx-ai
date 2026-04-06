@@ -9,7 +9,7 @@ import { deriveState, isValidationTerminal } from "../state.ts";
 import { resolveExpectedArtifactPath, diagnoseExpectedArtifact } from "../auto-artifact-paths.ts";
 import { verifyExpectedArtifact, buildLoopRemediationSteps } from "../auto-recovery.ts";
 import { resolveDispatch, type DispatchContext } from "../auto-dispatch.ts";
-import type { GSDState } from "../types.ts";
+import type { HXState } from "../types.ts";
 import { clearPathCache } from "../paths.ts";
 import { clearParseCache } from "../files.ts";
 
@@ -196,7 +196,7 @@ test("deriveState returns complete when both VALIDATION and SUMMARY exist", asyn
 // ─── Dispatch rule ────────────────────────────────────────────────────────
 
 test("dispatch rule matches validating-milestone phase", async () => {
-  const state: GSDState = {
+  const state: HXState = {
     activeMilestone: { id: "M001", title: "Test" },
     activeSlice: null,
     activeTask: null,
@@ -233,7 +233,7 @@ test("dispatch rule matches validating-milestone phase", async () => {
 });
 
 test("dispatch rule skips when skip_milestone_validation preference is set", async () => {
-  const state: GSDState = {
+  const state: HXState = {
     activeMilestone: { id: "M001", title: "Test" },
     activeSlice: null,
     activeTask: null,

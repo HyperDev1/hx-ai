@@ -7,17 +7,17 @@ import { resolveProjectRoot } from "../worktree.js";
 
 const hxHome = process.env.HX_HOME || join(homedir(), ".hx");
 
-export interface GsdCommandDefinition {
+export interface HxCommandDefinition {
   cmd: string;
   desc: string;
 }
 
-type CompletionMap = Record<string, readonly GsdCommandDefinition[]>;
+type CompletionMap = Record<string, readonly HxCommandDefinition[]>;
 
 export const HX_COMMAND_DESCRIPTION =
   "HX — Hyperlab Coding Agent: /hx help|start|templates|next|auto|stop|pause|status|widget|visualize|queue|quick|discuss|capture|triage|dispatch|history|undo|undo-task|reset-slice|rate|skip|export|cleanup|mode|prefs|config|keys|hooks|run-hook|skill-health|doctor|logs|forensics|changelog|migrate|hx-to-hx|remote|steer|knowledge|new-milestone|parallel|cmux|park|unpark|init|setup|inspect|extensions|update|fast|mcp|rethink";
 
-export const TOP_LEVEL_SUBCOMMANDS: readonly GsdCommandDefinition[] = [
+export const TOP_LEVEL_SUBCOMMANDS: readonly HxCommandDefinition[] = [
   { cmd: "help", desc: "Categorized command reference with descriptions" },
   { cmd: "next", desc: "Explicit step mode (same as /hx)" },
   { cmd: "auto", desc: "Autonomous mode — research, plan, execute, commit, repeat" },
@@ -68,6 +68,7 @@ export const TOP_LEVEL_SUBCOMMANDS: readonly GsdCommandDefinition[] = [
   { cmd: "start", desc: "Start a workflow template (bugfix, spike, feature, etc.)" },
   { cmd: "templates", desc: "List available workflow templates" },
   { cmd: "extensions", desc: "Manage extensions (list, enable, disable, info)" },
+  { cmd: "codebase", desc: "Generate and manage codebase map (.hx/CODEBASE.md)" },
   { cmd: "fast", desc: "Toggle OpenAI service tier (on/off/flex/status)" },
   { cmd: "mcp", desc: "MCP server status and connectivity check (status, check <server>)" },
   { cmd: "rethink", desc: "Conversational project reorganization — reorder, park, discard, add milestones" },
@@ -230,11 +231,18 @@ const NESTED_COMPLETIONS: CompletionMap = {
     { cmd: "pause", desc: "Pause custom workflow auto-mode" },
     { cmd: "resume", desc: "Resume paused custom workflow auto-mode" },
   ],
+  codebase: [
+    { cmd: "generate", desc: "Generate a new codebase map" },
+    { cmd: "update", desc: "Update existing codebase map" },
+    { cmd: "stats", desc: "Show codebase map statistics" },
+    { cmd: "help", desc: "Show codebase command help" },
+    { cmd: "--collapse-threshold", desc: "Collapse directories with N or fewer files" },
+  ],
 };
 
 function filterOptions(
   partial: string,
-  options: readonly GsdCommandDefinition[],
+  options: readonly HxCommandDefinition[],
   prefix = "",
 ) {
   const normalizedPrefix = prefix ? `${prefix} ` : "";
@@ -276,7 +284,7 @@ function getExtensionCompletions(prefix: string, action: string) {
   }
 }
 
-export function getGsdArgumentCompletions(prefix: string) {
+export function getHxArgumentCompletions(prefix: string) {
   const hasTrailingSpace = prefix.endsWith(" ");
   const parts = prefix.trim().split(/\s+/);
   if (hasTrailingSpace && parts.length >= 1) {

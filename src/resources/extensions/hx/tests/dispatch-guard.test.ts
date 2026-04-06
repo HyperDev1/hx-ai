@@ -263,3 +263,44 @@ test("dispatch guard skips cross-milestone check when HX_MILESTONE_LOCK is set (
     "Cannot dispatch execute-task M012/S02/T01: dependency slice M012/S01 is not complete.",
   );
 });
+
+test("dispatch guard skips positional check when HX_SLICE_LOCK is set", (t) => {
+  const repo = setupRepo();
+  t.after(() => {
+    delete process.env.HX_SLICE_LOCK;
+    teardownRepo(repo);
+  });
+
+  mkdirSync(join(repo, ".hx", "milestones", "M001"), { recursive: true });
+
+  // M001 has S01 (incomplete, no deps) and S02 (incomplete, no deps).
+  // Without lock: S02 is blocked by S01 being incomplete (positional ordering).
+  // With HX_SLICE_LOCK=M001/S02: S02 worker skips positional check.
+  insertMilestone({ id: "M001", title: "Parallel Slices" });
+  insertSlice({ id: "S01", milestoneId: "M001", title: "Foundation", status: "pending", depends: [], sequence: 1 });
+  insertSlice({ id: "S02", milestoneId: "M001", title: "Feature", status: "pending", depends: [], sequence: 2 });
+
+  writeFileSync(join(repo, ".hx", "milestones", "M001", "M001-ROADMAP.md"), "# M001\n");
+
+  // Without lock: S02 is blocked by incomplete S01 (positional fallback)
+  delete process.env.HX_SLICE_LOCK;
+  assert.match(
+    getPriorSliceCompletionBlocker(repo, "main", "execute-task", "M001/S02/T01") ?? "",
+    /earlier slice M001\/S01 is not complete/,
+  );
+
+  // With HX_SLICE_LOCK: S02 worker skips positional check — unblocked
+  process.env.HX_SLICE_LOCK = "M001/S02";
+  assert.equal(
+    getPriorSliceCompletionBlocker(repo, "main", "execute-task", "M001/S02/T01"),
+    null,
+  );
+
+  // With HX_SLICE_LOCK: intra-slice dep check still enforced (declared deps)
+  insertSlice({ id: "S03", milestoneId: "M001", title: "Dependent", status: "pending", depends: ["S02"], sequence: 3 });
+  process.env.HX_SLICE_LOCK = "M001/S03";
+  assert.match(
+    getPriorSliceCompletionBlocker(repo, "main", "execute-task", "M001/S03/T01") ?? "",
+    /dependency slice M001\/S02 is not complete/,
+  );
+});

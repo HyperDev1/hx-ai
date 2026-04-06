@@ -10,16 +10,16 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { homedir } from "node:os";
 
-const __extensionDir = resolveGsdExtensionDir();
+const __extensionDir = resolveHxExtensionDir();
 const registryPath = join(__extensionDir, "workflow-templates", "registry.json");
 
 /** Resolve the HX extension dir with fallback to ~/.hx/agent/extensions/hx/. */
-function resolveGsdExtensionDir(): string {
+function resolveHxExtensionDir(): string {
   const moduleDir = dirname(fileURLToPath(import.meta.url));
   if (existsSync(join(moduleDir, "workflow-templates"))) return moduleDir;
   const hxHome = process.env.HX_HOME || join(homedir(), ".hx");
-  const agentGsdDir = join(hxHome, "agent", "extensions", "hx");
-  if (existsSync(join(agentGsdDir, "workflow-templates"))) return agentGsdDir;
+  const agentHxDir = join(hxHome, "agent", "extensions", "hx");
+  if (existsSync(join(agentHxDir, "workflow-templates"))) return agentHxDir;
   return moduleDir;
 }
 

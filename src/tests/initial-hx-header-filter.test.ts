@@ -1,0 +1,60 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+
+const { filterInitialHxHeader } = await import("../../web/lib/initial-hx-header-filter.ts");
+
+const HX_LOGO_LINES = [
+  '██╗  ██╗██╗  ██╗',
+  '██║  ██║╚██╗██╔╝',
+  '███████║ ╚███╔╝ ',
+  '██╔══██║ ██╔██╗ ',
+  '██║  ██║██╔╝ ██╗',
+  '╚═╝  ╚═╝╚═╝  ╚═╝',
+] as const;
+
+test("filterInitialHxHeader strips a plain startup banner and keeps real terminal content", () => {
+  const warning = "Warning: Google Search is not configured.";
+  const raw = [...HX_LOGO_LINES, "  HX — Hyperlab Coding Agent v2.33.1", "", warning].join("\n");
+
+  const result = filterInitialHxHeader(raw);
+
+  assert.equal(result.status, "matched");
+  assert.equal(result.text, warning);
+});
+
+test("filterInitialHxHeader strips ANSI-colored startup banner output", () => {
+  const cyan = "\u001b[36m";
+  const reset = "\u001b[39m";
+  const bold = "\u001b[1m";
+  const boldReset = "\u001b[22m";
+  const dim = "\u001b[2m";
+  const dimReset = "\u001b[22m";
+  const warning = "Warning: terminal content starts here.\r\n";
+
+  const raw =
+    HX_LOGO_LINES.map((line) => `${cyan}${line}${reset}\r\n`).join("") +
+    `  ${bold}HX — Hyperlab Coding Agent${boldReset} ${dim}v2.33.1${dimReset}\r\n\r\n` +
+    warning;
+
+  const result = filterInitialHxHeader(raw);
+
+  assert.equal(result.status, "matched");
+  assert.equal(result.text, warning);
+});
+
+test("filterInitialHxHeader waits for more data when the startup banner is incomplete", () => {
+  const partial = `${HX_LOGO_LINES[0]}\n${HX_LOGO_LINES[1]}\n${HX_LOGO_LINES[2]}`;
+
+  const result = filterInitialHxHeader(partial);
+
+  assert.deepEqual(result, { status: "needs-more", text: "" });
+});
+
+test("filterInitialHxHeader passes normal terminal output through untouched", () => {
+  const raw = "Warning: already in the shell\r\n$ ";
+
+  const result = filterInitialHxHeader(raw);
+
+  assert.equal(result.status, "passthrough");
+  assert.equal(result.text, raw);
+});

@@ -9,7 +9,7 @@ Work autonomously to complete the assigned task. Use all available tools as need
 
 - Do **not** spawn subagents or act as an orchestrator unless the parent task explicitly instructs you to do so.
 - If the task looks like HX orchestration, planning, scouting, parallel dispatch, or review routing, stop and report that the caller should use the appropriate specialist agent instead (for example: `hx-worker`, `hx-scout`, `hx-reviewer`, or the top-level orchestrator).
-- In particular, do **not** call `gsd_scout`, `subagent`, `launch_parallel_view`, or `gsd_execute_parallel` on your own initiative.
+- In particular, do **not** call `hx_scout`, `subagent`, `launch_parallel_view`, or `hx_execute_parallel` on your own initiative.
 
 Output format when finished:
 

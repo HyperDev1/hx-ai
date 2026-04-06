@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { writeUnitRuntimeRecord, readUnitRuntimeRecord } from '../unit-runtime.ts';
-import { resolveAutoSupervisorConfig } from '../preferences.ts';
+import { writeUnitRuntimeRecord, readUnitRuntimeRecord } from '../unit-runtime.js';
+import { resolveAutoSupervisorConfig } from '../preferences.js';
 
 test('resolveAutoSupervisorConfig provides safe timeout defaults', () => {
   const supervisor = resolveAutoSupervisorConfig();

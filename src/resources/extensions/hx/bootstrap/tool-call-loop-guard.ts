@@ -16,8 +16,15 @@ import { createHash } from "node:crypto";
 
 const MAX_CONSECUTIVE_IDENTICAL_CALLS = 4;
 
+/** Tools that should trigger the loop guard after just 1 consecutive call (strict mode). */
+const STRICT_LOOP_TOOLS = new Set(["ask_user_questions"]);
+
+/** Strict mode threshold: block after this many consecutive identical calls. */
+const MAX_CONSECUTIVE_STRICT = 1;
+
 let consecutiveCount = 0;
 let lastSignature = "";
+let lastToolName: string | null = null;
 let enabled = true;
 
 /** Hash tool name + args into a compact signature for comparison. */
@@ -56,8 +63,13 @@ export function checkToolCallLoop(
     consecutiveCount = 1;
     lastSignature = sig;
   }
+  lastToolName = toolName;
 
-  if (consecutiveCount > MAX_CONSECUTIVE_IDENTICAL_CALLS) {
+  const threshold = STRICT_LOOP_TOOLS.has(toolName)
+    ? MAX_CONSECUTIVE_STRICT
+    : MAX_CONSECUTIVE_IDENTICAL_CALLS;
+
+  if (consecutiveCount > threshold) {
     return {
       block: true,
       reason:
@@ -75,6 +87,7 @@ export function checkToolCallLoop(
 export function resetToolCallLoopGuard(): void {
   consecutiveCount = 0;
   lastSignature = "";
+  lastToolName = null;
   enabled = true;
 }
 
@@ -83,6 +96,7 @@ export function disableToolCallLoopGuard(): void {
   enabled = false;
   consecutiveCount = 0;
   lastSignature = "";
+  lastToolName = null;
 }
 
 /** Get current consecutive count for diagnostics. */

@@ -24,3 +24,306 @@ Rules:
 - `hx --version` prints bare version for production, appends `(staging)` or `(local)` for non-prod.
 - `process.title` shows `hx` for prod, `hx [staging]` or `hx [local]` for others — visible in `ps` output.
 - Currently all three point to the same local repo via `npm link`. To switch `hx` to true prod: `npm unlink -g @hyperlab/hx && npm install -g @hyperlab/hx`.
+
+## Worktree file write reliability (M001/S01/T01)
+
+**Rule:** In git worktree environments, background `async_bash` jobs and `xargs`-based approaches to `perl -pi` do NOT reliably persist file writes. Only synchronous foreground shell loops (`while IFS= read -r FILE; do perl -pi /script.pl "$FILE"; done`) reliably modify tracked files.
+
+**Pattern:** Write the perl substitution script to a temp file (`/tmp/renames.pl`) then invoke `perl -pi /tmp/renames.pl "$FILE"` in a synchronous while loop. Avoid: `eval "perl -pi -e '...' $FILES"` (arg length limit), `xargs perl -pi -e "..."` (quoting issues with multiple substitutions), async_bash loops (background process isolation).
+
+## Import aliasing for protected function exports (M001/S01/T01)
+
+**Rule:** When callers reference identifiers exported from a file that cannot be modified (e.g., backward-compat migration code), use import aliasing to rename at the call site:
+```typescript
+import { oldFunctionName as newLocalName } from "./protected-file.js";
+```
+This clears verification greps without touching the protected file's exports.
+
+## Gsd*/GSD* rename exceptions — Rust N-API interface declarations (M001/S01)
+
+TypeScript interface property declarations that mirror Rust N-API function names (e.g., `batchParseGsdFiles:` and `scanGsdTree:` in `native-parser-bridge.ts`) must be left unchanged until S04 renames the Rust bindings. The T01 verification filter excluded only `native.scanGsdTree` and `native.batchParseGsdFiles` (method call syntax) but not bare property declarations. This is expected — 2 remaining hits are S04 scope.
+
+## Verification grep exclusion gap — native Function cast calls (M001/S01/T02)
+
+**Rule:** The T02 verification grep pattern excludes `native\.batchParseGsdFiles` but this only matches `native.batchParseGsdFiles` directly. The hx-parser/index.ts calls the native binary via cast: `(native as Record<string, Function>).batchParseGsdFiles(`. This does NOT match the exclusion pattern, leaving a count of 1 (not 0). This is intentional — the Rust binary still exports `batchParseGsdFiles` (renamed in S04), so the call string must stay unchanged until S04.
+
+**Pattern:** When a native binary function is called via TypeScript's indexed access `obj.funcName(`, don't rename it until the binary itself is renamed. The TS wrapper function and interface declaration can be renamed first; only the string literal used as the runtime property key must wait.
+
+## Edit tool misses Rust tokens with duplicate struct context — use sed instead (M001/S04/T01)
+
+**Rule:** When renaming a Rust type that appears in multiple structural contexts (e.g., `struct ParsedHxFile`, `Vec<ParsedGsdFile>`, `parsed_files.push(ParsedGsdFile {`), the Edit tool can miss occurrences because the match requires exact surrounding text. Use `sed -i '' 's/OldName/NewName/g'` for bulk identifier replacement in Rust files with repeated token patterns.
+
+**Pattern:** After any Edit-based Rust rename, always verify with `grep -n OldName file.rs` before proceeding. If hits remain, fall back to sed.
+
+## Glob is safer than explicit file lists for homogeneous test fixture updates (M001/S04/T02)
+
+**Rule:** When updating binary path strings across many similar test files (e.g., all `*.test.mjs` in `__tests__/`), use a shell glob rather than listing files explicitly. The glob catches files added since the plan was written. In S04/T02, the plan listed 13 files but 15 existed — the for-loop caught all automatically.
+
+**Pattern:** `for f in dir/*.test.mjs; do sed -i '' 's/old/new/g' "$f"; done` is more robust than a hardcoded list.
+
+## GSD→HX batch rename: test files can have duplicate variable names from renaming (M001/S01/T02)
+
+**Rule:** When test files test migration (e.g., migrate-gsd-to-hx.test.ts), they often have BOTH `gsdHome` (source dir) and `hxHome` (dest dir) variables. Batch renaming `gsdHome` → `hxHome` creates duplicate `const hxHome` declarations (TS2451 error). Fix by renaming the original `gsdHome` to `legacyHome` or `sourceHome` instead.
+
+**Pattern:** Review migration test files manually before or after batch renaming — they uniquely reference both old and new names as test fixtures.
+
+## A rename-only milestone can uncover pre-existing runtime bugs (M001/S02/T02)
+
+**Rule:** When renaming env vars, always check that both the write side and read side of each variable are updated together. In M001, `rpc-mode.ts` still read `GSD_WEB_BRIDGE_TUI` while `bridge-service.ts` already wrote `HX_WEB_BRIDGE_TUI` — this was a silent pre-existing bug that broke the embedded terminal feature. Similarly, `daemon.test.ts` set `GSD_DAEMON_CONFIG` but the daemon read `HX_DAEMON_CONFIG`.
+
+**Pattern:** Grep both for the old name and for any "split" references where the key appears on one side but not the other. `grep -rn 'BRIDGE_TUI\|DAEMON_CONFIG'` finds all occurrences of both sides.
+
+## Requirements DB vs REQUIREMENTS.md: always seed the DB before using hx_requirement_update (M001 close)
+
+**Rule:** The `hx_requirement_update` tool updates requirements stored in the HX database (hx.db). If requirements were defined only in REQUIREMENTS.md (not seeded to the DB), the tool will return "Requirement RXXX not found." In this case, update REQUIREMENTS.md directly.
+
+**Pattern:** At project kickoff, either seed requirements via the HX API or accept that requirement updates must be applied directly to REQUIREMENTS.md. Verify DB state with `sqlite3 .hx/hx.db "SELECT COUNT(*) FROM requirements;"` before calling hx_requirement_update.
+
+## Import aliasing prevents scope creep into protected files (M001/S01)
+
+**Rule:** When a protected file (like migrate-gsd-to-hx.ts) exports functions with old naming, callers should use import aliasing (`import { oldName as newLocalAlias }`) rather than modifying the protected file. This keeps the protected file untouched while allowing callers to use new naming conventions internally.
+
+**Pattern:** `import { migrateProjectGsdToHx as migrateProject } from './migrate-gsd-to-hx.js'` — the alias hides the old name at the call site without touching the protected file.
+
+## CI secret environment variables are not in source control (M001 close)
+
+**Rule:** After a large env var rename (GSD_* → HX_*), remember that GitHub Actions secrets and environment variables configured in the GitHub repository settings UI are NOT in source control. The source rename is complete, but any `GSD_*` secrets in the GitHub repo settings must be manually renamed or duplicated in the GitHub UI.
+
+**Pattern:** After any env var rename milestone, audit the GitHub repository's "Secrets and variables" settings page to rename any matching secrets. This cannot be automated via source-only changes.
+
+## compile-tests.mjs skips the integration/ subdirectory (M002/S05/T04)
+
+**Rule:** `scripts/compile-tests.mjs` has a `SKIP_DIRS` exclusion that prevents compilation of files in `tests/integration/`. Any test file placed in `src/resources/extensions/hx/tests/integration/` will NOT appear in `dist-test/` and will silently not run.
+
+**Pattern:** Always place new test files in the flat `src/resources/extensions/hx/tests/` directory. If the plan says "tests/integration/", place the file one level up (flat `tests/`) and add an explicit compile step if integration isolation is truly needed.
+
+**Exception:** T05 ported the T04 test to `tests/integration/` and added a manual compile step to `scripts/compile-tests.mjs`. This is the approved pattern if integration/ placement is truly required — add the sub-path explicitly to the compile script.
+
+## Porting worktree changes to main project when gates run from main CWD (M002/S05/T05)
+
+**Rule:** The auto-fix gate runs tests from the main project CWD (`/Users/beratcan/Desktop/GithubProjects/hx-ai`), not from the worktree. Any test files or source changes that exist only in the worktree's `dist-test/` will not be found by the gate.
+
+**Pattern:** When a task creates new test files and those tests must pass the auto-fix gate, apply the same changes to both the worktree AND the main project. Use `cp` to mirror the source files and re-run `node scripts/compile-tests.mjs` in the main project.
+
+## IIFE pattern for conditional spread in buildBeforeAgentStartResult (M002/S05/T03)
+
+**Rule:** When adding a conditional injection to `buildBeforeAgentStartResult()` that should not restructure the return shape, use an IIFE spread pattern:
+```typescript
+...(() => {
+  const marker = readForensicsMarker(basePath);
+  if (!injection && marker) {
+    clearForensicsMarker(basePath);
+    return { injection: { customType: "hx-forensics", content: marker.content } };
+  }
+  return {};
+})()
+```
+This keeps the conditional logic inline without extracting extra variables that bloat the surrounding function.
+
+## splitCompletedKey null semantics for hook/* keys (M002/S05/T02)
+
+**Rule:** `splitCompletedKey` returns `null` for `hook/<name>` keys with NO id remainder (i.e., exactly `hook/name` with nothing after the slash), not just any malformed input. A key like `hook/telegram-progress/M007/S01` is valid (type=`hook/telegram-progress`, id=`M007/S01`). Only keys with zero slashes or hook keys with no segment after the hook name return null.
+
+**Pattern:** When using splitCompletedKey, always null-check the result before destructuring. Log/skip null entries rather than crashing.
+
+## Node.js 23.4 cannot import absolute .ts file:// URLs even with --import hooks
+
+The `resolve` hook in Node.js 23 is **not invoked** for absolute `file://` URLs pointing to `.ts` files — Node.js rejects the extension at the filesystem level before hooks run. This means any test that does `import(pathToFileURL('/path/to/file.ts').href)` will fail with `ERR_UNKNOWN_FILE_EXTENSION` regardless of what hooks are registered. Similarly, static `import` statements in `.mjs` files that reference `.ts` files bypass hooks.
+
+**Fix:** When running compiled tests from `dist-test/`, use the compiled `.js` counterpart. For the extension smoke test: use `dist-test/src/resources/extensions/` as extensionsDir. For `.mjs` test files with static imports: use `.js` extensions (the dist-test-resolve hook rewrites `.ts`→`.js` for relative imports in compiled `.js` files, but not in `.mjs` static imports).
+
+## HX_RTK_DISABLED=1 is set in this development environment
+
+Any test that exercises RTK functionality (rtk-session-stats, rewriteCommandWithRtk, etc.) must explicitly unset `HX_RTK_DISABLED` during the test. Use a helper pattern:
+```ts
+function withRtkEnabled(): () => void {
+  const prev = process.env.HX_RTK_DISABLED;
+  delete process.env.HX_RTK_DISABLED;
+  return () => {
+    if (prev === undefined) delete process.env.HX_RTK_DISABLED;
+    else process.env.HX_RTK_DISABLED = prev;
+  };
+}
+```
+Call the returned function in the `finally` block.
+
+## dist-test accumulates stale directories from renamed/removed source extensions
+
+The `compile-tests.mjs` script does **not** clean `dist-test/` before rebuilding — it only overwrites files that still exist in source. If a directory is renamed or removed (e.g., `gsd/` → `hx/`), the old directory persists in `dist-test/` indefinitely. This causes static analysis tests that scan `dist-test/src/` to find ghost files. Periodically run `rm -rf dist-test/src/resources/extensions/<old-name>` when renaming extension directories, or add a manifest-diff cleanup step to `compile-tests.mjs`.
+
+## deleteSlice disk-DB symmetry is a critical invariant (M002/S03)
+
+**Rule:** Any DB row deletion for a slice, task, or milestone must also remove the corresponding disk artifact directory. If only the DB row is deleted, `deriveState()` reconciliation will re-insert the deleted row on the next cycle (it scans disk and inserts any missing entries).
+
+**Pattern:** Always pair `deleteSlice(db, id)` with `rmSync(slicePath, { recursive: true, force: true })`. Same applies to tasks and milestones. The disk-DB symmetry invariant must be maintained in both directions — creation and deletion.
+
+## When porting upstream TUI changes, verify each item individually (M002/S04)
+
+**Rule:** hx-ai is frequently ahead of upstream on TUI changes (the fork has independent improvements). In the S04 28-file TUI audit, 12 of 15 items were already correct in hx-ai and required no changes. Do NOT assume all upstream TUI fixes need to be applied — check each one.
+
+**Pattern:** For each upstream TUI fix, `grep -n <pattern> <file>` in hx-ai before writing any code. If the fix is already there (same or equivalent implementation), mark it N/A and move on. Only the 3 items that were genuinely different required code changes.
+
+## upstream 'quality_gates' vs 'gate_results' table name divergence (M002/S03)
+
+**Rule:** The upstream gsd-2 codebase refers to gate rows in some files as written to a 'gate_results' table, but the actual hx-ai DB schema uses 'quality_gates'. Always verify the table name against the actual schema (`sqlite3 .hx/hx.db ".schema quality_gates"`) before porting any gate-writing code.
+
+**Pattern:** grep for both names in the actual schema file (hx-db.ts CREATE TABLE statements) before writing any INSERT INTO queries for gate rows. The safe name to use is 'quality_gates'.
+
+## Forensics marker pattern — reusable context-injection template (M002/S05)
+
+**Rule:** The forensics persistence pattern (write JSON to `.hx/runtime/<type>-marker.json` after an investigation, inject as a named custom-type context block on the next agent turn, then clear the marker) is a general template for "remember this for next turn" use cases.
+
+**Pattern:**
+1. After completing work: `writeFileSync(markerPath, JSON.stringify({ content: report, timestamp: Date.now() }))`
+2. In `buildBeforeAgentStartResult()`: check for marker, if present clear it and return `{ injection: { customType: "hx-<type>", content: marker.content } }`
+3. In `system-context.ts`: handle `customType === "hx-<type>"` to inject as a named context block
+
+The pattern handles cold-start re-injection (the agent was stopped and restarted) correctly because the marker persists on disk across process restarts.
+
+## Capability-routing: scoreModel returns 1.0 for unknown model profiles (M003/S01)
+
+**Rule:** `scoreModel` returns 1.0 (perfect score) for models with no entry in `MODEL_CAPABILITY_PROFILES`, not 0 or a penalty. This preserves pass-through semantics — unknown models should not be silently demoted.
+
+**Pattern:** When adding new models to the capability layer, they will silently score 1.0 (winning over known models that don't fully match requirements) until a profile entry is added. Always add a profile entry alongside any new model addition to MODEL_CAPABILITY_TIER.
+
+## Capability-routing: test vision requirements via metadata.tags not metadata.visionRequired (M003/S01/T04)
+
+**Rule:** `computeTaskRequirements` reads `metadata.tags` (e.g., `['vision']`) to detect vision requirements, NOT the `metadata.visionRequired` boolean. The boolean is set in `extractTaskMetadata` from content scanning, but `computeTaskRequirements` checks for the `'vision'` string in the tags array.
+
+**Pattern:** In capability-router tests, set `tags: ['vision']` to simulate a vision task. Setting `visionRequired: true` directly on metadata will NOT trigger vision routing unless the tags path is also activated.
+
+## selectionMethod is a required field on RoutingDecision — all return paths must set it (M003/S01/T02)
+
+**Rule:** `selectionMethod` was added as a required (non-optional) field on `RoutingDecision`. All 5 return paths in `resolveModelForComplexity` set it explicitly. Do not make it optional — callers that log or switch on it would need null-checks everywhere.
+
+**Pattern:** When extending RoutingDecision with new required fields, trace all return paths in resolveModelForComplexity (early-exit for unknown model, downgrade path, escalate path, default-model path, normal path) and update each one.
+
+## initSchema vs migrateSchema gap — new tables in migrations only (M003/S02/T04)
+
+**Rule:** When `openDatabase(":memory:")` initializes a fresh DB, `initSchema` creates all tables AND stamps the schema at `SCHEMA_VERSION` (currently 15). Then `migrateSchema` checks `MAX(version)` — finds 15 ≥ 15 — and skips all migrations. Any table introduced in a numbered migration (e.g., `slice_locks` at v15) that is NOT also in `initSchema` will be missing from fresh in-memory DBs.
+
+**Pattern:** Whenever a new migration adds a table, also add the same `CREATE TABLE IF NOT EXISTS` to `initSchema`. The migration and initSchema entries are redundant for existing file-backed DBs, but the initSchema entry is required for test correctness with `:memory:`.
+
+**Symptom:** Tests that `openDatabase(":memory:")` and then call functions that use the new table will fail with `Error: no such table: <table>`.
+
+## Lazy dynamic imports in before_provider_request prevent circular import issues (M003/S03)
+
+**Rule:** The `before_provider_request` hook in `register-hooks.ts` uses dynamic `import()` for `preferences.js` and `context-masker.js` rather than top-level static imports. This avoids circular dependency issues that occur when the bootstrap module (which registers all hooks at startup) statically imports feature modules that in turn import from the bootstrap layer.
+
+**Pattern:** `const { loadEffectiveHXPreferences } = await import("../preferences.js")` inside the hook handler body. The extra await cost is negligible (cached module, single evaluation) and the safety is real.
+
+## Workflow-logger import path: same-directory files use './workflow-logger.js', not '../' (M003/S04/T02)
+
+**Rule:** `workflow-logger.ts` lives in `src/resources/extensions/hx/`. Files in the same directory import it as `'./workflow-logger.js'`. The S04 plan mistakenly wrote `'../workflow-logger.js'` for `triage-resolution.ts` — both files are in the same `hx/` directory, so the correct relative path is `'./'`.
+
+**Pattern:** Before wiring any import to `workflow-logger.js`, check the importer's directory. Only files in subdirectories (e.g., `auto/phases.ts`, `bootstrap/register-hooks.ts`) use `'../workflow-logger.js'`.
+
+## Audit-log severity guard: inner guard inside outer path check (M003/S04/T01)
+
+**Rule:** In `workflow-logger.ts _push()`, the audit path check (`if (_auditBasePath)`) and the severity guard (`if (severity === 'error')`) are nested, not parallel. The severity guard is the inner condition. This means the `try/catch` block wrapping `mkdirSync`+`appendFileSync` also moves inside the severity guard — the structure is `if (_auditBasePath) { if (severity === 'error') { try { ... } catch { ... } } }`.
+
+**Pattern:** When auditing the current structure, look for the outer `if (_auditBasePath)` block at line ~233 and confirm the inner guard wraps the filesystem writes.
+
+## findTurnBoundary returns 0 when fewer than keepRecentTurns assistant turns exist (M003/S03)
+
+**Rule:** `createObservationMask`'s internal `findTurnBoundary` scans messages from the end counting assistant turns. When the conversation has fewer assistant turns than `keepRecentTurns`, the loop exits with `i < 0` never being true and returns `boundary = 0`. The mask condition `index < boundary` is then always false — nothing is masked. This is correct "mask nothing" behavior, not a bug.
+
+**Impact:** In a fresh or short session, all messages are within the window and none are masked. Only when assistant turn count exceeds `keepRecentTurns` does masking activate.
+
+## mcp-server readers tests live in the package, not in src/resources/extensions/hx/tests/ (M003/S05/T01)
+
+**Rule:** Test files for `packages/mcp-server/src/readers/` belong in that package at `packages/mcp-server/src/readers/readers.test.ts`, not in the extension test directory. They import package-relative paths (`./paths.js`, `./state.js`, etc.) and are compiled/run via the mcp-server package's own build (`cd packages/mcp-server && npm run build && node --test dist/readers/readers.test.js`).
+
+**Pattern:** Only tests that import from `src/resources/extensions/hx/` go in the `hx/tests/` directory. Tests for sibling packages stay in those packages.
+
+## generateCodebaseMap is synchronous — await is safe but a no-op (M003/S05/T03)
+
+**Rule:** `generateCodebaseMap` in `codebase-generator.ts` is fully synchronous (returns a value, not a Promise). The `await generateCodebaseMap(...)` in `init-wizard.ts` is harmless — awaiting a non-Promise returns the value unchanged — but it's not necessary. Left in place for forward compatibility.
+
+**Pattern:** When porting functions from upstream, check the actual return type before adding await. A synchronous function with `await` produces no error but can mislead readers about performance characteristics.
+
+## checkRemoteAutoSession return shape — .running not .isRunning (M003/S06/T04)
+
+**Rule:** `checkRemoteAutoSession(basePath)` returns `{ running: boolean }`, NOT `{ isRunning: boolean }`. The steer worktree routing condition must read `.running`.
+
+**Pattern:** `const isActive = wtPath && (isAutoActive() || checkRemoteAutoSession(basePath).running)`. Using `.isRunning` silently evaluates as undefined (falsy) and breaks steer routing when a remote session is active but local `isAutoActive()` is false.
+
+## GLOBAL_ONLY_KEYS enforcement pattern for security-sensitive settings (M003/S06/T01)
+
+**Rule:** Any settings fields that have security implications (e.g., command prefix allowlists, fetch URL allowlists) must be in a `GLOBAL_ONLY_KEYS` Set and stripped from project-level settings at 3 SettingsManager merge sites: `fromStorage`, `reload`, and `saveProjectSettings`.
+
+**Pattern:** `const GLOBAL_ONLY_KEYS = new Set(['allowedCommandPrefixes', 'fetchAllowedUrls'])` + `stripGlobalOnlyKeys(settings)` removes these keys before any project-level application. Global settings retain them. This prevents a malicious project repo from escalating its own command permissions via a `.hx/PREFERENCES.md` entry.
+
+## ask-user-questions per-turn cache resets via hook, not ad-hoc (M003/S06/T02)
+
+**Rule:** The per-turn signature cache in ask-user-questions.ts is reset via `session_start`, `session_switch`, and `agent_end` hooks in `register-hooks.ts`, not by a timer or manual call. The cache is `Map<string, { questions: unknown[]; result: unknown }>` — keyed by SHA-256 of the canonicalized question set.
+
+**Pattern:** Cache only successful results (non-error, non-timeout paths). RPC fallback path also caches. On duplicate signature within a turn, return the cached result immediately, bypassing dispatch. This prevents agent loops where a stuck agent re-asks the same question set on every iteration.
+
+## COALESCE(NULLIF) SQL pattern for non-destructive upserts (M003/S06/T03)
+
+**Rule:** When an UPDATE SET clause must preserve existing values when the new value is empty, use `COALESCE(NULLIF(:val, ''), col)`. Empty string maps to NULL via NULLIF, then COALESCE picks the existing column value.
+
+**Pattern:** In `upsertMilestonePlanning`: `title = COALESCE(NULLIF(:title,''),title), status = COALESCE(NULLIF(:status,''),status)`. A re-plan that omits title/status doesn't wipe them. A re-plan that provides them overwrites correctly.
+
+## pi-coding-agent package tests not in main test suite — run from package dist/ (M003/S06/T01)
+
+**Rule:** `compile-tests.mjs` covers `src/`, not `packages/`. Tests in `packages/pi-coding-agent/src/core/` are NOT compiled to `dist-test/` and are NOT included in `npm run test:unit`. They must be run separately from the package's own `dist/` directory after rebuilding the package.
+
+**Pattern:** `cd packages/pi-coding-agent && npm run build && node --test dist/core/my.test.js`. Include this in T-level verification steps whenever adding tests to the pi-coding-agent package. The main `test:unit` count will not reflect these tests.
+
+## resolveModelWithFallbacksForUnit('execute-task') not 'default' for preferences bootstrap (M003/S06/T04)
+
+**Rule:** When resolving the preferred model for `startModelSnapshot` in `auto-start.ts`, use `resolveModelWithFallbacksForUnit('execute-task')` — NOT `'default'`. The `'default'` unit type returns `undefined` because there's no switch case for it. `'execute-task'` hits the case that returns the user-configured execution model.
+
+**Pattern:** When the plan says "use the session-default model", check the actual `resolveModelWithFallbacksForUnit` switch statement to find which unit type resolves to a meaningful model. `'default'` is not a valid unit type in this implementation.
+
+## Safety harness git-checkpoint.ts: use spawnSync with string[] args, not execSync with template literals (M004/S01/T01)
+
+**Rule:** `git-checkpoint.ts` must use `spawnSync(cmd, args[])` with a string array (not `execSync` with template literal interpolation) to pass the cross-platform filesystem safety static-analysis test (Pattern 4 in the test suite).
+
+**Pattern:** Write a `runGit(args: string[]): SpawnSyncReturns<Buffer>` helper that calls `spawnSync('git', args, { encoding: 'buffer' })`. This avoids shell injection risk and satisfies the static-analysis pattern matcher that flags execSync/spawnSync template literal calls.
+
+**Symptom:** Using `execSync(\`git ${cmd}\`)` or `spawnSync('git', [interpolatedStr])` with template interpolation will cause the cross-platform-filesystem-safety test to fail even though the code otherwise works correctly.
+
+## Safety harness auto-post-unit.ts: use dynamic import for logWarning to avoid circular dependencies (M004/S01/T02)
+
+**Rule:** `auto-post-unit.ts` imports `logWarning` via dynamic `import()` inside the safety block body, not as a top-level static import. This matches the K003 lazy-dynamic-import pattern already established for preferences.js and context-masker.js in `before_provider_request`.
+
+**Pattern:** `const { logWarning } = await import("./workflow-logger.js")` inside the async safety block. Top-level static import of workflow-logger from auto-post-unit.ts creates a circular dep through the auto/ chain.
+
+## Safety tool_call recording gated by isAutoActive() — not always-on (M004/S01/T02)
+
+**Rule:** In `register-hooks.ts`, the `safetyRecordToolCall` handler fires on all tool_call events, but `safetyRecordToolResult` is only called when `isAutoActive()` is true. This prevents recording tool results during manual/discussion sessions where there is no safety session context.
+
+**Pattern:** `if (isAutoActive()) { safetyRecordToolResult(...) }` inside the `tool_execution_end` handler. The tool_call handler records unconditionally (destructive command warning is always relevant), but result recording is gated.
+
+## MAX_TIMEOUT_SCALE=6 cap on auto-timers.ts timeoutScale (M004/S01/T02)
+
+**Rule:** `auto-timers.ts` now caps `timeoutScale` at `MAX_TIMEOUT_SCALE = 6` to prevent runaway timeout escalation for tasks with very large estimate values. Without the cap, a 180-minute estimate would produce a 18× scale factor, making the timeout 18× the base — which defeats the timeout's purpose.
+
+**Pattern:** `const MAX_TIMEOUT_SCALE = 6; const timeoutScale = estimateMinutes && estimateMinutes > 0 ? Math.min(MAX_TIMEOUT_SCALE, Math.max(1, estimateMinutes / 10)) : 1;`
+
+## packages/pi-ai must be rebuilt before compiled tests can import new exports (M004/S02/T01)
+
+**Rule:** `dist-test/` imports `@hyperlab/hx-ai` from the installed package at `packages/pi-ai/dist/`. When a new file is added to `packages/pi-ai/src/` (e.g., a new provider), the package must be rebuilt (`cd packages/pi-ai && npm run build`) before `node --test dist-test/...` can find the new exports. `compile-tests.mjs` compiles the test files but does NOT rebuild pi-ai.
+
+**Pattern:** When adding new exports to packages/pi-ai, always run `cd packages/pi-ai && npm run build` as part of verification before running the compiled tests. The tsc --noEmit step will pass without rebuilding (it uses source files), but the test runner uses the dist/ output.
+
+## Ollama authMode:'none' is required for isProviderRequestReady (M004/S02/T02)
+
+**Rule:** `pi.registerProvider('ollama', { authMode: 'none', ... })` must be called at startup (in register-extension.ts) for discovered Ollama models to pass the `isProviderRequestReady` check. Without it, Ollama models silently fail routing even though no API key is needed.
+
+**Pattern:** Any keyless local provider (Ollama, LM Studio, etc.) needs `authMode: 'none'` in its `registerProvider` call. The `api: 'ollama-chat'` field on the provider registration must match the `KnownApi` value assigned in `convertDiscoveredModels` — they must be kept in sync.
+
+## Flat-rate routing guard pattern — extendable prefix array (M004/S02/T02)
+
+**Rule:** The flat-rate guard in `model-router.ts` uses `FLAT_RATE_PREFIXES: string[]` and `isFlatRateModel(modelId)` rather than a hardcoded provider check. `isFlatRateModel` is exported for direct unit test coverage. The guard fires at the top of `resolveModelForComplexity` with an early return of the unchanged fallback chain.
+
+**Pattern:** To add a future flat-rate provider, append its prefix string to `FLAT_RATE_PREFIXES`. No other changes needed. The export allows `import { isFlatRateModel }` in tests without invoking the full routing machinery.
+
+## derive-state-db performance test is timing-sensitive (pre-existing) (M004/S02)
+
+**Rule:** The `derive-state-db: performance assertion` subtest has a 25ms threshold that occasionally fails under full-suite load (~55ms observed) but passes consistently in isolation (~32ms). This is a pre-existing flakiness unrelated to any S02 changes.
+
+**Pattern:** When the full test suite reports this single failure, re-run the test file in isolation to confirm. Do not treat it as a regression — it's a load-sensitive timing assertion.

@@ -34,6 +34,11 @@ import {
   resolveExpectedArtifactPath,
 } from "./auto-recovery.js";
 import { regenerateIfMissing } from "./workflow-projections.js";
+import { diagnoseExpectedArtifact, resolveExpectedArtifactPath as resolveArtifactForContent } from "./auto-artifact-paths.js";
+import { validateFileChanges } from "./safety/file-change-validator.js";
+import { validateContent } from "./safety/content-validator.js";
+import { resolveSafetyHarnessConfig } from "./safety/safety-harness.js";
+import { crossReferenceEvidence } from "./safety/evidence-cross-ref.js";
 import { syncStateToProjectRoot } from "./auto-worktree.js";
 import { isDbAvailable, getTask, getSlice, getMilestone, updateTaskStatus, _getAdapter } from "./hx-db.js";
 import { renderPlanCheckboxes } from "./markdown-renderer.js";
@@ -219,7 +224,7 @@ export interface PostUnitContext {
   lockBase: () => string;
   stopAuto: (ctx?: ExtensionContext, pi?: ExtensionAPI, reason?: string) => Promise<void>;
   pauseAuto: (ctx?: ExtensionContext, pi?: ExtensionAPI) => Promise<void>;
-  updateProgressWidget: (ctx: ExtensionContext, unitType: string, unitId: string, state: import("./types.js").GSDState) => void;
+  updateProgressWidget: (ctx: ExtensionContext, unitType: string, unitId: string, state: import("./types.js").HXState) => void;
 }
 
 /**
@@ -430,6 +435,58 @@ export async function postUnitPreVerification(pctx: PostUnitContext, opts?: PreV
       debugLog("postUnit", { phase: "rogue-detection", error: String(e) });
     }
 
+    // ── Safety harness: post-unit validation ────────────────────────────────
+    try {
+      const { loadEffectiveHXPreferences } = await import("./preferences.js");
+      const prefs = loadEffectiveHXPreferences();
+      const safetyCfg = resolveSafetyHarnessConfig(prefs?.preferences.safety_harness);
+
+      if (safetyCfg.enabled) {
+        // 1. File change validation
+        if (safetyCfg.fileChangeValidation) {
+          const fcResult = validateFileChanges(s.basePath);
+          if (!fcResult.valid) {
+            const { logWarning } = await import("./workflow-logger.js");
+            logWarning("safety", "File change validation found issues", {
+              suspiciousFiles: fcResult.suspiciousFiles.join(", "),
+              errors: fcResult.errors.join(", "),
+            });
+          }
+        }
+
+        // 2. Evidence cross-reference (zero-bash check)
+        if (safetyCfg.evidenceCrossReference && s.currentUnit.type === "execute-task") {
+          const xref = crossReferenceEvidence(s.currentUnit.type);
+          if (!xref.consistent) {
+            const { logWarning } = await import("./workflow-logger.js");
+            for (const finding of xref.findings) {
+              logWarning("safety", `Evidence cross-reference: ${finding}`, {
+                unitType: s.currentUnit.type,
+                unitId: s.currentUnit.id,
+              });
+            }
+          }
+        }
+
+        // 3. Content validation of expected artifact
+        if (safetyCfg.contentValidation) {
+          const artifactPath = resolveArtifactForContent(s.currentUnit.type, s.currentUnit.id, s.basePath);
+          if (artifactPath) {
+            const cvResult = validateContent(artifactPath);
+            if (!cvResult.valid && cvResult.findings.length > 0) {
+              const { logWarning } = await import("./workflow-logger.js");
+              logWarning("safety", `Content validation failed for ${s.currentUnit.type} artifact`, {
+                path: artifactPath,
+                findings: cvResult.findings.slice(0, 3).join("; "),
+              });
+            }
+          }
+        }
+      }
+    } catch (e) {
+      debugLog("postUnit", { phase: "safety-validation", error: String(e) });
+    }
+
     // Artifact verification
     let triggerArtifactVerified = false;
     if (!s.currentUnit.type.startsWith("hook/")) {
@@ -473,7 +530,11 @@ export async function postUnitPreVerification(pctx: PostUnitContext, opts?: PreV
           s.verificationRetryCount.set(retryKey, attempt);
           s.pendingVerificationRetry = {
             unitId: s.currentUnit.id,
-            failureContext: `Artifact verification failed: expected artifact for ${s.currentUnit.type} "${s.currentUnit.id}" was not found on disk after unit execution (attempt ${attempt}).`,
+            failureContext: (() => {
+              const diagnosis = diagnoseExpectedArtifact(s.currentUnit.type, s.currentUnit.id, s.basePath);
+              const base = `Artifact verification failed: expected artifact for ${s.currentUnit.type} "${s.currentUnit.id}" was not found on disk after unit execution (attempt ${attempt}).`;
+              return diagnosis ? `${base} Expected: ${diagnosis}` : base;
+            })(),
             attempt,
           };
           debugLog("postUnit", { phase: "artifact-verify-retry", unitType: s.currentUnit.type, unitId: s.currentUnit.id, attempt });

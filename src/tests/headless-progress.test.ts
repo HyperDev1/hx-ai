@@ -238,11 +238,11 @@ describe('summarizeToolArgs', () => {
     }), 'M001/S01/T01 Built the thing')
   })
 
-  it('summarizes gsd_plan_milestone with milestone ID', () => {
+  it('summarizes hx_plan_milestone with milestone ID', () => {
     assert.equal(summarizeToolArgs('hx_plan_milestone', { milestoneId: 'M002' }), 'M002')
   })
 
-  it('summarizes gsd_decision_save with decision text', () => {
+  it('summarizes hx_decision_save with decision text', () => {
     const result = summarizeToolArgs('hx_decision_save', { decision: 'Use SQLite for persistence' })
     assert.equal(result, 'Use SQLite for persistence')
   })

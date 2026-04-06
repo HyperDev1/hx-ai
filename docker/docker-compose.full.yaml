@@ -4,7 +4,7 @@ services:
       context: .                        # Build context is the docker/ directory
       dockerfile: Dockerfile.sandbox    # Runtime sandbox image with entrypoint
       args:
-        GSD_VERSION: latest             # Pin a specific version: GSD_VERSION=2.51.0
+        HX_VERSION: latest             # Pin a specific version: HX_VERSION=2.51.0
 
     container_name: hx-sandbox
 

@@ -36,7 +36,7 @@ const {
   dispatchBrowserSlashCommand,
 } = await import("../../../web/lib/browser-slash-command-dispatch.ts")
 
-const { GSDWorkspaceStore } = await import("../../../web/lib/hx-workspace-store.tsx")
+const { HXWorkspaceStore } = await import("../../../web/lib/hx-workspace-store.tsx")
 
 // ─── Block 1: Type exports (R103, R104, R105) ───────────────────────────────
 
@@ -309,42 +309,42 @@ describe("diagnostics surface→section mapping", () => {
 //
 // These methods are arrow-function class fields (instance properties, not on
 // the prototype). We verify via compile-time type assertion that the method
-// names exist on GSDWorkspaceStore, then do a runtime check that the class
+// names exist on HXWorkspaceStore, then do a runtime check that the class
 // constructor itself is exported and usable.
 
 // Compile-time assertion: if any of these method names were removed from the
 // class, TypeScript would error on these type aliases.
-type _AssertLoadForensics = InstanceType<typeof GSDWorkspaceStore>["loadForensicsDiagnostics"]
-type _AssertLoadDoctor = InstanceType<typeof GSDWorkspaceStore>["loadDoctorDiagnostics"]
-type _AssertApplyFixes = InstanceType<typeof GSDWorkspaceStore>["applyDoctorFixes"]
-type _AssertLoadSkillHealth = InstanceType<typeof GSDWorkspaceStore>["loadSkillHealthDiagnostics"]
+type _AssertLoadForensics = InstanceType<typeof HXWorkspaceStore>["loadForensicsDiagnostics"]
+type _AssertLoadDoctor = InstanceType<typeof HXWorkspaceStore>["loadDoctorDiagnostics"]
+type _AssertApplyFixes = InstanceType<typeof HXWorkspaceStore>["applyDoctorFixes"]
+type _AssertLoadSkillHealth = InstanceType<typeof HXWorkspaceStore>["loadSkillHealthDiagnostics"]
 
 describe("diagnostics store methods", () => {
-  it("GSDWorkspaceStore is a constructable class export", () => {
-    assert.equal(typeof GSDWorkspaceStore, "function", "GSDWorkspaceStore should be a class/function export")
+  it("HXWorkspaceStore is a constructable class export", () => {
+    assert.equal(typeof HXWorkspaceStore, "function", "HXWorkspaceStore should be a class/function export")
   })
 
   it("loadForensicsDiagnostics is a recognized method name on the store type", () => {
     // The compile-time type alias _AssertLoadForensics above already proves the
     // field exists. At runtime, arrow-field methods are on instances, not
     // prototype. We verify the field name appears in the actions Pick type by
-    // checking the useGSDWorkspaceActions hook references it in the exports.
-    const methodName: keyof Pick<InstanceType<typeof GSDWorkspaceStore>, "loadForensicsDiagnostics"> = "loadForensicsDiagnostics"
+    // checking the useHXWorkspaceActions hook references it in the exports.
+    const methodName: keyof Pick<InstanceType<typeof HXWorkspaceStore>, "loadForensicsDiagnostics"> = "loadForensicsDiagnostics"
     assert.equal(methodName, "loadForensicsDiagnostics")
   })
 
   it("loadDoctorDiagnostics is a recognized method name on the store type", () => {
-    const methodName: keyof Pick<InstanceType<typeof GSDWorkspaceStore>, "loadDoctorDiagnostics"> = "loadDoctorDiagnostics"
+    const methodName: keyof Pick<InstanceType<typeof HXWorkspaceStore>, "loadDoctorDiagnostics"> = "loadDoctorDiagnostics"
     assert.equal(methodName, "loadDoctorDiagnostics")
   })
 
   it("applyDoctorFixes is a recognized method name on the store type", () => {
-    const methodName: keyof Pick<InstanceType<typeof GSDWorkspaceStore>, "applyDoctorFixes"> = "applyDoctorFixes"
+    const methodName: keyof Pick<InstanceType<typeof HXWorkspaceStore>, "applyDoctorFixes"> = "applyDoctorFixes"
     assert.equal(methodName, "applyDoctorFixes")
   })
 
   it("loadSkillHealthDiagnostics is a recognized method name on the store type", () => {
-    const methodName: keyof Pick<InstanceType<typeof GSDWorkspaceStore>, "loadSkillHealthDiagnostics"> = "loadSkillHealthDiagnostics"
+    const methodName: keyof Pick<InstanceType<typeof HXWorkspaceStore>, "loadSkillHealthDiagnostics"> = "loadSkillHealthDiagnostics"
     assert.equal(methodName, "loadSkillHealthDiagnostics")
   })
 })

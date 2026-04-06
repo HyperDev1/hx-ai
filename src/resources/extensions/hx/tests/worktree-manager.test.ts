@@ -9,8 +9,8 @@ import {
   createWorktree,
   listWorktrees,
   removeWorktree,
-  diffWorktreeGSD,
-  getWorktreeGSDDiff,
+  diffWorktreeHX,
+  getWorktreeHXDiff,
   getWorktreeLog,
   worktreeBranchName,
   worktreePath,
@@ -156,9 +156,9 @@ describe("listWorktrees", () => {
   });
 });
 
-// ─── diffWorktreeGSD ─────────────────────────────────────────────────────────
+// ─── diffWorktreeHX ─────────────────────────────────────────────────────────
 
-describe("diffWorktreeGSD and getWorktreeGSDDiff", () => {
+describe("diffWorktreeHX and getWorktreeHXDiff", () => {
   let base: string;
   beforeEach(() => {
     const repo = makeRepoWithChanges("feature-x");
@@ -167,7 +167,7 @@ describe("diffWorktreeGSD and getWorktreeGSDDiff", () => {
   afterEach(() => { rmSync(base, { recursive: true, force: true }); });
 
   test("detects added and modified HX files", () => {
-    const diff = diffWorktreeGSD(base, "feature-x");
+    const diff = diffWorktreeHX(base, "feature-x");
     assert.ok(diff.added.length > 0, "should have added files");
     assert.ok(
       diff.added.some((f) => f.includes("M002")),
@@ -182,7 +182,7 @@ describe("diffWorktreeGSD and getWorktreeGSDDiff", () => {
   });
 
   test("returns patch content", () => {
-    const fullDiff = getWorktreeGSDDiff(base, "feature-x");
+    const fullDiff = getWorktreeHXDiff(base, "feature-x");
     assert.ok(fullDiff.includes("M002"), "diff should mention M002");
     assert.ok(fullDiff.includes("updated"), "diff should mention the update");
   });

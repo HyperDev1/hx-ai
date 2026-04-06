@@ -10,7 +10,7 @@ import type { ExtensionAPI, ExtensionContext } from "@hyperlab/hx-coding-agent";
 import { readUnitRuntimeRecord, writeUnitRuntimeRecord } from "./unit-runtime.js";
 import { isDbAvailable, getMilestoneSlices, getSliceTasks } from "./hx-db.js";
 import { resolveAutoSupervisorConfig } from "./preferences.js";
-import type { GSDPreferences } from "./preferences.js";
+import type { HXPreferences } from "./preferences.js";
 import { computeBudgets, resolveExecutorContextWindow } from "./context-budget.js";
 import {
   getInFlightToolCount,
@@ -24,6 +24,7 @@ import { saveActivityLog } from "./activity-log.js";
 import { recoverTimedOutUnit, type RecoveryContext } from "./auto-timeout-recovery.js";
 import { resolveAgentEndCancelled } from "./auto/resolve.js";
 import type { AutoSession } from "./auto/session.js";
+import { setWrapupInflight } from "./bootstrap/auto-wrapup-guard.js";
 
 export interface SupervisionContext {
   s: AutoSession;
@@ -31,7 +32,7 @@ export interface SupervisionContext {
   pi: ExtensionAPI;
   unitType: string;
   unitId: string;
-  prefs: GSDPreferences | undefined;
+  prefs: HXPreferences | undefined;
   buildSnapshotOpts: () => CloseoutOptions & Record<string, unknown>;
   buildRecoveryContext: () => RecoveryContext;
   pauseAuto: (ctx?: ExtensionContext, pi?: ExtensionAPI) => Promise<void>;
@@ -104,8 +105,9 @@ export function startUnitSupervision(sctx: SupervisionContext): void {
     }
   }
   const estimateMinutes = taskEstimate ? parseEstimateMinutes(taskEstimate) : null;
+  const MAX_TIMEOUT_SCALE = 6;
   const timeoutScale = estimateMinutes && estimateMinutes > 0
-    ? Math.max(1, estimateMinutes / 10)  // 10min task = 1x, 30min = 3x, 2h = 12x
+    ? Math.min(MAX_TIMEOUT_SCALE, Math.max(1, estimateMinutes / 10))  // 10min task = 1x, 30min = 3x, 2h = 12x → capped at 6x
     : 1;
 
   const softTimeoutMs = (supervisor.soft_timeout_minutes ?? 0) * 60 * 1000 * timeoutScale;
@@ -120,6 +122,7 @@ export function startUnitSupervision(sctx: SupervisionContext): void {
       phase: "wrapup-warning-sent",
       wrapupWarningSent: true,
     });
+    setWrapupInflight();
     pi.sendMessage(
       {
         customType: "hx-auto-wrapup",
@@ -287,6 +290,7 @@ export function startUnitSupervision(sctx: SupervisionContext): void {
       );
     }
 
+    setWrapupInflight();
     pi.sendMessage(
       {
         customType: "hx-auto-wrapup",

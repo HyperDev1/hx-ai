@@ -12,9 +12,9 @@ function makeTempDir(prefix: string): string {
 
 test("resolvePreferredModelConfig synthesizes heavy routing ceiling when models section is absent", () => {
   const originalCwd = process.cwd();
-  const originalGsdHome = process.env.HX_HOME;
+  const originalHxHome = process.env.HX_HOME;
   const tempProject = makeTempDir("hx-routing-project-");
-  const tempGsdHome = makeTempDir("hx-routing-home-");
+  const tempHxHome = makeTempDir("hx-routing-home-");
 
   try {
     mkdirSync(join(tempProject, ".hx"), { recursive: true });
@@ -32,7 +32,7 @@ test("resolvePreferredModelConfig synthesizes heavy routing ceiling when models 
       ].join("\n"),
       "utf-8",
     );
-    process.env.HX_HOME = tempGsdHome;
+    process.env.HX_HOME = tempHxHome;
     process.chdir(tempProject);
 
     const config = resolvePreferredModelConfig("plan-slice", {
@@ -46,18 +46,18 @@ test("resolvePreferredModelConfig synthesizes heavy routing ceiling when models 
     });
   } finally {
     process.chdir(originalCwd);
-    if (originalGsdHome === undefined) delete process.env.HX_HOME;
-    else process.env.HX_HOME = originalGsdHome;
+    if (originalHxHome === undefined) delete process.env.HX_HOME;
+    else process.env.HX_HOME = originalHxHome;
     rmSync(tempProject, { recursive: true, force: true });
-    rmSync(tempGsdHome, { recursive: true, force: true });
+    rmSync(tempHxHome, { recursive: true, force: true });
   }
 });
 
 test("resolvePreferredModelConfig falls back to auto start model when heavy tier is absent", () => {
   const originalCwd = process.cwd();
-  const originalGsdHome = process.env.HX_HOME;
+  const originalHxHome = process.env.HX_HOME;
   const tempProject = makeTempDir("hx-routing-project-");
-  const tempGsdHome = makeTempDir("hx-routing-home-");
+  const tempHxHome = makeTempDir("hx-routing-home-");
 
   try {
     mkdirSync(join(tempProject, ".hx"), { recursive: true });
@@ -74,7 +74,7 @@ test("resolvePreferredModelConfig falls back to auto start model when heavy tier
       ].join("\n"),
       "utf-8",
     );
-    process.env.HX_HOME = tempGsdHome;
+    process.env.HX_HOME = tempHxHome;
     process.chdir(tempProject);
 
     const config = resolvePreferredModelConfig("execute-task", {
@@ -88,18 +88,18 @@ test("resolvePreferredModelConfig falls back to auto start model when heavy tier
     });
   } finally {
     process.chdir(originalCwd);
-    if (originalGsdHome === undefined) delete process.env.HX_HOME;
-    else process.env.HX_HOME = originalGsdHome;
+    if (originalHxHome === undefined) delete process.env.HX_HOME;
+    else process.env.HX_HOME = originalHxHome;
     rmSync(tempProject, { recursive: true, force: true });
-    rmSync(tempGsdHome, { recursive: true, force: true });
+    rmSync(tempHxHome, { recursive: true, force: true });
   }
 });
 
 test("resolvePreferredModelConfig keeps explicit phase models as the ceiling", () => {
   const originalCwd = process.cwd();
-  const originalGsdHome = process.env.HX_HOME;
+  const originalHxHome = process.env.HX_HOME;
   const tempProject = makeTempDir("hx-routing-project-");
-  const tempGsdHome = makeTempDir("hx-routing-home-");
+  const tempHxHome = makeTempDir("hx-routing-home-");
 
   try {
     mkdirSync(join(tempProject, ".hx"), { recursive: true });
@@ -117,7 +117,7 @@ test("resolvePreferredModelConfig keeps explicit phase models as the ceiling", (
       ].join("\n"),
       "utf-8",
     );
-    process.env.HX_HOME = tempGsdHome;
+    process.env.HX_HOME = tempHxHome;
     process.chdir(tempProject);
 
     const config = resolvePreferredModelConfig("plan-slice", {
@@ -131,9 +131,9 @@ test("resolvePreferredModelConfig keeps explicit phase models as the ceiling", (
     });
   } finally {
     process.chdir(originalCwd);
-    if (originalGsdHome === undefined) delete process.env.HX_HOME;
-    else process.env.HX_HOME = originalGsdHome;
+    if (originalHxHome === undefined) delete process.env.HX_HOME;
+    else process.env.HX_HOME = originalHxHome;
     rmSync(tempProject, { recursive: true, force: true });
-    rmSync(tempGsdHome, { recursive: true, force: true });
+    rmSync(tempHxHome, { recursive: true, force: true });
   }
 });

@@ -5,7 +5,7 @@ import type { AgentEvent, HxClient } from "./hx-client.js";
  * Badges files in the VS Code explorer that HX has written or edited
  * during the current session.
  */
-export class GsdFileDecorationProvider implements vscode.FileDecorationProvider, vscode.Disposable {
+export class HxFileDecorationProvider implements vscode.FileDecorationProvider, vscode.Disposable {
 	private readonly _onDidChangeFileDecorations = new vscode.EventEmitter<vscode.Uri | vscode.Uri[] | undefined>();
 	readonly onDidChangeFileDecorations = this._onDidChangeFileDecorations.event;
 

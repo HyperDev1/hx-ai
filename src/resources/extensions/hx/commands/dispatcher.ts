@@ -6,7 +6,7 @@ import { handleOpsCommand } from "./handlers/ops.js";
 import { handleParallelCommand } from "./handlers/parallel.js";
 import { handleWorkflowCommand } from "./handlers/workflow.js";
 
-export async function handleGSDCommand(
+export async function handleHXCommand(
   args: string,
   ctx: ExtensionCommandContext,
   pi: ExtensionAPI,

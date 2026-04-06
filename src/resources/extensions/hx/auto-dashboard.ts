@@ -7,7 +7,7 @@
  */
 
 import type { ExtensionContext, ExtensionCommandContext, SessionMessageEntry } from "@hyperlab/hx-coding-agent";
-import type { GSDState } from "./types.js";
+import type { HXState } from "./types.js";
 import { getCurrentBranch } from "./worktree.js";
 import { getActiveHook } from "./post-unit-hooks.js";
 import { getLedger, getProjectTotals } from "./metrics.js";
@@ -114,7 +114,7 @@ export function unitPhaseLabel(unitType: string): string {
   }
 }
 
-function peekNext(unitType: string, state: GSDState): string {
+function peekNext(unitType: string, state: HXState): string {
   // Show active hook info in progress display
   const activeHookState = getActiveHook();
   if (activeHookState) {
@@ -143,7 +143,7 @@ function peekNext(unitType: string, state: GSDState): string {
 /**
  * Describe what the next unit will be, based on current state.
  */
-export function describeNextUnit(state: GSDState): { label: string; description: string } {
+export function describeNextUnit(state: HXState): { label: string; description: string } {
   const sid = state.activeSlice?.id;
   const sTitle = state.activeSlice?.title;
   const tid = state.activeTask?.id;
@@ -430,13 +430,15 @@ export interface WidgetStateAccessors {
   isVerbose(): boolean;
   /** True while newSession() is in-flight — render must not access session state. */
   isSessionSwitching(): boolean;
+  /** Returns the model ID used by the most recently dispatched unit, or null. */
+  getCurrentDispatchedModelId(): string | null;
 }
 
 export function updateProgressWidget(
   ctx: ExtensionContext,
   unitType: string,
   unitId: string,
-  state: GSDState,
+  state: HXState,
   accessors: WidgetStateAccessors,
   tierBadge?: string,
 ): void {
@@ -609,9 +611,13 @@ export function updateProgressWidget(
         const cxPctVal = cxUsage?.percent ?? 0;
         const cxPct = cxUsage?.percent !== null ? cxPctVal.toFixed(1) : "?";
 
-        // Model display — shown in context section, not stats
-        const modelId = cmdCtx?.model?.id ?? "";
-        const modelProvider = cmdCtx?.model?.provider ?? "";
+        // Model display — prefer the dispatched model ID over the stale cmdCtx.model (#f18305c50)
+        const dispatchedModelId = accessors.getCurrentDispatchedModelId();
+        const rawModelId = dispatchedModelId ?? cmdCtx?.model?.id ?? "";
+        const modelId = rawModelId.includes("/") ? rawModelId.split("/").slice(1).join("/") : rawModelId;
+        const modelProvider = rawModelId.includes("/")
+          ? rawModelId.split("/")[0]!
+          : cmdCtx?.model?.provider ?? "";
         const tierIcon = resolveServiceTierIcon(effectiveServiceTier, modelId);
         const modelDisplay = (modelProvider && modelId
           ? `${modelProvider}/${modelId}`

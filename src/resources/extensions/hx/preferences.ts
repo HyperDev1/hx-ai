@@ -15,6 +15,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 
 import { hxRoot } from "./paths.js";
+import { logWarning } from "./workflow-logger.js";
 import { parse as parseYaml } from "yaml";
 import type { PostUnitHookConfig, PreDispatchHookConfig, TokenProfile } from "./types.js";
 import type { DynamicRoutingConfig } from "./model-router.js";
@@ -25,9 +26,10 @@ import {
   KNOWN_PREFERENCE_KEYS,
   MODE_DEFAULTS,
   type WorkflowMode,
-  type GSDPreferences,
-  type LoadedGSDPreferences,
+  type HXPreferences,
+  type LoadedHXPreferences,
   type SkillResolution,
+  type ContextManagementConfig,
 } from "./preferences-types.js";
 import { validatePreferences } from "./preferences-validation.js";
 import { formatSkillRef } from "./preferences-skills.js";
@@ -39,17 +41,20 @@ import { formatSkillRef } from "./preferences-skills.js";
 
 export type {
   WorkflowMode,
-  GSDSkillRule,
-  GSDPhaseModelConfig,
-  GSDModelConfig,
-  GSDModelConfigV2,
+  HXSkillRule,
+  HXPhaseModelConfig,
+  HXModelConfig,
+  HXModelConfigV2,
   ResolvedModelConfig,
   SkillDiscoveryMode,
   AutoSupervisorConfig,
   RemoteQuestionsConfig,
   CmuxPreferences,
-  GSDPreferences,
-  LoadedGSDPreferences,
+  CodebaseMapPreferences,
+  ExperimentalPreferences,
+  ContextManagementConfig,
+  HXPreferences,
+  LoadedHXPreferences,
   SkillResolution,
   SkillResolutionReport,
 } from "./preferences-types.js";
@@ -120,24 +125,24 @@ export function getProjectHXPreferencesPath(): string {
 
 // ─── Loading ────────────────────────────────────────────────────────────────
 
-export function loadGlobalHXPreferences(): LoadedGSDPreferences | null {
+export function loadGlobalHXPreferences(): LoadedHXPreferences | null {
   return loadPreferencesFile(globalPreferencesPath(), "global")
     ?? loadPreferencesFile(globalPreferencesPathLegacy(), "global")
     ?? loadPreferencesFile(legacyGlobalPreferencesPath(), "global");
 }
 
-export function loadProjectHXPreferences(): LoadedGSDPreferences | null {
+export function loadProjectHXPreferences(): LoadedHXPreferences | null {
   return loadPreferencesFile(projectPreferencesPath(), "project")
     ?? loadPreferencesFile(projectPreferencesPathLegacy(), "project");
 }
 
-export function loadEffectiveHXPreferences(): LoadedGSDPreferences | null {
+export function loadEffectiveHXPreferences(): LoadedHXPreferences | null {
   const globalPreferences = loadGlobalHXPreferences();
   const projectPreferences = loadProjectHXPreferences();
 
   if (!globalPreferences && !projectPreferences) return null;
 
-  let result: LoadedGSDPreferences;
+  let result: LoadedHXPreferences;
   if (!globalPreferences) {
     result = projectPreferences!;
   } else if (!projectPreferences) {
@@ -163,7 +168,7 @@ export function loadEffectiveHXPreferences(): LoadedGSDPreferences | null {
     const profileDefaults = _resolveProfileDefaults(profile);
     result = {
       ...result,
-      preferences: mergePreferences(profileDefaults as GSDPreferences, result.preferences),
+      preferences: mergePreferences(profileDefaults as HXPreferences, result.preferences),
     };
   }
 
@@ -178,7 +183,7 @@ export function loadEffectiveHXPreferences(): LoadedGSDPreferences | null {
   return result;
 }
 
-function loadPreferencesFile(path: string, scope: "global" | "project"): LoadedGSDPreferences | null {
+function loadPreferencesFile(path: string, scope: "global" | "project"): LoadedHXPreferences | null {
   if (!existsSync(path)) return null;
 
   const raw = readFileSync(path, "utf-8");
@@ -204,7 +209,7 @@ export function _resetParseWarningFlag(): void {
 }
 
 /** @internal Exported for testing only */
-export function parsePreferencesMarkdown(content: string): GSDPreferences | null {
+export function parsePreferencesMarkdown(content: string): HXPreferences | null {
   // Strip content before the first frontmatter delimiter.
   // Handles leading whitespace, blank lines, or stray text (e.g. "widget_mode: full")
   // that some agents or editors place before the opening "---".
@@ -235,25 +240,26 @@ export function parsePreferencesMarkdown(content: string): GSDPreferences | null
   if (!_warnedUnrecognizedFormat) {
     _warnedUnrecognizedFormat = true;
     console.warn("[parsePreferencesMarkdown] PREFERENCES.md exists but uses an unrecognized format — skipping.");
+    logWarning("engine", "PREFERENCES.md exists but uses an unrecognized format — skipping", {});
   }
   return null;
 }
 
-function parseFrontmatterBlock(frontmatter: string): GSDPreferences {
+function parseFrontmatterBlock(frontmatter: string): HXPreferences {
   try {
     const parsed = parseYaml(frontmatter);
     if (typeof parsed !== 'object' || parsed === null) {
-      return {} as GSDPreferences;
+      return {} as HXPreferences;
     }
-    return parsed as GSDPreferences;
+    return parsed as HXPreferences;
   } catch (e) {
     console.error("[parseFrontmatterBlock] YAML parse error:", e);
-    return {} as GSDPreferences;
+    return {} as HXPreferences;
   }
 }
 
 /**
- * Parse heading+list format into a nested object, then cast to GSDPreferences.
+ * Parse heading+list format into a nested object, then cast to HXPreferences.
  * Handles markdown like:
  *   ## Git
  *   - isolation: none
@@ -261,7 +267,7 @@ function parseFrontmatterBlock(frontmatter: string): GSDPreferences {
  *   ## Models
  *   - planner: sonnet
  */
-function parseHeadingListFormat(content: string): GSDPreferences {
+function parseHeadingListFormat(content: string): HXPreferences {
   const result: Record<string, string[]> = {};
   let currentSection: string | null = null;
 
@@ -311,7 +317,7 @@ function parseHeadingListFormat(content: string): GSDPreferences {
     }
   }
 
-  return typed as GSDPreferences;
+  return typed as HXPreferences;
 }
 
 // ─── Merging ────────────────────────────────────────────────────────────────
@@ -320,13 +326,13 @@ function parseHeadingListFormat(content: string): GSDPreferences {
  * Apply mode defaults as the lowest-priority layer.
  * Mode defaults fill in undefined fields; any explicit user value wins.
  */
-export function applyModeDefaults(mode: WorkflowMode, prefs: GSDPreferences): GSDPreferences {
+export function applyModeDefaults(mode: WorkflowMode, prefs: HXPreferences): HXPreferences {
   const defaults = MODE_DEFAULTS[mode];
   if (!defaults) return prefs;
   return mergePreferences(defaults, prefs);
 }
 
-function mergePreferences(base: GSDPreferences, override: GSDPreferences): GSDPreferences {
+function mergePreferences(base: HXPreferences, override: HXPreferences): HXPreferences {
   return {
     version: override.version ?? base.version,
     mode: override.mode ?? base.mode,
@@ -385,6 +391,20 @@ function mergePreferences(base: GSDPreferences, override: GSDPreferences): GSDPr
     experimental: (base.experimental || override.experimental)
       ? { ...(base.experimental ?? {}), ...(override.experimental ?? {}) }
       : undefined,
+    context_management: (base.context_management || override.context_management)
+      ? { ...(base.context_management ?? {}), ...(override.context_management ?? {}) } as ContextManagementConfig
+      : undefined,
+    codebase: (base.codebase || override.codebase)
+      ? {
+          ...(base.codebase ?? {}),
+          ...(override.codebase ?? {}),
+          // Merge exclude_patterns arrays rather than overriding
+          exclude_patterns: [
+            ...((base.codebase?.exclude_patterns) ?? []),
+            ...((override.codebase?.exclude_patterns) ?? []),
+          ].filter(Boolean),
+        }
+      : undefined,
   };
 }
 
@@ -435,7 +455,7 @@ function mergePreDispatchHooks(
 
 // ─── System Prompt Rendering ──────────────────────────────────────────────────
 
-export function renderPreferencesForSystemPrompt(preferences: GSDPreferences, resolutions?: Map<string, SkillResolution>): string {
+export function renderPreferencesForSystemPrompt(preferences: HXPreferences, resolutions?: Map<string, SkillResolution>): string {
   const validated = validatePreferences(preferences);
   const lines: string[] = ["## HX Skill Preferences"];
 
@@ -571,7 +591,7 @@ export function getIsolationMode(): "none" | "worktree" | "branch" {
   return "none"; // default — no isolation, work on current branch
 }
 
-export function resolveParallelConfig(prefs: GSDPreferences | undefined): import("./types.js").ParallelConfig {
+export function resolveParallelConfig(prefs: HXPreferences | undefined): import("./types.js").ParallelConfig {
   return {
     enabled: prefs?.parallel?.enabled ?? false,
     max_workers: Math.max(1, Math.min(4, prefs?.parallel?.max_workers ?? 2)),

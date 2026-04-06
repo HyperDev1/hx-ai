@@ -243,11 +243,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **hx**: handle session_switch event so /resume restores HX state (#2587)
 - use GitHub Issue Types via GraphQL instead of classification labels
 - **headless**: disable overall timeout for auto-mode, fix lock-guard auto-select (#2586)
-- **auto**: align UAT artifact suffix with gsd_slice_complete output (#2592)
+- **auto**: align UAT artifact suffix with hx_slice_complete output (#2592)
 - **retry-handler**: stop treating 5xx server errors as credential-level failures
 - **test**: replace stale completedUnits with sessionFile in session-lock test
 - **session-lock**: retry lock file reads before declaring compromise
-- **hx**: prevent ensureGsdSymlink from creating subdirectory .hx when git-root .hx exists
+- **hx**: prevent ensureHxSymlink from creating subdirectory .hx when git-root .hx exists
 - **auto**: add EAGAIN to INFRA_ERROR_CODES to stop budget-burning retries
 - **search**: enforce hard search budget and survive context compaction
 - **remote-questions**: use static ESM import for AuthStorage hydration
@@ -693,8 +693,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **hx**: add browser-executable and runtime-executable UAT types (#1620)
 - apply model preferences in guided flow for milestone planning (#1614)
 - **hx**: GitHub sync extension — auto-sync to Issues, PRs, Milestones (#1603)
-- add GSD_PROJECT_ID env var to override project hash (#1600)
-- add GSD_HOME env var to override global ~/.hx directory (#1566)
+- add HX_PROJECT_ID env var to override project hash (#1600)
+- add HX_HOME env var to override global ~/.hx directory (#1566)
 - **hx**: add 13 enhancements to /hx doctor (#1583)
 - feat(ui): minimal HX welcome screen on startup (#1584)
 
@@ -1068,7 +1068,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **hx**: remove STATE.md update instructions from all prompts (#983)
 - **hx**: clear all caches after discuss dispatch so picker sees new CONTEXT files (#981)
 - **auto**: dispatch retry after verification gate failure (#998)
-- enforce GSDError usage and activate unused error codes (#997)
+- enforce HXError usage and activate unused error codes (#997)
 - unify extension discovery logic (#995)
 - deduplicate tierLabel/tierOrdinal exports (#988)
 - deduplicate getMainBranch implementations (#994)
@@ -1185,7 +1185,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `require_slice_discussion` option to pause auto-mode before each slice for human review
 - Discussion status indicators in `/hx discuss` slice picker
 - Worker NDJSON monitoring and budget enforcement for parallel orchestration
-- `gsd_generate_milestone_id` tool for multi-milestone unique ID generation
+- `hx_generate_milestone_id` tool for multi-milestone unique ID generation
 - Alt+V clipboard image paste shortcut on macOS
 - Hashline edit mode integration into active workflow
 - Fallback parser for prose-style roadmaps without `## Slices` section
@@ -1208,7 +1208,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Debug logging for silent early-return paths in dispatchNextUnit
 - Untracked .hx/ state files removed before milestone merge checkout
 - Crash prevention when cancelling OAuth provider login dialog
-- Resource staleness check compares gsdVersion instead of syncedAt
+- Resource staleness check compares hxVersion instead of syncedAt
 - Unique temp paths in saveFile() to prevent parallel write collisions
 - Validation/summary file generation for completed milestones during migration
 - Cache invalidation before initial state derivation in startAuto
@@ -1285,7 +1285,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Background shell performance** — optimized hot path with parallel git queries and lazy workspace validation
 
 ### Fixed
-- Forensics uses `GSD_VERSION` env var instead of fragile package.json path traversal; now worktree-aware to prevent stale root misdiagnosis
+- Forensics uses `HX_VERSION` env var instead of fragile package.json path traversal; now worktree-aware to prevent stale root misdiagnosis
 - Background commands rewritten to prevent pipe-open hang; stalled-tool detection added with prompt guidance
 - Auto mode breaks infinite skip loop on repeatedly-skipped completed units
 - Roadmap parser expands range syntax in depends (e.g. `S01-S04` → `S01,S02,S03,S04`)

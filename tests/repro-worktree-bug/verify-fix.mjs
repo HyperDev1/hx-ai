@@ -18,12 +18,12 @@ function findWorktreeSegment(normalizedPath) {
   const directMarker = "/.hx/worktrees/";
   const idx = normalizedPath.indexOf(directMarker);
   if (idx !== -1) {
-    return { gsdIdx: idx, afterWorktrees: idx + directMarker.length };
+    return { hxIdx: idx, afterWorktrees: idx + directMarker.length };
   }
   const symlinkRe = /\/\.hx\/projects\/[a-f0-9]+\/worktrees\//;
   const match = normalizedPath.match(symlinkRe);
   if (match && match.index !== undefined) {
-    return { gsdIdx: match.index, afterWorktrees: match.index + match[0].length };
+    return { hxIdx: match.index, afterWorktrees: match.index + match[0].length };
   }
   return null;
 }
@@ -72,8 +72,8 @@ function normalizePathForCompare(path) {
 
 function resolveProjectRoot(basePath) {
   // Layer 1: If the coordinator passed the real project root, use it.
-  if (process.env.GSD_PROJECT_ROOT) {
-    return process.env.GSD_PROJECT_ROOT;
+  if (process.env.HX_PROJECT_ROOT) {
+    return process.env.HX_PROJECT_ROOT;
   }
 
   const normalizedPath = basePath.replaceAll("\\", "/");
@@ -81,17 +81,17 @@ function resolveProjectRoot(basePath) {
   if (!seg) return basePath;
 
   const sepChar = basePath.includes("\\") ? "\\" : "/";
-  const gsdMarker = `${sepChar}.hx${sepChar}`;
-  const gsdIdx = basePath.indexOf(gsdMarker);
-  const candidate = gsdIdx !== -1
-    ? basePath.slice(0, gsdIdx)
-    : basePath.slice(0, seg.gsdIdx);
+  const hxMarker = `${sepChar}.hx${sepChar}`;
+  const hxIdx = basePath.indexOf(hxMarker);
+  const candidate = hxIdx !== -1
+    ? basePath.slice(0, hxIdx)
+    : basePath.slice(0, seg.hxIdx);
 
   // Layer 2: Guard against resolving to the user's home directory.
-  const gsdHome = normalizePathForCompare(process.env.GSD_HOME || join(homedir(), ".hx"));
-  const candidateGsdPath = normalizePathForCompare(join(candidate, ".hx"));
+  const hxHome = normalizePathForCompare(process.env.HX_HOME || join(homedir(), ".hx"));
+  const candidateHxPath = normalizePathForCompare(join(candidate, ".hx"));
 
-  if (candidateGsdPath === gsdHome || candidateGsdPath.startsWith(gsdHome + "/")) {
+  if (candidateHxPath === hxHome || candidateHxPath.startsWith(hxHome + "/")) {
     const realRoot = resolveProjectRootFromGitFile(basePath);
     if (realRoot) return realRoot;
     return basePath;
@@ -104,22 +104,22 @@ function resolveProjectRoot(basePath) {
 
 const HASH = "abc123def456";
 const TEST_ROOT = mkdtempSync(join(tmpdir(), "hx-verify-fix-"));
-const USER_GSD = process.env.GSD_HOME || join(TEST_ROOT, ".hx");
+const USER_HX = process.env.HX_HOME || join(TEST_ROOT, ".hx");
 const USER_HOME = homedir();
-const PROJECT_GSD_STORAGE = `${USER_GSD}/projects/${HASH}`;
+const PROJECT_HX_STORAGE = `${USER_HX}/projects/${HASH}`;
 const PROJECT_DIR = mkdtempSync(join(tmpdir(), "myproject-"));
-const PROJECT_GSD_LINK = `${PROJECT_DIR}/.hx`;
+const PROJECT_HX_LINK = `${PROJECT_DIR}/.hx`;
 const PROJECT_REAL = normalizePathForCompare(PROJECT_DIR);
-const EXPECTED_BUGGY_ROOT = normalizePathForCompare(resolve(USER_GSD, ".."));
+const EXPECTED_BUGGY_ROOT = normalizePathForCompare(resolve(USER_HX, ".."));
 
-process.env.GSD_HOME = USER_GSD;
+process.env.HX_HOME = USER_HX;
 
 console.log("=== Setting up filesystem layout ===\n");
 
-mkdirSync(`${PROJECT_GSD_STORAGE}/worktrees`, { recursive: true });
-mkdirSync(`${PROJECT_GSD_STORAGE}/milestones`, { recursive: true });
+mkdirSync(`${PROJECT_HX_STORAGE}/worktrees`, { recursive: true });
+mkdirSync(`${PROJECT_HX_STORAGE}/milestones`, { recursive: true });
 mkdirSync(PROJECT_DIR, { recursive: true });
-symlinkSync(PROJECT_GSD_STORAGE, PROJECT_GSD_LINK);
+symlinkSync(PROJECT_HX_STORAGE, PROJECT_HX_LINK);
 
 // Init git in project dir
 execSync("git init -b main", { cwd: PROJECT_DIR, stdio: "pipe" });
@@ -150,18 +150,18 @@ function test(name, actual, expected) {
   }
 }
 
-// ── Test 1: GSD_PROJECT_ROOT env var (Layer 1) ──────────────────────────
+// ── Test 1: HX_PROJECT_ROOT env var (Layer 1) ──────────────────────────
 
-console.log("=== Layer 1: GSD_PROJECT_ROOT env var ===\n");
+console.log("=== Layer 1: HX_PROJECT_ROOT env var ===\n");
 
-process.env.GSD_PROJECT_ROOT = PROJECT_DIR;
+process.env.HX_PROJECT_ROOT = PROJECT_DIR;
 const resolvedPath = realpathSync(`${PROJECT_DIR}/.hx/worktrees/M001`);
 test(
-  "GSD_PROJECT_ROOT overrides path resolution",
+  "HX_PROJECT_ROOT overrides path resolution",
   resolveProjectRoot(resolvedPath),
   PROJECT_DIR,
 );
-delete process.env.GSD_PROJECT_ROOT;
+delete process.env.HX_PROJECT_ROOT;
 
 // ── Test 2: Direct layout still works ────────────────────────────────────
 
@@ -232,10 +232,10 @@ function oldResolveProjectRoot(basePath) {
   const seg = findWorktreeSegment(normalizedPath);
   if (!seg) return basePath;
   const sepChar = basePath.includes("\\") ? "\\" : "/";
-  const gsdMarker = `${sepChar}.hx${sepChar}`;
-  const gsdIdx = basePath.indexOf(gsdMarker);
-  if (gsdIdx !== -1) return basePath.slice(0, gsdIdx);
-  return basePath.slice(0, seg.gsdIdx);
+  const hxMarker = `${sepChar}.hx${sepChar}`;
+  const hxIdx = basePath.indexOf(hxMarker);
+  if (hxIdx !== -1) return basePath.slice(0, hxIdx);
+  return basePath.slice(0, seg.hxIdx);
 }
 
 const oldResult = oldResolveProjectRoot(workerCwd);

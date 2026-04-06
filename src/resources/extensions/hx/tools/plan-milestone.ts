@@ -4,6 +4,7 @@ import { isNonEmptyString, validateStringArray } from "../validation.js";
 import {
   transaction,
   getMilestone,
+  getMilestoneSlices,
   insertMilestone,
   insertSlice,
   upsertMilestonePlanning,
@@ -189,6 +190,23 @@ export async function handlePlanMilestone(
         return;
       }
 
+      // Guard: refuse to re-plan if any completed slices would be dropped.
+      // Re-planning silently drops slices absent from the new list, which
+      // would permanently hide completion evidence for already-done work (#fea1b7431).
+      if (existingMilestone) {
+        const existingSlices = getMilestoneSlices(params.milestoneId);
+        const newSliceIds = new Set(params.slices.map((s) => s.sliceId));
+        const droppedCompleted = existingSlices.filter(
+          (s) => isClosedStatus(s.status) && !newSliceIds.has(s.id),
+        );
+        if (droppedCompleted.length > 0) {
+          guardError =
+            `cannot re-plan milestone ${params.milestoneId}: re-plan would drop completed slices ` +
+            droppedCompleted.map((s) => s.id).join(", ");
+          return;
+        }
+      }
+
       // Validate depends_on: all dependencies must exist and be complete
       if (params.dependsOn && params.dependsOn.length > 0) {
         for (const depId of params.dependsOn) {
@@ -212,6 +230,8 @@ export async function handlePlanMilestone(
       });
 
       upsertMilestonePlanning(params.milestoneId, {
+        title: params.title,
+        status: params.status,
         vision: params.vision,
         successCriteria: params.successCriteria,
         keyRisks: params.keyRisks,

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "taskId": "T01",
+  "unitId": "M003-ttxmyu/S05/T01",
+  "timestamp": 1775413311654,
+  "passed": true,
+  "discoverySource": "task-plan",
+  "checks": [
+    {
+      "command": "echo 'PASS: 0 GSD hits in readers source'",
+      "exitCode": 0,
+      "durationMs": 13,
+      "verdict": "pass"
+    }
+  ]
+}

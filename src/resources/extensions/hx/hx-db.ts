@@ -159,7 +159,7 @@ function openRawDb(path: string): unknown {
   return new Database(path);
 }
 
-const SCHEMA_VERSION = 14;
+const SCHEMA_VERSION = 15;
 
 function initSchema(db: DbAdapter, fileBacked: boolean): void {
   if (fileBacked) db.exec("PRAGMA journal_mode=WAL");
@@ -396,6 +396,18 @@ function initSchema(db: DbAdapter, fileBacked: boolean): void {
         PRIMARY KEY (milestone_id, slice_id, depends_on_slice_id),
         FOREIGN KEY (milestone_id, slice_id) REFERENCES slices(milestone_id, id),
         FOREIGN KEY (milestone_id, depends_on_slice_id) REFERENCES slices(milestone_id, id)
+      )
+    `);
+
+    // Slice lock table (v15) — advisory locks for parallel slice execution
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS slice_locks (
+        milestone_id TEXT NOT NULL,
+        slice_id TEXT NOT NULL,
+        worker_pid INTEGER NOT NULL,
+        acquired_at TEXT NOT NULL,
+        expires_at TEXT NOT NULL,
+        PRIMARY KEY (milestone_id, slice_id)
       )
     `);
 
@@ -741,6 +753,23 @@ function migrateSchema(db: DbAdapter): void {
       db.exec("CREATE INDEX IF NOT EXISTS idx_slice_deps_target ON slice_dependencies(milestone_id, depends_on_slice_id)");
       db.prepare("INSERT INTO schema_version (version, applied_at) VALUES (:version, :applied_at)").run({
         ":version": 14,
+        ":applied_at": new Date().toISOString(),
+      });
+    }
+
+    if (currentVersion < 15) {
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS slice_locks (
+          milestone_id TEXT NOT NULL,
+          slice_id TEXT NOT NULL,
+          worker_pid INTEGER NOT NULL,
+          acquired_at TEXT NOT NULL,
+          expires_at TEXT NOT NULL,
+          PRIMARY KEY (milestone_id, slice_id)
+        )
+      `);
+      db.prepare("INSERT INTO schema_version (version, applied_at) VALUES (:version, :applied_at)").run({
+        ":version": 15,
         ":applied_at": new Date().toISOString(),
       });
     }
@@ -1124,10 +1153,12 @@ export function insertMilestone(m: {
   });
 }
 
-export function upsertMilestonePlanning(milestoneId: string, planning: Partial<MilestonePlanningRecord>): void {
+export function upsertMilestonePlanning(milestoneId: string, planning: Partial<MilestonePlanningRecord> & { title?: string; status?: string }): void {
   if (!currentDb) throw new HXError(HX_STALE_STATE, "hx-db: No database open");
   currentDb.prepare(
     `UPDATE milestones SET
+      title = COALESCE(NULLIF(:title,''),title),
+      status = COALESCE(NULLIF(:status,''),status),
       vision = COALESCE(:vision, vision),
       success_criteria = COALESCE(:success_criteria, success_criteria),
       key_risks = COALESCE(:key_risks, key_risks),
@@ -1142,6 +1173,8 @@ export function upsertMilestonePlanning(milestoneId: string, planning: Partial<M
      WHERE id = :id`,
   ).run({
     ":id": milestoneId,
+    ":title": planning.title ?? "",
+    ":status": planning.status ?? "",
     ":vision": planning.vision ?? null,
     ":success_criteria": planning.successCriteria ? JSON.stringify(planning.successCriteria) : null,
     ":key_risks": planning.keyRisks ? JSON.stringify(planning.keyRisks) : null,
@@ -1726,6 +1759,73 @@ export function getDependentSlices(milestoneId: string, sliceId: string): string
   return currentDb.prepare(
     "SELECT slice_id FROM slice_dependencies WHERE milestone_id = :mid AND depends_on_slice_id = :sid",
   ).all({ ":mid": milestoneId, ":sid": sliceId }).map((r) => r["slice_id"] as string);
+}
+
+// ─── Slice Lock Accessors (v15) ───────────────────────────────────────────
+
+/**
+ * Try to acquire a slice lock for a worker. Uses INSERT OR IGNORE so only the
+ * first caller succeeds. Returns true if the lock was acquired (row inserted),
+ * false if it was already held by another worker.
+ */
+export function acquireSliceLock(
+  db: DbAdapter,
+  milestoneId: string,
+  sliceId: string,
+  workerPid: number,
+  ttlMs: number,
+): boolean {
+  const now = new Date();
+  const expiresAt = new Date(now.getTime() + ttlMs).toISOString();
+  const result = db.prepare(
+    `INSERT OR IGNORE INTO slice_locks (milestone_id, slice_id, worker_pid, acquired_at, expires_at)
+     VALUES (:mid, :sid, :pid, :acquired, :expires)`,
+  ).run({
+    ":mid": milestoneId,
+    ":sid": sliceId,
+    ":pid": workerPid,
+    ":acquired": now.toISOString(),
+    ":expires": expiresAt,
+  });
+  return (typeof result === "object" && result !== null ? ((result as { changes?: number }).changes ?? 0) : 0) > 0;
+}
+
+/**
+ * Release a slice lock held by a specific worker pid. Silently does nothing
+ * if the lock is not held by that pid (avoids stomping a lock taken by a
+ * different worker after a crash/expiry).
+ */
+export function releaseSliceLock(
+  db: DbAdapter,
+  milestoneId: string,
+  sliceId: string,
+  workerPid: number,
+): void {
+  db.prepare(
+    "DELETE FROM slice_locks WHERE milestone_id = :mid AND slice_id = :sid AND worker_pid = :pid",
+  ).run({ ":mid": milestoneId, ":sid": sliceId, ":pid": workerPid });
+}
+
+/** Return the current lock row for a slice, or null if unlocked. */
+export function getSliceLock(
+  db: DbAdapter,
+  milestoneId: string,
+  sliceId: string,
+): { milestone_id: string; slice_id: string; worker_pid: number; acquired_at: string; expires_at: string } | null {
+  const row = db.prepare(
+    "SELECT * FROM slice_locks WHERE milestone_id = :mid AND slice_id = :sid",
+  ).get({ ":mid": milestoneId, ":sid": sliceId });
+  return row
+    ? (row as { milestone_id: string; slice_id: string; worker_pid: number; acquired_at: string; expires_at: string })
+    : null;
+}
+
+/** Delete all expired lock rows. Call periodically to prevent stale locks. */
+export function cleanExpiredSliceLocks(db: DbAdapter): number {
+  const result = db.prepare(
+    "DELETE FROM slice_locks WHERE expires_at < :now",
+  ).run({ ":now": new Date().toISOString() });
+  return typeof result === "object" && result !== null ? ((result as { changes?: number }).changes ?? 0) : 0;
 }
 
 // ─── Worktree DB Helpers ──────────────────────────────────────────────────

@@ -9,6 +9,7 @@
  * Based on: https://github.com/openai/codex (codex-rs/core/src/tools/handlers/ask_user_questions.rs)
  */
 
+import { createHash } from "node:crypto";
 import type { ExtensionAPI } from "@hyperlab/hx-coding-agent";
 import { sanitizeError } from "./shared/sanitize.js";
 import { Text } from "@hyperlab/hx-tui";
@@ -19,6 +20,43 @@ import {
 	type QuestionOption,
 	type RoundResult,
 } from "./shared/tui.js";
+
+// ─── Dedup Cache ──────────────────────────────────────────────────────────────
+
+/**
+ * Per-turn cache mapping question signature → result.
+ * Prevents the same question set from being dispatched twice in one turn.
+ */
+const turnCache = new Map<string, { questions: unknown[]; result: unknown }>();
+
+/** Reset the dedup cache. Call at turn boundaries (session_start, session_switch, agent_end). */
+export function resetAskUserQuestionsCache(): void {
+	turnCache.clear();
+}
+
+/**
+ * Compute a stable SHA-256 signature for a question array.
+ * Questions are sorted by id before hashing so order doesn't matter.
+ */
+export function questionSignature(questions: unknown[]): string {
+	const canonical = [...questions].sort((a: unknown, b: unknown) => {
+		const aId = (a as Record<string, unknown>)?.id ?? "";
+		const bId = (b as Record<string, unknown>)?.id ?? "";
+		return String(aId).localeCompare(String(bId));
+	}).map((q: unknown) => {
+		const qObj = q as Record<string, unknown>;
+		return {
+			id: qObj.id,
+			header: qObj.header,
+			question: qObj.question,
+			options: qObj.options,
+			allowMultiple: qObj.allowMultiple ?? false,
+		};
+	});
+	const h = createHash("sha256");
+	h.update(JSON.stringify(canonical));
+	return h.digest("hex").slice(0, 16);
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -135,10 +173,26 @@ export default function AskUserQuestions(pi: ExtensionAPI) {
 				}
 			}
 
-			if (!ctx.hasUI) {
+			// Dedup: return cached result if same question set asked in this turn
+			const sig = questionSignature(params.questions as unknown[]);
+			const cached = turnCache.get(sig);
+			if (cached) {
+				return cached.result as Awaited<ReturnType<typeof this.execute>>;
+			}
+
+			// Attempt remote questions first — even in non-interactive sessions
+			{
 				const { tryRemoteQuestions } = await import("./remote-questions/manager.js");
 				const remoteResult = await tryRemoteQuestions(params.questions, signal);
-				if (remoteResult) return { ...remoteResult, details: remoteResult.details as unknown };
+				if (remoteResult) {
+					const result = { ...remoteResult, details: remoteResult.details as unknown };
+					// Cache on success (not an error)
+					turnCache.set(sig, { questions: params.questions as unknown[], result });
+					return result;
+				}
+			}
+
+			if (!ctx.hasUI) {
 				return errorResult("Error: UI not available (non-interactive mode)", params.questions);
 			}
 
@@ -162,8 +216,19 @@ export default function AskUserQuestions(pi: ExtensionAPI) {
 					if (selected === undefined) {
 						return errorResult("ask_user_questions was cancelled", params.questions);
 					}
+					let freeTextNote = "";
+					const selectedStr = Array.isArray(selected) ? selected[0] : selected;
+					if (!q.allowMultiple && selectedStr === OTHER_OPTION_LABEL) {
+						const note = await ctx.ui.input(
+							`${q.header}: Please explain in your own words`,
+							"Type your answer here…",
+						);
+						if (note) { freeTextNote = note; }
+					}
+					const answerList = Array.isArray(selected) ? selected : [selected];
+					if (freeTextNote) { answerList.push(`user_note: ${freeTextNote}`); }
 					answers[q.id] = {
-						answers: Array.isArray(selected) ? selected : [selected],
+						answers: answerList,
 					};
 				}
 				const roundResult: RoundResult = {
@@ -175,7 +240,7 @@ export default function AskUserQuestions(pi: ExtensionAPI) {
 						]),
 					),
 				};
-				return {
+				const rpcResult = {
 					content: [{ type: "text" as const, text: JSON.stringify({ answers }) }],
 					details: {
 						questions: params.questions,
@@ -183,21 +248,25 @@ export default function AskUserQuestions(pi: ExtensionAPI) {
 						cancelled: false,
 					} satisfies LocalResultDetails,
 				};
+				turnCache.set(sig, { questions: params.questions as unknown[], result: rpcResult });
+				return rpcResult;
 			}
 
 			// Check if cancelled (empty answers = user exited)
 			const hasAnswers = Object.keys(result.answers).length > 0;
 			if (!hasAnswers) {
 				return {
-					content: [{ type: "text", text: "ask_user_questions was cancelled before receiving a response" }],
+					content: [{ type: "text" as const, text: "ask_user_questions was cancelled before receiving a response" }],
 					details: { questions: params.questions, response: null, cancelled: true } satisfies LocalResultDetails,
 				};
 			}
 
-			return {
-				content: [{ type: "text", text: formatForLLM(result) }],
+			const successResult = {
+				content: [{ type: "text" as const, text: formatForLLM(result) }],
 				details: { questions: params.questions, response: result, cancelled: false } satisfies LocalResultDetails,
 			};
+			turnCache.set(sig, { questions: params.questions as unknown[], result: successResult });
+			return successResult;
 		},
 
 		// ─── Rendering ────────────────────────────────────────────────────────

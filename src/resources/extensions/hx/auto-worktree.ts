@@ -35,6 +35,7 @@ import {
   removeWorktree,
   resolveGitDir,
   worktreePath,
+  isInsideWorktreesDir,
 } from "./worktree-manager.js";
 import {
   detectWorktreeName,
@@ -43,7 +44,7 @@ import {
 } from "./worktree.js";
 import { MergeConflictError, readIntegrationBranch, RUNTIME_EXCLUSION_PATHS } from "./git-service.js";
 import { debugLog } from "./debug-logger.js";
-import { logWarning } from "./workflow-logger.js";
+import { logWarning, logError } from "./workflow-logger.js";
 import { loadEffectiveHXPreferences } from "./preferences.js";
 import {
   nativeGetCurrentBranch,
@@ -72,7 +73,7 @@ const LEGACY_PROJECT_PREFERENCES_FILE = "preferences.md";
 
 /**
  * Root-level .hx/ state files synced between worktree and project root.
- * Single source of truth — used by syncGsdStateToWorktree, syncWorktreeStateBack,
+ * Single source of truth — used by syncHxStateToWorktree, syncWorktreeStateBack,
  * and the dispatch-level sync functions.
  */
 const ROOT_STATE_FILES = [
@@ -85,7 +86,7 @@ const ROOT_STATE_FILES = [
   "completed-units.json",
   "metrics.json",
   // NOTE: project preferences are intentionally NOT in ROOT_STATE_FILES.
-  // Forward-sync (main → worktree) is handled explicitly in syncGsdStateToWorktree().
+  // Forward-sync (main → worktree) is handled explicitly in syncHxStateToWorktree().
   // Back-sync (worktree → main) must NEVER overwrite the project root's copy
   // because the project root is authoritative for preferences (#2684).
 ] as const;
@@ -195,13 +196,13 @@ export function syncProjectRootToWorktree(
   if (!worktreePath_ || !projectRoot || worktreePath_ === projectRoot) return;
   if (!milestoneId) return;
 
-  const prGsd = join(projectRoot, ".hx");
-  const wtGsd = join(worktreePath_, ".hx");
+  const prHx = join(projectRoot, ".hx");
+  const wtHx = join(worktreePath_, ".hx");
 
   // When .hx is a symlink to the same external directory in both locations,
   // cpSync rejects the copy because source === destination (ERR_FS_CP_EINVAL).
   // Compare realpaths and skip when they resolve to the same physical path (#2184).
-  if (isSamePath(prGsd, wtGsd)) return;
+  if (isSamePath(prHx, wtHx)) return;
 
   // Copy milestone directory from project root to worktree — additive only.
   // force:false prevents cpSync from overwriting existing worktree files.
@@ -209,8 +210,8 @@ export function syncProjectRootToWorktree(
   // by validate-milestone) get clobbered by stale project root copies,
   // causing an infinite re-validation loop (#1886).
   safeCopyRecursive(
-    join(prGsd, "milestones", milestoneId),
-    join(wtGsd, "milestones", milestoneId),
+    join(prHx, "milestones", milestoneId),
+    join(wtHx, "milestones", milestoneId),
     { force: false },
   );
 
@@ -218,17 +219,25 @@ export function syncProjectRootToWorktree(
   // Project root is authoritative for completion state after crash recovery;
   // without this, the worktree re-dispatches already-completed units (#1886).
   safeCopy(
-    join(prGsd, "completed-units.json"),
-    join(wtGsd, "completed-units.json"),
+    join(prHx, "completed-units.json"),
+    join(wtHx, "completed-units.json"),
     { force: true },
   );
 
   // Delete worktree hx.db so it rebuilds from the freshly synced files.
   // Stale DB rows are the root cause of the infinite skip loop (#853).
+  // Also remove companion WAL/SHM files to prevent orphaned journal state
+  // that would cause "database disk image is malformed" on next open (#1c9032a).
   try {
-    const wtDb = join(wtGsd, "hx.db");
+    const wtDb = join(wtHx, "hx.db");
     if (existsSync(wtDb)) {
       unlinkSync(wtDb);
+    }
+    for (const suffix of ["-wal", "-shm"]) {
+      const companion = wtDb + suffix;
+      if (existsSync(companion)) {
+        unlinkSync(companion);
+      }
     }
   } catch {
     /* non-fatal */
@@ -249,37 +258,37 @@ export function syncStateToProjectRoot(
   if (!worktreePath_ || !projectRoot || worktreePath_ === projectRoot) return;
   if (!milestoneId) return;
 
-  const wtGsd = join(worktreePath_, ".hx");
-  const prGsd = join(projectRoot, ".hx");
+  const wtHx = join(worktreePath_, ".hx");
+  const prHx = join(projectRoot, ".hx");
 
   // When .hx is a symlink to the same external directory in both locations,
   // cpSync rejects the copy because source === destination (ERR_FS_CP_EINVAL).
   // Compare realpaths and skip when they resolve to the same physical path (#2184).
-  if (isSamePath(wtGsd, prGsd)) return;
+  if (isSamePath(wtHx, prHx)) return;
 
   // 1. STATE.md — the quick-glance status used by initial deriveState()
-  safeCopy(join(wtGsd, "STATE.md"), join(prGsd, "STATE.md"), { force: true });
+  safeCopy(join(wtHx, "STATE.md"), join(prHx, "STATE.md"), { force: true });
 
   // 2. Milestone directory — ROADMAP, slice PLANs, task summaries
   // Copy the entire milestone .hx subtree so deriveState reads current checkboxes
   safeCopyRecursive(
-    join(wtGsd, "milestones", milestoneId),
-    join(prGsd, "milestones", milestoneId),
+    join(wtHx, "milestones", milestoneId),
+    join(prHx, "milestones", milestoneId),
     { force: true },
   );
 
   // 3. metrics.json — session cost/token tracking (#2313).
   // Without this, metrics accumulated in the worktree are invisible from the
   // project root and never appear in the dashboard or skill-health reports.
-  safeCopy(join(wtGsd, "metrics.json"), join(prGsd, "metrics.json"), { force: true });
+  safeCopy(join(wtHx, "metrics.json"), join(prHx, "metrics.json"), { force: true });
 
   // 4. Runtime records — unit dispatch state used by selfHealRuntimeRecords().
   // Without this, a crash during a unit leaves the runtime record only in the
   // worktree. If the next session resolves basePath before worktree re-entry,
   // selfHeal can't find or clear the stale record (#769).
   safeCopyRecursive(
-    join(wtGsd, "runtime", "units"),
-    join(prGsd, "runtime", "units"),
+    join(wtHx, "runtime", "units"),
+    join(prHx, "runtime", "units"),
     { force: true },
   );
 }
@@ -355,9 +364,9 @@ export function escapeStaleWorktree(base: string): string {
   // the string-slice heuristic matched the wrong /.hx/ boundary. This happens
   // when .hx is a symlink into ~/.hx/projects/<hash> and process.cwd()
   // resolved through the symlink. Returning ~ would be catastrophic (#1676).
-  const candidateGsd = join(projectRoot, ".hx").replaceAll("\\", "/");
+  const candidateHx = join(projectRoot, ".hx").replaceAll("\\", "/");
   const hxHomePath = hxHome.replaceAll("\\", "/");
-  if (candidateGsd === hxHomePath || candidateGsd.startsWith(hxHomePath + "/")) {
+  if (candidateHx === hxHomePath || candidateHx.startsWith(hxHomePath + "/")) {
     // Don't chdir to home — return base unchanged.
     // resolveProjectRoot() in worktree.ts has the full git-file-based recovery
     // and will be called by the caller (startAuto → projectRoot()).
@@ -424,23 +433,23 @@ export function cleanStaleRuntimeUnits(
  * Only adds missing content — never overwrites existing files in the worktree
  * (the worktree's execution state is authoritative for in-progress work).
  */
-export function syncGsdStateToWorktree(
+export function syncHxStateToWorktree(
   mainBasePath: string,
   worktreePath_: string,
 ): { synced: string[] } {
-  const mainGsd = hxRoot(mainBasePath);
-  const wtGsd = hxRoot(worktreePath_);
+  const mainHx = hxRoot(mainBasePath);
+  const wtHx = hxRoot(worktreePath_);
   const synced: string[] = [];
 
   // If both resolve to the same directory (symlink), no sync needed
-  if (isSamePath(mainGsd, wtGsd)) return { synced };
+  if (isSamePath(mainHx, wtHx)) return { synced };
 
-  if (!existsSync(mainGsd) || !existsSync(wtGsd)) return { synced };
+  if (!existsSync(mainHx) || !existsSync(wtHx)) return { synced };
 
   // Sync root-level .hx/ files (DECISIONS, REQUIREMENTS, PROJECT, KNOWLEDGE, etc.)
   for (const f of ROOT_STATE_FILES) {
-    const src = join(mainGsd, f);
-    const dst = join(wtGsd, f);
+    const src = join(mainHx, f);
+    const dst = join(wtHx, f);
     if (existsSync(src) && !existsSync(dst)) {
       try {
         cpSync(src, dst);
@@ -455,12 +464,12 @@ export function syncGsdStateToWorktree(
   // Prefer the canonical uppercase file name, but keep the legacy lowercase
   // fallback so older repos still work on case-sensitive filesystems.
   {
-    const worktreeHasPreferences = existsSync(join(wtGsd, PROJECT_PREFERENCES_FILE))
-      || existsSync(join(wtGsd, LEGACY_PROJECT_PREFERENCES_FILE));
+    const worktreeHasPreferences = existsSync(join(wtHx, PROJECT_PREFERENCES_FILE))
+      || existsSync(join(wtHx, LEGACY_PROJECT_PREFERENCES_FILE));
     if (!worktreeHasPreferences) {
       for (const file of [PROJECT_PREFERENCES_FILE, LEGACY_PROJECT_PREFERENCES_FILE] as const) {
-        const src = join(mainGsd, file);
-        const dst = join(wtGsd, file);
+        const src = join(mainHx, file);
+        const dst = join(wtHx, file);
         if (existsSync(src)) {
           try {
             cpSync(src, dst);
@@ -475,8 +484,8 @@ export function syncGsdStateToWorktree(
   }
 
   // Sync milestones: copy entire milestone directories that are missing
-  const mainMilestonesDir = join(mainGsd, "milestones");
-  const wtMilestonesDir = join(wtGsd, "milestones");
+  const mainMilestonesDir = join(mainHx, "milestones");
+  const wtMilestonesDir = join(wtHx, "milestones");
   if (existsSync(mainMilestonesDir)) {
     try {
       mkdirSync(wtMilestonesDir, { recursive: true });
@@ -589,22 +598,22 @@ export function syncWorktreeStateBack(
   worktreePath: string,
   milestoneId: string,
 ): { synced: string[] } {
-  const mainGsd = hxRoot(mainBasePath);
-  const wtGsd = hxRoot(worktreePath);
+  const mainHx = hxRoot(mainBasePath);
+  const wtHx = hxRoot(worktreePath);
   const synced: string[] = [];
 
   // If both resolve to the same directory (symlink), no sync needed
-  if (isSamePath(mainGsd, wtGsd)) return { synced };
+  if (isSamePath(mainHx, wtHx)) return { synced };
 
-  if (!existsSync(wtGsd) || !existsSync(mainGsd)) return { synced };
+  if (!existsSync(wtHx) || !existsSync(mainHx)) return { synced };
 
   // ── 0. Pre-upgrade worktree DB reconciliation ────────────────────────
   // If the worktree has its own hx.db (copied before the WAL transition),
   // reconcile its hierarchy data into the project root DB before syncing
   // files. This handles in-flight worktrees that were created before the
   // upgrade to shared WAL mode.
-  const wtLocalDb = join(wtGsd, "hx.db");
-  const mainDb = join(mainGsd, "hx.db");
+  const wtLocalDb = join(wtHx, "hx.db");
+  const mainDb = join(mainHx, "hx.db");
   if (existsSync(wtLocalDb) && existsSync(mainDb)) {
     try {
       reconcileWorktreeDb(mainDb, wtLocalDb);
@@ -621,8 +630,8 @@ export function syncWorktreeStateBack(
   // written during milestone closeout and lost on teardown without explicit sync
   // (#1787, #2313).
   for (const f of ROOT_STATE_FILES) {
-    const src = join(wtGsd, f);
-    const dst = join(mainGsd, f);
+    const src = join(wtHx, f);
+    const dst = join(mainHx, f);
     if (existsSync(src)) {
       try {
         cpSync(src, dst, { force: true });
@@ -637,7 +646,7 @@ export function syncWorktreeStateBack(
   // The complete-milestone unit may create next-milestone artifacts (e.g.
   // M007 setup while closing M006). We must sync every milestone directory
   // in the worktree, not just the current one.
-  const wtMilestonesDir = join(wtGsd, "milestones");
+  const wtMilestonesDir = join(wtHx, "milestones");
   if (!existsSync(wtMilestonesDir)) return { synced };
 
   try {
@@ -646,7 +655,7 @@ export function syncWorktreeStateBack(
       .map((d) => d.name);
 
     for (const mid of wtMilestones) {
-      syncMilestoneDir(wtGsd, mainGsd, mid, synced);
+      syncMilestoneDir(wtHx, mainHx, mid, synced);
     }
   } catch {
     /* non-fatal */
@@ -683,13 +692,13 @@ function syncDirFiles(
 }
 
 function syncMilestoneDir(
-  wtGsd: string,
-  mainGsd: string,
+  wtHx: string,
+  mainHx: string,
   mid: string,
   synced: string[],
 ): void {
-  const wtMilestoneDir = join(wtGsd, "milestones", mid);
-  const mainMilestoneDir = join(mainGsd, "milestones", mid);
+  const wtMilestoneDir = join(wtHx, "milestones", mid);
+  const mainMilestoneDir = join(mainHx, "milestones", mid);
 
   if (!existsSync(wtMilestoneDir)) return;
   mkdirSync(mainMilestoneDir, { recursive: true });
@@ -985,12 +994,12 @@ export function createAutoWorktree(
  * Best-effort — failures are non-fatal since auto-mode can recreate artifacts.
  */
 function copyPlanningArtifacts(srcBase: string, wtPath: string): void {
-  const srcGsd = join(srcBase, ".hx");
-  const dstGsd = join(wtPath, ".hx");
-  if (!existsSync(srcGsd)) return;
+  const srcHx = join(srcBase, ".hx");
+  const dstHx = join(wtPath, ".hx");
+  if (!existsSync(srcHx)) return;
 
   // Copy milestones/ directory (planning files, roadmaps, plans, research)
-  safeCopyRecursive(join(srcGsd, "milestones"), join(dstGsd, "milestones"), {
+  safeCopyRecursive(join(srcHx, "milestones"), join(dstHx, "milestones"), {
     force: true,
     filter: (src) => !src.endsWith("-META.json"),
   });
@@ -1005,20 +1014,20 @@ function copyPlanningArtifacts(srcBase: string, wtPath: string): void {
     "KNOWLEDGE.md",
     "OVERRIDES.md",
   ]) {
-    safeCopy(join(srcGsd, file), join(dstGsd, file), { force: true });
+    safeCopy(join(srcHx, file), join(dstHx, file), { force: true });
   }
 
   // Seed canonical PREFERENCES.md when available; fall back to legacy lowercase.
-  if (existsSync(join(srcGsd, PROJECT_PREFERENCES_FILE))) {
+  if (existsSync(join(srcHx, PROJECT_PREFERENCES_FILE))) {
     safeCopy(
-      join(srcGsd, PROJECT_PREFERENCES_FILE),
-      join(dstGsd, PROJECT_PREFERENCES_FILE),
+      join(srcHx, PROJECT_PREFERENCES_FILE),
+      join(dstHx, PROJECT_PREFERENCES_FILE),
       { force: true },
     );
-  } else if (existsSync(join(srcGsd, LEGACY_PROJECT_PREFERENCES_FILE))) {
+  } else if (existsSync(join(srcHx, LEGACY_PROJECT_PREFERENCES_FILE))) {
     safeCopy(
-      join(srcGsd, LEGACY_PROJECT_PREFERENCES_FILE),
-      join(dstGsd, LEGACY_PROJECT_PREFERENCES_FILE),
+      join(srcHx, LEGACY_PROJECT_PREFERENCES_FILE),
+      join(dstHx, LEGACY_PROJECT_PREFERENCES_FILE),
       { force: true },
     );
   }
@@ -1073,7 +1082,11 @@ export function teardownAutoWorktree(
     );
     // Attempt a direct filesystem removal as a fallback
     try {
-      rmSync(wtDir, { recursive: true, force: true });
+      if (!isInsideWorktreesDir(originalBasePath, wtDir)) {
+        logError("reconcile", `Safety: refusing to remove ${wtDir} — not inside worktrees dir`, { basePath: originalBasePath, wtDir });
+      } else {
+        rmSync(wtDir, { recursive: true, force: true });
+      }
     } catch {
       // Non-fatal — the warning above tells the user how to clean up
     }

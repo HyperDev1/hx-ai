@@ -275,7 +275,7 @@ function extractCostFromNdjson(mid) {
 // ─── Self-Healing ────────────────────────────────────────────────────────────
 
 // Auto-detect the HX loader path — works across npm global, homebrew, and local installs
-function findGsdLoader() {
+function findHxLoader() {
   // 1. Check if we're running from inside the hx-2 repo itself
   const repoLoader = path.resolve(import.meta.dirname, '..', 'dist', 'loader.js');
   if (fs.existsSync(repoLoader)) return repoLoader;
@@ -305,7 +305,7 @@ function findGsdLoader() {
   return null;
 }
 
-const GSD_LOADER = findGsdLoader();
+const HX_LOADER = findHxLoader();
 
 /**
  * Respawn a dead worker. Returns the new PID or null on failure.
@@ -314,26 +314,26 @@ const GSD_LOADER = findGsdLoader();
 function respawnWorker(mid) {
   const worktreeDir = path.resolve(PROJECT_ROOT, `.hx/worktrees/${mid}`);
   if (!fs.existsSync(worktreeDir)) return null;
-  if (!fs.existsSync(GSD_LOADER)) return null;
+  if (!fs.existsSync(HX_LOADER)) return null;
   
   const stdoutLog = path.resolve(PROJECT_ROOT, PARALLEL_DIR, `${mid}.stdout.log`);
   const stderrLog = path.resolve(PROJECT_ROOT, PARALLEL_DIR, `${mid}.stderr.log`);
   
   try {
     const env = [
-      `GSD_MILESTONE_LOCK=${mid}`,
-      `GSD_PROJECT_ROOT=${PROJECT_ROOT}`,
-      `GSD_PARALLEL_WORKER=1`,
+      `HX_MILESTONE_LOCK=${mid}`,
+      `HX_PROJECT_ROOT=${PROJECT_ROOT}`,
+      `HX_PARALLEL_WORKER=1`,
     ].join(' ');
     
     // Use a shell script written to a temp file to avoid quoting hell
     const script = [
       '#!/bin/bash',
       `cd "${worktreeDir}"`,
-      `export GSD_MILESTONE_LOCK=${mid}`,
-      `export GSD_PROJECT_ROOT="${PROJECT_ROOT}"`,
-      `export GSD_PARALLEL_WORKER=1`,
-      `exec node "${GSD_LOADER}" headless --json auto > "${stdoutLog}" 2>> "${stderrLog}"`,
+      `export HX_MILESTONE_LOCK=${mid}`,
+      `export HX_PROJECT_ROOT="${PROJECT_ROOT}"`,
+      `export HX_PARALLEL_WORKER=1`,
+      `exec node "${HX_LOADER}" headless --json auto > "${stdoutLog}" 2>> "${stderrLog}"`,
     ].join('\n');
     
     const scriptPath = path.resolve(PROJECT_ROOT, PARALLEL_DIR, `${mid}.respawn.sh`);

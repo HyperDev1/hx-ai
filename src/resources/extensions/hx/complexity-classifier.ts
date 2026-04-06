@@ -26,6 +26,9 @@ export interface TaskMetadata {
   estimatedLines?: number;
   codeBlockCount?: number;      // number of fenced code blocks in plan
   complexityKeywords?: string[]; // detected complexity signals
+  toolUsage?: string[];          // tool names referenced in plan (bash, browser, etc.)
+  visionRequired?: boolean;      // plan mentions screenshot/image/vision
+  requiresReasoning?: boolean;   // plan mentions multi-step deduction/analysis
 }
 
 // ─── Unit Type → Default Tier Mapping ────────────────────────────────────────
@@ -267,6 +270,27 @@ function extractTaskMetadata(unitId: string, basePath: string): TaskMetadata {
     if (content.match(/\b(concurrent|parallel|race condition|mutex|lock)\b/i)) complexityKeywords.push("concurrency");
     if (content.match(/\b(backward.?compat|breaking change|deprecat)\b/i)) complexityKeywords.push("compatibility");
     meta.complexityKeywords = complexityKeywords;
+
+    // Tool usage: scan for tool name patterns in plan content
+    const toolPatterns: Array<[RegExp, string]> = [
+      [/\bbash\b/gi, "bash"],
+      [/\bbrowser\b/gi, "browser"],
+      [/\blsp\b/gi, "lsp"],
+      [/\bmac_/gi, "mac"],
+    ];
+    const toolUsage: string[] = [];
+    for (const [pattern, toolName] of toolPatterns) {
+      if (pattern.test(content) && !toolUsage.includes(toolName)) {
+        toolUsage.push(toolName);
+      }
+    }
+    meta.toolUsage = toolUsage;
+
+    // Vision required: plan mentions screenshot/image/vision/visual
+    meta.visionRequired = content.match(/\b(screenshot|image|vision|visual)\b/i) !== null;
+
+    // Reasoning required: plan mentions multi-step deduction/analysis
+    meta.requiresReasoning = content.match(/\b(reason|deduc|infer|analyz|diagnos)\b/i) !== null;
   } catch {
     // Non-fatal — metadata extraction is best-effort
   }

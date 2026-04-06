@@ -1,5 +1,5 @@
 import type { ExtensionCommandContext, ExtensionContext } from "@hyperlab/hx-coding-agent";
-import type { GSDState } from "../../types.js";
+import type { HXState } from "../../types.js";
 
 import { computeProgressScore, formatProgressLine } from "../../progress-score.js";
 import { loadEffectiveHXPreferences, getGlobalHXPreferencesPath, getProjectHXPreferencesPath } from "../../preferences.js";
@@ -77,9 +77,9 @@ export async function handleStatus(ctx: ExtensionCommandContext): Promise<void> 
     return;
   }
 
-  const { GSDDashboardOverlay } = await import("../../dashboard-overlay.js");
+  const { HXDashboardOverlay } = await import("../../dashboard-overlay.js");
   const result = await ctx.ui.custom<void>(
-    (tui, theme, _kb, done) => new GSDDashboardOverlay(tui, theme, () => done()),
+    (tui, theme, _kb, done) => new HXDashboardOverlay(tui, theme, () => done()),
     {
       overlay: true,
       overlayOptions: {
@@ -106,9 +106,9 @@ export async function handleVisualize(ctx: ExtensionCommandContext): Promise<voi
     return;
   }
 
-  const { GSDVisualizerOverlay } = await import("../../visualizer-overlay.js");
+  const { HXVisualizerOverlay } = await import("../../visualizer-overlay.js");
   const result = await ctx.ui.custom<void>(
-    (tui, theme, _kb, done) => new GSDVisualizerOverlay(tui, theme, () => done()),
+    (tui, theme, _kb, done) => new HXVisualizerOverlay(tui, theme, () => done()),
     {
       overlay: true,
       overlayOptions: {
@@ -220,7 +220,7 @@ export async function handleCoreCommand(trimmed: string, ctx: ExtensionCommandCo
   return false;
 }
 
-export function formatTextStatus(state: GSDState): string {
+export function formatTextStatus(state: HXState): string {
   const lines: string[] = ["HX Status\n"];
   lines.push(formatProgressLine(computeProgressScore()));
   lines.push("");

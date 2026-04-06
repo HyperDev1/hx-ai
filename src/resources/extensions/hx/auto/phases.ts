@@ -27,12 +27,15 @@ import { debugLog } from "../debug-logger.js";
 import { PROJECT_FILES } from "../detection.js";
 import { MergeConflictError } from "../git-service.js";
 import { join } from "node:path";
-import { existsSync, cpSync } from "node:fs";
+import { existsSync, cpSync, readdirSync } from "node:fs";
 import { logWarning, logError } from "../workflow-logger.js";
 import { hxRoot } from "../paths.js";
 import { atomicWriteSync } from "../atomic-write.js";
 import { verifyExpectedArtifact } from "../auto-recovery.js";
 import { writeUnitRuntimeRecord } from "../unit-runtime.js";
+import { resetEvidence } from "../safety/evidence-collector.js";
+import { createCheckpoint, cleanupCheckpoint, rollbackToCheckpoint } from "../safety/git-checkpoint.js";
+import { resolveSafetyHarnessConfig } from "../safety/safety-harness.js";
 
 // ─── generateMilestoneReport ──────────────────────────────────────────────────
 
@@ -892,11 +895,38 @@ export async function runUnitPhase(
     }
     const hasProjectFile = PROJECT_FILES.some((f) => deps.existsSync(join(s.basePath, f)));
     const hasSrcDir = deps.existsSync(join(s.basePath, "src"));
-    if (!hasProjectFile && !hasSrcDir) {
+
+    // Monorepo support: walk parent dirs up to git root for project file markers
+    let hasProjectFileInParent = false;
+    try {
+      let dir = join(s.basePath, "..");
+      for (let depth = 0; depth < 5; depth++) {
+        const resolved = dir;
+        if (PROJECT_FILES.some((f) => existsSync(join(resolved, f)))) {
+          hasProjectFileInParent = true;
+          break;
+        }
+        // Stop at filesystem root or git boundary
+        if (existsSync(join(resolved, ".git"))) break;
+        const parent = join(resolved, "..");
+        if (parent === resolved) break;
+        dir = parent;
+      }
+    } catch { /* ignore errors during parent walk */ }
+
+    // Xcode bundle detection (monorepo support)
+    let hasXcodeBundle = false;
+    try {
+      hasXcodeBundle = readdirSync(s.basePath).some(
+        (f) => f.endsWith(".xcodeproj") || f.endsWith(".xcworkspace"),
+      );
+    } catch { /* ignore readdir errors */ }
+
+    if (!hasProjectFile && !hasSrcDir && !hasXcodeBundle && !hasProjectFileInParent) {
       // Greenfield projects won't have project files yet — the first task creates them.
       // Log a warning but allow execution to proceed. The .git check above is sufficient
       // to ensure we're in a valid working directory.
-      debugLog("runUnitPhase", { phase: "worktree-health-warn-greenfield", basePath: s.basePath, hasProjectFile, hasSrcDir });
+      debugLog("runUnitPhase", { phase: "worktree-health-warn-greenfield", basePath: s.basePath, hasProjectFile, hasSrcDir, hasXcodeBundle, hasProjectFileInParent });
       ctx.ui.notify(`Warning: ${s.basePath} has no recognized project files — proceeding as greenfield project`, "warning");
     }
   }
@@ -910,6 +940,7 @@ export async function runUnitPhase(
   const previousTier = s.currentUnitRouting?.tier;
 
   s.currentUnit = { type: unitType, id: unitId, startedAt: Date.now() };
+  s.currentDispatchedModelId = null; // Reset at unit start; set after model selection
   const unitStartSeq = ic.nextSeq();
   deps.emitJournalEvent({ ts: new Date().toISOString(), flowId: ic.flowId, seq: unitStartSeq, eventType: "unit-start", data: { unitType, unitId } });
   deps.captureAvailableSkills();
@@ -936,6 +967,28 @@ export async function runUnitPhase(
   deps.updateProgressWidget(ctx, unitType, unitId, state);
 
   deps.ensurePreconditions(unitType, unitId, s.basePath, state);
+
+  // ── Safety harness: reset evidence + create checkpoint ─────────────────
+  {
+    const { loadEffectiveHXPreferences } = await import("../preferences.js");
+    const prefs = loadEffectiveHXPreferences();
+    const safetyCfg = resolveSafetyHarnessConfig(prefs?.preferences.safety_harness);
+
+    if (safetyCfg.enabled && safetyCfg.evidenceCollection) {
+      resetEvidence();
+    }
+
+    if (safetyCfg.enabled && safetyCfg.checkpoints && unitType === "execute-task") {
+      const cpResult = createCheckpoint(s.basePath, unitId);
+      if (cpResult.success && cpResult.sha) {
+        s.checkpointSha = cpResult.sha;
+      } else {
+        s.checkpointSha = null;
+      }
+    } else {
+      s.checkpointSha = null;
+    }
+  }
 
   // Prompt injection
   let finalPrompt = prompt;
@@ -976,12 +1029,12 @@ export async function runUnitPhase(
   s.lastBaselineCharCount = undefined;
   if (deps.isDbAvailable()) {
     try {
-      const { inlineGsdRootFile } = await importExtensionModule<typeof import("../auto-prompts.js")>(import.meta.url, "../auto-prompts.js");
+      const { inlineHxRootFile } = await importExtensionModule<typeof import("../auto-prompts.js")>(import.meta.url, "../auto-prompts.js");
       const [decisionsContent, requirementsContent, projectContent] =
         await Promise.all([
-          inlineGsdRootFile(s.basePath, "decisions.md", "Decisions"),
-          inlineGsdRootFile(s.basePath, "requirements.md", "Requirements"),
-          inlineGsdRootFile(s.basePath, "project.md", "Project"),
+          inlineHxRootFile(s.basePath, "decisions.md", "Decisions"),
+          inlineHxRootFile(s.basePath, "requirements.md", "Requirements"),
+          inlineHxRootFile(s.basePath, "project.md", "Project"),
         ]);
       s.lastBaselineCharCount =
         (decisionsContent?.length ?? 0) +
@@ -1012,11 +1065,19 @@ export async function runUnitPhase(
     s.verbose,
     s.autoModeStartModel,
     sidecarItem ? undefined : { isRetry, previousTier },
+    undefined,
   );
   s.currentUnitRouting =
     modelResult.routing as AutoSession["currentUnitRouting"];
   s.currentUnitModel =
     modelResult.appliedModel as AutoSession["currentUnitModel"];
+  // Track the dispatched model ID for the dashboard (#f18305c50)
+  if (s.currentUnitModel) {
+    const m = s.currentUnitModel as { provider?: string; id?: string };
+    s.currentDispatchedModelId = (m.provider && m.id)
+      ? `${m.provider}/${m.id}`
+      : m.id ?? null;
+  }
 
   // Apply sidecar/pre-dispatch hook model override (takes priority over standard model selection)
   const hookModelOverride = sidecarItem?.model ?? iterData.hookModelOverride;
@@ -1196,7 +1257,51 @@ export async function runUnitPhase(
     s.unitRecoveryCount.delete(`${unitType}/${unitId}`);
   }
 
+  // Write phase handoff anchor after successful research/planning completion
+  const anchorPhases = new Set(["research-milestone", "research-slice", "plan-milestone", "plan-slice"]);
+  if (artifactVerified && mid && anchorPhases.has(unitType)) {
+    try {
+      const { writePhaseAnchor } = await import("../phase-anchor.js");
+      writePhaseAnchor(s.basePath, mid, {
+        phase: unitType,
+        milestoneId: mid,
+        generatedAt: new Date().toISOString(),
+        intent: `Completed ${unitType} for ${unitId}`,
+        decisions: [],
+        blockers: [],
+        nextSteps: [],
+      });
+    } catch (e) { logWarning('engine', 'Phase anchor write failed', { error: String(e) }); }
+  }
+
   deps.emitJournalEvent({ ts: new Date().toISOString(), flowId: ic.flowId, seq: ic.nextSeq(), eventType: "unit-end", data: { unitType, unitId, status: unitResult.status, artifactVerified, ...(unitResult.errorContext ? { errorContext: unitResult.errorContext } : {}) }, causedBy: { flowId: ic.flowId, seq: unitStartSeq } });
+
+  // ── Safety harness: checkpoint cleanup or rollback ──────────────────────
+  if (s.checkpointSha) {
+    const { loadEffectiveHXPreferences } = await import("../preferences.js");
+    const prefs = loadEffectiveHXPreferences();
+    const safetyCfg = resolveSafetyHarnessConfig(prefs?.preferences.safety_harness);
+
+    if (safetyCfg.enabled && safetyCfg.autoRollback && unitResult.status === "error") {
+      const rollback = rollbackToCheckpoint(s.basePath, s.checkpointSha);
+      if (rollback.success) {
+        logWarning("safety", `Auto-rolled back to checkpoint ${s.checkpointSha} after failed unit`, {
+          unitId,
+          unitType,
+          sha: s.checkpointSha,
+        });
+      } else {
+        logError("safety", `Auto-rollback failed for ${unitId}: ${rollback.error ?? "unknown"}`, {
+          unitId,
+          sha: s.checkpointSha,
+        });
+      }
+    } else {
+      // Successful unit — clean up the checkpoint ref
+      cleanupCheckpoint(s.basePath, unitId);
+    }
+    s.checkpointSha = null;
+  }
 
   return { action: "next", data: { unitStartedAt: s.currentUnit.startedAt } };
 }
@@ -1217,8 +1322,11 @@ export async function runFinalize(
 
   debugLog("autoLoop", { phase: "finalize", iteration: ic.iteration });
 
-  // Clear unit timeout (unit completed)
+  // Clear unit timeout (unit completed). Also cleared in finally to guard against
+  // any exception escaping from the verification/post-verification steps (#e772de0d2).
   deps.clearUnitTimeout();
+
+  try {
 
   // Post-unit context for pre/post verification
   const postUnitCtx: PostUnitContext = {
@@ -1315,4 +1423,7 @@ export async function runFinalize(
   }
 
   return { action: "next", data: undefined as void };
+  } finally {
+    deps.clearUnitTimeout();
+  }
 }

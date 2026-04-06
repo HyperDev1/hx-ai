@@ -20,10 +20,10 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const gsdDir = join(__dirname, "..");
+const hxDir = join(__dirname, "..");
 
 function readSrc(file: string): string {
-  return readFileSync(join(gsdDir, file), "utf-8");
+  return readFileSync(join(hxDir, file), "utf-8");
 }
 
 const preferencesSrc = readSrc("preferences-models.ts");

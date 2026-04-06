@@ -77,7 +77,7 @@ Agent writes file → on slice branch → handleAgentEnd → auto-commit on slic
 ### `.hx/` Tracking (Current — Contradictory)
 
 - `.gitignore` line 52: `.hx/` — ignores everything
-- `smartStage()` lines 338-349: force-adds `GSD_DURABLE_PATHS` — tracks milestones/, DECISIONS.md, PROJECT.md, REQUIREMENTS.md, QUEUE.md
+- `smartStage()` lines 338-349: force-adds `HX_DURABLE_PATHS` — tracks milestones/, DECISIONS.md, PROJECT.md, REQUIREMENTS.md, QUEUE.md
 - Result: `.hx/milestones/` is partially tracked on some branches, fully ignored on others. The code fights the config.
 
 ## Proposed Architecture
@@ -171,7 +171,7 @@ Agent writes file → on milestone branch → handleAgentEnd → auto-commit on 
 
 4. Update README suggested `.gitignore` section
 
-5. Remove `smartStage()` force-add of `GSD_DURABLE_PATHS` — no longer needed since `.gitignore` doesn't block them
+5. Remove `smartStage()` force-add of `HX_DURABLE_PATHS` — no longer needed since `.gitignore` doesn't block them
 
 **Verification:** `git status` shows planning artifacts tracked, runtime files untracked. `git worktree add` on a new worktree has correct `.hx/milestones/` state.
 

@@ -45,6 +45,7 @@ const TOP_LEVEL_SUBCOMMANDS = [
   { cmd: "start", desc: "Start a workflow template" },
   { cmd: "templates", desc: "List available workflow templates" },
   { cmd: "extensions", desc: "Manage extensions" },
+  { cmd: "codebase", desc: "Generate and manage codebase map (.hx/CODEBASE.md)" },
 ] as const;
 
 function filterStartsWith(
@@ -62,7 +63,7 @@ function filterStartsWith(
     }));
 }
 
-function getGsdArgumentCompletions(prefix: string) {
+function getHxArgumentCompletions(prefix: string) {
   const parts = prefix.trim().split(/\s+/);
 
   if (parts.length <= 1) {
@@ -241,13 +242,13 @@ function getGsdArgumentCompletions(prefix: string) {
   return null;
 }
 
-export function registerLazyGSDCommand(pi: ExtensionAPI): void {
+export function registerLazyHXCommand(pi: ExtensionAPI): void {
   pi.registerCommand("hx", {
     description: "HX — Hyperlab Coding Agent",
-    getArgumentCompletions: getGsdArgumentCompletions,
+    getArgumentCompletions: getHxArgumentCompletions,
     handler: async (args: string, ctx: ExtensionCommandContext) => {
-      const { handleGSDCommand } = await importExtensionModule<typeof import("./commands.js")>(import.meta.url, "./commands.js");
-      await handleGSDCommand(args, ctx, pi);
+      const { handleHXCommand } = await importExtensionModule<typeof import("./commands.js")>(import.meta.url, "./commands.js");
+      await handleHXCommand(args, ctx, pi);
     },
   });
 }

@@ -18,6 +18,7 @@ import { logWarning, logError } from './workflow-logger.js';
 import { invalidateStateCache } from './state.js';
 import { clearPathCache } from './paths.js';
 import { clearParseCache } from './files.js';
+import { parseRequirementsSections } from './md-importer.js';
 
 // ─── Freeform Detection ───────────────────────────────────────────────────
 
@@ -251,21 +252,49 @@ export async function saveDecisionToDb(
   try {
     const db = await import('./hx-db.js');
 
-    const id = await nextDecisionId();
+    // Wrap ID assignment + insert in a transaction to prevent TOCTOU race
+    // where two concurrent calls both read the same MAX(id) and then both
+    // try to insert the same ID (18cc75138).
+    let id = 'D001';
+    db.transaction(() => {
+      const adapter = db._getAdapter();
+      if (!adapter) return;
 
-    db.upsertDecision({
-      id,
-      when_context: fields.when_context ?? '',
-      scope: fields.scope,
-      decision: fields.decision,
-      choice: fields.choice,
-      rationale: fields.rationale,
-      revisable: fields.revisable ?? 'Yes',
-      made_by: fields.made_by ?? 'agent',
-      superseded_by: null,
+      const row = adapter
+        .prepare('SELECT MAX(CAST(SUBSTR(id, 2) AS INTEGER)) as max_num FROM decisions')
+        .get();
+      const maxNum = row ? (row['max_num'] as number | null) : null;
+      const next = (maxNum != null && !isNaN(maxNum as number)) ? (maxNum as number) + 1 : 1;
+      id = `D${String(next).padStart(3, '0')}`;
+
+      db.upsertDecision({
+        id,
+        when_context: fields.when_context ?? '',
+        scope: fields.scope,
+        decision: fields.decision,
+        choice: fields.choice,
+        rationale: fields.rationale,
+        revisable: fields.revisable ?? 'Yes',
+        made_by: fields.made_by ?? 'agent',
+        superseded_by: null,
+      });
     });
 
-    // Fetch all decisions (including superseded for the full register)
+    // Cluster 9: if the decision text refers to deferring a slice, update
+    // the slice status to 'deferred' in the DB (non-fatal).
+    {
+      const combinedText = `${fields.decision ?? ''} ${fields.rationale ?? ''} ${fields.choice ?? ''}`;
+      if (/\bdefer/i.test(combinedText)) {
+        const sliceRef = extractDeferredSliceRef(combinedText);
+        if (sliceRef) {
+          try {
+            db.updateSliceStatus(sliceRef.milestoneId, sliceRef.sliceId, 'deferred');
+          } catch {
+            /* non-fatal — deferred status update is best-effort */
+          }
+        }
+      }
+    }
     const adapter = db._getAdapter();
     let allDecisions: Decision[] = [];
     if (adapter) {
@@ -343,7 +372,32 @@ export async function updateRequirementInDb(
   try {
     const db = await import('./hx-db.js');
 
-    const existing = db.getRequirementById(id);
+    let existing = db.getRequirementById(id);
+
+    // Cluster 20: if the requirement isn't in the DB yet, parse REQUIREMENTS.md
+    // and seed all requirements into the DB before retrying the lookup.
+    // This handles projects where requirements were defined only in the markdown
+    // file and never seeded to the DB (K-note: 'Requirements DB vs REQUIREMENTS.md').
+    if (!existing) {
+      const reqsFilePath = resolveHxRootFile(basePath, 'REQUIREMENTS');
+      if (existsSync(reqsFilePath)) {
+        try {
+          const mdContent = readFileSync(reqsFilePath, 'utf-8');
+          const parsedReqs = parseRequirementsSections(mdContent);
+          for (const r of parsedReqs) {
+            // INSERT OR IGNORE semantics: only insert if the row is not already present
+            if (!db.getRequirementById(r.id)) {
+              db.upsertRequirement(r);
+            }
+          }
+          // Retry lookup after seeding
+          existing = db.getRequirementById(id);
+        } catch (seedErr) {
+          logWarning('manifest', `seed from REQUIREMENTS.md failed: ${String((seedErr as Error).message)}`, { fn: 'updateRequirementInDb', id });
+        }
+      }
+    }
+
     if (!existing) {
       throw new HXError(HX_STALE_STATE, `Requirement ${id} not found`);
     }
@@ -402,6 +456,34 @@ export async function updateRequirementInDb(
   }
 }
 
+// ─── Deferred Slice Extraction ────────────────────────────────────────────
+
+/**
+ * Extract milestone + slice IDs from a decision text that mentions deferring
+ * a slice. Matches patterns like "defer S03 from M002" or "deferring M001/S02".
+ *
+ * Returns { milestoneId, sliceId } if both are found, or null otherwise.
+ */
+export function extractDeferredSliceRef(
+  decisionText: string,
+): { milestoneId: string; sliceId: string } | null {
+  // Pattern: M-id/S-id (e.g. M001/S03, M002-abc123/S01)
+  const slashRe = /\b(M\d+(?:-[a-z0-9]{6})?)\/(S\d+)\b/i;
+  const slashMatch = decisionText.match(slashRe);
+  if (slashMatch) {
+    return { milestoneId: slashMatch[1], sliceId: slashMatch[2] };
+  }
+
+  // Pattern: "defer S03 from M002" or "deferring S01 in M003"
+  const verbRe = /\bdefer(?:ring)?\s+(S\d+)\s+(?:from|in)\s+(M\d+(?:-[a-z0-9]{6})?)\b/i;
+  const verbMatch = decisionText.match(verbRe);
+  if (verbMatch) {
+    return { milestoneId: verbMatch[2], sliceId: verbMatch[1] };
+  }
+
+  return null;
+}
+
 // ─── Save Artifact to DB + Disk ───────────────────────────────────────────
 
 export interface SaveArtifactOpts {
@@ -426,9 +508,9 @@ export async function saveArtifactToDb(
     const db = await import('./hx-db.js');
 
     // Guard against path traversal before any reads/writes
-    const gsdDir = resolve(basePath, '.hx');
+    const hxDir = resolve(basePath, '.hx');
     const fullPath = resolve(basePath, '.hx', opts.path);
-    if (!fullPath.startsWith(gsdDir)) {
+    if (!fullPath.startsWith(hxDir)) {
       throw new HXError(HX_IO_ERROR, `saveArtifactToDb: path escapes .hx/ directory: ${opts.path}`);
     }
 

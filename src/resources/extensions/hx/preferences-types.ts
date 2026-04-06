@@ -28,7 +28,7 @@ import type { GitHubSyncConfig } from "../github-sync/types.js";
 export type WorkflowMode = "solo" | "team";
 
 /** Default preference values for each workflow mode. */
-export const MODE_DEFAULTS: Record<WorkflowMode, Partial<GSDPreferences>> = {
+export const MODE_DEFAULTS: Record<WorkflowMode, Partial<HXPreferences>> = {
   solo: {
     git: {
       auto_push: true,
@@ -51,7 +51,7 @@ export const MODE_DEFAULTS: Record<WorkflowMode, Partial<GSDPreferences>> = {
   },
 };
 
-/** All recognized top-level keys in GSDPreferences. Used to detect typos / stale config. */
+/** All recognized top-level keys in HXPreferences. Used to detect typos / stale config. */
 export const KNOWN_PREFERENCE_KEYS = new Set<string>([
   "version",
   "mode",
@@ -95,6 +95,9 @@ export const KNOWN_PREFERENCE_KEYS = new Set<string>([
   "show_token_cost",
   "language",
   "experimental",
+  "context_management",
+  "codebase",
+  "safety_harness",
 ]);
 
 /** Canonical list of all dispatch unit types. */
@@ -108,7 +111,7 @@ export type UnitType = (typeof KNOWN_UNIT_TYPES)[number];
 
 export const SKILL_ACTIONS = new Set(["use", "prefer", "avoid"]);
 
-export interface GSDSkillRule {
+export interface HXSkillRule {
   when: string;
   use?: string[];
   prefer?: string[];
@@ -119,7 +122,7 @@ export interface GSDSkillRule {
  * Model configuration for a single phase.
  * Supports primary model with optional fallbacks for resilience.
  */
-export interface GSDPhaseModelConfig {
+export interface HXPhaseModelConfig {
   /** Primary model ID (e.g., "claude-opus-4-6") */
   model: string;
   /** Provider name to disambiguate when the same model ID exists across providers (e.g., "bedrock", "anthropic") */
@@ -130,9 +133,9 @@ export interface GSDPhaseModelConfig {
 
 /**
  * Legacy model config -- simple string per phase.
- * Kept for backward compatibility; will be migrated to GSDModelConfigV2 on load.
+ * Kept for backward compatibility; will be migrated to HXModelConfigV2 on load.
  */
-export interface GSDModelConfig {
+export interface HXModelConfig {
   research?: string;
   planning?: string;
   discuss?: string;
@@ -147,15 +150,15 @@ export interface GSDModelConfig {
  * Extended model config with per-phase fallback support.
  * Each phase can specify a primary model and ordered fallbacks.
  */
-export interface GSDModelConfigV2 {
-  research?: string | GSDPhaseModelConfig;
-  planning?: string | GSDPhaseModelConfig;
-  discuss?: string | GSDPhaseModelConfig;
-  execution?: string | GSDPhaseModelConfig;
-  execution_simple?: string | GSDPhaseModelConfig;
-  completion?: string | GSDPhaseModelConfig;
-  validation?: string | GSDPhaseModelConfig;
-  subagent?: string | GSDPhaseModelConfig;
+export interface HXModelConfigV2 {
+  research?: string | HXPhaseModelConfig;
+  planning?: string | HXPhaseModelConfig;
+  discuss?: string | HXPhaseModelConfig;
+  execution?: string | HXPhaseModelConfig;
+  execution_simple?: string | HXPhaseModelConfig;
+  completion?: string | HXPhaseModelConfig;
+  validation?: string | HXPhaseModelConfig;
+  subagent?: string | HXPhaseModelConfig;
 }
 
 /** Normalized model selection with resolved fallbacks */
@@ -202,15 +205,35 @@ export interface ExperimentalPreferences {
   rtk?: boolean;
 }
 
-export interface GSDPreferences {
+export interface ContextManagementConfig {
+  /** Whether to mask older tool-result observations to reduce context size. Default: true. */
+  observation_masking?: boolean;
+  /** Number of recent assistant turns to keep unmasked. Default: 8. Range: 1–50. */
+  observation_mask_turns?: number;
+  /** Fraction of context window at which compaction is triggered. Default: 0.70. Range: 0.5–0.95. */
+  compaction_threshold_percent?: number;
+  /** Maximum characters to retain per tool result before truncation. Default: 800. Range: 200–10000. */
+  tool_result_max_chars?: number;
+}
+
+export interface CodebaseMapPreferences {
+  /** Glob patterns to exclude from the codebase map. Merged with built-in defaults. */
+  exclude_patterns?: string[];
+  /** Maximum number of files to include in the map. Default: 500. */
+  max_files?: number;
+  /** Collapse directories that contain N or fewer files into a single entry. Default: 3. */
+  collapse_threshold?: number;
+}
+
+export interface HXPreferences {
   version?: number;
   mode?: WorkflowMode;
   always_use_skills?: string[];
   prefer_skills?: string[];
   avoid_skills?: string[];
-  skill_rules?: GSDSkillRule[];
+  skill_rules?: HXSkillRule[];
   custom_instructions?: string[];
-  models?: GSDModelConfig | GSDModelConfigV2;
+  models?: HXModelConfig | HXModelConfigV2;
   skill_discovery?: SkillDiscoveryMode;
   skill_staleness_days?: number;  // Skills unused for N days get deprioritized (#599). 0 = disabled. Default: 60.
   auto_supervisor?: AutoSupervisorConfig;
@@ -265,12 +288,31 @@ export interface GSDPreferences {
    * See the preferences reference for details on each feature.
    */
   experimental?: ExperimentalPreferences;
+  /** Context management configuration — observation masking, compaction thresholds, tool result limits. */
+  context_management?: ContextManagementConfig;
+  /** Codebase map generation preferences — exclude patterns, file limits, collapse threshold. */
+  codebase?: CodebaseMapPreferences;
+  /**
+   * LLM safety harness configuration — checkpoints, evidence collection, file-change validation.
+   * All features are enabled by default. Set `enabled: false` to disable the entire harness.
+   */
+  safety_harness?: {
+    enabled?: boolean;
+    evidence_collection?: boolean;
+    file_change_validation?: boolean;
+    evidence_cross_reference?: boolean;
+    destructive_command_warnings?: boolean;
+    content_validation?: boolean;
+    checkpoints?: boolean;
+    auto_rollback?: boolean;
+    timeout_scale_cap?: number;
+  };
 }
 
-export interface LoadedGSDPreferences {
+export interface LoadedHXPreferences {
   path: string;
   scope: "global" | "project";
-  preferences: GSDPreferences;
+  preferences: HXPreferences;
   /** Validation warnings (unknown keys, type mismatches, deprecations). Empty when preferences are clean. */
   warnings?: string[];
 }

@@ -16,10 +16,10 @@ const PLAYWRIGHT_SKIP =
   process.env.PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD === '1' ||
   process.env.PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD === 'true'
 const RTK_SKIP =
-  process.env.GSD_SKIP_RTK_INSTALL === '1' ||
-  process.env.GSD_SKIP_RTK_INSTALL === 'true' ||
-  process.env.GSD_RTK_DISABLED === '1' ||
-  process.env.GSD_RTK_DISABLED === 'true'
+  process.env.HX_SKIP_RTK_INSTALL === '1' ||
+  process.env.HX_SKIP_RTK_INSTALL === 'true' ||
+  process.env.HX_RTK_DISABLED === '1' ||
+  process.env.HX_RTK_DISABLED === 'true'
 
 const RTK_VERSION = '0.33.1'
 const RTK_REPO = 'rtk-ai/rtk'

@@ -153,7 +153,7 @@ export async function autoLoop(
 
         // dispatch.action === "dispatch"
         const step = dispatch.step!;
-        const gsdState = await deps.deriveState(s.basePath);
+        const hxState = await deps.deriveState(s.basePath);
 
         iterData = {
           unitType: step.unitType,
@@ -161,7 +161,7 @@ export async function autoLoop(
           prompt: step.prompt,
           finalPrompt: step.prompt,
           pauseAfterUatDispatch: false,
-          state: gsdState,
+          state: hxState,
           mid: s.currentMilestoneId ?? "workflow",
           midTitle: "Workflow",
           isRetry: false,

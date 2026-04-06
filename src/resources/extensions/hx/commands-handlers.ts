@@ -16,11 +16,12 @@ import {
   formatDoctorIssuesForPrompt,
   formatDoctorReport,
   formatDoctorReportJson,
-  runGSDDoctor,
+  runHXDoctor,
   selectDoctorScope,
   filterDoctorIssues,
 } from "./doctor.js";
-import { isAutoActive } from "./auto.js";
+import { isAutoActive, checkRemoteAutoSession } from "./auto.js";
+import { getAutoWorktreePath } from "./auto-worktree.js";
 import { projectRoot } from "./commands/context.js";
 import { loadPrompt } from "./prompt-loader.js";
 import { loadEffectiveHXPreferences } from "./preferences.js";
@@ -56,7 +57,7 @@ export async function handleDoctor(args: string, ctx: ExtensionCommandContext, p
   const requestedScope = mode === "doctor" ? parts[0] : parts[1];
   const scope = await selectDoctorScope(projectRoot(), requestedScope);
   const effectiveScope = mode === "audit" ? requestedScope : scope;
-  const report = await runGSDDoctor(projectRoot(), {
+  const report = await runHXDoctor(projectRoot(), {
     fix: mode === "fix" || mode === "heal" || dryRun,
     dryRun,
     scope: effectiveScope,
@@ -153,9 +154,9 @@ export async function handleCapture(args: string, ctx: ExtensionCommandContext):
   const basePath = process.cwd();
 
   // Ensure .hx/ exists — capture should work even without a milestone
-  const gsdDir = hxRoot(basePath);
-  if (!existsSync(gsdDir)) {
-    mkdirSync(gsdDir, { recursive: true });
+  const hxDir = hxRoot(basePath);
+  if (!existsSync(hxDir)) {
+    mkdirSync(hxDir, { recursive: true });
   }
 
   const id = appendCapture(basePath, text);
@@ -223,7 +224,13 @@ export async function handleSteer(change: string, ctx: ExtensionCommandContext, 
   const sid = state.activeSlice?.id ?? "none";
   const tid = state.activeTask?.id ?? "none";
   const appliedAt = `${mid}/${sid}/${tid}`;
-  await appendOverride(basePath, change, appliedAt);
+
+  // Write override to the worktree path when auto-mode is active (#724e65643, cb3f38c27)
+  const wtPath = mid !== "none" ? getAutoWorktreePath(basePath, mid) : null;
+  const targetPath = (wtPath && (isAutoActive() || checkRemoteAutoSession(basePath).running))
+    ? wtPath
+    : basePath;
+  await appendOverride(targetPath, change, appliedAt);
 
   if (isAutoActive()) {
     pi.sendMessage({

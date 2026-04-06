@@ -286,7 +286,7 @@ function copyDirRecursive(src: string, dest: string): void {
  */
 function ensureNodeModulesSymlink(agentDir: string): void {
   const agentNodeModules = join(agentDir, 'node_modules')
-  const gsdNodeModules = join(packageRoot, 'node_modules')
+  const hxNodeModules = join(packageRoot, 'node_modules')
 
   try {
     const stat = lstatSync(agentNodeModules)
@@ -294,7 +294,7 @@ function ensureNodeModulesSymlink(agentDir: string): void {
     if (stat.isSymbolicLink()) {
       const existing = readlinkSync(agentNodeModules)
       // Symlink exists — verify it points to the correct, existing target
-      if (existing === gsdNodeModules && existsSync(agentNodeModules)) return  // correct and target exists
+      if (existing === hxNodeModules && existsSync(agentNodeModules)) return  // correct and target exists
       // Stale or wrong target — remove and recreate
       unlinkSync(agentNodeModules)
     } else {
@@ -306,10 +306,10 @@ function ensureNodeModulesSymlink(agentDir: string): void {
   }
 
   try {
-    symlinkSync(gsdNodeModules, agentNodeModules, 'junction')
+    symlinkSync(hxNodeModules, agentNodeModules, 'junction')
   } catch (err) {
     // This failure makes HX non-functional — extensions can't resolve @hyperlab/* packages
-    console.error(`[hx] WARN: Failed to symlink ${agentNodeModules} → ${gsdNodeModules}: ${err instanceof Error ? err.message : err}`)
+    console.error(`[hx] WARN: Failed to symlink ${agentNodeModules} → ${hxNodeModules}: ${err instanceof Error ? err.message : err}`)
   }
 }
 

@@ -111,7 +111,7 @@ export {
   parseFrontmatter,
   extractSection as nativeExtractSection,
   extractAllSections,
-  batchParseGsdFiles,
+  batchParseHxFiles,
   parseRoadmapFile,
 } from "./hx-parser/index.js";
 export type {
@@ -120,7 +120,7 @@ export type {
   NativeBoundaryMapEntry,
   NativeRoadmap,
   NativeRoadmapSlice,
-  ParsedGsdFile,
+  ParsedHxFile,
   SectionResult,
 } from "./hx-parser/index.js";
 

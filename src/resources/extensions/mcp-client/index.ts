@@ -111,7 +111,11 @@ function readConfigs(): McpServerConfig[] {
 }
 
 function getServerConfig(name: string): McpServerConfig | undefined {
-	return readConfigs().find((s) => s.name === name);
+	const trimmed = name.trim();
+	return readConfigs().find((s) =>
+		s.name === trimmed ||
+		s.name.toLowerCase() === trimmed.toLowerCase(),
+	);
 }
 
 /** Resolve ${VAR} references in env values against process.env. */
@@ -131,11 +135,11 @@ function resolveEnv(env: Record<string, string>): Record<string, string> {
 }
 
 async function getOrConnect(name: string, signal?: AbortSignal): Promise<Client> {
-	const existing = connections.get(name);
-	if (existing) return existing.client;
-
 	const config = getServerConfig(name);
 	if (!config) throw new Error(`Unknown MCP server: "${name}". Use mcp_servers to list available servers.`);
+
+	const existing = connections.get(config.name);
+	if (existing) return existing.client;
 
 	const client = new Client({ name: "hx", version: "1.0.0" });
 	let transport: StdioClientTransport | StreamableHTTPClientTransport;
@@ -151,15 +155,15 @@ async function getOrConnect(name: string, signal?: AbortSignal): Promise<Client>
 	} else if (config.transport === "http" && config.url) {
 		const resolvedUrl = config.url.replace(
 			/\$\{([^}]+)\}/g,
-			(_, name) => process.env[name] ?? "",
+			(_, varName) => process.env[varName] ?? "",
 		);
 		transport = new StreamableHTTPClientTransport(new URL(resolvedUrl));
 	} else {
-		throw new Error(`Server "${name}" has unsupported transport: ${config.transport}`);
+		throw new Error(`Server "${config.name}" has unsupported transport: ${config.transport}`);
 	}
 
 	await client.connect(transport, { signal, timeout: 30000 });
-	connections.set(name, { client, transport });
+	connections.set(config.name, { client, transport });
 	return client;
 }
 

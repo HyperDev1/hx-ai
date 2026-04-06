@@ -4,7 +4,7 @@ A `/hx migrate` command just wrote a `.hx/` directory from an old `.planning` so
 
 ### Source
 - Old `.planning` directory: `{{sourcePath}}`
-- Written `.hx` directory: `{{gsdPath}}`
+- Written `.hx` directory: `{{hxPath}}`
 
 ### Migration Stats
 {{previewStats}}

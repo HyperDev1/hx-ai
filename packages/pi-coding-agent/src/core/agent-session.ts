@@ -1621,6 +1621,9 @@ export class AgentSession {
 			throw new Error(`No API key for ${model.provider}/${model.id}`);
 		}
 
+		// Clear any queued retry state so stale retries don't fire after model switch
+		this._retryHandler.clearQueued();
+
 		const thinkingLevel = this._getThinkingLevelForModelSwitch();
 		await this._applyModelChange(model, thinkingLevel, "set", options);
 	}

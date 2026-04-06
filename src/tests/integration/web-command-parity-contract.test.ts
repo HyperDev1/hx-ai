@@ -15,7 +15,7 @@ const {
   setCommandSurfacePending,
   surfaceOutcomeToOpenRequest,
 } = await import("../../../web/lib/command-surface-contract.ts")
-const gsdExtension = await import("../../resources/extensions/hx/index.ts")
+const hxExtension = await import("../../resources/extensions/hx/index.ts")
 
 const EXPECTED_BUILTIN_OUTCOMES = new Map<string, "rpc" | "surface" | "reject">([
   ["settings", "surface"],
@@ -46,10 +46,10 @@ const EXPECTED_BUILTIN_OUTCOMES = new Map<string, "rpc" | "surface" | "reject">(
 const BUILTIN_DESCRIPTIONS = new Map(BUILTIN_SLASH_COMMANDS.map((command) => [command.name, command.description]))
 const DEFERRED_BROWSER_REJECTS = ["share", "copy", "changelog", "hotkeys", "tree", "provider", "reload", "edit-mode", "terminal", "quit"] as const
 
-async function collectRegisteredGsdCommandRoots(): Promise<string[]> {
+async function collectRegisteredHxCommandRoots(): Promise<string[]> {
   const commands = new Map<string, unknown>()
 
-  await gsdExtension.default({
+  await hxExtension.default({
     registerCommand(name: string, options: unknown) {
       commands.set(name, options)
     },
@@ -141,7 +141,7 @@ test("browser-local aliases and legacy helpers stay explicit", async (t) => {
 })
 
 test("registered HX command roots stay on the prompt/extension path", async () => {
-  const registeredRoots = await collectRegisteredGsdCommandRoots()
+  const registeredRoots = await collectRegisteredHxCommandRoots()
   assert.deepEqual(
     registeredRoots,
     ["exit", "hx", "kill", "worktree", "wt"],
@@ -152,14 +152,14 @@ test("registered HX command roots stay on the prompt/extension path", async () =
   // Derived dynamically so adding a new registration fails this assertion loudly.
   const nonHxRoots = registeredRoots.filter((r) => r !== "hx")
   assert.equal(nonHxRoots.length, 4, "expected exactly 4 non-hx passthrough roots; update this count when adding registrations")
-  for (const root of nonGsdRoots) {
+  for (const root of nonHxRoots) {
     assertPromptPassthrough(`/${root}`)
   }
 
   // Bare /hx passes through to bridge (equivalent to /hx next)
-  const bareGsd = dispatchBrowserSlashCommand("/hx")
-  assert.equal(bareGsd.kind, "prompt", "bare /hx should pass through to bridge")
-  assert.equal(bareGsd.command.message, "/hx", "bare /hx should preserve exact input")
+  const bareHx = dispatchBrowserSlashCommand("/hx")
+  assert.equal(bareHx.kind, "prompt", "bare /hx should pass through to bridge")
+  assert.equal(bareHx.command.message, "/hx", "bare /hx should preserve exact input")
 })
 
 test("current HX command family samples dispatch to correct outcomes after S02", async (t) => {
@@ -191,7 +191,7 @@ test("current HX command family samples dispatch to correct outcomes after S02",
   })
 })
 
-const EXPECTED_GSD_OUTCOMES = new Map<string, "surface" | "prompt" | "local" | "view-navigate">([
+const EXPECTED_HX_OUTCOMES = new Map<string, "surface" | "prompt" | "local" | "view-navigate">([
   // Surface commands (19)
   ["status", "surface"],
   ["visualize", "view-navigate"],
@@ -229,12 +229,12 @@ const EXPECTED_GSD_OUTCOMES = new Map<string, "surface" | "prompt" | "local" | "
 
 test("every registered /hx subcommand has an explicit browser dispatch outcome", async (t) => {
   assert.equal(
-    EXPECTED_GSD_OUTCOMES.size,
+    EXPECTED_HX_OUTCOMES.size,
     30,
-    "EXPECTED_GSD_OUTCOMES must cover all 30 HX subcommands (19 surface + 1 view-navigate + 9 passthrough + 1 help)",
+    "EXPECTED_HX_OUTCOMES must cover all 30 HX subcommands (19 surface + 1 view-navigate + 9 passthrough + 1 help)",
   )
 
-  for (const [subcommand, expectedKind] of EXPECTED_GSD_OUTCOMES) {
+  for (const [subcommand, expectedKind] of EXPECTED_HX_OUTCOMES) {
     await t.test(`/hx ${subcommand} -> ${expectedKind}`, () => {
       const outcome = dispatchBrowserSlashCommand(`/hx ${subcommand}`)
       assert.equal(
@@ -328,11 +328,11 @@ test("HX dispatch edge cases", async (t) => {
 })
 
 test("every HX surface dispatches through the contract wiring end-to-end", async (t) => {
-  const gsdSurfaces = [...EXPECTED_GSD_OUTCOMES.entries()].filter(([, kind]) => kind === "surface")
+  const hxSurfaces = [...EXPECTED_HX_OUTCOMES.entries()].filter(([, kind]) => kind === "surface")
 
-  assert.equal(gsdSurfaces.length, 19, "should have exactly 19 HX surface subcommands")
+  assert.equal(hxSurfaces.length, 19, "should have exactly 19 HX surface subcommands")
 
-  for (const [subcommand] of gsdSurfaces) {
+  for (const [subcommand] of hxSurfaces) {
     await t.test(`/hx ${subcommand} -> dispatch -> open request -> surface state`, () => {
       const outcome = dispatchBrowserSlashCommand(`/hx ${subcommand}`)
       assert.equal(outcome.kind, "surface")

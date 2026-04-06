@@ -6,10 +6,11 @@
 
 import type { Api, Model } from "@hyperlab/hx-ai";
 import type { ExtensionAPI, ExtensionContext } from "@hyperlab/hx-coding-agent";
-import type { GSDPreferences } from "./preferences.js";
+import type { HXPreferences } from "./preferences.js";
 import { resolveModelWithFallbacksForUnit, resolveDynamicRoutingConfig } from "./preferences.js";
 import type { ComplexityTier } from "./complexity-classifier.js";
 import { classifyUnitComplexity, tierLabel } from "./complexity-classifier.js";
+import type { TaskMetadata } from "./complexity-classifier.js";
 import { resolveModelForComplexity, escalateTier } from "./model-router.js";
 import { getLedger, getProjectTotals } from "./metrics.js";
 import { unitPhaseLabel } from "./auto-dashboard.js";
@@ -54,10 +55,11 @@ export async function selectAndApplyModel(
   unitType: string,
   unitId: string,
   basePath: string,
-  prefs: GSDPreferences | undefined,
+  prefs: HXPreferences | undefined,
   verbose: boolean,
   autoModeStartModel: { provider: string; id: string } | null,
   retryContext?: { isRetry: boolean; previousTier?: string },
+  metadata?: TaskMetadata,
 ): Promise<ModelSelectionResult> {
   const modelConfig = resolvePreferredModelConfig(unitType, autoModeStartModel);
   let routing: { tier: string; modelDowngraded: boolean } | null = null;
@@ -86,7 +88,7 @@ export async function selectAndApplyModel(
       const shouldClassify = !isHook || routingConfig.hooks !== false;
 
       if (shouldClassify) {
-        let classification = classifyUnitComplexity(unitType, unitId, basePath, budgetPct);
+        let classification = classifyUnitComplexity(unitType, unitId, basePath, budgetPct, metadata);
         const availableModelIds = availableModels.map(m => m.id);
 
         // Escalate tier on retry when escalate_on_failure is enabled (default: true)
@@ -115,8 +117,11 @@ export async function selectAndApplyModel(
             fallbacks: routingResult.fallbacks,
           };
           if (verbose) {
+            const methodSuffix = routingResult.selectionMethod === "capability-score"
+              ? ` (capability-score)`
+              : ``;
             ctx.ui.notify(
-              `Dynamic routing [${tierLabel(classification.tier)}]: ${routingResult.modelId} (${classification.reason})`,
+              `Dynamic routing [${tierLabel(classification.tier)}]${methodSuffix}: ${routingResult.modelId} (${classification.reason})`,
               "info",
             );
           }
@@ -175,14 +180,18 @@ export async function selectAndApplyModel(
     );
     if (startModel) {
       const ok = await pi.setModel(startModel, { persist: false });
-      if (!ok) {
+      if (ok) {
+        appliedModel = startModel;
+      } else {
+        // setModel rejected startModel — try provider-agnostic fallback.
+        // Still record startModel as appliedModel so currentUnitModel is not null
+        // when the session-start model was at least identified (#fallback-race).
+        appliedModel = startModel;
         const byId = availableModels.find(m => m.id === autoModeStartModel.id);
         if (byId) {
           const fallbackOk = await pi.setModel(byId, { persist: false });
           if (fallbackOk) appliedModel = byId;
         }
-      } else {
-        appliedModel = startModel;
       }
     }
   }

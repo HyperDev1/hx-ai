@@ -18,9 +18,9 @@ import { showNextAction } from "../../shared/tui.js";
 import {
   validatePlanningDirectory,
   parsePlanningDirectory,
-  transformToGSD,
+  transformToHX,
   generatePreview,
-  writeGSDDirectory,
+  writeHXDirectory,
 } from "./index.js";
 
 import type { MigrationPreview } from "./writer.js";
@@ -43,7 +43,7 @@ function formatPreviewStats(preview: MigrationPreview): string {
 /** Load and interpolate the review-migration prompt template. */
 function buildReviewPrompt(
   sourcePath: string,
-  gsdPath: string,
+  hxPath: string,
   preview: MigrationPreview,
 ): string {
   const promptsDir = join(dirname(fileURLToPath(import.meta.url)), "..", "prompts");
@@ -51,7 +51,7 @@ function buildReviewPrompt(
   let content = readFileSync(templatePath, "utf-8");
 
   content = content.replaceAll("{{sourcePath}}", sourcePath);
-  content = content.replaceAll("{{gsdPath}}", gsdPath);
+  content = content.replaceAll("{{hxPath}}", hxPath);
   content = content.replaceAll("{{previewStats}}", formatPreviewStats(preview));
 
   return content.trim();
@@ -61,10 +61,10 @@ function buildReviewPrompt(
 function dispatchReview(
   pi: ExtensionAPI,
   sourcePath: string,
-  gsdPath: string,
+  hxPath: string,
   preview: MigrationPreview,
 ): void {
-  const prompt = buildReviewPrompt(sourcePath, gsdPath, preview);
+  const prompt = buildReviewPrompt(sourcePath, hxPath, preview);
 
   pi.sendMessage(
     {
@@ -129,7 +129,7 @@ export async function handleMigrate(
 
   // ── Parse → Transform → Preview ───────────────────────────────────────────
   const parsed = await parsePlanningDirectory(sourcePath);
-  const project = transformToGSD(parsed);
+  const project = transformToHX(parsed);
   const preview = generatePreview(project);
 
   // ── Build preview text ─────────────────────────────────────────────────────
@@ -145,8 +145,8 @@ export async function handleMigrate(
     );
   }
 
-  const targetGsdExists = existsSync(hxRoot(process.cwd()));
-  if (targetGsdExists) {
+  const targetHxExists = existsSync(hxRoot(process.cwd()));
+  if (targetHxExists) {
     lines.push("");
     lines.push("⚠ A .hx directory already exists in the current working directory — it will be overwritten.");
   }
@@ -179,8 +179,8 @@ export async function handleMigrate(
   // ── Write ──────────────────────────────────────────────────────────────────
   ctx.ui.notify("Writing .hx directory…", "info");
 
-  const result = await writeGSDDirectory(project, process.cwd());
-  const gsdPath = hxRoot(process.cwd());
+  const result = await writeHXDirectory(project, process.cwd());
+  const hxPath = hxRoot(process.cwd());
 
   ctx.ui.notify(
     `✓ Migration complete — ${result.paths.length} file(s) written to .hx/`,
@@ -214,6 +214,6 @@ export async function handleMigrate(
   });
 
   if (reviewChoice === "review") {
-    dispatchReview(pi, sourcePath, gsdPath, preview);
+    dispatchReview(pi, sourcePath, hxPath, preview);
   }
 }

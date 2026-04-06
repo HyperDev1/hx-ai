@@ -124,7 +124,7 @@ If you restrict outbound network access in your sandbox, HX needs these endpoint
 Build with a specific HX version:
 
 ```bash
-docker compose -f docker/docker-compose.yaml build --build-arg GSD_VERSION=2.51.0
+docker compose -f docker/docker-compose.yaml build --build-arg HX_VERSION=2.51.0
 ```
 
 ## Cleanup

@@ -11,7 +11,7 @@ import {
 import {
   dispatchBrowserSlashCommand,
   getBrowserSlashCommandTerminalNotice,
-  GSD_HELP_TEXT,
+  HX_HELP_TEXT,
   type BrowserSlashCommandDispatchResult,
   type BrowserSlashCommandSurface,
 } from "./browser-slash-command-dispatch"
@@ -310,7 +310,7 @@ export type ProjectDetectionKind =
   | "blank"
 
 export interface ProjectDetectionSignals {
-  hasGsdFolder: boolean
+  hasHxFolder: boolean
   hasPlanningFolder: boolean
   hasGitRepo: boolean
   hasPackageJson: boolean
@@ -1855,7 +1855,7 @@ export function buildProjectUrl(path: string, projectCwd?: string): string {
   return url.pathname + url.search
 }
 
-export class GSDWorkspaceStore {
+export class HXWorkspaceStore {
   constructor(private readonly projectCwd?: string) {}
 
   private buildUrl(path: string): string {
@@ -4060,11 +4060,11 @@ export class GSDWorkspaceStore {
           await this.refreshBoot()
           return outcome
         }
-        if (outcome.action === "gsd_help") {
+        if (outcome.action === "hx_help") {
           this.patchState({
             terminalLines: withTerminalLine(
               withTerminalLine(this.state.terminalLines, createTerminalLine("input", trimmed)),
-              createTerminalLine("system", GSD_HELP_TEXT),
+              createTerminalLine("system", HX_HELP_TEXT),
             ),
           })
           return outcome
@@ -5189,10 +5189,10 @@ export class GSDWorkspaceStore {
   }
 }
 
-const WorkspaceStoreContext = createContext<GSDWorkspaceStore | null>(null)
+const WorkspaceStoreContext = createContext<HXWorkspaceStore | null>(null)
 
-export function GSDWorkspaceProvider({ children, store: externalStore }: { children: ReactNode; store?: GSDWorkspaceStore }) {
-  const [internalStore] = useState(() => new GSDWorkspaceStore())
+export function HXWorkspaceProvider({ children, store: externalStore }: { children: ReactNode; store?: HXWorkspaceStore }) {
+  const [internalStore] = useState(() => new HXWorkspaceStore())
   const store = externalStore ?? internalStore
 
   useEffect(() => {
@@ -5206,21 +5206,21 @@ export function GSDWorkspaceProvider({ children, store: externalStore }: { child
   return <WorkspaceStoreContext.Provider value={store}>{children}</WorkspaceStoreContext.Provider>
 }
 
-function useWorkspaceStore(): GSDWorkspaceStore {
+function useWorkspaceStore(): HXWorkspaceStore {
   const store = useContext(WorkspaceStoreContext)
   if (!store) {
-    throw new Error("useWorkspaceStore must be used within GSDWorkspaceProvider")
+    throw new Error("useWorkspaceStore must be used within HXWorkspaceProvider")
   }
   return store
 }
 
-export function useGSDWorkspaceState(): WorkspaceStoreState {
+export function useHXWorkspaceState(): WorkspaceStoreState {
   const store = useWorkspaceStore()
   return useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot)
 }
 
-export function useGSDWorkspaceActions(): Pick<
-  GSDWorkspaceStore,
+export function useHXWorkspaceActions(): Pick<
+  HXWorkspaceStore,
   | "sendCommand"
   | "submitInput"
   | "clearTerminalLines"

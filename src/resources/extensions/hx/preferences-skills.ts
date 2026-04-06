@@ -11,7 +11,7 @@ import { isAbsolute, join } from "node:path";
 import { statSync } from "node:fs";
 
 import type {
-  GSDPreferences,
+  HXPreferences,
   SkillDiscoveryMode,
   SkillResolution,
   SkillResolutionReport,
@@ -20,7 +20,7 @@ import { validatePreferences } from "./preferences-validation.js";
 import { loadEffectiveHXPreferences } from "./preferences.js";
 
 // Re-export types so existing consumers of ./preferences-skills.js keep working
-export type { GSDSkillRule, SkillDiscoveryMode, SkillResolution, SkillResolutionReport } from "./preferences-types.js";
+export type { HXSkillRule, SkillDiscoveryMode, SkillResolution, SkillResolutionReport } from "./preferences-types.js";
 
 /**
  * Known skill directories, in priority order.
@@ -30,6 +30,7 @@ export type { GSDSkillRule, SkillDiscoveryMode, SkillResolution, SkillResolution
 export function getSkillSearchDirs(cwd: string): Array<{ dir: string; method: SkillResolution["method"] }> {
   const dirs: Array<{ dir: string; method: SkillResolution["method"] }> = [
     { dir: join(homedir(), ".agents", "skills"), method: "user-skill" },
+    { dir: join(homedir(), ".claude", "skills"), method: "user-skill" },
     { dir: join(cwd, ".agents", "skills"), method: "project-skill" },
   ];
   // Legacy fallback — read skills from old HX directory only if migration hasn't completed
@@ -105,7 +106,7 @@ export function resolveSkillReference(ref: string, cwd: string): SkillResolution
  * Resolve all skill references in a preferences object.
  * Caches resolution per reference string to avoid redundant filesystem scans.
  */
-export function resolveAllSkillReferences(preferences: GSDPreferences, cwd: string): SkillResolutionReport {
+export function resolveAllSkillReferences(preferences: HXPreferences, cwd: string): SkillResolutionReport {
   const validated = validatePreferences(preferences).preferences;
   preferences = validated;
 

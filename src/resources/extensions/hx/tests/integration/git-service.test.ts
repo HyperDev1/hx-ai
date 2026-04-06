@@ -481,7 +481,7 @@ describe('git-service', async () => {
 
     // Without task context, autoCommit uses generic chore message
     const msg = svc.autoCommit("task", "T01");
-    assert.deepStrictEqual(msg, "chore: auto-commit after task\n\nGSD-Unit: T01", "autoCommit returns generic format with trailer");
+    assert.deepStrictEqual(msg, "chore: auto-commit after task\n\nHX-Unit: T01", "autoCommit returns generic format with trailer");
 
     const log = run("git log --oneline -1", repo);
     assert.ok(log.includes("chore: auto-commit after task"), "generic commit message is in git log");
@@ -533,7 +533,7 @@ describe('git-service', async () => {
 
     // Auto-commit with .hx/ excluded (simulates pre-switch)
     const msg = svc.autoCommit("pre-switch", "main", [".hx/"]);
-    assert.deepStrictEqual(msg, "chore: auto-commit after pre-switch\n\nGSD-Unit: main", "pre-switch autoCommit with .hx/ exclusion commits");
+    assert.deepStrictEqual(msg, "chore: auto-commit after pre-switch\n\nHX-Unit: main", "pre-switch autoCommit with .hx/ exclusion commits");
 
     // Verify .hx/ file was NOT committed
     const show = run("git show --stat HEAD", repo);
@@ -1250,13 +1250,13 @@ describe('git-service', async () => {
     const repo = initTempRepo();
 
     // Create the real .hx directory outside the repo, then symlink it
-    const externalGsd = mkdtempSync(join(tmpdir(), "hx-external-"));
-    mkdirSync(join(externalGsd, "activity"), { recursive: true });
-    writeFileSync(join(externalGsd, "activity", "log.jsonl"), "log data");
-    writeFileSync(join(externalGsd, "STATE.md"), "# State");
+    const externalHx = mkdtempSync(join(tmpdir(), "hx-external-"));
+    mkdirSync(join(externalHx, "activity"), { recursive: true });
+    writeFileSync(join(externalHx, "activity", "log.jsonl"), "log data");
+    writeFileSync(join(externalHx, "STATE.md"), "# State");
 
     // Symlink .hx -> external directory
-    symlinkSync(externalGsd, join(repo, ".hx"));
+    symlinkSync(externalHx, join(repo, ".hx"));
 
     // Add .gitignore so git add -A fallback skips .hx/
     writeFileSync(join(repo, ".gitignore"), ".hx\n");
@@ -1280,7 +1280,7 @@ describe('git-service', async () => {
     assert.ok(!staged.includes(".hx"), ".hx content not staged");
 
     rmSync(repo, { recursive: true, force: true });
-    rmSync(externalGsd, { recursive: true, force: true });
+    rmSync(externalHx, { recursive: true, force: true });
   });
 
   // ─── nativeAddAllWithExclusions: non-symlinked .hx still works ───────
@@ -1423,12 +1423,12 @@ describe('git-service', async () => {
     const repo = initTempRepo();
 
     // Create an external .hx directory and symlink it into the repo
-    const externalGsd = mkdtempSync(join(tmpdir(), "hx-external-symlink-"));
-    mkdirSync(join(externalGsd, "milestones", "M009"), { recursive: true });
-    mkdirSync(join(externalGsd, "activity"), { recursive: true });
-    mkdirSync(join(externalGsd, "runtime"), { recursive: true });
+    const externalHx = mkdtempSync(join(tmpdir(), "hx-external-symlink-"));
+    mkdirSync(join(externalHx, "milestones", "M009"), { recursive: true });
+    mkdirSync(join(externalHx, "activity"), { recursive: true });
+    mkdirSync(join(externalHx, "runtime"), { recursive: true });
 
-    symlinkSync(externalGsd, join(repo, ".hx"));
+    symlinkSync(externalHx, join(repo, ".hx"));
 
     // .gitignore blocks .hx (as ensureGitignore would do for symlink projects)
     writeFileSync(join(repo, ".gitignore"), ".hx\n");
@@ -1436,9 +1436,9 @@ describe('git-service', async () => {
     run('git commit -m "add gitignore"', repo);
 
     // Simulate new milestone artifacts created during execution
-    writeFileSync(join(externalGsd, "milestones", "M009", "M009-SUMMARY.md"), "# M009 Summary");
-    writeFileSync(join(externalGsd, "milestones", "M009", "S01-SUMMARY.md"), "# S01 Summary");
-    writeFileSync(join(externalGsd, "milestones", "M009", "T01-VERIFY.json"), '{"passed":true}');
+    writeFileSync(join(externalHx, "milestones", "M009", "M009-SUMMARY.md"), "# M009 Summary");
+    writeFileSync(join(externalHx, "milestones", "M009", "S01-SUMMARY.md"), "# S01 Summary");
+    writeFileSync(join(externalHx, "milestones", "M009", "T01-VERIFY.json"), '{"passed":true}');
 
     // Also create a normal source file change
     createFile(repo, "src/feature.ts", "export const feature = true;");
@@ -1453,6 +1453,6 @@ describe('git-service', async () => {
       "symlink autoCommit: .hx/milestones/ files are NOT staged (external state stays external)");
 
     try { rmSync(repo, { recursive: true, force: true }); } catch {}
-    try { rmSync(externalGsd, { recursive: true, force: true }); } catch {}
+    try { rmSync(externalHx, { recursive: true, force: true }); } catch {}
   });
 });

@@ -37,7 +37,7 @@ import {
   collectAuthoritativeAutoDashboardData,
   collectTestOnlyFallbackAutoDashboardData,
 } from "./auto-dashboard-service.ts";
-import { resolveGsdCliEntry } from "./cli-entry.ts";
+import { resolveHxCliEntry } from "./cli-entry.ts";
 
 // Lazily computed fallback — import.meta.url is baked in at build time by
 // webpack, so when the standalone bundle built on Linux CI runs on Windows the
@@ -464,7 +464,7 @@ export interface BootResumableSession {
   isActive: boolean;
 }
 
-export interface GSDWorkspaceTaskTarget {
+export interface HXWorkspaceTaskTarget {
   id: string;
   title: string;
   done: boolean;
@@ -472,7 +472,7 @@ export interface GSDWorkspaceTaskTarget {
   summaryPath?: string;
 }
 
-export interface GSDWorkspaceSliceTarget {
+export interface HXWorkspaceSliceTarget {
   id: string;
   title: string;
   done: boolean;
@@ -481,31 +481,31 @@ export interface GSDWorkspaceSliceTarget {
   uatPath?: string;
   tasksDir?: string;
   branch?: string;
-  tasks: GSDWorkspaceTaskTarget[];
+  tasks: HXWorkspaceTaskTarget[];
 }
 
-export interface GSDWorkspaceMilestoneTarget {
+export interface HXWorkspaceMilestoneTarget {
   id: string;
   title: string;
   roadmapPath?: string;
-  slices: GSDWorkspaceSliceTarget[];
+  slices: HXWorkspaceSliceTarget[];
 }
 
-export interface GSDWorkspaceScopeTarget {
+export interface HXWorkspaceScopeTarget {
   scope: string;
   label: string;
   kind: "project" | "milestone" | "slice" | "task";
 }
 
-export interface GSDWorkspaceIndex {
-  milestones: GSDWorkspaceMilestoneTarget[];
+export interface HXWorkspaceIndex {
+  milestones: HXWorkspaceMilestoneTarget[];
   active: {
     milestoneId?: string;
     sliceId?: string;
     taskId?: string;
     phase: string;
   };
-  scopes: GSDWorkspaceScopeTarget[];
+  scopes: HXWorkspaceScopeTarget[];
   validationIssues: Array<Record<string, unknown>>;
 }
 
@@ -519,7 +519,7 @@ export type ProjectDetectionKind =
   | "blank";        // empty/near-empty folder
 
 export interface ProjectDetectionSignals {
-  hasGsdFolder: boolean;
+  hasHxFolder: boolean;
   hasPlanningFolder: boolean;
   hasGitRepo: boolean;
   hasPackageJson: boolean;
@@ -579,7 +579,7 @@ export function detectMonorepo(dirPath: string, checkExists?: (path: string) => 
 export function detectProjectKind(projectCwd: string): ProjectDetection {
   const checkExists = getBridgeDeps().existsSync ?? existsSync;
 
-  const hasGsdFolder = checkExists(join(projectCwd, ".hx"));
+  const hasHxFolder = checkExists(join(projectCwd, ".hx"));
   const hasPlanningFolder = checkExists(join(projectCwd, ".planning"));
   const hasGitRepo = checkExists(join(projectCwd, ".git"));
   const hasPackageJson = checkExists(join(projectCwd, "package.json"));
@@ -598,7 +598,7 @@ export function detectProjectKind(projectCwd: string): ProjectDetection {
   }
 
   const signals: ProjectDetectionSignals = {
-    hasGsdFolder,
+    hasHxFolder,
     hasPlanningFolder,
     hasGitRepo,
     hasPackageJson,
@@ -611,7 +611,7 @@ export function detectProjectKind(projectCwd: string): ProjectDetection {
 
   let kind: ProjectDetectionKind;
 
-  if (hasGsdFolder) {
+  if (hasHxFolder) {
     // Check if milestones exist
     const milestonesDir = join(projectCwd, ".hx", "milestones");
     let hasMilestones = false;
@@ -641,7 +641,7 @@ export interface BridgeBootPayload {
     sessionsDir: string;
     packageRoot: string;
   };
-  workspace: GSDWorkspaceIndex;
+  workspace: HXWorkspaceIndex;
   auto: AutoDashboardData;
   onboarding: OnboardingState;
   onboardingNeeded: boolean;
@@ -707,7 +707,7 @@ interface BridgeServiceDeps {
   existsSync?: (path: string) => boolean;
   execPath?: string;
   env?: NodeJS.ProcessEnv;
-  indexWorkspace?: (basePath: string) => Promise<GSDWorkspaceIndex>;
+  indexWorkspace?: (basePath: string) => Promise<HXWorkspaceIndex>;
   getAutoDashboardData?: () => AutoDashboardData | Promise<AutoDashboardData>;
   listSessions?: (projectSessionsDir: string) => Promise<LocalSessionInfo[]>;
   getOnboardingState?: () => OnboardingState | Promise<OnboardingState>;
@@ -715,9 +715,9 @@ interface BridgeServiceDeps {
 }
 
 type WorkspaceIndexCacheEntry = {
-  value: GSDWorkspaceIndex | null;
+  value: HXWorkspaceIndex | null;
   expiresAt: number;
-  promise: Promise<GSDWorkspaceIndex> | null;
+  promise: Promise<HXWorkspaceIndex> | null;
 };
 
 const defaultBridgeServiceDeps: BridgeServiceDeps = {
@@ -771,6 +771,7 @@ async function loadSessionBrowserSessionsViaChildProcess(config: BridgeRuntimeCo
           HX_SESSION_BROWSER_DIR: config.projectSessionsDir,
         },
         maxBuffer: 1024 * 1024,
+        windowsHide: true,
       },
       (error, stdout, stderr) => {
         if (error) {
@@ -832,6 +833,7 @@ async function appendSessionInfoViaChildProcess(
           HX_TARGET_SESSION_NAME: name,
         },
         maxBuffer: 1024 * 1024,
+        windowsHide: true,
       },
       (error, _stdout, stderr) => {
         if (error) {
@@ -933,7 +935,7 @@ function getBridgeDeps(): BridgeServiceDeps {
   return { ...defaultBridgeServiceDeps, ...(bridgeServiceOverrides ?? {}) };
 }
 
-function cloneWorkspaceIndex(index: GSDWorkspaceIndex): GSDWorkspaceIndex {
+function cloneWorkspaceIndex(index: HXWorkspaceIndex): HXWorkspaceIndex {
   return structuredClone(index);
 }
 
@@ -948,8 +950,8 @@ function invalidateWorkspaceIndexCache(basePath?: string): void {
 
 async function loadCachedWorkspaceIndex(
   basePath: string,
-  loader: () => Promise<GSDWorkspaceIndex>,
-): Promise<GSDWorkspaceIndex> {
+  loader: () => Promise<HXWorkspaceIndex>,
+): Promise<HXWorkspaceIndex> {
   const cached = workspaceIndexCache.get(basePath);
   const now = Date.now();
 
@@ -984,7 +986,7 @@ async function loadCachedWorkspaceIndex(
   return cloneWorkspaceIndex(await promise);
 }
 
-async function loadWorkspaceIndexViaChildProcess(basePath: string, packageRoot: string): Promise<GSDWorkspaceIndex> {
+async function loadWorkspaceIndexViaChildProcess(basePath: string, packageRoot: string): Promise<HXWorkspaceIndex> {
   const deps = getBridgeDeps();
   const checkExists = deps.existsSync ?? existsSync;
   const resolveTsLoader = join(packageRoot, "src", "resources", "extensions", "hx", "tests", "resolve-ts.mjs");
@@ -1014,7 +1016,7 @@ async function loadWorkspaceIndexViaChildProcess(basePath: string, packageRoot: 
     pathToFileURL(resolveTsLoader).href,
   );
 
-  return await new Promise<GSDWorkspaceIndex>((resolveResult, reject) => {
+  return await new Promise<HXWorkspaceIndex>((resolveResult, reject) => {
     execFile(
       deps.execPath ?? process.execPath,
       [
@@ -1030,6 +1032,7 @@ async function loadWorkspaceIndexViaChildProcess(basePath: string, packageRoot: 
           HX_WORKSPACE_BASE: basePath,
         },
         maxBuffer: 1024 * 1024,
+        windowsHide: true,
       },
       (error, stdout, stderr) => {
         if (error) {
@@ -1038,7 +1041,7 @@ async function loadWorkspaceIndexViaChildProcess(basePath: string, packageRoot: 
         }
 
         try {
-          resolveResult(JSON.parse(stdout) as GSDWorkspaceIndex);
+          resolveResult(JSON.parse(stdout) as HXWorkspaceIndex);
         } catch (parseError) {
           reject(new Error(`workspace index subprocess returned invalid JSON: ${parseError instanceof Error ? parseError.message : String(parseError)}`));
         }
@@ -1131,7 +1134,7 @@ function listProjectSessions(projectSessionsDir: string): LocalSessionInfo[] {
   return sessions;
 }
 
-async function fallbackWorkspaceIndex(basePath: string): Promise<GSDWorkspaceIndex> {
+async function fallbackWorkspaceIndex(basePath: string): Promise<HXWorkspaceIndex> {
   const packageRoot = resolveBridgeRuntimeConfig().packageRoot;
   return await loadWorkspaceIndexViaChildProcess(basePath, packageRoot);
 }
@@ -1144,7 +1147,7 @@ export function resolveBridgeRuntimeConfig(env: NodeJS.ProcessEnv = getBridgeDep
 }
 
 function resolveBridgeCliEntry(config: BridgeRuntimeConfig, deps: BridgeServiceDeps): BridgeCliEntry {
-  return resolveGsdCliEntry({
+  return resolveHxCliEntry({
     packageRoot: config.packageRoot,
     cwd: config.projectCwd,
     execPath: deps.execPath ?? process.execPath,
@@ -1616,6 +1619,7 @@ export class BridgeService {
       cwd: cliEntry.cwd,
       env: childEnv,
       stdio: ["pipe", "pipe", "pipe"],
+      windowsHide: true,
     }) as SpawnedRpcChild;
 
     this.process = child;
@@ -2177,7 +2181,7 @@ export type BridgeSelectiveLiveStateDomain = "auto" | "workspace" | "resumable_s
 
 export interface BridgeSelectiveLiveStatePayload {
   auto?: AutoDashboardData;
-  workspace?: GSDWorkspaceIndex;
+  workspace?: HXWorkspaceIndex;
   resumableSessions?: BootResumableSession[];
   bridge: BridgeRuntimeSnapshot;
 }

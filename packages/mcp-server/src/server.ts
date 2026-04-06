@@ -10,6 +10,12 @@ import { readFile, readdir, stat } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { z } from 'zod';
 import type { SessionManager } from './session-manager.js';
+import { readProgress } from './readers/state.js';
+import { readRoadmap } from './readers/roadmap.js';
+import { readHistory } from './readers/metrics.js';
+import { readCaptures } from './readers/captures.js';
+import { readKnowledge } from './readers/knowledge.js';
+import { runDoctorLite } from './readers/doctor-lite.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -268,6 +274,126 @@ export async function createMcpServer(sessionManager: SessionManager): Promise<{
       try {
         await sessionManager.resolveBlocker(sessionId, response);
         return jsonContent({ resolved: true });
+      } catch (err) {
+        return errorContent(err instanceof Error ? err.message : String(err));
+      }
+    },
+  );
+
+  // -----------------------------------------------------------------------
+  // hx_progress — read execution progress from .hx/ filesystem
+  // -----------------------------------------------------------------------
+  server.tool(
+    'hx_progress',
+    'Read current execution progress from .hx/STATE.md and milestone filesystem. Returns structured progress data including milestone/slice/task status and completion counts.',
+    {
+      projectDir: z.string().describe('Absolute path to the project directory'),
+    },
+    async (args: Record<string, unknown>) => {
+      const { projectDir } = args as { projectDir: string };
+      try {
+        const result = readProgress(projectDir);
+        return jsonContent(result);
+      } catch (err) {
+        return errorContent(err instanceof Error ? err.message : String(err));
+      }
+    },
+  );
+
+  // -----------------------------------------------------------------------
+  // hx_roadmap — read milestone roadmaps from .hx/milestones/
+  // -----------------------------------------------------------------------
+  server.tool(
+    'hx_roadmap',
+    'Read milestone roadmap data from .hx/milestones/*/ROADMAP.md files. Returns structured slice entries with risk, dependencies, and completion status.',
+    {
+      projectDir: z.string().describe('Absolute path to the project directory'),
+    },
+    async (args: Record<string, unknown>) => {
+      const { projectDir } = args as { projectDir: string };
+      try {
+        const result = readRoadmap(projectDir);
+        return jsonContent(result);
+      } catch (err) {
+        return errorContent(err instanceof Error ? err.message : String(err));
+      }
+    },
+  );
+
+  // -----------------------------------------------------------------------
+  // hx_history — read session metrics history
+  // -----------------------------------------------------------------------
+  server.tool(
+    'hx_history',
+    'Read session metrics history from .hx/activity/metrics.json. Returns cost, token usage, and tool call counts across past sessions.',
+    {
+      projectDir: z.string().describe('Absolute path to the project directory'),
+    },
+    async (args: Record<string, unknown>) => {
+      const { projectDir } = args as { projectDir: string };
+      try {
+        const result = readHistory(projectDir);
+        return jsonContent(result);
+      } catch (err) {
+        return errorContent(err instanceof Error ? err.message : String(err));
+      }
+    },
+  );
+
+  // -----------------------------------------------------------------------
+  // hx_captures — read project captures log
+  // -----------------------------------------------------------------------
+  server.tool(
+    'hx_captures',
+    'Read project captures from .hx/CAPTURES.md. Returns structured capture entries with titles, dates, and content.',
+    {
+      projectDir: z.string().describe('Absolute path to the project directory'),
+    },
+    async (args: Record<string, unknown>) => {
+      const { projectDir } = args as { projectDir: string };
+      try {
+        const result = readCaptures(projectDir);
+        return jsonContent(result);
+      } catch (err) {
+        return errorContent(err instanceof Error ? err.message : String(err));
+      }
+    },
+  );
+
+  // -----------------------------------------------------------------------
+  // hx_knowledge — read project knowledge base
+  // -----------------------------------------------------------------------
+  server.tool(
+    'hx_knowledge',
+    'Read project knowledge base from .hx/KNOWLEDGE.md. Returns structured knowledge entries with IDs, titles, and content.',
+    {
+      projectDir: z.string().describe('Absolute path to the project directory'),
+    },
+    async (args: Record<string, unknown>) => {
+      const { projectDir } = args as { projectDir: string };
+      try {
+        const result = readKnowledge(projectDir);
+        return jsonContent(result);
+      } catch (err) {
+        return errorContent(err instanceof Error ? err.message : String(err));
+      }
+    },
+  );
+
+  // -----------------------------------------------------------------------
+  // hx_doctor — run lightweight health checks on a HX project
+  // -----------------------------------------------------------------------
+  server.tool(
+    'hx_doctor',
+    'Run lightweight health checks on a HX project directory. Checks for .hx/ structure, required files, and state consistency. Returns structured check results with remediation hints.',
+    {
+      projectDir: z.string().describe('Absolute path to the project directory'),
+    },
+    async (args: Record<string, unknown>) => {
+      const { projectDir } = args as { projectDir: string };
+      try {
+        const result = runDoctorLite(projectDir);
+        return jsonContent(result);
       } catch (err) {
         return errorContent(err instanceof Error ? err.message : String(err));
       }

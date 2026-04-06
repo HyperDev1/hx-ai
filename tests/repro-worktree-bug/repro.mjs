@@ -28,13 +28,13 @@ function findWorktreeSegment(normalizedPath) {
   const directMarker = "/.hx/worktrees/";
   const idx = normalizedPath.indexOf(directMarker);
   if (idx !== -1) {
-    return { gsdIdx: idx, afterWorktrees: idx + directMarker.length };
+    return { hxIdx: idx, afterWorktrees: idx + directMarker.length };
   }
   // Symlink-resolved layout: /.hx/projects/<hash>/worktrees/<name>
   const symlinkRe = /\/\.hx\/projects\/[a-f0-9]+\/worktrees\//;
   const match = normalizedPath.match(symlinkRe);
   if (match && match.index !== undefined) {
-    return { gsdIdx: match.index, afterWorktrees: match.index + match[0].length };
+    return { hxIdx: match.index, afterWorktrees: match.index + match[0].length };
   }
   return null;
 }
@@ -45,36 +45,36 @@ function resolveProjectRoot(basePath) {
   if (!seg) return basePath;
   // Return the original path up to the /.hx/ boundary
   const sep = basePath.includes("\\") ? "\\" : "/";
-  const gsdMarker = `${sep}.hx${sep}`;
-  const gsdIdx = basePath.indexOf(gsdMarker);
-  if (gsdIdx !== -1) return basePath.slice(0, gsdIdx);
-  return basePath.slice(0, seg.gsdIdx);
+  const hxMarker = `${sep}.hx${sep}`;
+  const hxIdx = basePath.indexOf(hxMarker);
+  if (hxIdx !== -1) return basePath.slice(0, hxIdx);
+  return basePath.slice(0, seg.hxIdx);
 }
 
 // ── Set up the filesystem layout ────────────────────────────────────────
 
 const HASH = "abc123def456";
 const TEST_ROOT = mkdtempSync(join(tmpdir(), "hx-repro-"));
-const USER_GSD = process.env.GSD_HOME || join(TEST_ROOT, ".hx");
+const USER_HX = process.env.HX_HOME || join(TEST_ROOT, ".hx");
 const USER_HOME = homedir();
-const PROJECT_GSD_STORAGE = `${USER_GSD}/projects/${HASH}`;
+const PROJECT_HX_STORAGE = `${USER_HX}/projects/${HASH}`;
 const PROJECT_DIR = mkdtempSync(join(tmpdir(), "myproject-"));
-const PROJECT_GSD_LINK = `${PROJECT_DIR}/.hx`;
+const PROJECT_HX_LINK = `${PROJECT_DIR}/.hx`;
 
 console.log("=== Setting up filesystem layout ===\n");
 
 // 1. Create user-level HX structure
-mkdirSync(`${PROJECT_GSD_STORAGE}/worktrees/M001`, { recursive: true });
-mkdirSync(`${PROJECT_GSD_STORAGE}/milestones`, { recursive: true });
-console.log(`Created: ${PROJECT_GSD_STORAGE}/worktrees/M001`);
+mkdirSync(`${PROJECT_HX_STORAGE}/worktrees/M001`, { recursive: true });
+mkdirSync(`${PROJECT_HX_STORAGE}/milestones`, { recursive: true });
+console.log(`Created: ${PROJECT_HX_STORAGE}/worktrees/M001`);
 
 // 2. Create project directory
 mkdirSync(PROJECT_DIR, { recursive: true });
 console.log(`Created: ${PROJECT_DIR}`);
 
 // 3. Create symlink: project/.hx → user-level storage
-symlinkSync(PROJECT_GSD_STORAGE, PROJECT_GSD_LINK);
-console.log(`Symlink: ${PROJECT_GSD_LINK} → ${PROJECT_GSD_STORAGE}`);
+symlinkSync(PROJECT_HX_STORAGE, PROJECT_HX_LINK);
+console.log(`Symlink: ${PROJECT_HX_LINK} → ${PROJECT_HX_STORAGE}`);
 
 // 4. Init git in project dir
 execSync("git init -b main", { cwd: PROJECT_DIR, stdio: "pipe" });
@@ -128,8 +128,8 @@ if (workerBuggy) {
   console.log(`That path exists:                   ${existsSync(join(result3, ".hx"))}`);
   
   if (existsSync(join(result3, ".hx"))) {
-    const resolvedGsd = realpathSync(join(result3, ".hx"));
-    console.log(`It resolves to:                    ${resolvedGsd}`);
+    const resolvedHx = realpathSync(join(result3, ".hx"));
+    console.log(`It resolves to:                    ${resolvedHx}`);
     console.log(`\nThis is the USER-LEVEL .hx directory!`);
     console.log(`The worker would:`);
     console.log(`  1. Write session status to ~/.hx/parallel/`);
@@ -145,10 +145,10 @@ console.log(`\n=== Root Cause Detail ===\n`);
 const seg = findWorktreeSegment(resolvedPath);
 if (seg) {
   console.log(`findWorktreeSegment() matched:`);
-  console.log(`  gsdIdx:         ${seg.gsdIdx}`);
+  console.log(`  hxIdx:         ${seg.hxIdx}`);
   console.log(`  afterWorktrees: ${seg.afterWorktrees}`);
-  console.log(`  Path before /.hx/: "${resolvedPath.slice(0, seg.gsdIdx)}"`);
-  console.log(`  This is: ${resolvedPath.slice(0, seg.gsdIdx) === USER_HOME ? "THE HOME DIRECTORY (bug!)" : "some other directory"}`);
+  console.log(`  Path before /.hx/: "${resolvedPath.slice(0, seg.hxIdx)}"`);
+  console.log(`  This is: ${resolvedPath.slice(0, seg.hxIdx) === USER_HOME ? "THE HOME DIRECTORY (bug!)" : "some other directory"}`);
   
   // Show which regex matched
   const directMarker = "/.hx/worktrees/";

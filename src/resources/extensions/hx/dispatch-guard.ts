@@ -106,6 +106,18 @@ export function getPriorSliceCompletionBlocker(
         // it may be a cross-milestone reference handled elsewhere.
       }
     } else {
+      // Parallel slice worker isolation: when HX_SLICE_LOCK is set, this
+      // worker is scoped to a single slice. Skip the positional ordering
+      // check — other slices are being handled by their own workers and
+      // may not be complete. Only dependency-declared checks apply when
+      // a slice lock is active.
+      const sliceLock = process.env.HX_SLICE_LOCK;
+      const sliceLockSid = sliceLock ? sliceLock.split('/')[1] : undefined;
+      if (sliceLockSid && targetSid === sliceLockSid) {
+        // Worker is locked to this slice — skip positional check entirely.
+        continue;
+      }
+
       const targetIndex = slices.findIndex((slice) => slice.id === targetSid);
       const incomplete = slices
         .slice(0, targetIndex)

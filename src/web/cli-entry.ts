@@ -3,13 +3,13 @@ import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { resolveTypeStrippingFlag } from "./ts-subprocess-flags.ts";
 
-export interface GsdCliEntry {
+export interface HxCliEntry {
   command: string;
   args: string[];
   cwd: string;
 }
 
-export interface ResolveGsdCliEntryOptions {
+export interface ResolveHxCliEntryOptions {
   packageRoot: string;
   cwd: string;
   execPath?: string;
@@ -20,7 +20,7 @@ export interface ResolveGsdCliEntryOptions {
   existsSync?: (path: string) => boolean;
 }
 
-function buildExtraArgs(options: ResolveGsdCliEntryOptions): string[] {
+function buildExtraArgs(options: ResolveHxCliEntryOptions): string[] {
   if (options.mode !== "rpc") return [];
 
   if (!options.sessionDir) {
@@ -30,7 +30,7 @@ function buildExtraArgs(options: ResolveGsdCliEntryOptions): string[] {
   return ["--mode", "rpc", "--continue", "--session-dir", options.sessionDir];
 }
 
-export function resolveGsdCliEntry(options: ResolveGsdCliEntryOptions): GsdCliEntry {
+export function resolveHxCliEntry(options: ResolveHxCliEntryOptions): HxCliEntry {
   const checkExists = options.existsSync ?? existsSync;
   const execPath = options.execPath ?? process.execPath;
   const extraArgs = buildExtraArgs(options);
@@ -53,7 +53,7 @@ export function resolveGsdCliEntry(options: ResolveGsdCliEntryOptions): GsdCliEn
             ...messageArgs,
           ],
           cwd: options.cwd,
-        } satisfies GsdCliEntry
+        } satisfies HxCliEntry
       : null;
 
   const builtCliEntry = checkExists(builtEntry)
@@ -61,7 +61,7 @@ export function resolveGsdCliEntry(options: ResolveGsdCliEntryOptions): GsdCliEn
         command: execPath,
         args: [builtEntry, ...extraArgs, ...messageArgs],
         cwd: options.cwd,
-      } satisfies GsdCliEntry
+      } satisfies HxCliEntry
     : null;
 
   if (options.hostKind === "packaged-standalone") {

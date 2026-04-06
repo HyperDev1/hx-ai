@@ -24,7 +24,7 @@ import { authFetch } from "@/lib/auth"
 type ProjectDetectionKind = "active-hx" | "empty-hx" | "v1-legacy" | "brownfield" | "blank"
 
 interface ProjectDetectionSignals {
-  hasGsdFolder: boolean
+  hasHxFolder: boolean
   hasPlanningFolder: boolean
   hasGitRepo: boolean
   hasPackageJson: boolean

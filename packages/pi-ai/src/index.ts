@@ -10,6 +10,7 @@ export * from "./providers/google.js";
 export * from "./providers/google-gemini-cli.js";
 export * from "./providers/google-vertex.js";
 export * from "./providers/mistral.js";
+export * from "./providers/ollama-chat.js";
 export * from "./providers/openai-completions.js";
 export * from "./providers/openai-responses.js";
 export * from "./providers/register-builtins.js";
@@ -28,3 +29,4 @@ export type {
 export * from "./utils/overflow.js";
 export * from "./utils/typebox-helpers.js";
 export * from "./utils/validation.js";
+export * from "./utils/repair-tool-json.js";

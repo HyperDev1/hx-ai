@@ -28,7 +28,7 @@
 | `tests/smoke/test-init.ts` | Verify `hx init` creates expected files in a temp dir |
 | `tests/fixtures/provider.ts` | `FixtureProvider` — wraps `ApiProvider`, records/replays turns |
 | `tests/fixtures/run.ts` | Fixture test runner — loads recordings, replays via `FixtureProvider` |
-| `tests/fixtures/record.ts` | Recording helper — runs a session with `GSD_FIXTURE_MODE=record` |
+| `tests/fixtures/record.ts` | Recording helper — runs a session with `HX_FIXTURE_MODE=record` |
 | `tests/fixtures/recordings/agent-creates-file.json` | Sample fixture: single-turn file creation |
 | `tests/fixtures/recordings/agent-reads-and-edits.json` | Fixture: multi-turn read + edit flow |
 | `tests/fixtures/recordings/agent-handles-error.json` | Fixture: error response handling |
@@ -135,8 +135,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install HX globally — version is controlled by the build arg
-ARG GSD_VERSION=latest
-RUN npm install -g hx-pi@${GSD_VERSION}
+ARG HX_VERSION=latest
+RUN npm install -g hx-pi@${HX_VERSION}
 
 # Default working directory for user projects
 WORKDIR /workspace
@@ -226,12 +226,12 @@ if (failed > 0) process.exit(1);
 ```typescript
 // tests/smoke/test-version.ts
 // Verifies that `hx --version` outputs valid semver-like string.
-// When GSD_SMOKE_BINARY is set (CI), uses that binary directly.
+// When HX_SMOKE_BINARY is set (CI), uses that binary directly.
 // Otherwise falls back to npx hx-pi.
 
 import { execFileSync } from "child_process";
 
-const bin = process.env.GSD_SMOKE_BINARY;
+const bin = process.env.HX_SMOKE_BINARY;
 const output = bin
   ? execFileSync(bin, ["--version"], { encoding: "utf8", timeout: 30_000 }).trim()
   : execFileSync("npx", ["hx-pi", "--version"], { encoding: "utf8", timeout: 30_000 }).trim();
@@ -252,7 +252,7 @@ console.log(`version: ${output}`);
 
 import { execFileSync } from "child_process";
 
-const bin = process.env.GSD_SMOKE_BINARY;
+const bin = process.env.HX_SMOKE_BINARY;
 const output = bin
   ? execFileSync(bin, ["--help"], { encoding: "utf8", timeout: 30_000 })
   : execFileSync("npx", ["hx-pi", "--help"], { encoding: "utf8", timeout: 30_000 });
@@ -282,13 +282,13 @@ import { tmpdir } from "os";
 const tmp = mkdtempSync(join(tmpdir(), "hx-smoke-init-"));
 
 try {
-  const bin = process.env.GSD_SMOKE_BINARY;
+  const bin = process.env.HX_SMOKE_BINARY;
   const args = bin ? [bin, "init"] : ["npx", "hx-pi", "init"];
   execFileSync(args[0], args.slice(1), {
     encoding: "utf8",
     cwd: tmp,
     timeout: 30_000,
-    env: { ...process.env, GSD_NON_INTERACTIVE: "1" },
+    env: { ...process.env, HX_NON_INTERACTIVE: "1" },
   });
 
   // Check that .hx directory was created
@@ -353,8 +353,8 @@ The provider is registered via `registerApiProvider()` from `packages/pi-ai/src/
 // Replay mode: loads saved JSON, serves responses by turn index.
 //
 // Controlled via environment variables:
-//   GSD_FIXTURE_MODE=record|replay
-//   GSD_FIXTURE_DIR=./tests/fixtures/recordings
+//   HX_FIXTURE_MODE=record|replay
+//   HX_FIXTURE_DIR=./tests/fixtures/recordings
 
 import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
@@ -383,13 +383,13 @@ export interface FixtureFile {
 export type FixtureMode = "record" | "replay" | "off";
 
 export function getFixtureMode(): FixtureMode {
-  const mode = process.env.GSD_FIXTURE_MODE;
+  const mode = process.env.HX_FIXTURE_MODE;
   if (mode === "record" || mode === "replay") return mode;
   return "off";
 }
 
 export function getFixtureDir(): string {
-  return process.env.GSD_FIXTURE_DIR || join(process.cwd(), "tests/fixtures/recordings");
+  return process.env.HX_FIXTURE_DIR || join(process.cwd(), "tests/fixtures/recordings");
 }
 
 export function loadFixture(filepath: string): FixtureFile {
@@ -809,13 +809,13 @@ git commit -m "feat(ci): add additional fixture recordings for multi-turn and er
 
 ```typescript
 // tests/live/run.ts
-// Runs real LLM integration tests. Only executes when GSD_LIVE_TESTS=1.
+// Runs real LLM integration tests. Only executes when HX_LIVE_TESTS=1.
 // These tests cost real money — used in the Prod gate only.
 //
-// Usage: GSD_LIVE_TESTS=1 node --experimental-strip-types tests/live/run.ts
+// Usage: HX_LIVE_TESTS=1 node --experimental-strip-types tests/live/run.ts
 
-if (process.env.GSD_LIVE_TESTS !== "1") {
-  console.log("Skipping live tests (set GSD_LIVE_TESTS=1 to enable)");
+if (process.env.HX_LIVE_TESTS !== "1") {
+  console.log("Skipping live tests (set HX_LIVE_TESTS=1 to enable)");
   process.exit(0);
 }
 
@@ -944,8 +944,8 @@ console.log(`OpenAI roundtrip OK: "${text.substring(0, 50)}"`);
 
 Add to `package.json` `scripts`:
 ```json
-"test:fixtures:record": "GSD_FIXTURE_MODE=record node --experimental-strip-types tests/fixtures/record.ts",
-"test:live": "GSD_LIVE_TESTS=1 node --experimental-strip-types tests/live/run.ts",
+"test:fixtures:record": "HX_FIXTURE_MODE=record node --experimental-strip-types tests/fixtures/record.ts",
+"test:live": "HX_LIVE_TESTS=1 node --experimental-strip-types tests/live/run.ts",
 "pipeline:version-stamp": "node scripts/version-stamp.mjs",
 "docker:build-runtime": "docker build --target runtime -t ghcr.io/hx-build/hx-pi .",
 "docker:build-builder": "docker build --target builder -t ghcr.io/hx-build/hx-ci-builder ."
@@ -954,7 +954,7 @@ Add to `package.json` `scripts`:
 - [ ] **Step 5: Verify live tests skip without env var**
 
 Run: `npm run test:live`
-Expected: `Skipping live tests (set GSD_LIVE_TESTS=1 to enable)` and exit 0
+Expected: `Skipping live tests (set HX_LIVE_TESTS=1 to enable)` and exit 0
 
 - [ ] **Step 6: Commit**
 
@@ -1067,7 +1067,7 @@ jobs:
       - name: Run CLI smoke tests
         run: npm run test:smoke
         env:
-          GSD_SMOKE_BINARY: hx  # Use globally installed binary, not npx
+          HX_SMOKE_BINARY: hx  # Use globally installed binary, not npx
 
       - name: Run fixture replay tests
         run: npm run test:fixtures
@@ -1081,7 +1081,7 @@ jobs:
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           docker build --target runtime \
-            --build-arg GSD_VERSION=${{ needs.dev-publish.outputs.dev-version }} \
+            --build-arg HX_VERSION=${{ needs.dev-publish.outputs.dev-version }} \
             -t ghcr.io/hx-build/hx-pi:next \
             -t ghcr.io/hx-build/hx-pi:${{ needs.dev-publish.outputs.dev-version }} \
             .
@@ -1111,7 +1111,7 @@ jobs:
         run: |
           npm ci
           npm run build
-          GSD_LIVE_TESTS=1 npm run test:live
+          HX_LIVE_TESTS=1 npm run test:live
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -1290,8 +1290,8 @@ git commit -m "feat(ci): add weekly dev version cleanup workflow"
 // Helper for recording new LLM fixtures.
 //
 // Usage:
-//   GSD_FIXTURE_MODE=record \
-//   GSD_FIXTURE_DIR=./tests/fixtures/recordings \
+//   HX_FIXTURE_MODE=record \
+//   HX_FIXTURE_DIR=./tests/fixtures/recordings \
 //   node --experimental-strip-types tests/fixtures/record.ts
 //
 // This is a developer tool, not used in CI.
@@ -1303,10 +1303,10 @@ const mode = getFixtureMode();
 const dir = getFixtureDir();
 
 if (mode !== "record") {
-  console.error("Recording requires GSD_FIXTURE_MODE=record");
+  console.error("Recording requires HX_FIXTURE_MODE=record");
   console.error("");
   console.error("Usage:");
-  console.error("  GSD_FIXTURE_MODE=record GSD_FIXTURE_DIR=./tests/fixtures/recordings \\");
+  console.error("  HX_FIXTURE_MODE=record HX_FIXTURE_DIR=./tests/fixtures/recordings \\");
   console.error("  node --experimental-strip-types tests/fixtures/record.ts");
   process.exit(1);
 }
@@ -1315,7 +1315,7 @@ console.log("Fixture recording mode enabled");
 console.log(`Recordings will be saved to: ${dir}`);
 console.log("");
 console.log("To record a fixture:");
-console.log("1. Set GSD_FIXTURE_MODE=record in your environment");
+console.log("1. Set HX_FIXTURE_MODE=record in your environment");
 console.log("2. Run your HX session normally");
 console.log("3. The FixtureProvider will intercept and save all LLM calls");
 console.log("4. Review the generated JSON in the recordings directory");
@@ -1350,7 +1350,7 @@ npm run test:live
 Expected:
 - Smoke tests: 3 passed
 - Fixture tests: 1 passed
-- Live tests: Skipped (no `GSD_LIVE_TESTS=1`)
+- Live tests: Skipped (no `HX_LIVE_TESTS=1`)
 
 - [ ] **Step 2: Validate all workflow YAML files**
 

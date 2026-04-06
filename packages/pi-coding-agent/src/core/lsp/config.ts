@@ -104,22 +104,25 @@ function coerceServerConfigs(servers: Record<string, Partial<ServerConfig>>): Re
 	return result;
 }
 
+const LEGACY_ALIASES: Record<string, string> = { 'kotlin-language-server': 'kotlin-lsp' };
+
 function mergeServers(
 	base: Record<string, ServerConfig>,
 	overrides: Record<string, Partial<ServerConfig>>,
 ): Record<string, ServerConfig> {
 	const merged: Record<string, ServerConfig> = { ...base };
 	for (const [name, config] of Object.entries(overrides)) {
-		if (merged[name]) {
-			const candidate = { ...merged[name], ...config };
-			const normalized = normalizeServerConfig(name, candidate);
+		const effectiveName = LEGACY_ALIASES[name] ?? name;
+		if (merged[effectiveName]) {
+			const candidate = { ...merged[effectiveName], ...config };
+			const normalized = normalizeServerConfig(effectiveName, candidate);
 			if (normalized) {
-				merged[name] = normalized;
+				merged[effectiveName] = normalized;
 			}
 		} else {
-			const normalized = normalizeServerConfig(name, config);
+			const normalized = normalizeServerConfig(effectiveName, config);
 			if (normalized) {
-				merged[name] = normalized;
+				merged[effectiveName] = normalized;
 			}
 		}
 	}

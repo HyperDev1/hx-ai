@@ -21,13 +21,13 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import {
-  GSDWorkspaceProvider,
+  HXWorkspaceProvider,
   getCurrentScopeLabel,
   getProjectDisplayName,
   getStatusPresentation,
   getVisibleWorkspaceError,
-  useGSDWorkspaceState,
-  useGSDWorkspaceActions,
+  useHXWorkspaceState,
+  useHXWorkspaceActions,
 } from "@/lib/hx-workspace-store"
 import { ChatMode } from "@/components/hx/chat-mode"
 import { ScopeBadge } from "@/components/hx/scope-badge"
@@ -60,8 +60,8 @@ function WorkspaceChrome() {
   const [projectsPanelOpen, setProjectsPanelOpen] = useState(false)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [mobileMilestoneOpen, setMobileMilestoneOpen] = useState(false)
-  const workspace = useGSDWorkspaceState()
-  const { refreshBoot } = useGSDWorkspaceActions()
+  const workspace = useHXWorkspaceState()
+  const { refreshBoot } = useHXWorkspaceActions()
 
   const status = getStatusPresentation(workspace)
   const projectPath = workspace.boot?.project.cwd
@@ -537,7 +537,7 @@ function WorkspaceChrome() {
   )
 }
 
-export function GSDAppShell() {
+export function HXAppShell() {
   // Extract the auth token from the URL fragment on first render.
   // Must happen before any API calls fire.
   getAuthToken()
@@ -577,10 +577,10 @@ function ProjectAwareWorkspace() {
   }
 
   return (
-    <GSDWorkspaceProvider store={activeStore}>
+    <HXWorkspaceProvider store={activeStore}>
       <DevOverridesProvider>
         <WorkspaceChrome />
       </DevOverridesProvider>
-    </GSDWorkspaceProvider>
+    </HXWorkspaceProvider>
   )
 }

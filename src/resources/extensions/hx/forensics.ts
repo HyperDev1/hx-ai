@@ -22,7 +22,7 @@ import {
   formatCost, formatTokenCount, type UnitMetrics, type MetricsLedger,
 } from "./metrics.js";
 import { readCrashLock, isLockProcessAlive, formatCrashInfo, type LockData } from "./crash-recovery.js";
-import { runGSDDoctor, formatDoctorIssuesForPrompt, type DoctorIssue } from "./doctor.js";
+import { runHXDoctor, formatDoctorIssuesForPrompt, type DoctorIssue } from "./doctor.js";
 import { verifyExpectedArtifact } from "./auto-recovery.js";
 import { deriveState } from "./state.js";
 import { isAutoActive } from "./auto.js";
@@ -284,7 +284,7 @@ export async function buildForensicReport(basePath: string): Promise<ForensicRep
   // 6. Run doctor
   let doctorIssues: DoctorIssue[] = [];
   try {
-    const report = await runGSDDoctor(basePath, { scope: undefined });
+    const report = await runHXDoctor(basePath, { scope: undefined });
     doctorIssues = report.issues;
   } catch { /* doctor failure is non-fatal */ }
 

@@ -39,8 +39,8 @@ function resolveExtensionDir(): string {
 
   // Fallback: user-local agent directory
   const hxHome = process.env.HX_HOME || join(homedir(), ".hx");
-  const agentGsdDir = join(hxHome, "agent", "extensions", "hx");
-  if (existsSync(join(agentGsdDir, "prompts"))) return agentGsdDir;
+  const agentHxDir = join(hxHome, "agent", "extensions", "hx");
+  if (existsSync(join(agentHxDir, "prompts"))) return agentHxDir;
 
   // Last resort: return the module dir (warmCache will silently handle the miss)
   return moduleDir;

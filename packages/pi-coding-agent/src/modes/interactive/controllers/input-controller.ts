@@ -23,6 +23,17 @@ export function setupEditorSubmitHandler(host: InteractiveModeStateHost & {
 				host.editor.setText("");
 				return;
 			}
+			// Unrecognized slash command — route to session as user input
+			// so extension-defined commands (e.g. /hx) can be handled by the agent.
+			host.editor.addToHistory?.(text);
+			host.editor.setText("");
+			try {
+				await host.session.prompt(text);
+			} catch (error: unknown) {
+				const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+				host.showError(errorMessage);
+			}
+			return;
 		}
 
 		if (text.startsWith("!")) {

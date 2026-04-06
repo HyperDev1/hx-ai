@@ -14,7 +14,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import test from "node:test";
 import assert from "node:assert/strict";
-import { runGSDDoctor } from "../../doctor.ts";
+import { runHXDoctor } from "../../doctor.ts";
 import { closeDatabase } from "../../hx-db.ts";
 
 function makeTmp(name: string): string {
@@ -83,7 +83,7 @@ test("fixLevel:task — no reconciliation issue codes are reported", async (t) =
 
   buildScaffold(tmp);
 
-  const report = await runGSDDoctor(tmp, { fix: true, fixLevel: "task" });
+  const report = await runHXDoctor(tmp, { fix: true, fixLevel: "task" });
 
   const codes = report.issues.map(i => i.code);
   for (const removed of REMOVED_CODES) {
@@ -97,7 +97,7 @@ test("fixLevel:all — no reconciliation issue codes are reported", async (t) =>
 
   buildScaffold(tmp);
 
-  const report = await runGSDDoctor(tmp, { fix: true });
+  const report = await runHXDoctor(tmp, { fix: true });
 
   const codes = report.issues.map(i => i.code);
   for (const removed of REMOVED_CODES) {
@@ -153,7 +153,7 @@ test("legacy roadmap fallback: future slices are treated as pending, active slic
 
   // Active slice exists in state/registry but has no directory yet — this should
   // still be reported as a real error, while future untouched slices should be skipped.
-  const report = await runGSDDoctor(tmp, { scope: "M001" });
+  const report = await runHXDoctor(tmp, { scope: "M001" });
   const missingSliceDirUnits = report.issues
     .filter(i => i.code === "missing_slice_dir")
     .map(i => i.unitId)
@@ -204,7 +204,7 @@ test("fixLevel:all — delimiter_in_title still fixable", async (t) => {
 - [ ] **T01: Do stuff** \`est:5m\`
 `);
 
-  const report = await runGSDDoctor(tmp, { fix: true });
+  const report = await runHXDoctor(tmp, { fix: true });
 
   // The milestone-level delimiter is auto-fixed, but the report may or may not include it
   // depending on whether it was fixed successfully. Just verify it ran without crashing.

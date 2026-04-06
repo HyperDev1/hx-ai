@@ -89,6 +89,7 @@ async function parseConfig(): Promise<LspmuxConfig | null> {
 async function checkServerRunning(binaryPath: string): Promise<boolean> {
 	try {
 		const proc = spawn(binaryPath, ["status"], {
+			shell: process.platform === "win32",
 			stdio: ["ignore", "pipe", "pipe"],
 		});
 
@@ -116,7 +117,7 @@ export async function detectLspmux(): Promise<LspmuxState> {
 		return cachedState;
 	}
 
-	if (process.env.PI_DISABLE_LSPMUX === "1" || process.env.GSD_DISABLE_LSPMUX === "1") {
+	if (process.env.PI_DISABLE_LSPMUX === "1" || process.env.HX_DISABLE_LSPMUX === "1") {
 		cachedState = { available: false, running: false, binaryPath: null, config: null };
 		cacheTimestamp = now;
 		return cachedState;

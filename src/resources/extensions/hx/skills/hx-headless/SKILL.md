@@ -123,11 +123,11 @@ HX tracks concurrent workers via file-based IPC in `.hx/parallel/`. See [referen
 
 **Quick overview:**
 
-Each worker spawns with `GSD_MILESTONE_LOCK=M00X` + its own git worktree. Workers write heartbeats to `.hx/parallel/<milestoneId>.status.json`. The orchestrator enumerates all status files to get a dashboard of all workers, and sends commands via signal files.
+Each worker spawns with `HX_MILESTONE_LOCK=M00X` + its own git worktree. Workers write heartbeats to `.hx/parallel/<milestoneId>.status.json`. The orchestrator enumerates all status files to get a dashboard of all workers, and sends commands via signal files.
 
 ```bash
 # Spawn a worker for milestone M001 in its worktree
-GSD_MILESTONE_LOCK=M001 GSD_PARALLEL_WORKER=1 \
+HX_MILESTONE_LOCK=M001 HX_PARALLEL_WORKER=1 \
   hx headless --json auto \
   --cwd .hx/worktrees/M001 2>worker-M001.log &
 

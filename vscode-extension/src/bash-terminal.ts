@@ -5,7 +5,7 @@ import type { AgentEvent, HxClient } from "./hx-client.js";
  * Routes the HX agent's Bash tool output to a dedicated VS Code terminal panel.
  * Shows streaming output from tool_execution_update events in real time.
  */
-export class GsdBashTerminal implements vscode.Disposable {
+export class HxBashTerminal implements vscode.Disposable {
 	private terminal: vscode.Terminal | undefined;
 	private writeEmitter: vscode.EventEmitter<string> | undefined;
 	private disposables: vscode.Disposable[] = [];

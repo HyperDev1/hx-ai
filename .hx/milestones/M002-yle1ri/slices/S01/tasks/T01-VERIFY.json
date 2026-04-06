@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "taskId": "T01",
+  "unitId": "M002-yle1ri/S01/T01",
+  "timestamp": 1775295149116,
+  "passed": false,
+  "discoverySource": "task-plan",
+  "checks": [
+    {
+      "command": "cd /Users/beratcan/Desktop/GithubProjects/hx-ai/.hx/worktrees/M002-yle1ri",
+      "exitCode": 0,
+      "durationMs": 7,
+      "verdict": "pass"
+    },
+    {
+      "command": "npx tsc --noEmit",
+      "exitCode": 0,
+      "durationMs": 3936,
+      "verdict": "pass"
+    },
+    {
+      "command": "cd /Users/beratcan/Desktop/GithubProjects/hx-ai",
+      "exitCode": 0,
+      "durationMs": 9,
+      "verdict": "pass"
+    },
+    {
+      "command": "node scripts/compile-tests.mjs",
+      "exitCode": 1,
+      "durationMs": 132,
+      "verdict": "fail"
+    },
+    {
+      "command": "node --test dist-test/src/resources/extensions/hx/tests/unit-ownership.test.js",
+      "exitCode": 1,
+      "durationMs": 128,
+      "verdict": "fail"
+    }
+  ],
+  "retryAttempt": 1,
+  "maxRetries": 2
+}

@@ -49,10 +49,18 @@ const CLASSIFICATION_LABELS: Record<Classification, { label: string; description
     label: "Note",
     description: "Informational only — no action needed.",
   },
+  "stop": {
+    label: "Stop",
+    description: "Halt auto-mode execution immediately — session is fundamentally off-track.",
+  },
+  "backtrack": {
+    label: "Backtrack",
+    description: "Rewind to a specific previous slice. Include target slice ID in the rationale.",
+  },
 };
 
 const ALL_CLASSIFICATIONS: Classification[] = [
-  "quick-task", "inject", "defer", "replan", "note",
+  "quick-task", "inject", "defer", "replan", "note", "stop", "backtrack",
 ];
 
 // ─── Public API ───────────────────────────────────────────────────────────────

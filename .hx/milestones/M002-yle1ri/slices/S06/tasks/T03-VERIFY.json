@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "taskId": "T03",
+  "unitId": "M002-yle1ri/S06/T03",
+  "timestamp": 1775340512216,
+  "passed": false,
+  "discoverySource": "task-plan",
+  "checks": [
+    {
+      "command": "npx tsc --noEmit",
+      "exitCode": 0,
+      "durationMs": 4277,
+      "verdict": "pass"
+    },
+    {
+      "command": "node scripts/compile-tests.mjs",
+      "exitCode": 0,
+      "durationMs": 7167,
+      "verdict": "pass"
+    },
+    {
+      "command": "npm run test:unit",
+      "exitCode": 1,
+      "durationMs": 69095,
+      "verdict": "fail"
+    }
+  ],
+  "retryAttempt": 1,
+  "maxRetries": 2
+}

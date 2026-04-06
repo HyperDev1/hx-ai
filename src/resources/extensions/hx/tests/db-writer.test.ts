@@ -439,6 +439,76 @@ describe('db-writer', () => {
     }
   });
 
+  test('updateRequirementInDb — seeds from REQUIREMENTS.md when DB is empty', async () => {
+    const tmpDir = makeTmpDir();
+    const dbPath = path.join(tmpDir, '.hx', 'hx.db');
+    openDatabase(dbPath);
+
+    try {
+      // Write REQUIREMENTS.md with R001 and R002 — no rows seeded in DB yet
+      const mdContent = generateRequirementsMd([SAMPLE_REQUIREMENTS[0], SAMPLE_REQUIREMENTS[1]]);
+      fs.writeFileSync(path.join(tmpDir, '.hx', 'REQUIREMENTS.md'), mdContent, 'utf-8');
+
+      // updateRequirementInDb should auto-seed from markdown then apply the update
+      await updateRequirementInDb('R001', { status: 'validated' }, tmpDir);
+
+      const updated = getRequirementById('R001');
+      assert.ok(!!updated, 'R001 exists after seed + update');
+      assert.deepStrictEqual(updated?.status, 'validated', 'R001 status updated to validated');
+    } finally {
+      closeDatabase();
+      cleanupDir(tmpDir);
+    }
+  });
+
+  test('updateRequirementInDb — seeds all requirements from REQUIREMENTS.md, not just the target', async () => {
+    const tmpDir = makeTmpDir();
+    const dbPath = path.join(tmpDir, '.hx', 'hx.db');
+    openDatabase(dbPath);
+
+    try {
+      // Write REQUIREMENTS.md with both R001 and R002
+      const mdContent = generateRequirementsMd([SAMPLE_REQUIREMENTS[0], SAMPLE_REQUIREMENTS[1]]);
+      fs.writeFileSync(path.join(tmpDir, '.hx', 'REQUIREMENTS.md'), mdContent, 'utf-8');
+
+      // Target only R001 — but R002 should also be seeded as a side-effect
+      await updateRequirementInDb('R001', { status: 'validated' }, tmpDir);
+
+      const r002 = getRequirementById('R002');
+      assert.ok(!!r002, 'R002 was also seeded from REQUIREMENTS.md even though it was not the target');
+    } finally {
+      closeDatabase();
+      cleanupDir(tmpDir);
+    }
+  });
+
+  test('updateRequirementInDb — not found throws when ID absent from both DB and REQUIREMENTS.md', async () => {
+    const tmpDir = makeTmpDir();
+    const dbPath = path.join(tmpDir, '.hx', 'hx.db');
+    openDatabase(dbPath);
+
+    try {
+      // Write REQUIREMENTS.md with only R001 — R999 is absent
+      const mdContent = generateRequirementsMd([SAMPLE_REQUIREMENTS[0]]);
+      fs.writeFileSync(path.join(tmpDir, '.hx', 'REQUIREMENTS.md'), mdContent, 'utf-8');
+
+      let threw = false;
+      try {
+        await updateRequirementInDb('R999', { status: 'validated' }, tmpDir);
+      } catch (err) {
+        threw = true;
+        assert.ok(
+          (err as Error).message.includes('R999'),
+          'error message mentions the missing ID',
+        );
+      }
+      assert.ok(threw, 'throws when requirement absent from both DB and REQUIREMENTS.md');
+    } finally {
+      closeDatabase();
+      cleanupDir(tmpDir);
+    }
+  });
+
   // ═══════════════════════════════════════════════════════════════════════════
   // saveArtifactToDb Tests
   // ═══════════════════════════════════════════════════════════════════════════

@@ -88,7 +88,7 @@ function makeValidSliceParams(): CompleteSliceParams {
     keyDecisions: ['D001'],
     patternsEstablished: ['SliceRow/rowToSlice follows same pattern as TaskRow/rowToTask'],
     observabilitySurfaces: ['SELECT status FROM slices shows completion state'],
-    provides: ['complete_slice handler', 'gsd_slice_complete tool'],
+    provides: ['complete_slice handler', 'hx_slice_complete tool'],
     requirementsSurfaced: [],
     drillDownPaths: ['milestones/M001/slices/S01/tasks/T01-SUMMARY.md'],
     affects: ['S02'],
@@ -125,9 +125,9 @@ console.log('\n=== complete-slice: schema v6 migration ===');
 
   const adapter = _getAdapter()!;
 
-  // Verify schema version is current (v14 after indexes + slice_dependencies)
+  // Verify schema version is current (v15 after indexes + slice_dependencies + slice_locks)
   const versionRow = adapter.prepare('SELECT MAX(version) as v FROM schema_version').get();
-  assertEq(versionRow?.['v'], 14, 'schema version should be 14');
+  assertEq(versionRow?.['v'], 15, 'schema version should be 15');
 
   // Verify slices table has full_summary_md and full_uat_md columns
   const cols = adapter.prepare("PRAGMA table_info(slices)").all();

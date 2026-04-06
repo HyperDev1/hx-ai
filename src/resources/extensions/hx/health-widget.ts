@@ -9,7 +9,7 @@
  */
 
 import type { ExtensionContext } from "@hyperlab/hx-coding-agent";
-import type { GSDState } from "./types.js";
+import type { HXState } from "./types.js";
 import { runProviderChecks, summariseProviderIssues } from "./doctor-providers.js";
 import { runEnvironmentChecks } from "./doctor-environment.js";
 import { loadEffectiveHXPreferences } from "./preferences.js";

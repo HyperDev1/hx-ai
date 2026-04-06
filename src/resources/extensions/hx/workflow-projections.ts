@@ -16,7 +16,7 @@ import { join } from "node:path";
 import { mkdirSync, existsSync } from "node:fs";
 import { logWarning } from "./workflow-logger.js";
 import { deriveState } from "./state.js";
-import type { GSDState } from "./types.js";
+import type { HXState } from "./types.js";
 
 // ─── PLAN.md Projection ──────────────────────────────────────────────────
 
@@ -97,7 +97,9 @@ export function renderRoadmapContent(milestoneRow: MilestoneRow, sliceRows: Slic
   lines.push(`# ${milestoneRow.id}: ${milestoneRow.title}`);
   lines.push("");
   lines.push("## Vision");
-  lines.push(milestoneRow.vision || milestoneRow.title || "TBD");
+  // Strip a leading "## Vision" line if it's already embedded in the vision text
+  const visionText = milestoneRow.vision || milestoneRow.title || "TBD";
+  lines.push(visionText.startsWith("## Vision") ? visionText.replace(/^##\s*Vision\s*\n?/, "") : visionText);
   lines.push("");
   lines.push("## Slice Overview");
   lines.push("| ID | Slice | Risk | Depends | Done | After this |");
@@ -189,7 +191,9 @@ export function renderSummaryContent(taskRow: TaskRow, sliceId: string, mileston
   }
 
   lines.push("## What Happened");
-  lines.push(taskRow.full_summary_md || taskRow.narrative || "No summary recorded.");
+  // Strip double-prefix if full_summary_md already starts with "## What Happened"
+  const whatHappenedText = taskRow.full_summary_md || taskRow.narrative || "No summary recorded.";
+  lines.push(whatHappenedText.startsWith("## What Happened") ? whatHappenedText.replace(/^##\s*What Happened\s*\n?/, "") : whatHappenedText);
   lines.push("");
 
   // Deviations (if present)
@@ -227,11 +231,11 @@ export function renderSummaryProjection(basePath: string, milestoneId: string, s
 // ─── STATE.md Projection ────────────────────────────────────────────────
 
 /**
- * Render STATE.md content from GSDState.
+ * Render STATE.md content from HXState.
  * Matches the buildStateMarkdown output format from doctor.ts exactly.
  * Pure function — no side effects.
  */
-export function renderStateContent(state: GSDState): string {
+export function renderStateContent(state: HXState): string {
   const lines: string[] = [];
   lines.push("# HX State", "");
 

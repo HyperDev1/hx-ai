@@ -7,8 +7,8 @@
 import type { ExtensionAPI, ExtensionContext } from "@hyperlab/hx-coding-agent";
 
 import type { AutoSession } from "./session.js";
-import type { GSDPreferences } from "../preferences.js";
-import type { GSDState } from "../types.js";
+import type { HXPreferences } from "../preferences.js";
+import type { HXState } from "../types.js";
 import type { SessionLockStatus } from "../session-lock.js";
 import type { CloseoutOptions } from "../auto-unit-closeout.js";
 import type { PostUnitContext, PreVerificationOpts } from "../auto-post-unit.js";
@@ -20,6 +20,7 @@ import type { DispatchAction } from "../auto-dispatch.js";
 import type { WorktreeResolver } from "../worktree-resolver.js";
 import type { CmuxLogLevel } from "../../cmux/index.js";
 import type { JournalEntry } from "../journal.js";
+import type { TaskMetadata } from "../complexity-classifier.js";
 
 /**
  * Dependencies injected by the caller (auto.ts startAuto) so autoLoop
@@ -42,21 +43,21 @@ export interface LoopDeps {
     ctx: ExtensionContext,
     unitType: string,
     unitId: string,
-    state: GSDState,
+    state: HXState,
   ) => void;
-  syncCmuxSidebar: (preferences: GSDPreferences | undefined, state: GSDState) => void;
+  syncCmuxSidebar: (preferences: HXPreferences | undefined, state: HXState) => void;
   logCmuxEvent: (
-    preferences: GSDPreferences | undefined,
+    preferences: HXPreferences | undefined,
     message: string,
     level?: CmuxLogLevel,
   ) => void;
 
   // State and cache functions
   invalidateAllCaches: () => void;
-  deriveState: (basePath: string) => Promise<GSDState>;
+  deriveState: (basePath: string) => Promise<HXState>;
   rebuildState: (basePath: string) => Promise<void>;
   loadEffectiveHXPreferences: () =>
-    | { preferences?: GSDPreferences }
+    | { preferences?: HXPreferences }
     | undefined;
 
   // Pre-dispatch health gate
@@ -146,8 +147,8 @@ export interface LoopDeps {
     basePath: string;
     mid: string;
     midTitle: string;
-    state: GSDState;
-    prefs: GSDPreferences | undefined;
+    state: HXState;
+    prefs: HXPreferences | undefined;
     session?: AutoSession;
   }) => Promise<DispatchAction>;
   runPreDispatchHooks: (
@@ -190,7 +191,7 @@ export interface LoopDeps {
     unitType: string,
     unitId: string,
     basePath: string,
-    state: GSDState,
+    state: HXState,
   ) => void;
   updateSliceProgressCache: (
     basePath: string,
@@ -205,10 +206,11 @@ export interface LoopDeps {
     unitType: string,
     unitId: string,
     basePath: string,
-    prefs: GSDPreferences | undefined,
+    prefs: HXPreferences | undefined,
     verbose: boolean,
     startModel: { provider: string; id: string } | null,
     retryContext?: { isRetry: boolean; previousTier?: string },
+    metadata?: TaskMetadata,
   ) => Promise<{
     routing: { tier: string; modelDowngraded: boolean } | null;
     appliedModel: { provider: string; id: string } | null;
@@ -224,7 +226,7 @@ export interface LoopDeps {
     pi: ExtensionAPI;
     unitType: string;
     unitId: string;
-    prefs: GSDPreferences | undefined;
+    prefs: HXPreferences | undefined;
     buildSnapshotOpts: () => CloseoutOptions & Record<string, unknown>;
     buildRecoveryContext: () => unknown;
     pauseAuto: (ctx?: ExtensionContext, pi?: ExtensionAPI) => Promise<void>;

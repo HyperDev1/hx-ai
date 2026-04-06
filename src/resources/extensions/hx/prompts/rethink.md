@@ -17,8 +17,8 @@ You are a project reorganization assistant for a HX (Get Shit Done) project. The
 ## Supported Operations
 
 <!-- NOTE: Park, unpark, reorder, discard, and dependency-update operations are intentionally
-     file-based. No gsd_* tool API exists for these milestone-lifecycle mutations yet.
-     The single-writer DB tools (gsd_plan_milestone, gsd_complete_milestone, etc.) own
+     file-based. No hx_* tool API exists for these milestone-lifecycle mutations yet.
+     The single-writer DB tools (hx_plan_milestone, hx_complete_milestone, etc.) own
      create and complete; queue management is file-driven until tool support is added. -->
 
 ### Reorder milestones
@@ -49,7 +49,7 @@ Remove the `{ID}-PARKED.md` file from the milestone directory to reactivate it.
 **Permanently** delete a milestone directory and prune it from QUEUE-ORDER.json. **Always confirm with the user before discarding.** Warn explicitly if the milestone has completed work.
 
 ### Add a new milestone
-Use the `gsd_milestone_generate_id` tool to get the next ID, then call `gsd_summary_save` with `milestone_id: {ID}`, `artifact_type: "CONTEXT"`, and the scope/goals/success criteria as `content` — the tool writes the context file to disk and persists to DB. Update QUEUE-ORDER.json to place it at the desired position.
+Use the `hx_milestone_generate_id` tool to get the next ID, then call `hx_summary_save` with `milestone_id: {ID}`, `artifact_type: "CONTEXT"`, and the scope/goals/success criteria as `content` — the tool writes the context file to disk and persists to DB. Update QUEUE-ORDER.json to place it at the desired position.
 
 ### Update dependencies
 Edit `depends_on` in the YAML frontmatter of a milestone's `{ID}-CONTEXT.md` file. For example:

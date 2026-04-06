@@ -19,7 +19,7 @@
  *   - syncWorktreeStateBack syncs root-level .hx/ files (REQUIREMENTS, PROJECT, etc.)
  *   - syncWorktreeStateBack syncs ALL milestone directories, not just the current one
  *   - syncWorktreeStateBack handles next-milestone artifacts created during completion
- *   - syncGsdStateToWorktree syncs non-standard milestone dir names (#1547)
+ *   - syncHxStateToWorktree syncs non-standard milestone dir names (#1547)
  *   - syncWorktreeStateBack syncs non-standard milestone dir names (#1547)
  */
 
@@ -28,7 +28,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
 import { syncProjectRootToWorktree } from '../auto-worktree.ts';
-import { syncGsdStateToWorktree, syncWorktreeStateBack } from '../auto-worktree.ts';
+import { syncHxStateToWorktree, syncWorktreeStateBack } from '../auto-worktree.ts';
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -176,7 +176,7 @@ describe('worktree-sync-milestones', async () => {
 
       assert.ok(!existsSync(join(wtBase, '.hx', 'milestones')), 'milestones/ missing before sync');
 
-      const result = syncGsdStateToWorktree(mainBase, wtBase);
+      const result = syncHxStateToWorktree(mainBase, wtBase);
 
       assert.ok(existsSync(join(wtBase, '.hx', 'milestones')), 'milestones/ created in worktree');
       assert.ok(existsSync(join(wtBase, '.hx', 'milestones', 'M001')), 'M001 synced to worktree');
@@ -519,8 +519,8 @@ describe('worktree-sync-milestones', async () => {
     }
   }
 
-  // ─── 14. syncGsdStateToWorktree syncs non-standard milestone dir names (#1547) ──
-  console.log('\n=== 14. syncGsdStateToWorktree syncs non-standard milestone dir names (#1547) ===');
+  // ─── 14. syncHxStateToWorktree syncs non-standard milestone dir names (#1547) ──
+  console.log('\n=== 14. syncHxStateToWorktree syncs non-standard milestone dir names (#1547) ===');
   {
     const mainBase = createBase('main');
     const wtBase = createBase('wt');
@@ -538,7 +538,7 @@ describe('worktree-sync-milestones', async () => {
       assert.ok(!existsSync(join(wtBase, '.hx', 'milestones', 'sprint-alpha')), 'sprint-alpha missing before sync');
       assert.ok(!existsSync(join(wtBase, '.hx', 'milestones', 'M001-abc123')), 'M001-abc123 missing before sync');
 
-      const result = syncGsdStateToWorktree(mainBase, wtBase);
+      const result = syncHxStateToWorktree(mainBase, wtBase);
 
       assert.ok(
         existsSync(join(wtBase, '.hx', 'milestones', 'sprint-alpha', 'CONTEXT.md')),

@@ -75,17 +75,17 @@ describe("parallel-worker-lock-contention (#2184)", () => {
   });
 
   // ─── Bug 1b: effectiveLockTarget returns per-milestone directory ─────────
-  test("Bug 1b: effectiveLockTarget returns gsdDir without parallel env", () => {
+  test("Bug 1b: effectiveLockTarget returns hxDir without parallel env", () => {
     delete process.env.HX_PARALLEL_WORKER;
-    const gsdDir = "/tmp/test/.hx";
-    assert.equal(effectiveLockTarget(gsdDir), gsdDir);
+    const hxDir = "/tmp/test/.hx";
+    assert.equal(effectiveLockTarget(hxDir), hxDir);
   });
 
   test("Bug 1b: effectiveLockTarget returns parallel/<MID> in parallel mode", () => {
     process.env.HX_PARALLEL_WORKER = "1";
     process.env.HX_MILESTONE_LOCK = "M003";
-    const gsdDir = "/tmp/test/.hx";
-    assert.equal(effectiveLockTarget(gsdDir), join(gsdDir, "parallel", "M003"));
+    const hxDir = "/tmp/test/.hx";
+    assert.equal(effectiveLockTarget(hxDir), join(hxDir, "parallel", "M003"));
   });
 
   // ─── Bug 1c: Two parallel workers acquire independent locks ──────────────
@@ -102,16 +102,16 @@ describe("parallel-worker-lock-contention (#2184)", () => {
       assert.ok(r1.acquired, "M001 worker acquires lock");
 
       // Verify the lock file is per-milestone
-      const gsdDir = hxRoot(base);
-      const m001LockFile = join(gsdDir, "auto-M001.lock");
+      const hxDir = hxRoot(base);
+      const m001LockFile = join(hxDir, "auto-M001.lock");
       assert.ok(existsSync(m001LockFile), "auto-M001.lock exists");
 
       // The shared auto.lock should NOT exist
-      const sharedLockFile = join(gsdDir, "auto.lock");
+      const sharedLockFile = join(hxDir, "auto.lock");
       assert.ok(!existsSync(sharedLockFile), "shared auto.lock does NOT exist");
 
       // The per-milestone lock target directory should exist
-      const m001LockTarget = join(gsdDir, "parallel", "M001");
+      const m001LockTarget = join(hxDir, "parallel", "M001");
       assert.ok(existsSync(m001LockTarget), "parallel/M001 directory exists");
 
       releaseSessionLock(base);
@@ -136,8 +136,8 @@ describe("parallel-worker-lock-contention (#2184)", () => {
 
       writeLock(base, "execute-task", "M002/S01/T01");
 
-      const gsdDir = hxRoot(base);
-      const lockFile = join(gsdDir, "auto-M002.lock");
+      const hxDir = hxRoot(base);
+      const lockFile = join(hxDir, "auto-M002.lock");
       assert.ok(existsSync(lockFile), "crash-recovery writes auto-M002.lock");
 
       const data = readCrashLock(base);
@@ -156,24 +156,24 @@ describe("parallel-worker-lock-contention (#2184)", () => {
   // ─── Bug 3: syncProjectRootToWorktree skips same-path symlinks ───────────
   test("Bug 3: syncProjectRootToWorktree skips when .hx resolves to same path (symlink)", () => {
     const base = mkdtempSync(join(tmpdir(), "hx-symlink-sync-"));
-    const externalGsd = join(base, "external-hx");
+    const externalHx = join(base, "external-hx");
     const projectRoot = join(base, "project");
     const worktreePath = join(base, "worktree");
 
-    mkdirSync(externalGsd, { recursive: true });
+    mkdirSync(externalHx, { recursive: true });
     mkdirSync(projectRoot, { recursive: true });
     mkdirSync(worktreePath, { recursive: true });
 
     // Create the external state directory with a milestone
-    mkdirSync(join(externalGsd, "milestones", "M001"), { recursive: true });
+    mkdirSync(join(externalHx, "milestones", "M001"), { recursive: true });
     writeFileSync(
-      join(externalGsd, "milestones", "M001", "M001-ROADMAP.md"),
+      join(externalHx, "milestones", "M001", "M001-ROADMAP.md"),
       "# Roadmap",
     );
 
     // Symlink both project and worktree .hx to the same external directory
-    symlinkSync(externalGsd, join(projectRoot, ".hx"));
-    symlinkSync(externalGsd, join(worktreePath, ".hx"));
+    symlinkSync(externalHx, join(projectRoot, ".hx"));
+    symlinkSync(externalHx, join(worktreePath, ".hx"));
 
     try {
       // This should NOT throw ERR_FS_CP_EINVAL — it should skip silently

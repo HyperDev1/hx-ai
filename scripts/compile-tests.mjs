@@ -200,11 +200,44 @@ async function main() {
   }
 
   // Ensure dist-test/node_modules exists so resource-loader.ts (which computes
-  // packageRoot from import.meta.url) resolves gsdNodeModules to a real path.
+  // packageRoot from import.meta.url) resolves hxNodeModules to a real path.
   // Without this, initResources creates dangling symlinks in test environments.
   const distNodeModules = join(ROOT, 'dist-test', 'node_modules');
   if (!existsSync(distNodeModules)) {
     symlinkSync(join(ROOT, 'node_modules'), distNodeModules);
+  }
+
+  // Compile unit-style tests placed under tests/integration/ that import via
+  // relative paths (not full E2E tests — those remain excluded from the main
+  // compile pass for speed). Only compiles files that exist in both source and
+  // are not already handled by the main pass above.
+  const hxIntegrationSrc = join(ROOT, 'src', 'resources', 'extensions', 'hx', 'tests', 'integration');
+  const hxIntegrationDist = join(ROOT, 'dist-test', 'src', 'resources', 'extensions', 'hx', 'tests', 'integration');
+  try {
+    const integEntries = await readdir(hxIntegrationSrc, { withFileTypes: true });
+    const integTs = integEntries
+      .filter(e => e.isFile() && e.name.endsWith('.test.ts') && !e.name.endsWith('.d.ts'))
+      .map(e => join(hxIntegrationSrc, e.name));
+    if (integTs.length > 0) {
+      await mkdir(hxIntegrationDist, { recursive: true });
+      await esbuild.build({
+        entryPoints: integTs,
+        outdir: hxIntegrationDist,
+        bundle: false,
+        format: 'esm',
+        platform: 'node',
+        target: 'node18',
+        sourcemap: false,
+        logLevel: 'silent',
+      });
+      // Copy .ts source files alongside compiled .js (for error messages / jiti)
+      for (const tsFile of integTs) {
+        const name = tsFile.split('/').at(-1);
+        await cp(tsFile, join(hxIntegrationDist, name), { force: true });
+      }
+    }
+  } catch {
+    // Non-fatal — integration test compilation failure doesn't block main compile
   }
 
   const elapsed = ((Date.now() - start) / 1000).toFixed(2);

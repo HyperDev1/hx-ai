@@ -21,7 +21,7 @@ const resolveTsPath = resolve(root, 'src', 'resources', 'extensions', 'hx', 'tes
 
 const child = spawn(
   process.execPath,
-  ['--import', resolveTsPath, '--experimental-strip-types', srcLoaderPath, ...process.argv.slice(2)],
+  ['--disable-warning=ExperimentalWarning', '--import', resolveTsPath, '--experimental-strip-types', srcLoaderPath, ...process.argv.slice(2)],
   {
     cwd: process.cwd(),
     stdio: 'inherit',

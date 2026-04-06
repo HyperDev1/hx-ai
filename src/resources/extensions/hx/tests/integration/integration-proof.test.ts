@@ -82,7 +82,7 @@ import {
 import { detectRogueFileWrites } from "../../auto-post-unit.ts";
 
 // ── Doctor ────────────────────────────────────────────────────────────────
-import { runGSDDoctor } from "../../doctor.ts";
+import { runHXDoctor } from "../../doctor.ts";
 
 // ── Undo/reset ────────────────────────────────────────────────────────────
 import { handleUndoTask, handleResetSlice } from "../../undo.ts";
@@ -118,13 +118,13 @@ function makeCtx(): { notifications: Array<{ message: string; level: string }>; 
  */
 function createRealisticFixture(): string {
   const base = makeTempDir();
-  const gsdDir = join(base, ".hx");
-  const mDir = join(gsdDir, "milestones", "M001");
+  const hxDir = join(base, ".hx");
+  const mDir = join(hxDir, "milestones", "M001");
   const sliceDir = join(mDir, "slices", "S01");
   const tasksDir = join(sliceDir, "tasks");
 
   mkdirSync(tasksDir, { recursive: true });
-  mkdirSync(join(gsdDir, "activity"), { recursive: true });
+  mkdirSync(join(hxDir, "activity"), { recursive: true });
 
   // Roadmap with exact format
   writeFileSync(
@@ -184,7 +184,7 @@ Prove all subsystems compose.
 
   // Minimal REQUIREMENTS.md
   writeFileSync(
-    join(gsdDir, "REQUIREMENTS.md"),
+    join(hxDir, "REQUIREMENTS.md"),
     `# Requirements
 
 ## Active
@@ -198,7 +198,7 @@ Prove all subsystems compose.
 
   // Minimal DECISIONS.md
   writeFileSync(
-    join(gsdDir, "DECISIONS.md"),
+    join(hxDir, "DECISIONS.md"),
     `# Decisions
 
 | ID | Decision | Choice | Rationale |
@@ -209,7 +209,7 @@ Prove all subsystems compose.
 
   // PROJECT.md stub
   writeFileSync(
-    join(gsdDir, "PROJECT.md"),
+    join(hxDir, "PROJECT.md"),
     "# Integration Proof Project\n\nTest project for integration proof.\n",
     "utf-8",
   );
@@ -378,7 +378,7 @@ test("full lifecycle: migration through completion through doctor", async (t) =>
     assert.ok(dbState.registry.length > 0, "DB registry should have entries");
 
     // ── (h) Doctor zero-fix (R009) ───────────────────────────────────
-    const doctorReport = await runGSDDoctor(base, {
+    const doctorReport = await runHXDoctor(base, {
       fix: false,
       isolationMode: "none",
     });
@@ -457,7 +457,7 @@ test("recovery: DB loss → migrateFromMarkdown restores state, stale render det
 
     assert.equal(existsSync(dbPath), false, "DB file should be deleted");
 
-    // Clear path caches so gsdRoot re-probes after DB deletion
+    // Clear path caches so hxRoot re-probes after DB deletion
     const { clearPathCache: clearPaths } = await import("../../paths.ts");
     clearPaths();
     invalidateAllCaches();

@@ -852,12 +852,13 @@ export class ModelRegistry {
 		for (const result of results) {
 			if (result.error) continue;
 			for (const dm of result.models) {
+				const isOllama = result.provider === "ollama";
 				converted.push({
 					id: dm.id,
 					name: dm.name ?? dm.id,
-					api: "openai" as Api,
+					api: (isOllama ? "ollama-chat" : "openai") as Api,
 					provider: result.provider,
-					baseUrl: "",
+					baseUrl: isOllama ? "http://localhost:11434" : "",
 					reasoning: dm.reasoning ?? false,
 					input: dm.input ?? ["text"],
 					cost: dm.cost ?? { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },

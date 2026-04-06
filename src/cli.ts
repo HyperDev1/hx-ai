@@ -32,6 +32,7 @@ import { getProjectSessionsDir } from './project-sessions.js'
 import { markStartup, printStartupTimings } from './startup-timings.js'
 import { bootstrapRtk, HX_RTK_DISABLED_ENV } from './rtk.js'
 import { loadEffectiveHXPreferences } from './resources/extensions/hx/preferences.js'
+import { applySecurityOverrides } from './security-overrides.js'
 
 // ---------------------------------------------------------------------------
 // V8 compile cache — Node 22+ can cache compiled bytecode across runs,
@@ -330,6 +331,7 @@ const modelRegistry = new ModelRegistry(authStorage, modelsJsonPath)
 markStartup('ModelRegistry')
 const settingsManager = SettingsManager.create(agentDir)
 markStartup('SettingsManager.create')
+applySecurityOverrides(settingsManager)
 
 // Run onboarding wizard on first launch (no LLM provider configured)
 if (!isPrintMode && shouldRunOnboarding(authStorage, settingsManager.getDefaultProvider())) {

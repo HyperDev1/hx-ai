@@ -35,7 +35,7 @@ export type BrowserSlashCommandSurface =
   | "hx-cleanup"
   | "hx-queue"
 
-export type BrowserSlashCommandLocalAction = "clear_terminal" | "refresh_workspace" | "gsd_help"
+export type BrowserSlashCommandLocalAction = "clear_terminal" | "refresh_workspace" | "hx_help"
 
 export type BrowserSlashPromptCommandType = "prompt" | "follow_up"
 
@@ -113,7 +113,7 @@ const SURFACE_COMMANDS = new Map<string, BrowserSlashCommandSurface>([
 
 // --- HX subcommand dispatch (S02) ---
 
-const GSD_SURFACE_SUBCOMMANDS = new Map<string, BrowserSlashCommandSurface>([
+const HX_SURFACE_SUBCOMMANDS = new Map<string, BrowserSlashCommandSurface>([
   ["status", "hx-status"],
   ["visualize", "hx-visualize"],
   ["forensics", "hx-forensics"],
@@ -136,7 +136,7 @@ const GSD_SURFACE_SUBCOMMANDS = new Map<string, BrowserSlashCommandSurface>([
   ["queue", "hx-queue"],
 ])
 
-const GSD_PASSTHROUGH_SUBCOMMANDS = new Set<string>([
+const HX_PASSTHROUGH_SUBCOMMANDS = new Set<string>([
   "auto",
   "next",
   "stop",
@@ -148,7 +148,7 @@ const GSD_PASSTHROUGH_SUBCOMMANDS = new Set<string>([
   "remote",
 ])
 
-export const GSD_HELP_TEXT = `Available /hx subcommands:
+export const HX_HELP_TEXT = `Available /hx subcommands:
 
 Workflow:    next · auto · stop · pause · skip · queue · quick · capture · triage
 Diagnostics: status · visualize · forensics · doctor · skill-health · inspect
@@ -158,7 +158,7 @@ Advanced:    export · cleanup · run-hook · migrate · remote
 
 Type /hx <subcommand> to run. Use /hx help for this message.`
 
-function dispatchGSDSubcommand(
+function dispatchHXSubcommand(
   input: string,
   args: string,
   options: BrowserSlashCommandDispatchOptions,
@@ -187,7 +187,7 @@ function dispatchGSDSubcommand(
       kind: "local",
       input,
       commandName: "hx",
-      action: "gsd_help",
+      action: "hx_help",
     }
   }
 
@@ -202,7 +202,7 @@ function dispatchGSDSubcommand(
   }
 
   // Surface-routed subcommands — open browser-native UI
-  const surface = GSD_SURFACE_SUBCOMMANDS.get(subcommand)
+  const surface = HX_SURFACE_SUBCOMMANDS.get(subcommand)
   if (surface) {
     return {
       kind: "surface",
@@ -214,7 +214,7 @@ function dispatchGSDSubcommand(
   }
 
   // Bridge-passthrough subcommands — let the extension handle them
-  if (GSD_PASSTHROUGH_SUBCOMMANDS.has(subcommand)) {
+  if (HX_PASSTHROUGH_SUBCOMMANDS.has(subcommand)) {
     return {
       kind: "prompt",
       input,
@@ -344,7 +344,7 @@ export function dispatchBrowserSlashCommand(
   // HX subcommand dispatch — must precede SURFACE_COMMANDS to avoid
   // `/hx export` colliding with the built-in `/export` surface.
   if (parsed.name === "hx") {
-    return dispatchGSDSubcommand(trimmed, parsed.args, options)
+    return dispatchHXSubcommand(trimmed, parsed.args, options)
   }
 
   const browserSurface = SURFACE_COMMANDS.get(parsed.name)

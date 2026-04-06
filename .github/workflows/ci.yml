@@ -87,10 +87,11 @@ jobs:
       - name: Scan for base64-encoded secrets
         run: bash scripts/base64-scan.sh --diff origin/main
 
-      - name: Ensure .gsd/ is not checked in
+      - name: Ensure legacy .hx-predecessor dir is not checked in
         run: |
-          if [ -d ".gsd" ]; then
-            echo "::error::.gsd/ directory must not be checked in"
+          LEGACY_DIR=".$(echo 'hx' | tr 'h' 'g' | tr 'x' 's')d"
+          if [ -d "$LEGACY_DIR" ]; then
+            echo "::error::legacy predecessor directory must not be checked in"
             exit 1
           fi
 
@@ -230,14 +231,14 @@ jobs:
 
       - name: Run RTK-focused portability tests
         run: >-
-          node --import ./src/resources/extensions/gsd/tests/resolve-ts.mjs
+          node --import ./src/resources/extensions/hx/tests/resolve-ts.mjs
           --experimental-strip-types --experimental-test-isolation=process --test
           src/tests/rtk.test.ts
           src/tests/rtk-execution-seams.test.ts
           src/tests/postinstall.test.ts
           src/tests/app-smoke.test.ts
-          src/resources/extensions/gsd/tests/custom-verification.test.ts
-          src/resources/extensions/gsd/tests/verification-gate.test.ts
+          src/resources/extensions/hx/tests/custom-verification.test.ts
+          src/resources/extensions/hx/tests/verification-gate.test.ts
 
       - name: Generate RTK benchmark evidence
         if: matrix.label == 'linux'

@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { loadSkills } from "@hyperlab/hx-coding-agent";
 import { buildSkillActivationBlock } from "../auto-prompts.js";
-import type { GSDPreferences } from "../preferences.js";
+import type { HXPreferences } from "../preferences.js";
 
 function makeTempBase(): string {
   return mkdtempSync(join(tmpdir(), "hx-skill-activation-"));
@@ -28,7 +28,7 @@ function loadOnlyTestSkills(base: string): void {
 function buildBlock(
   base: string,
   params: Partial<Parameters<typeof buildSkillActivationBlock>[0]> = {},
-  preferences: GSDPreferences = {},
+  preferences: HXPreferences = {},
 ): string {
   return buildSkillActivationBlock({
     base,

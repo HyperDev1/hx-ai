@@ -3,8 +3,8 @@
 export { handleMigrate } from './command.js';
 export { parsePlanningDirectory } from './parser.js';
 export { validatePlanningDirectory } from './validator.js';
-export { transformToGSD } from './transformer.js';
-export { writeGSDDirectory } from './writer.js';
+export { transformToHX } from './transformer.js';
+export { writeHXDirectory } from './writer.js';
 export type { WrittenFiles, MigrationPreview } from './writer.js';
 export { generatePreview } from './preview.js';
 export type {
@@ -31,12 +31,12 @@ export type {
   ValidationIssue,
   ValidationSeverity,
   // Output types (HX-2 format)
-  GSDProject,
-  GSDMilestone,
-  GSDSlice,
-  GSDTask,
-  GSDRequirement,
-  GSDSliceSummaryData,
-  GSDTaskSummaryData,
-  GSDBoundaryEntry,
+  HXProject,
+  HXMilestone,
+  HXSlice,
+  HXTask,
+  HXRequirement,
+  HXSliceSummaryData,
+  HXTaskSummaryData,
+  HXBoundaryEntry,
 } from './types.js';

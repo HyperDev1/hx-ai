@@ -397,7 +397,7 @@ async function collectRecoveryDiagnosticsChildPayload(
     'const unitId = process.env.HX_RECOVERY_UNIT_ID || "project";',
     'const sessionFile = process.env.HX_RECOVERY_SESSION_FILE || undefined;',
     'const activityDir = process.env.HX_RECOVERY_ACTIVITY_DIR || undefined;',
-    'const report = await doctor.runGSDDoctor(basePath, { fix: false, scope, fixLevel: "task" });',
+    'const report = await doctor.runHXDoctor(basePath, { fix: false, scope, fixLevel: "task" });',
     'const summary = doctor.summarizeDoctorIssues(report.issues);',
     'const briefing = forensics.synthesizeCrashRecovery(basePath, unitType, unitId, sessionFile, activityDir);',
     'const trace = briefing?.trace;',
@@ -491,6 +491,7 @@ async function collectRecoveryDiagnosticsChildPayload(
           HX_RECOVERY_FORENSICS_MODULE: sessionForensicsModulePath,
         },
         maxBuffer: RECOVERY_DIAGNOSTICS_MAX_BUFFER,
+        windowsHide: true,
       },
       (error, stdout, stderr) => {
         if (error) {

@@ -57,10 +57,10 @@ function encodeCwd(cwd: string): string {
 	return cwd.replace(/\//g, "--");
 }
 
-const gsdHome = process.env.HX_HOME || path.join(os.homedir(), ".hx");
+const hxHome = process.env.HX_HOME || path.join(os.homedir(), ".hx");
 
 function getIsolationBaseDir(cwd: string, taskId: string): string {
-	return path.join(gsdHome, "wt", encodeCwd(cwd), taskId);
+	return path.join(hxHome, "wt", encodeCwd(cwd), taskId);
 }
 
 // Track active isolation dirs for cleanup on exit

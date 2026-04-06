@@ -4,7 +4,7 @@ import { join } from "node:path";
 import type { ExtensionAPI } from "@hyperlab/hx-coding-agent";
 import { Key } from "@hyperlab/hx-tui";
 
-import { GSDDashboardOverlay } from "../dashboard-overlay.js";
+import { HXDashboardOverlay } from "../dashboard-overlay.js";
 import { ParallelMonitorOverlay } from "../parallel-monitor-overlay.js";
 import { shortcutDesc } from "../../shared/mod.js";
 
@@ -17,7 +17,7 @@ export function registerShortcuts(pi: ExtensionAPI): void {
         return;
       }
       await ctx.ui.custom<void>(
-        (tui, theme, _kb, done) => new GSDDashboardOverlay(tui, theme, () => done()),
+        (tui, theme, _kb, done) => new HXDashboardOverlay(tui, theme, () => done()),
         {
           overlay: true,
           overlayOptions: {

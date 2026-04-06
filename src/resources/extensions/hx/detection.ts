@@ -285,7 +285,7 @@ const MAX_RECURSIVE_SCAN_DEPTH = 6;
  */
 export function detectProjectState(basePath: string): ProjectDetection {
   const v1 = detectV1Planning(basePath);
-  const v2 = detectV2Gsd(basePath);
+  const v2 = detectV2Hx(basePath);
   const projectSignals = detectProjectSignals(basePath);
   const globalSetup = hasGlobalSetup();
   const firstEver = isFirstEverLaunch();
@@ -353,7 +353,7 @@ export function detectV1Planning(basePath: string): V1Detection | null {
 
 // ─── V2 HX Detection ──────────────────────────────────────────────────────────
 
-function detectV2Gsd(basePath: string): V2Detection | null {
+function detectV2Hx(basePath: string): V2Detection | null {
   const hxPath = hxRoot(basePath);
 
   if (!existsSync(hxPath)) return null;
