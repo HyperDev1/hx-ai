@@ -23,7 +23,7 @@ File list and their upstream SHA to port:
   - Estimate: 1h
   - Files: src/resources/extensions/hx/safety/evidence-collector.ts, src/resources/extensions/hx/safety/destructive-guard.ts, src/resources/extensions/hx/safety/file-change-validator.ts, src/resources/extensions/hx/safety/evidence-cross-ref.ts, src/resources/extensions/hx/safety/git-checkpoint.ts, src/resources/extensions/hx/safety/content-validator.ts, src/resources/extensions/hx/safety/safety-harness.ts
   - Verify: grep -rn 'refs/gsd/checkpoints' src/resources/extensions/hx/safety/ | wc -l | grep -q '^0$' && grep -rn '\.gsd/' src/resources/extensions/hx/safety/ | wc -l | grep -q '^0$' && grep -rn '\bgsd\b\|\bGSD\b' src/resources/extensions/hx/safety/ | wc -l | grep -q '^0$' && echo 'GSD-clean' && npx tsc --noEmit 2>&1 | head -20
-- [ ] **T02: Wire safety harness into existing files and add checkpoint tests** — Modify 7 existing files to integrate the safety harness, then add git-checkpoint regression tests. Run compile-tests.mjs and verify all 4 checkpoint tests pass.
+- [x] **T02: Wired LLM safety harness into 7 existing files and added 4 git-checkpoint regression tests; tsc clean, all tests pass** — Modify 7 existing files to integrate the safety harness, then add git-checkpoint regression tests. Run compile-tests.mjs and verify all 4 checkpoint tests pass.
 
 File-by-file changes:
 

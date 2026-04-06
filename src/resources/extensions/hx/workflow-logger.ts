@@ -31,7 +31,8 @@ export type LogComponent =
   | "state"         // deriveState fallback/degradation
   | "tool"          // Tool handler errors
   | "compaction"    // Event compaction
-  | "reconcile";    // Worktree reconciliation
+  | "reconcile"     // Worktree reconciliation
+  | "safety";       // LLM safety harness
 
 export interface LogEntry {
   ts: string;

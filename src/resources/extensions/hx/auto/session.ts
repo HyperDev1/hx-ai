@@ -134,6 +134,9 @@ export class AutoSession {
   // ── Dispatch circuit breakers ──────────────────────────────────────
   rewriteAttemptCount = 0;
 
+  // ── Safety harness ───────────────────────────────────────────────────────
+  checkpointSha: string | null = null;
+
   // ── Metrics ──────────────────────────────────────────────────────────────
   autoStartTime = 0;
   lastPromptCharCount: number | undefined;
@@ -217,6 +220,9 @@ export class AutoSession {
     this.rewriteAttemptCount = 0;
     this.isolationDegraded = false;
     this.milestoneMergedInPhases = false;
+
+    // Safety harness
+    this.checkpointSha = null;
 
     // Signal handler
     this.sigtermHandler = null;

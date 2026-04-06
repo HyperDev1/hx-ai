@@ -33,6 +33,9 @@ import { hxRoot } from "../paths.js";
 import { atomicWriteSync } from "../atomic-write.js";
 import { verifyExpectedArtifact } from "../auto-recovery.js";
 import { writeUnitRuntimeRecord } from "../unit-runtime.js";
+import { resetEvidence } from "../safety/evidence-collector.js";
+import { createCheckpoint, cleanupCheckpoint, rollbackToCheckpoint } from "../safety/git-checkpoint.js";
+import { resolveSafetyHarnessConfig } from "../safety/safety-harness.js";
 
 // ─── generateMilestoneReport ──────────────────────────────────────────────────
 
@@ -965,6 +968,28 @@ export async function runUnitPhase(
 
   deps.ensurePreconditions(unitType, unitId, s.basePath, state);
 
+  // ── Safety harness: reset evidence + create checkpoint ─────────────────
+  {
+    const { loadEffectiveHXPreferences } = await import("../preferences.js");
+    const prefs = loadEffectiveHXPreferences();
+    const safetyCfg = resolveSafetyHarnessConfig(prefs?.preferences.safety_harness);
+
+    if (safetyCfg.enabled && safetyCfg.evidenceCollection) {
+      resetEvidence();
+    }
+
+    if (safetyCfg.enabled && safetyCfg.checkpoints && unitType === "execute-task") {
+      const cpResult = createCheckpoint(s.basePath, unitId);
+      if (cpResult.success && cpResult.sha) {
+        s.checkpointSha = cpResult.sha;
+      } else {
+        s.checkpointSha = null;
+      }
+    } else {
+      s.checkpointSha = null;
+    }
+  }
+
   // Prompt injection
   let finalPrompt = prompt;
 
@@ -1250,6 +1275,33 @@ export async function runUnitPhase(
   }
 
   deps.emitJournalEvent({ ts: new Date().toISOString(), flowId: ic.flowId, seq: ic.nextSeq(), eventType: "unit-end", data: { unitType, unitId, status: unitResult.status, artifactVerified, ...(unitResult.errorContext ? { errorContext: unitResult.errorContext } : {}) }, causedBy: { flowId: ic.flowId, seq: unitStartSeq } });
+
+  // ── Safety harness: checkpoint cleanup or rollback ──────────────────────
+  if (s.checkpointSha) {
+    const { loadEffectiveHXPreferences } = await import("../preferences.js");
+    const prefs = loadEffectiveHXPreferences();
+    const safetyCfg = resolveSafetyHarnessConfig(prefs?.preferences.safety_harness);
+
+    if (safetyCfg.enabled && safetyCfg.autoRollback && unitResult.status === "failed") {
+      const rollback = rollbackToCheckpoint(s.basePath, s.checkpointSha);
+      if (rollback.success) {
+        logWarning("safety", `Auto-rolled back to checkpoint ${s.checkpointSha} after failed unit`, {
+          unitId,
+          unitType,
+          sha: s.checkpointSha,
+        });
+      } else {
+        logError("safety", `Auto-rollback failed for ${unitId}: ${rollback.error ?? "unknown"}`, {
+          unitId,
+          sha: s.checkpointSha,
+        });
+      }
+    } else {
+      // Successful unit — clean up the checkpoint ref
+      cleanupCheckpoint(s.basePath, unitId);
+    }
+    s.checkpointSha = null;
+  }
 
   return { action: "next", data: { unitStartedAt: s.currentUnit.startedAt } };
 }

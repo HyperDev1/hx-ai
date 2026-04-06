@@ -97,6 +97,7 @@ export const KNOWN_PREFERENCE_KEYS = new Set<string>([
   "experimental",
   "context_management",
   "codebase",
+  "safety_harness",
 ]);
 
 /** Canonical list of all dispatch unit types. */
@@ -291,6 +292,21 @@ export interface HXPreferences {
   context_management?: ContextManagementConfig;
   /** Codebase map generation preferences — exclude patterns, file limits, collapse threshold. */
   codebase?: CodebaseMapPreferences;
+  /**
+   * LLM safety harness configuration — checkpoints, evidence collection, file-change validation.
+   * All features are enabled by default. Set `enabled: false` to disable the entire harness.
+   */
+  safety_harness?: {
+    enabled?: boolean;
+    evidence_collection?: boolean;
+    file_change_validation?: boolean;
+    evidence_cross_reference?: boolean;
+    destructive_command_warnings?: boolean;
+    content_validation?: boolean;
+    checkpoints?: boolean;
+    auto_rollback?: boolean;
+    timeout_scale_cap?: number;
+  };
 }
 
 export interface LoadedHXPreferences {

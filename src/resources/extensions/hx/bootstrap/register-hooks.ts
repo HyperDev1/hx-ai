@@ -20,6 +20,8 @@ import { resetAskUserQuestionsCache } from "../../ask-user-questions.js";
 import { saveActivityLog } from "../activity-log.js";
 import { startRtkStatusUpdates, stopRtkStatusUpdates } from "../rtk-status.js";
 import { rewriteCommandWithRtk } from "../../shared/rtk.js";
+import { recordToolCall as safetyRecordToolCall, recordToolResult as safetyRecordToolResult } from "../safety/evidence-collector.js";
+import { classifyCommand } from "../safety/destructive-guard.js";
 
 // Skip the welcome screen on the very first session_start — cli.ts already
 // printed it before the TUI launched. Only re-print on /clear (subsequent sessions).
@@ -198,6 +200,26 @@ export function registerHooks(pi: ExtensionAPI): void {
     if (result.block) return result;
   });
 
+  pi.on("tool_call", async (event) => {
+    // ── Safety harness: record all tool calls and warn on destructive commands ──
+    if (isAutoActive()) {
+      safetyRecordToolCall(event.toolName, event.input as Record<string, unknown>);
+
+      if (event.toolName === "bash" || event.toolName === "Bash") {
+        const cmd = (event.input as Record<string, unknown>)?.command;
+        if (typeof cmd === "string") {
+          const classification = classifyCommand(cmd);
+          if (classification.isDestructive) {
+            logWarning("safety", `Destructive command: [${classification.label}] ${cmd.slice(0, 120)}`, {
+              toolName: event.toolName,
+              label: classification.label ?? "unknown",
+            });
+          }
+        }
+      }
+    }
+  });
+
   pi.on("tool_result", async (event) => {
     if (event.toolName !== "ask_user_questions") return;
     const milestoneId = getDiscussionMilestoneId();
@@ -255,6 +277,9 @@ export function registerHooks(pi: ExtensionAPI): void {
 
   pi.on("tool_execution_end", async (event) => {
     markToolEnd(event.toolCallId);
+    if (isAutoActive()) {
+      safetyRecordToolResult(event.toolCallId, event.toolName, event.result, event.isError);
+    }
   });
 
   pi.on("model_select", async (_event, ctx) => {
