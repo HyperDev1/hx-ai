@@ -1,4 +1,4 @@
-import test from "node:test";
+import test, { beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
 import { chmodSync, copyFileSync, mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -18,6 +18,18 @@ import {
   validateRtkBinary,
 } from "../rtk.ts";
 import { createFakeRtk } from "./rtk-test-utils.ts";
+
+// Ensure HX_RTK_DISABLED is cleared for the duration of this test file.
+// It may be set in CI or dev environments where RTK is not installed.
+let _savedRtkDisabled: string | undefined;
+beforeEach(() => {
+  _savedRtkDisabled = process.env.HX_RTK_DISABLED;
+  delete process.env.HX_RTK_DISABLED;
+});
+afterEach(() => {
+  if (_savedRtkDisabled === undefined) delete process.env.HX_RTK_DISABLED;
+  else process.env.HX_RTK_DISABLED = _savedRtkDisabled;
+});
 
 test("resolveRtkAssetName maps supported release assets correctly", () => {
   assert.equal(resolveRtkAssetName("darwin", "arm64"), "rtk-aarch64-apple-darwin.tar.gz");
@@ -91,6 +103,7 @@ test("rewriteCommandWithRtk falls back to the managed RTK path when HX_RTK_PATH 
       HX_HOME: managedHome,
     };
     delete env.HX_RTK_PATH;
+    delete env.HX_RTK_DISABLED;
 
     assert.equal(resolveRtkBinaryPath({ env }), managedPath);
     assert.equal(rewriteCommandWithRtk("git status", { env }), "rtk git status");
