@@ -681,6 +681,16 @@ export function nativeAddAll(basePath: string): void {
 }
 
 /**
+ * Stage only already-tracked files (git add -u).
+ * Use this when .hx is a symlink to an external directory to avoid
+ * accidentally staging files from the symlink target.
+ * Fallback: `git add -u`.
+ */
+export function nativeAddTracked(basePath: string): void {
+  gitFileExec(basePath, ["add", "-u"]);
+}
+
+/**
  * Stage all files with pathspec exclusions (git add -A -- ':!pattern' ...).
  * Excluded paths are never hashed by git, preventing hangs on large
  * untracked artifact trees (57GB+, 11K+ files). See #1605.

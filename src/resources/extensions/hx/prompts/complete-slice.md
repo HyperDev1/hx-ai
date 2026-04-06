@@ -42,6 +42,7 @@ Then:
 9. Review task summaries for `key_decisions`. Append any significant decisions to `.hx/DECISIONS.md` if missing.
 10. Review task summaries for patterns, gotchas, or non-obvious lessons learned. If any would save future agents from repeating investigation or hitting the same issues, append them to `.hx/KNOWLEDGE.md`. Only add entries that are genuinely useful — don't pad with obvious observations.
 11. Call `hx_complete_slice` with milestone_id, slice_id, the slice summary, and the UAT result. Do NOT manually mark the roadmap checkbox — the tool writes to the DB and renders the ROADMAP.md projection automatically.
+    > **Filesystem guard:** Do NOT write `{{sliceSummaryPath}}` or `{{sliceUatPath}}` directly with file tools or shell commands. Call `hx_complete_slice` — the tool writes both files atomically and toggles the roadmap checkbox. Direct writes bypass the DB transaction and cause corruption (#aa0ebd3c0).
 12. Do not run git commands — the system commits your changes and handles any merge after this unit succeeds.
 13. Update `.hx/PROJECT.md` if it exists — refresh current state if needed.
 
