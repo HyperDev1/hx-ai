@@ -6,6 +6,7 @@ import { registerWorktreeCommand } from "../worktree-command.js";
 import { registerDbTools } from "./db-tools.js";
 import { registerDynamicTools } from "./dynamic-tools.js";
 import { registerJournalTools } from "./journal-tools.js";
+import { registerQueryTools } from "./query-tools.js";
 import { registerHooks } from "./register-hooks.js";
 import { registerOllamaManageTool } from "./ollama-manage-tool.js";
 import { registerShortcuts } from "./register-shortcuts.js";
@@ -65,6 +66,7 @@ export function registerHxExtension(pi: ExtensionAPI): void {
   registerDynamicTools(pi);
   registerDbTools(pi);
   registerJournalTools(pi);
+  registerQueryTools(pi);
   registerShortcuts(pi);
   registerHooks(pi);
   registerOllamaManageTool(pi);

@@ -24,7 +24,7 @@ Steps:
   - Estimate: 45m
   - Files: src/resources/extensions/hx/tests/db-writer.test.ts, src/resources/extensions/hx/prompts/system.md, src/resources/extensions/hx/prompts/complete-slice.md, src/resources/extensions/hx/prompts/complete-milestone.md, src/resources/extensions/hx/prompts/validate-milestone.md, src/resources/extensions/hx/prompts/plan-milestone.md, src/resources/extensions/hx/prompts/plan-slice.md
   - Verify: node scripts/compile-tests.mjs && node --test dist-test/src/resources/extensions/hx/tests/db-writer.test.js 2>&1 | grep -E 'passed|failed' && grep -q 'Database Access Safety' src/resources/extensions/hx/prompts/system.md && grep -q 'hx_milestone_status' src/resources/extensions/hx/prompts/complete-slice.md
-- [ ] **T02: hx_milestone_status tool + tests + wiring** — Create bootstrap/query-tools.ts with the hx_milestone_status read-only tool, wire it into register-extension.ts, and create tests/milestone-status.test.ts with 11 tests.
+- [x] **T02: Created hx_milestone_status read-only query tool, wired it into bootstrap, and added 11 passing DB function tests** — Create bootstrap/query-tools.ts with the hx_milestone_status read-only tool, wire it into register-extension.ts, and create tests/milestone-status.test.ts with 11 tests.
 
 Steps:
 1. Create src/resources/extensions/hx/bootstrap/query-tools.ts following the journal-tools.ts pattern:

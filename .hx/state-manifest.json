@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-04-06T08:28:56.441Z",
+  "exported_at": "2026-04-06T08:34:58.706Z",
   "milestones": [
     {
       "id": "M001-df6x5t",
@@ -5511,19 +5511,26 @@
       "milestone_id": "M004-erchk5",
       "slice_id": "S03",
       "id": "T02",
-      "title": "hx_milestone_status tool + tests + wiring",
-      "status": "pending",
-      "one_liner": "",
-      "narrative": "",
-      "verification_result": "",
+      "title": "Created hx_milestone_status read-only query tool, wired it into bootstrap, and added 11 passing DB function tests",
+      "status": "complete",
+      "one_liner": "Created hx_milestone_status read-only query tool, wired it into bootstrap, and added 11 passing DB function tests",
+      "narrative": "Created bootstrap/query-tools.ts following the journal-tools.ts pattern. The tool accepts milestoneId (required) and optional sliceId. When milestoneId === 'active', resolves via getActiveMilestoneIdFromDb(). Without sliceId returns slice overview with counts; with sliceId returns task detail with counts. All paths call ensureDbOpen() first. Wired into register-extension.ts with import and call after registerJournalTools. Created tests/milestone-status.test.ts with 11 tests covering all six DB functions using openDatabase(':memory:') + closeDatabase() in beforeEach/afterEach.",
+      "verification_result": "node scripts/compile-tests.mjs (clean), node --test dist-test/.../milestone-status.test.js (11/11 pass), npx tsc --noEmit (clean), npm run test:unit (4329 pass / 3 pre-existing failures). No GSD references in query-tools.ts. registerQueryTools confirmed wired in register-extension.ts.",
       "duration": "",
-      "completed_at": null,
+      "completed_at": "2026-04-06T08:34:58.654Z",
       "blocker_discovered": false,
-      "deviations": "",
-      "known_issues": "",
-      "key_files": [],
-      "key_decisions": [],
-      "full_summary_md": "",
+      "deviations": "None.",
+      "known_issues": "None.",
+      "key_files": [
+        "src/resources/extensions/hx/bootstrap/query-tools.ts",
+        "src/resources/extensions/hx/bootstrap/register-extension.ts",
+        "src/resources/extensions/hx/tests/milestone-status.test.ts"
+      ],
+      "key_decisions": [
+        "Followed journal-tools.ts pattern exactly for tool registration structure",
+        "Tests exercise underlying DB functions directly rather than the registered tool callback — avoids needing a mock ExtensionAPI"
+      ],
+      "full_summary_md": "---\nid: T02\nparent: S03\nmilestone: M004-erchk5\nkey_files:\n  - src/resources/extensions/hx/bootstrap/query-tools.ts\n  - src/resources/extensions/hx/bootstrap/register-extension.ts\n  - src/resources/extensions/hx/tests/milestone-status.test.ts\nkey_decisions:\n  - Followed journal-tools.ts pattern exactly for tool registration structure\n  - Tests exercise underlying DB functions directly rather than the registered tool callback — avoids needing a mock ExtensionAPI\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-04-06T08:34:58.655Z\nblocker_discovered: false\n---\n\n# T02: Created hx_milestone_status read-only query tool, wired it into bootstrap, and added 11 passing DB function tests\n\n**Created hx_milestone_status read-only query tool, wired it into bootstrap, and added 11 passing DB function tests**\n\n## What Happened\n\nCreated bootstrap/query-tools.ts following the journal-tools.ts pattern. The tool accepts milestoneId (required) and optional sliceId. When milestoneId === 'active', resolves via getActiveMilestoneIdFromDb(). Without sliceId returns slice overview with counts; with sliceId returns task detail with counts. All paths call ensureDbOpen() first. Wired into register-extension.ts with import and call after registerJournalTools. Created tests/milestone-status.test.ts with 11 tests covering all six DB functions using openDatabase(':memory:') + closeDatabase() in beforeEach/afterEach.\n\n## Verification\n\nnode scripts/compile-tests.mjs (clean), node --test dist-test/.../milestone-status.test.js (11/11 pass), npx tsc --noEmit (clean), npm run test:unit (4329 pass / 3 pre-existing failures). No GSD references in query-tools.ts. registerQueryTools confirmed wired in register-extension.ts.\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `node scripts/compile-tests.mjs` | 0 | ✅ pass | 9500ms |\n| 2 | `node --test dist-test/src/resources/extensions/hx/tests/milestone-status.test.js 2>&1 | grep -E 'passed|failed'` | 0 | ✅ pass | 2100ms |\n| 3 | `npx tsc --noEmit` | 0 | ✅ pass | 11200ms |\n| 4 | `grep -rn 'gsd|GSD' src/resources/extensions/hx/bootstrap/query-tools.ts | wc -l | grep -q '^0'` | 0 | ✅ pass | 10ms |\n| 5 | `npm run test:unit 2>&1 | tail -1` | 0 | ✅ pass | 160400ms |\n\n\n## Deviations\n\nNone.\n\n## Known Issues\n\nNone.\n\n## Files Created/Modified\n\n- `src/resources/extensions/hx/bootstrap/query-tools.ts`\n- `src/resources/extensions/hx/bootstrap/register-extension.ts`\n- `src/resources/extensions/hx/tests/milestone-status.test.ts`\n",
       "description": "Create bootstrap/query-tools.ts with the hx_milestone_status read-only tool, wire it into register-extension.ts, and create tests/milestone-status.test.ts with 11 tests.\n\nSteps:\n1. Create src/resources/extensions/hx/bootstrap/query-tools.ts following the journal-tools.ts pattern:\n   - Import: Type from @sinclair/typebox, ExtensionAPI from @hyperlab/hx-coding-agent, ensureDbOpen from ./dynamic-tools.js\n   - Import DB functions from ../hx-db.js: getActiveMilestoneIdFromDb, getMilestone, getMilestoneSlices, getSliceTasks, getSliceStatusSummary, getSliceTaskCounts\n   - Export registerQueryTools(pi: ExtensionAPI): void\n   - Register hx_milestone_status with parameters: milestoneId: string (required), sliceId?: string (optional)\n   - When milestoneId === 'active': call getActiveMilestoneIdFromDb() to resolve the real ID; if null return 'No active milestone'\n   - When milestoneId only: call getMilestoneSlices(milestoneId) → return JSON array of {id, status, title} per slice, plus total/complete/pending counts\n   - When milestoneId + sliceId: call getSliceTasks(milestoneId, sliceId) → return JSON array of {id, status, title} per task, plus getSliceTaskCounts counts\n   - Always call ensureDbOpen() at the top of execute() — if it returns false, return an error message 'DB not open — run hx command first'\n   - Return JSON text (JSON.stringify with null, 2)\n   - Wrap in try/catch returning error text on failure\n   - NO GSD references anywhere\n\n2. Modify src/resources/extensions/hx/bootstrap/register-extension.ts:\n   - Add: import { registerQueryTools } from './query-tools.js'; after registerJournalTools import\n   - Add: registerQueryTools(pi); after registerJournalTools(pi) call\n\n3. Create src/resources/extensions/hx/tests/milestone-status.test.ts with 11 tests:\n   Import: describe/test from node:test, assert from node:assert/strict, path/os/fs from node:\n   Import from ../hx-db.ts: openDatabase, closeDatabase, upsertMilestonePlanning (or use planMilestone), insertSlice-like functions — check what's available for seeding test data. Use direct upsert calls to seed milestone/slice/task rows.\n   \n   IMPORTANT: The tool execute() function is hard to call directly in tests since it's registered via pi.registerTool. Instead, test the DB functions that back it:\n   - Test getActiveMilestoneIdFromDb() returns null when no DB open\n   - Test getActiveMilestoneIdFromDb() returns active milestone after inserting one\n   - Test getMilestoneSlices() returns slices for a milestone\n   - Test getSliceTasks() returns tasks for a milestone+slice\n   - Test getSliceStatusSummary() returns id+status array\n   - Test getSliceTaskCounts() returns total/done/pending\n   - Test getMilestone() returns null for unknown ID\n   - Test getActiveMilestoneIdFromDb() returns null when milestone is complete\n   - Test getSliceStatusSummary() with mixed statuses\n   - Test getSliceTaskCounts() with all-complete tasks\n   - Test getSliceTasks() with empty slice returns empty array\n   \n   Use openDatabase(':memory:') + closeDatabase() pattern. Seed rows using functions available in hx-db.ts: upsertMilestonePlanning, upsertSlicePlanning (check the actual exported function names first before writing tests). Each test uses makeTmpDir-equivalent inline setup with in-memory DB.\n\n4. Run: node scripts/compile-tests.mjs\n5. Run: node --test dist-test/src/resources/extensions/hx/tests/milestone-status.test.js\n6. Run: npx tsc --noEmit\n7. Run: npm run test:unit",
       "estimate": "90m",
       "files": [
@@ -9213,6 +9220,61 @@
       "verdict": "✅ pass",
       "duration_ms": 103400,
       "created_at": "2026-04-06T08:28:56.399Z"
+    },
+    {
+      "id": 311,
+      "task_id": "T02",
+      "slice_id": "S03",
+      "milestone_id": "M004-erchk5",
+      "command": "node scripts/compile-tests.mjs",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 9500,
+      "created_at": "2026-04-06T08:34:58.654Z"
+    },
+    {
+      "id": 312,
+      "task_id": "T02",
+      "slice_id": "S03",
+      "milestone_id": "M004-erchk5",
+      "command": "node --test dist-test/src/resources/extensions/hx/tests/milestone-status.test.js 2>&1 | grep -E 'passed|failed'",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 2100,
+      "created_at": "2026-04-06T08:34:58.654Z"
+    },
+    {
+      "id": 313,
+      "task_id": "T02",
+      "slice_id": "S03",
+      "milestone_id": "M004-erchk5",
+      "command": "npx tsc --noEmit",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 11200,
+      "created_at": "2026-04-06T08:34:58.654Z"
+    },
+    {
+      "id": 314,
+      "task_id": "T02",
+      "slice_id": "S03",
+      "milestone_id": "M004-erchk5",
+      "command": "grep -rn 'gsd|GSD' src/resources/extensions/hx/bootstrap/query-tools.ts | wc -l | grep -q '^0'",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 10,
+      "created_at": "2026-04-06T08:34:58.654Z"
+    },
+    {
+      "id": 315,
+      "task_id": "T02",
+      "slice_id": "S03",
+      "milestone_id": "M004-erchk5",
+      "command": "npm run test:unit 2>&1 | tail -1",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 160400,
+      "created_at": "2026-04-06T08:34:58.654Z"
     }
   ]
 }
