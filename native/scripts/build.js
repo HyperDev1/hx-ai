@@ -72,8 +72,8 @@ if (!fs.existsSync(sourcePath)) {
 fs.mkdirSync(addonDir, { recursive: true });
 
 const destFilename = isDev
-  ? "gsd_engine.dev.node"
-  : `gsd_engine.${platformTag}.node`;
+  ? "hx_engine.dev.node"
+  : `hx_engine.${platformTag}.node`;
 const destPath = path.join(addonDir, destFilename);
 
 fs.copyFileSync(sourcePath, destPath);

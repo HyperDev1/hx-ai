@@ -4,8 +4,8 @@
  * Locates and loads the compiled Rust N-API addon (`.node` file).
  * Resolution order:
  *   1. @hx-build/engine-{platform} npm optional dependency (production install)
- *   2. native/addon/gsd_engine.{platform}.node (local release build)
- *   3. native/addon/gsd_engine.dev.node (local debug build)
+ *   2. native/addon/hx_engine.{platform}.node (local release build)
+ *   3. native/addon/hx_engine.dev.node (local debug build)
  */
 
 import { createRequire } from "node:module";
@@ -43,22 +43,26 @@ function loadNative(): Record<string, unknown> {
     }
   }
 
-  // 2. Try local release build (native/addon/gsd_engine.{platform}.node)
-  const releasePath = path.join(addonDir, `gsd_engine.${platformTag}.node`);
-  try {
-    _loadedSuccessfully = true; return require(releasePath) as Record<string, unknown>;
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    errors.push(`${releasePath}: ${message}`);
+  // 2. Try local release build — supports both current (hx_engine) and legacy (gsd_engine) prefixes
+  for (const prefix of ["hx_engine", "gsd_engine"]) {
+    const releasePath = path.join(addonDir, `${prefix}.${platformTag}.node`);
+    try {
+      _loadedSuccessfully = true; return require(releasePath) as Record<string, unknown>;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      errors.push(`${releasePath}: ${message}`);
+    }
   }
 
-  // 3. Try local dev build (native/addon/gsd_engine.dev.node)
-  const devPath = path.join(addonDir, "gsd_engine.dev.node");
-  try {
-    _loadedSuccessfully = true; return require(devPath) as Record<string, unknown>;
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    errors.push(`${devPath}: ${message}`);
+  // 3. Try local dev build — supports both prefixes
+  for (const prefix of ["hx_engine", "gsd_engine"]) {
+    const devPath = path.join(addonDir, `${prefix}.dev.node`);
+    try {
+      _loadedSuccessfully = true; return require(devPath) as Record<string, unknown>;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      errors.push(`${devPath}: ${message}`);
+    }
   }
 
   const details = errors.map((e) => `  - ${e}`).join("\n");
