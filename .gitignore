@@ -2,7 +2,7 @@
 # ── Compiled test output ──
 dist-test/
 
-# ── GSD project state (development-only, lives in worktree branches) ──
+# ── HX project state (development-only, lives in worktree branches) ──
 package-lock.json
 .claude/
 RELEASE-GUIDE.md
@@ -42,12 +42,12 @@ tmp/
 packages/*/dist/
 packages/*/node_modules/
 
-# ── GSD baseline (auto-generated) ──
+# ── HX baseline (auto-generated) ──
 dist/
 !/pkg/dist/modes/
 !/pkg/dist/core/export-html/
 .bg_shell
-.gsd*.tgz
+.hx*.tgz
 .artifacts/
 AGENTS.md
 .bg-shell/
@@ -56,12 +56,24 @@ TODOS.md
 .audits/
 docs/coherence-audit/
 
-# ── GSD project state (per-worktree, never committed) ──
-.gsd/
-
 # ── Stale lock files (npm is canonical) ──
 pnpm-lock.yaml
 bun.lock
 
-# ── GSD baseline (auto-generated) ──
+# ── Legacy GSD symlink (migration artifact) ──
 .gsd
+
+# ── HX project runtime (per-worktree, never committed) ──
+.hx/hx.db
+.hx/hx.db-shm
+.hx/hx.db-wal
+.hx/activity/
+.hx/journal/
+.hx/worktrees/
+.hx/runtime/
+.hx/STATE.md
+.hx/state-manifest.json
+.hx/event-log.jsonl
+.hx/audit-log.jsonl
+.hx/doctor-history.jsonl
+.hx/metrics.json
