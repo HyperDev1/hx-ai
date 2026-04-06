@@ -2,6 +2,8 @@ You are executing HX auto-mode.
 
 ## UNIT: Complete Milestone {{milestoneId}} ("{{milestoneTitle}}")
 
+> ⚠️ **Database access**: Never run `sqlite3 .hx/hx.db` or query `hx.db` via bash. Use `hx_milestone_status` to inspect milestone/slice/task status. WAL single-writer discipline — direct bash access corrupts state.
+
 ## Working Directory
 
 Your working directory is `{{workingDirectory}}`. All file reads, writes, and shell commands MUST operate relative to this directory. Do NOT `cd` to any other directory.

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-04-06T08:00:38.867Z",
+  "exported_at": "2026-04-06T08:28:56.441Z",
   "milestones": [
     {
       "id": "M001-df6x5t",
@@ -702,16 +702,16 @@
       "milestone_id": "M004-erchk5",
       "id": "S02",
       "title": "Ollama Native Provider + Flat-rate Routing Guard",
-      "status": "pending",
+      "status": "complete",
       "risk": "medium",
       "depends": [
         "S01"
       ],
       "demo": "After this: Ollama native provider registered; flat-rate guard active; model fallback race fixed; tsc clean",
       "created_at": "2026-04-06T06:39:44.641Z",
-      "completed_at": null,
-      "full_summary_md": "",
-      "full_uat_md": "",
+      "completed_at": "2026-04-06T08:07:31.115Z",
+      "full_summary_md": "---\nid: S02\nparent: M004-erchk5\nmilestone: M004-erchk5\nprovides:\n  - Ollama native /api/chat NDJSON streaming provider (ollama-chat) registered and available\n  - Flat-rate routing guard active for github-copilot/ prefix models\n  - ollama_manage tool: list/pull/remove/show via Ollama REST API\n  - model fallback race fixed — appliedModel never null when startModel identified\n  - 9 ollama-chat tests + 5 flat-rate guard tests as regression coverage\nrequires:\n  []\naffects:\n  - S03\n  - S04\n  - S05\nkey_files:\n  - packages/pi-ai/src/providers/ollama-chat.ts\n  - packages/pi-ai/src/types.ts\n  - packages/pi-ai/src/providers/register-builtins.ts\n  - packages/pi-ai/src/index.ts\n  - packages/pi-coding-agent/src/core/model-registry.ts\n  - src/resources/extensions/hx/tests/ollama-chat.test.ts\n  - src/resources/extensions/hx/bootstrap/register-extension.ts\n  - src/resources/extensions/hx/bootstrap/ollama-manage-tool.ts\n  - src/resources/extensions/hx/model-router.ts\n  - src/resources/extensions/hx/auto-model-selection.ts\n  - src/resources/extensions/hx/tests/model-router.test.ts\nkey_decisions:\n  - streamSimpleOllamaChat strips apiKey before forwarding — Ollama is keyless local service\n  - pi.registerProvider('ollama',{authMode:'none'}) is required for isProviderRequestReady to pass for Ollama models\n  - FLAT_RATE_PREFIXES array pattern (not hardcoded if/else) makes adding future flat-rate providers trivial\n  - ollama_manage pull uses stream:false to get single JSON response instead of NDJSON\n  - appliedModel race fix: set appliedModel=startModel before byId attempt so currentUnitModel is never null when startModel identified\n  - ollama_manage extracted to dedicated ollama-manage-tool.ts for separation of concerns\npatterns_established:\n  - Keyless local provider registration: pi.registerProvider(name, {authMode:'none', api:'...', baseUrl:'...'}) in register-extension.ts\n  - Flat-rate guard pattern: FLAT_RATE_PREFIXES string[] + exported isFlatRateModel() + early return before resolveModelForComplexity\n  - NDJSON streaming pattern in pi-ai providers: line-by-line parse of fetch() response body with done-chunk for tool calls and token usage\nobservability_surfaces:\n  - ollama_manage tool returns {error: string} when Ollama is not running — visible in tool output\n  - Ollama provider emits InferenceMetrics (token counts) from done chunk — surfaced in session stats\n  - isFlatRateModel() exported for direct observability in tests and future diagnostics\ndrill_down_paths:\n  - .hx/milestones/M004-erchk5/slices/S02/tasks/T01-SUMMARY.md\n  - .hx/milestones/M004-erchk5/slices/S02/tasks/T02-SUMMARY.md\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-04-06T08:07:31.119Z\nblocker_discovered: false\n---\n\n# S02: Ollama Native Provider + Flat-rate Routing Guard\n\n**Replaced broken OpenAI-compat Ollama shim with native /api/chat NDJSON streaming provider; added flat-rate routing guard for zero-cost providers; created ollama_manage REST tool; fixed model fallback race.**\n\n## What Happened\n\nS02 ported four upstream changes from v2.63.0→v2.64.0 across two tasks.\n\n**T01 — Ollama native provider (packages/pi-ai + model-registry)**\n\nCreated `packages/pi-ai/src/providers/ollama-chat.ts` (438 lines) implementing full NDJSON streaming against Ollama's `/api/chat` endpoint. The provider converts the pi-ai Context format to Ollama messages (including image base64 support), streams response line-by-line, emits all AssistantMessageEventStream events (start/text_start/text_delta/text_end/toolcall_start/toolcall_end/done/error), records token usage from the done-chunk, and strips `apiKey` before forwarding since Ollama is keyless. Tool calls arrive in the `done=true` chunk (not in streaming deltas) — handled as a separate code path. Added `'ollama-chat'` to `KnownApi` in `types.ts`, registered it in `register-builtins.ts`, exported from `index.ts`. Fixed `convertDiscoveredModels` in `model-registry.ts` to assign `api:'ollama-chat'` and `baseUrl:'http://localhost:11434'` to discovered Ollama models instead of the broken `api:'openai'` shim. Wrote 9 unit tests with mock fetch covering text streaming, token usage, error paths, tool calls, custom baseUrl, apiKey stripping, and abort handling.\n\n**T02 — Registration, flat-rate guard, ollama_manage tool, fallback race fix**\n\nWired `pi.registerProvider(\"ollama\", {authMode:\"none\", api:\"ollama-chat\", baseUrl:\"http://localhost:11434\"})` in `register-extension.ts` so discovered Ollama models pass the `isProviderRequestReady` check without an API key — this was the critical missing piece. Created `ollama-manage-tool.ts` (194 lines) with `list/pull/remove/show` subcommands using `fetch()` against the Ollama REST API; gracefully returns `{error:...}` when Ollama is not running; `pull` uses `stream:false` to get a single JSON response rather than NDJSON. Added `FLAT_RATE_PREFIXES` array and `isFlatRateModel()` export to `model-router.ts`; early return in `resolveModelForComplexity` skips cost-based routing for `github-copilot/` models (zero savings from dynamic routing on zero-cost providers). Fixed the `appliedModel` race in `auto-model-selection.ts`: `appliedModel = startModel` is now set before the byId fallback attempt, ensuring `currentUnitModel` is never null when the session-start model was at least identified. Added 5 flat-rate guard tests to `model-router.test.ts` (20 total, up from 15).\n\n**Verification outcome:** tsc --noEmit clean; 1221 files compiled; 9/9 ollama-chat tests pass; 20/20 model-router tests pass; full suite 4312 pass / 3 pre-existing fail / 5 skip. Zero GSD references introduced.\n\n## Verification\n\nAll slice-plan verification checks passed:\n1. `npx tsc --noEmit` → exit 0, no type errors\n2. `node scripts/compile-tests.mjs` → 1221 files compiled, exit 0\n3. `node --test dist-test/.../ollama-chat.test.js` → 9/9 pass, exit 0\n4. `node --test dist-test/.../model-router.test.js` → 20/20 pass, exit 0\n5. `npm run test:unit` → 4312 pass / 3 pre-existing fail / 5 skip\n6. GSD naming grep across all 11 modified files → 0 hits\n\n## Requirements Advanced\n\n- R023 — Replaced broken OpenAI-compat Ollama shim with native /api/chat NDJSON streaming provider; added ollama_manage tool; wired provider registration with authMode:none\n- R029 — Zero GSD references introduced across all 11 modified files\n- R030 — tsc clean, 4312/3/5 test results, 3 failures are pre-existing\n\n## Requirements Validated\n\n- R023 — 9/9 ollama-chat.test.js tests pass covering streaming, tool calls, token usage, custom baseUrl, apiKey stripping, error handling. 20/20 model-router tests pass including 5 flat-rate guard cases. tsc clean.\n\n## New Requirements Surfaced\n\nNone.\n\n## Requirements Invalidated or Re-scoped\n\nNone.\n\n## Deviations\n\nNone. All planned components implemented as specified. T02 extracted ollama_manage into a dedicated file (ollama-manage-tool.ts) rather than adding to dynamic-tools.ts — this improves separation of concerns without affecting interface or behavior.\n\n## Known Limitations\n\nThe derive-state-db performance assertion is a pre-existing flaky test (timing-sensitive, 25ms threshold); it fails under full-suite load but passes in isolation. Not introduced by S02.\n\n## Follow-ups\n\nNone. Ollama provider is functional end-to-end. Future: add more providers to FLAT_RATE_PREFIXES as needed (append to array, no code changes).\n\n## Files Created/Modified\n\n- `packages/pi-ai/src/providers/ollama-chat.ts` — New: native /api/chat NDJSON streaming provider (438 lines)\n- `packages/pi-ai/src/types.ts` — Added 'ollama-chat' to KnownApi union type\n- `packages/pi-ai/src/providers/register-builtins.ts` — Registered ollama-chat provider in builtins map\n- `packages/pi-ai/src/index.ts` — Exported streamOllamaChat and streamSimpleOllamaChat\n- `packages/pi-coding-agent/src/core/model-registry.ts` — convertDiscoveredModels assigns api:ollama-chat and baseUrl for Ollama providers\n- `src/resources/extensions/hx/tests/ollama-chat.test.ts` — New: 9 unit tests for ollama-chat provider with mock fetch\n- `src/resources/extensions/hx/bootstrap/register-extension.ts` — Wired pi.registerProvider('ollama', {authMode:'none', api:'ollama-chat', baseUrl:'http://localhost:11434'})\n- `src/resources/extensions/hx/bootstrap/ollama-manage-tool.ts` — New: ollama_manage tool with list/pull/remove/show subcommands via Ollama REST API (194 lines)\n- `src/resources/extensions/hx/model-router.ts` — Added FLAT_RATE_PREFIXES, isFlatRateModel(), early return guard in resolveModelForComplexity\n- `src/resources/extensions/hx/auto-model-selection.ts` — Fixed appliedModel race: set appliedModel=startModel before byId fallback attempt\n- `src/resources/extensions/hx/tests/model-router.test.ts` — Added 5 flat-rate guard tests (20 total, up from 15)\n",
+      "full_uat_md": "# S02: Ollama Native Provider + Flat-rate Routing Guard — UAT\n\n**Milestone:** M004-erchk5\n**Written:** 2026-04-06T08:07:31.120Z\n\n## UAT Type\nUAT mode: runtime-executable\n\n## Purpose\nVerify S02 deliverables: Ollama native provider registration, flat-rate routing guard, ollama_manage tool, and model fallback race fix.\n\n## Preconditions\n- Working directory: `/Users/beratcan/Desktop/GithubProjects/hx-ai`\n- `packages/pi-ai` has been built (`cd packages/pi-ai && npm run build`)\n- `node scripts/compile-tests.mjs` has been run\n- Ollama does NOT need to be running — tests use mock fetch or test against error handling\n\n## Test Cases\n\n### TC01 — ollama-chat provider: full NDJSON streaming\n**What:** 9 ollama-chat.test.js tests covering all provider paths.\n```bash\nnode --test dist-test/src/resources/extensions/hx/tests/ollama-chat.test.js\n```\n**Expected:** 9 pass, 0 fail. Tests cover: text streaming, token usage from done chunk, non-200 error, tool call response, custom baseUrl, apiKey stripping, abort signal, convertDiscoveredModels api assignment, KnownApi compile-time guard.\n\n### TC02 — flat-rate routing guard: github-copilot models not downgraded\n**What:** 5 flat-rate guard tests in model-router.test.js.\n```bash\nnode --test dist-test/src/resources/extensions/hx/tests/model-router.test.js 2>&1 | grep -E 'flat-rate|isFlatRateModel|pass|fail'\n```\n**Expected:** All 5 flat-rate tests pass: `isFlatRateModel: github-copilot/ prefix is flat-rate`, `isFlatRateModel: non-flat-rate providers return false`, `flat-rate model is not downgraded even with routing enabled`, `flat-rate guard returns configured fallbacks unchanged`, `non-flat-rate model is still downgraded normally`.\n\n### TC03 — full model-router test suite\n**What:** All 20 model-router tests (15 pre-existing + 5 new).\n```bash\nnode --test dist-test/src/resources/extensions/hx/tests/model-router.test.js\n```\n**Expected:** 20 pass, 0 fail.\n\n### TC04 — tsc typecheck clean\n**What:** No type errors introduced.\n```bash\nnpx tsc --noEmit 2>&1; echo \"EXIT:$?\"\n```\n**Expected:** No output, `EXIT:0`.\n\n### TC05 — KnownApi includes ollama-chat (compile-time guard)\n**What:** The KnownApi type guard test confirms 'ollama-chat' is in the union.\n```bash\nnode --test dist-test/src/resources/extensions/hx/tests/ollama-chat.test.js 2>&1 | grep \"KnownApi\"\n```\n**Expected:** `✔ KnownApi type includes ollama-chat (compile-time guard)`\n\n### TC06 — Ollama provider registered with authMode:none\n**What:** Verify the provider registration call exists in register-extension.ts.\n```bash\ngrep -n \"authMode.*none\\|registerProvider.*ollama\" src/resources/extensions/hx/bootstrap/register-extension.ts\n```\n**Expected:** Lines showing `registerProvider(\"ollama\"` with `authMode: \"none\"` and `api: \"ollama-chat\"`.\n\n### TC07 — ollama_manage tool gracefully handles Ollama not running\n**What:** Static check that ollama-manage-tool.ts returns error object (not throws) on fetch failure.\n```bash\ngrep -n 'return.*error\\|catch.*error' src/resources/extensions/hx/bootstrap/ollama-manage-tool.ts | head -10\n```\n**Expected:** Multiple error return paths visible; no `throw` on network failure.\n\n### TC08 — model fallback race fix: appliedModel set before byId attempt\n**What:** Verify the fix is in place in auto-model-selection.ts.\n```bash\ngrep -n 'appliedModel = startModel' src/resources/extensions/hx/auto-model-selection.ts\n```\n**Expected:** Two lines — one for the `setModel` success path and one for the fallback path (line ~189: set before byId attempt).\n\n### TC09 — zero GSD references in modified files\n**What:** Naming invariant check.\n```bash\ngrep -rn '\\bGSD\\b\\|GSD_\\|gsd_' \\\n  packages/pi-ai/src/providers/ollama-chat.ts \\\n  src/resources/extensions/hx/bootstrap/ollama-manage-tool.ts \\\n  src/resources/extensions/hx/model-router.ts \\\n  src/resources/extensions/hx/auto-model-selection.ts \\\n  src/resources/extensions/hx/bootstrap/register-extension.ts \\\n  src/resources/extensions/hx/tests/model-router.test.ts \\\n  src/resources/extensions/hx/tests/ollama-chat.test.ts\n```\n**Expected:** No output (zero hits).\n\n### TC10 — full test suite baseline maintained\n**What:** Suite count at or above S01 baseline (4309).\n```bash\nnpm run test:unit 2>&1 | tail -5\n```\n**Expected:** ≥4309 pass, 0 new failures beyond the 3 pre-existing.\n\n## Edge Cases\n\n- **Ollama not running:** `ollama_manage list` should return `{error: \"...\"}` not throw. Covered by TC07 static check; confirmed in T02 task narrative.\n- **github-copilot/claude-3.5-sonnet (provider/model format):** `isFlatRateModel` splits on first slash and checks prefix — covered by TC02 tests.\n- **startModel found but setModel returns false:** `appliedModel` is still set to `startModel` (not null) — covered by TC08 grep and T02 narrative.\n- **Trailing slash in Ollama baseUrl:** `ollama-chat.ts` normalizes baseUrl by stripping trailing slash before appending `/api/chat` — covered by TC01 (custom baseUrl test).\n",
       "goal": "Port Ollama native /api/chat provider and flat-rate routing guard from upstream v2.63.0→v2.64.0. Replace the broken OpenAI-compat Ollama shim with a real NDJSON streaming provider; register it so discovered Ollama models route correctly; guard cost-based dynamic routing from triggering on zero-cost flat-rate providers like GitHub Copilot; add the ollama_manage tool (list/pull/remove/show); fix the model fallback race in auto-model-selection.",
       "success_criteria": "- \"ollama-chat\" in KnownApi; packages/pi-ai/src/providers/ollama-chat.ts exists and exports streamOllamaChat + streamSimpleOllamaChat\n- Ollama discovered models get api:\"ollama-chat\" and baseUrl:\"http://localhost:11434\" from convertDiscoveredModels\n- pi.registerProvider(\"ollama\", {authMode:\"none\", api:\"ollama-chat\", baseUrl:\"http://localhost:11434\"}) call in register-extension.ts\n- Flat-rate guard in resolveModelForComplexity returns tier-only early-exit for github-copilot/ prefixed models\n- ollama_manage tool registered with list/pull/remove/show subcommands\n- Model fallback race fixed (appliedModel set even when provider+id lookup fails but byId succeeds)\n- 3+ new tests: flat-rate guard (2), ollama provider NDJSON (1+)\n- grep -rn GSD/gsd in new/modified S02 files returns 0\n- npx tsc --noEmit exits 0; npm run test:unit ≥4300 pass / 0 new failures",
       "proof_level": "contract — tsc clean + unit tests for flat-rate guard and Ollama NDJSON streaming (no live Ollama instance required)",
@@ -734,11 +734,11 @@
       "completed_at": null,
       "full_summary_md": "",
       "full_uat_md": "",
-      "goal": "Port requirements DB auto-seed (a4e43ca41), S##-CONTEXT.md injection into 5 prompt builders (09a450b2c), and 4-layer DB bash protection with new hx_milestone_status tool (5fe879adb). All GSD→HX naming.",
-      "success_criteria": "updateRequirementInDb seeds on not_found; 5 prompt builders have resolveSliceFile+inlineFileOptional; hx_milestone_status registered in query-tools.ts; 14 regression tests pass; tsc clean",
-      "proof_level": "contract: grep confirms injection in prompt builders; hx_milestone_status grep in register-extension.ts; 14 tests pass",
-      "integration_closure": "hx_milestone_status registered in register-extension.ts; parseRequirementsSections used in hx-db.ts",
-      "observability_impact": "DB guard adds structured log when LLM attempts direct sqlite3 bash call",
+      "goal": "Add missing regression tests for R024 (requirements seed already in source), add DB bash-access guard blocks to 6 prompt files (R026 layers 1+2), create the hx_milestone_status read-only query tool wired into bootstrap (R026 layer 3), and add 11 milestone-status tests (R026 layer 4). R024 and R025 are already implemented in source — this slice proves them with tests and completes the remaining R026 work.",
+      "success_criteria": "- 3 new seed tests in db-writer.test.ts pass (seed-from-REQUIREMENTS.md path, seeds-all-requirements, not-found-still-throws)\n- DB bash-access guard blocks added to system.md, complete-slice.md, complete-milestone.md, validate-milestone.md, plan-milestone.md, plan-slice.md\n- bootstrap/query-tools.ts created with hx_milestone_status tool\n- register-extension.ts wired with registerQueryTools\n- 11 new tests in milestone-status.test.ts pass\n- npx tsc --noEmit exits 0\n- npm run test:unit shows ≥ 4326 pass / 0 new failures",
+      "proof_level": "contract",
+      "integration_closure": "query-tools.ts imported by register-extension.ts; hx_milestone_status available to the agent at runtime via pi.registerTool. All DB access goes through hx-db.ts functions — no direct sqlite3 calls. Guard blocks in prompts prevent agent bash-access anti-pattern.",
+      "observability_impact": "hx_milestone_status tool gives agents a structured read path for milestone/slice/task status without touching hx.db directly — improves diagnosability of auto-mode state at completion time.",
       "sequence": 0,
       "replan_triggered_at": null
     },
@@ -5443,6 +5443,110 @@
       "observability_impact": "",
       "full_plan_md": "",
       "sequence": 0
+    },
+    {
+      "milestone_id": "M004-erchk5",
+      "slice_id": "S03",
+      "id": "T01",
+      "title": "Added 3 seed regression tests for updateRequirementInDb Cluster-20 path and DB bash-access guard blocks to system.md and 5 high-risk prompt files",
+      "status": "complete",
+      "one_liner": "Added 3 seed regression tests for updateRequirementInDb Cluster-20 path and DB bash-access guard blocks to system.md and 5 high-risk prompt files",
+      "narrative": "Examined the existing db-writer.test.ts updateRequirementInDb test group, identified the SAMPLE_REQUIREMENTS fixture already available. Added 3 new tests: (1) auto-seed from REQUIREMENTS.md when DB is empty, (2) all requirements seeded not just the target, (3) not-found throws when ID absent from both DB and markdown. For system.md, inserted a ## Database Access Safety section between the Commands block and Execution Heuristics. For the 5 prompt files (complete-slice, complete-milestone, validate-milestone, plan-milestone, plan-slice), inserted a DB guard callout between the UNIT header and ## Working Directory in each file.",
+      "verification_result": "Ran the task verification command: compile-tests, db-writer test suite (20 pass/0 fail), grep for Database Access Safety in system.md, grep for hx_milestone_status in complete-slice.md — all 4 checks pass. Full npm run test:unit shows 4317 pass / 3 pre-existing failures unrelated to this task.",
+      "duration": "",
+      "completed_at": "2026-04-06T08:28:56.399Z",
+      "blocker_discovered": false,
+      "deviations": "Inserted the Database Access Safety section between Commands and Execution Heuristics rather than strictly 'after Hard Rules' as stated in the plan — the file structure has Hard Rules followed by sub-sections and Commands before Execution Heuristics; the chosen location is the natural boundary between operational references and execution guidance.",
+      "known_issues": "None.",
+      "key_files": [
+        "src/resources/extensions/hx/tests/db-writer.test.ts",
+        "src/resources/extensions/hx/prompts/system.md",
+        "src/resources/extensions/hx/prompts/complete-slice.md",
+        "src/resources/extensions/hx/prompts/complete-milestone.md",
+        "src/resources/extensions/hx/prompts/validate-milestone.md",
+        "src/resources/extensions/hx/prompts/plan-milestone.md",
+        "src/resources/extensions/hx/prompts/plan-slice.md"
+      ],
+      "key_decisions": [
+        "Used SAMPLE_REQUIREMENTS fixture already in the test file to build REQUIREMENTS.md content for seed tests",
+        "Inserted Database Access Safety section between Commands block and Execution Heuristics in system.md"
+      ],
+      "full_summary_md": "---\nid: T01\nparent: S03\nmilestone: M004-erchk5\nkey_files:\n  - src/resources/extensions/hx/tests/db-writer.test.ts\n  - src/resources/extensions/hx/prompts/system.md\n  - src/resources/extensions/hx/prompts/complete-slice.md\n  - src/resources/extensions/hx/prompts/complete-milestone.md\n  - src/resources/extensions/hx/prompts/validate-milestone.md\n  - src/resources/extensions/hx/prompts/plan-milestone.md\n  - src/resources/extensions/hx/prompts/plan-slice.md\nkey_decisions:\n  - Used SAMPLE_REQUIREMENTS fixture already in the test file to build REQUIREMENTS.md content for seed tests\n  - Inserted Database Access Safety section between Commands block and Execution Heuristics in system.md\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-04-06T08:28:56.400Z\nblocker_discovered: false\n---\n\n# T01: Added 3 seed regression tests for updateRequirementInDb Cluster-20 path and DB bash-access guard blocks to system.md and 5 high-risk prompt files\n\n**Added 3 seed regression tests for updateRequirementInDb Cluster-20 path and DB bash-access guard blocks to system.md and 5 high-risk prompt files**\n\n## What Happened\n\nExamined the existing db-writer.test.ts updateRequirementInDb test group, identified the SAMPLE_REQUIREMENTS fixture already available. Added 3 new tests: (1) auto-seed from REQUIREMENTS.md when DB is empty, (2) all requirements seeded not just the target, (3) not-found throws when ID absent from both DB and markdown. For system.md, inserted a ## Database Access Safety section between the Commands block and Execution Heuristics. For the 5 prompt files (complete-slice, complete-milestone, validate-milestone, plan-milestone, plan-slice), inserted a DB guard callout between the UNIT header and ## Working Directory in each file.\n\n## Verification\n\nRan the task verification command: compile-tests, db-writer test suite (20 pass/0 fail), grep for Database Access Safety in system.md, grep for hx_milestone_status in complete-slice.md — all 4 checks pass. Full npm run test:unit shows 4317 pass / 3 pre-existing failures unrelated to this task.\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `node scripts/compile-tests.mjs` | 0 | ✅ pass | 8130ms |\n| 2 | `node --test dist-test/src/resources/extensions/hx/tests/db-writer.test.js 2>&1 | grep -E 'passed|failed'` | 0 | ✅ pass | 2300ms |\n| 3 | `grep -q 'Database Access Safety' src/resources/extensions/hx/prompts/system.md` | 0 | ✅ pass | 10ms |\n| 4 | `grep -q 'hx_milestone_status' src/resources/extensions/hx/prompts/complete-slice.md` | 0 | ✅ pass | 10ms |\n| 5 | `npm run test:unit 2>&1 | tail -1` | 0 | ✅ pass | 103400ms |\n\n\n## Deviations\n\nInserted the Database Access Safety section between Commands and Execution Heuristics rather than strictly 'after Hard Rules' as stated in the plan — the file structure has Hard Rules followed by sub-sections and Commands before Execution Heuristics; the chosen location is the natural boundary between operational references and execution guidance.\n\n## Known Issues\n\nNone.\n\n## Files Created/Modified\n\n- `src/resources/extensions/hx/tests/db-writer.test.ts`\n- `src/resources/extensions/hx/prompts/system.md`\n- `src/resources/extensions/hx/prompts/complete-slice.md`\n- `src/resources/extensions/hx/prompts/complete-milestone.md`\n- `src/resources/extensions/hx/prompts/validate-milestone.md`\n- `src/resources/extensions/hx/prompts/plan-milestone.md`\n- `src/resources/extensions/hx/prompts/plan-slice.md`\n",
+      "description": "Add 3 seed regression tests to db-writer.test.ts that exercise the 'Cluster 20' auto-seed path already present in db-writer.ts. Then add DB bash-access guard blocks to system.md and 5 high-risk prompt files.\n\nSteps:\n1. Open src/resources/extensions/hx/tests/db-writer.test.ts — find the updateRequirementInDb test group (~L362). Add 3 new tests after the existing 'not found' test:\n   - 'updateRequirementInDb — seeds from REQUIREMENTS.md when DB is empty': create tmpDir, write .hx/REQUIREMENTS.md with R001 (active status) using generateRequirementsMd([...]), call updateRequirementInDb('R001', {status:'validated'}, tmpDir), assert no throw and getRequirementById('R001').status === 'validated'\n   - 'updateRequirementInDb — seeds all requirements from REQUIREMENTS.md, not just the target': after the seed, also assert getRequirementById('R002') is non-null (if REQUIREMENTS.md had R002)\n   - 'updateRequirementInDb — not found throws when ID absent from both DB and REQUIREMENTS.md': write REQUIREMENTS.md with only R001, call updateRequirementInDb('R999', ...), assert throws with 'R999' in message\n   IMPORTANT: these tests need to call openDatabase(dbPath) before updateRequirementInDb and closeDatabase() in finally. The tmpDir already has .hx/ from makeTmpDir(). Write REQUIREMENTS.md to path.join(tmpDir, '.hx', 'REQUIREMENTS.md').\n\n2. Add a ## Database Access Safety section to src/resources/extensions/hx/prompts/system.md (after the Hard Rules section, before Execution Heuristics). Content:\n   '## Database Access Safety\n   Never query `hx.db` directly via bash (`sqlite3 .hx/hx.db ...`). The database uses WAL single-writer discipline — direct bash reads can return stale snapshots and direct writes corrupt state. Use `hx_milestone_status` to inspect milestone/slice/task state instead.'\n\n3. Prepend a DB safety callout to src/resources/extensions/hx/prompts/complete-slice.md (after the UNIT header line, before the working directory section). Same pattern for complete-milestone.md, validate-milestone.md, plan-milestone.md, plan-slice.md.\n   Content to add (identical across all 5):\n   '> ⚠️ **Database access**: Never run `sqlite3 .hx/hx.db` or query `hx.db` via bash. Use `hx_milestone_status` to inspect milestone/slice/task status. WAL single-writer discipline — direct bash access corrupts state.'\n   Place it immediately before '## Working Directory' in each prompt.",
+      "estimate": "45m",
+      "files": [
+        "src/resources/extensions/hx/tests/db-writer.test.ts",
+        "src/resources/extensions/hx/prompts/system.md",
+        "src/resources/extensions/hx/prompts/complete-slice.md",
+        "src/resources/extensions/hx/prompts/complete-milestone.md",
+        "src/resources/extensions/hx/prompts/validate-milestone.md",
+        "src/resources/extensions/hx/prompts/plan-milestone.md",
+        "src/resources/extensions/hx/prompts/plan-slice.md"
+      ],
+      "verify": "node scripts/compile-tests.mjs && node --test dist-test/src/resources/extensions/hx/tests/db-writer.test.js 2>&1 | grep -E 'passed|failed' && grep -q 'Database Access Safety' src/resources/extensions/hx/prompts/system.md && grep -q 'hx_milestone_status' src/resources/extensions/hx/prompts/complete-slice.md",
+      "inputs": [
+        "`src/resources/extensions/hx/tests/db-writer.test.ts` — existing test file to extend",
+        "`src/resources/extensions/hx/db-writer.ts` — seed implementation at L370-395 (Cluster 20)",
+        "`src/resources/extensions/hx/prompts/system.md` — global HX system prompt",
+        "`src/resources/extensions/hx/prompts/complete-slice.md` — prompt file to guard",
+        "`src/resources/extensions/hx/prompts/complete-milestone.md` — prompt file to guard",
+        "`src/resources/extensions/hx/prompts/validate-milestone.md` — prompt file to guard",
+        "`src/resources/extensions/hx/prompts/plan-milestone.md` — prompt file to guard",
+        "`src/resources/extensions/hx/prompts/plan-slice.md` — prompt file to guard"
+      ],
+      "expected_output": [
+        "`src/resources/extensions/hx/tests/db-writer.test.ts` — 3 new seed tests added",
+        "`src/resources/extensions/hx/prompts/system.md` — Database Access Safety section added",
+        "`src/resources/extensions/hx/prompts/complete-slice.md` — DB guard callout added",
+        "`src/resources/extensions/hx/prompts/complete-milestone.md` — DB guard callout added",
+        "`src/resources/extensions/hx/prompts/validate-milestone.md` — DB guard callout added",
+        "`src/resources/extensions/hx/prompts/plan-milestone.md` — DB guard callout added",
+        "`src/resources/extensions/hx/prompts/plan-slice.md` — DB guard callout added"
+      ],
+      "observability_impact": "",
+      "full_plan_md": "",
+      "sequence": 0
+    },
+    {
+      "milestone_id": "M004-erchk5",
+      "slice_id": "S03",
+      "id": "T02",
+      "title": "hx_milestone_status tool + tests + wiring",
+      "status": "pending",
+      "one_liner": "",
+      "narrative": "",
+      "verification_result": "",
+      "duration": "",
+      "completed_at": null,
+      "blocker_discovered": false,
+      "deviations": "",
+      "known_issues": "",
+      "key_files": [],
+      "key_decisions": [],
+      "full_summary_md": "",
+      "description": "Create bootstrap/query-tools.ts with the hx_milestone_status read-only tool, wire it into register-extension.ts, and create tests/milestone-status.test.ts with 11 tests.\n\nSteps:\n1. Create src/resources/extensions/hx/bootstrap/query-tools.ts following the journal-tools.ts pattern:\n   - Import: Type from @sinclair/typebox, ExtensionAPI from @hyperlab/hx-coding-agent, ensureDbOpen from ./dynamic-tools.js\n   - Import DB functions from ../hx-db.js: getActiveMilestoneIdFromDb, getMilestone, getMilestoneSlices, getSliceTasks, getSliceStatusSummary, getSliceTaskCounts\n   - Export registerQueryTools(pi: ExtensionAPI): void\n   - Register hx_milestone_status with parameters: milestoneId: string (required), sliceId?: string (optional)\n   - When milestoneId === 'active': call getActiveMilestoneIdFromDb() to resolve the real ID; if null return 'No active milestone'\n   - When milestoneId only: call getMilestoneSlices(milestoneId) → return JSON array of {id, status, title} per slice, plus total/complete/pending counts\n   - When milestoneId + sliceId: call getSliceTasks(milestoneId, sliceId) → return JSON array of {id, status, title} per task, plus getSliceTaskCounts counts\n   - Always call ensureDbOpen() at the top of execute() — if it returns false, return an error message 'DB not open — run hx command first'\n   - Return JSON text (JSON.stringify with null, 2)\n   - Wrap in try/catch returning error text on failure\n   - NO GSD references anywhere\n\n2. Modify src/resources/extensions/hx/bootstrap/register-extension.ts:\n   - Add: import { registerQueryTools } from './query-tools.js'; after registerJournalTools import\n   - Add: registerQueryTools(pi); after registerJournalTools(pi) call\n\n3. Create src/resources/extensions/hx/tests/milestone-status.test.ts with 11 tests:\n   Import: describe/test from node:test, assert from node:assert/strict, path/os/fs from node:\n   Import from ../hx-db.ts: openDatabase, closeDatabase, upsertMilestonePlanning (or use planMilestone), insertSlice-like functions — check what's available for seeding test data. Use direct upsert calls to seed milestone/slice/task rows.\n   \n   IMPORTANT: The tool execute() function is hard to call directly in tests since it's registered via pi.registerTool. Instead, test the DB functions that back it:\n   - Test getActiveMilestoneIdFromDb() returns null when no DB open\n   - Test getActiveMilestoneIdFromDb() returns active milestone after inserting one\n   - Test getMilestoneSlices() returns slices for a milestone\n   - Test getSliceTasks() returns tasks for a milestone+slice\n   - Test getSliceStatusSummary() returns id+status array\n   - Test getSliceTaskCounts() returns total/done/pending\n   - Test getMilestone() returns null for unknown ID\n   - Test getActiveMilestoneIdFromDb() returns null when milestone is complete\n   - Test getSliceStatusSummary() with mixed statuses\n   - Test getSliceTaskCounts() with all-complete tasks\n   - Test getSliceTasks() with empty slice returns empty array\n   \n   Use openDatabase(':memory:') + closeDatabase() pattern. Seed rows using functions available in hx-db.ts: upsertMilestonePlanning, upsertSlicePlanning (check the actual exported function names first before writing tests). Each test uses makeTmpDir-equivalent inline setup with in-memory DB.\n\n4. Run: node scripts/compile-tests.mjs\n5. Run: node --test dist-test/src/resources/extensions/hx/tests/milestone-status.test.js\n6. Run: npx tsc --noEmit\n7. Run: npm run test:unit",
+      "estimate": "90m",
+      "files": [
+        "src/resources/extensions/hx/bootstrap/query-tools.ts",
+        "src/resources/extensions/hx/bootstrap/register-extension.ts",
+        "src/resources/extensions/hx/tests/milestone-status.test.ts"
+      ],
+      "verify": "npx tsc --noEmit && node scripts/compile-tests.mjs && node --test dist-test/src/resources/extensions/hx/tests/milestone-status.test.js 2>&1 | grep -E 'passed|failed' && grep -rn 'gsd\\|GSD' src/resources/extensions/hx/bootstrap/query-tools.ts | wc -l | grep -q '^0$' && npm run test:unit 2>&1 | tail -5",
+      "inputs": [
+        "`src/resources/extensions/hx/bootstrap/journal-tools.ts` — pattern to follow for tool registration",
+        "`src/resources/extensions/hx/bootstrap/dynamic-tools.ts` — ensureDbOpen export",
+        "`src/resources/extensions/hx/bootstrap/register-extension.ts` — wiring target",
+        "`src/resources/extensions/hx/hx-db.ts` — DB functions: getActiveMilestoneIdFromDb, getMilestone, getMilestoneSlices, getSliceTasks, getSliceStatusSummary, getSliceTaskCounts",
+        "`src/resources/extensions/hx/tests/db-writer.test.ts` — test file pattern to follow"
+      ],
+      "expected_output": [
+        "`src/resources/extensions/hx/bootstrap/query-tools.ts` — new hx_milestone_status tool",
+        "`src/resources/extensions/hx/bootstrap/register-extension.ts` — registerQueryTools wired",
+        "`src/resources/extensions/hx/tests/milestone-status.test.ts` — 11 new DB function tests"
+      ],
+      "observability_impact": "hx_milestone_status provides structured JSON inspection of milestone/slice/task status — agents can query project state without bash access to hx.db.",
+      "full_plan_md": "",
+      "sequence": 0
     }
   ],
   "decisions": [
@@ -9054,6 +9158,61 @@
       "verdict": "✅ pass (4314/4317, 3 pre-existing)",
       "duration_ms": 162800,
       "created_at": "2026-04-06T08:00:38.795Z"
+    },
+    {
+      "id": 306,
+      "task_id": "T01",
+      "slice_id": "S03",
+      "milestone_id": "M004-erchk5",
+      "command": "node scripts/compile-tests.mjs",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 8130,
+      "created_at": "2026-04-06T08:28:56.399Z"
+    },
+    {
+      "id": 307,
+      "task_id": "T01",
+      "slice_id": "S03",
+      "milestone_id": "M004-erchk5",
+      "command": "node --test dist-test/src/resources/extensions/hx/tests/db-writer.test.js 2>&1 | grep -E 'passed|failed'",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 2300,
+      "created_at": "2026-04-06T08:28:56.399Z"
+    },
+    {
+      "id": 308,
+      "task_id": "T01",
+      "slice_id": "S03",
+      "milestone_id": "M004-erchk5",
+      "command": "grep -q 'Database Access Safety' src/resources/extensions/hx/prompts/system.md",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 10,
+      "created_at": "2026-04-06T08:28:56.399Z"
+    },
+    {
+      "id": 309,
+      "task_id": "T01",
+      "slice_id": "S03",
+      "milestone_id": "M004-erchk5",
+      "command": "grep -q 'hx_milestone_status' src/resources/extensions/hx/prompts/complete-slice.md",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 10,
+      "created_at": "2026-04-06T08:28:56.399Z"
+    },
+    {
+      "id": 310,
+      "task_id": "T01",
+      "slice_id": "S03",
+      "milestone_id": "M004-erchk5",
+      "command": "npm run test:unit 2>&1 | tail -1",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 103400,
+      "created_at": "2026-04-06T08:28:56.399Z"
     }
   ]
 }
