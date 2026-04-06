@@ -17,7 +17,7 @@ import { hxRoot } from "./paths.js";
 import { GitServiceImpl, runGit } from "./git-service.js";
 import { loadEffectiveHXPreferences } from "./preferences.js";
 import { nativeHasStagedChanges } from "./native-git-bridge.js";
-import { slugify, quickBranchName } from "./branch-patterns.js";
+import { slugify, generateSmartSlug, quickBranchName } from "./branch-patterns.js";
 
 interface QuickReturnState {
   basePath: string;
@@ -175,7 +175,7 @@ export async function handleQuick(
   // Setup
   const quickDir = join(root, "quick");
   const taskNum = getNextTaskNum(quickDir);
-  const slug = slugify(description);
+  const slug = await generateSmartSlug(description, ctx);
   const taskDir = ensureQuickDir(basePath, taskNum, slug);
   const taskDirRel = `.hx/quick/${taskNum}-${slug}`;
   const date = new Date().toISOString().split("T")[0];

@@ -22,7 +22,7 @@ import { hxRoot } from "./paths.js";
 import { createGitService, runGit } from "./git-service.js";
 import { isAutoActive, isAutoPaused } from "./auto.js";
 import { getErrorMessage } from "./error-utils.js";
-import { slugify, workflowBranchName } from "./branch-patterns.js";
+import { slugify, generateSmartSlug, workflowBranchName } from "./branch-patterns.js";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 /**
@@ -400,14 +400,17 @@ export async function handleStart(
     return;
   }
 
+  // ─── Generate smart slug for branch and artifact directory ───────────────
+
+  const smartSlug = await generateSmartSlug(description || templateId, ctx);
+
   // ─── Create artifact directory ──────────────────────────────────────────
 
   let artifactDir = "";
   if (template.artifact_dir) {
-    const slug = slugify(description || templateId);
     const prefix = datePrefix();
     const num = getNextWorkflowNum(join(basePath, template.artifact_dir));
-    artifactDir = `${template.artifact_dir}${prefix}-${num}-${slug}`;
+    artifactDir = `${template.artifact_dir}${prefix}-${num}-${smartSlug}`;
     mkdirSync(join(basePath, artifactDir), { recursive: true });
   }
 
@@ -415,8 +418,7 @@ export async function handleStart(
 
   const git = createGitService(basePath);
   const skipBranch = git.prefs.isolation === "none";
-  const slug = slugify(description || templateId);
-  const branchName = workflowBranchName(templateId, slug);
+  const branchName = workflowBranchName(templateId, smartSlug);
   let branchCreated = false;
 
   if (!skipBranch) {
