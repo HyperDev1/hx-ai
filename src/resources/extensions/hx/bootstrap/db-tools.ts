@@ -625,7 +625,7 @@ export function registerDbTools(pi: ExtensionAPI): void {
     }
     try {
       const { handleCompleteTask } = await import("../tools/complete-task.js");
-      const result = await handleCompleteTask(params, process.cwd());
+      const result = await handleCompleteTask({ ...params, verificationEvidence: params.verificationEvidence ?? [] }, process.cwd());
       if ("error" in result) {
         return {
           content: [{ type: "text" as const, text: `Error completing task: ${result.error}` }],
@@ -678,7 +678,7 @@ export function registerDbTools(pi: ExtensionAPI): void {
       keyFiles: Type.Array(Type.String(), { description: "List of key files created or modified" }),
       keyDecisions: Type.Array(Type.String(), { description: "List of key decisions made during this task" }),
       blockerDiscovered: Type.Boolean({ description: "Whether a plan-invalidating blocker was discovered" }),
-      verificationEvidence: Type.Array(
+      verificationEvidence: Type.Optional(Type.Array(
         Type.Object({
           command: Type.String({ description: "Verification command that was run" }),
           exitCode: Type.Number({ description: "Exit code of the command" }),
@@ -686,7 +686,7 @@ export function registerDbTools(pi: ExtensionAPI): void {
           durationMs: Type.Number({ description: "Duration of the command in milliseconds" }),
         }),
         { description: "Array of verification evidence entries" },
-      ),
+      )),
     }),
     execute: taskCompleteExecute,
   };

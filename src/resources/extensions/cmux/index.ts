@@ -201,6 +201,9 @@ export class CmuxClient {
         encoding: "utf-8",
         timeout: 3000,
         env: process.env,
+        // Prevent stdin inheritance — cmux subprocess must not block waiting
+        // for input from the parent process's interactive terminal.
+        input: "",
       });
     } catch {
       return null;

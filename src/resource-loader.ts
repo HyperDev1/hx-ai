@@ -374,6 +374,26 @@ function pruneRemovedBundledExtensions(
   // installedExtensionRootFiles even when a manifest exists.
   // env-utils.js was moved from extensions/ root → hx/ in v2.39.x (#1634)
   removeFileIfStale('env-utils.js')
+
+  // Conflict detection: warn when a user-installed root-level extension file
+  // has the same base name as a newly-bundled subdirectory extension.
+  // e.g., user has extensions/hx.ts but bundle now ships extensions/hx/ (dir)
+  // The bundled directory will win after the sync, but surface a warning so
+  // users can remove or rename their custom file.
+  try {
+    if (existsSync(extensionsDir)) {
+      for (const e of readdirSync(extensionsDir, { withFileTypes: true })) {
+        if (!e.isFile()) continue
+        const baseName = e.name.replace(/\.(ts|js)$/, '')
+        if (currentSourceDirs.has(baseName)) {
+          process.stderr.write(
+            `[hx] Warning: extensions/${e.name} conflicts with bundled extension directory ` +
+            `"${baseName}/". The bundled version will be used. Remove extensions/${e.name} to silence this warning.\n`
+          )
+        }
+      }
+    }
+  } catch { /* non-fatal */ }
 }
 
 /**

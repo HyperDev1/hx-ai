@@ -638,7 +638,7 @@ async function loadExtensionModule(extensionPath: string) {
 	}
 
 	const jiti = createJiti(import.meta.url, {
-		moduleCache: false,
+		moduleCache: true,
 		...getJitiOptions(),
 	});
 

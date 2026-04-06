@@ -36,6 +36,8 @@ interface McpServerConfig {
 	env?: Record<string, string>;
 	url?: string;
 	cwd?: string;
+	/** Bearer token for HTTP transport auth. Supports ${ENV_VAR} interpolation. */
+	bearer_token?: string;
 }
 
 interface McpToolSchema {
@@ -99,6 +101,7 @@ function readConfigs(): McpServerConfig[] {
 						cwd: typeof config.cwd === "string" ? config.cwd : undefined,
 					}),
 					...(hasUrl && { url: config.url as string }),
+					...(typeof config.bearer_token === "string" && { bearer_token: config.bearer_token }),
 				});
 			}
 		} catch {
@@ -157,7 +160,14 @@ async function getOrConnect(name: string, signal?: AbortSignal): Promise<Client>
 			/\$\{([^}]+)\}/g,
 			(_, varName) => process.env[varName] ?? "",
 		);
-		transport = new StreamableHTTPClientTransport(new URL(resolvedUrl));
+		const resolvedToken = config.bearer_token?.replace(
+			/\$\{([^}]+)\}/g,
+			(_, varName) => process.env[varName] ?? "",
+		);
+		const requestInit = resolvedToken
+			? { headers: { Authorization: `Bearer ${resolvedToken}` } }
+			: undefined;
+		transport = new StreamableHTTPClientTransport(new URL(resolvedUrl), { requestInit });
 	} else {
 		throw new Error(`Server "${config.name}" has unsupported transport: ${config.transport}`);
 	}

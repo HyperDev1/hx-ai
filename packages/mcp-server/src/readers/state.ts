@@ -81,15 +81,23 @@ function isChecked(line: string): boolean {
 /**
  * Parse slice status from a ROADMAP.md entry.
  * Lines look like: `- [x] **S01: Title** ...`
+ * Also handles checkmark prefix: `- ✅ **S01: Title** ...`
  */
 function parseRoadmapSliceStatus(line: string): { id: string; title: string; status: 'pending' | 'complete' } | null {
   const m = line.match(/^\s*-\s*\[([ x])\]\s*\*\*(\w+):\s*(.+?)\*\*/i);
-  if (!m) return null;
-  return {
-    id: m[2],
-    title: m[3].trim(),
-    status: m[1].toLowerCase() === 'x' ? 'complete' : 'pending',
-  };
+  if (m) {
+    return {
+      id: m[2],
+      title: m[3].trim(),
+      status: m[1].toLowerCase() === 'x' ? 'complete' : 'pending',
+    };
+  }
+  // Also handle checkmark prefix (U+2713 ✓, U+2714 ✔, U+2705 ✅)
+  const m2 = line.match(/^\s*-\s*[\u2713\u2714\u2705]\s*\*\*(\w+):\s*(.+?)\*\*/);
+  if (m2) {
+    return { id: m2[1], title: m2[2].trim(), status: 'complete' };
+  }
+  return null;
 }
 
 /**
