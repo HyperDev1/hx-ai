@@ -56,24 +56,13 @@ TODOS.md
 .audits/
 docs/coherence-audit/
 
-# ── Stale lock files (npm is canonical) ──
-pnpm-lock.yaml
-bun.lock
+# ── HX project state (per-worktree, never committed) ──
+.hx/
 
 # ── Legacy GSD symlink (migration artifact) ──
 .gsd
+.gsd/
 
-# ── HX project runtime (per-worktree, never committed) ──
-.hx/hx.db
-.hx/hx.db-shm
-.hx/hx.db-wal
-.hx/activity/
-.hx/journal/
-.hx/worktrees/
-.hx/runtime/
-.hx/STATE.md
-.hx/state-manifest.json
-.hx/event-log.jsonl
-.hx/audit-log.jsonl
-.hx/doctor-history.jsonl
-.hx/metrics.json
+# ── Stale lock files (npm is canonical) ──
+pnpm-lock.yaml
+bun.lock
