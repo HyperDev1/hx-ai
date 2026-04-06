@@ -65,6 +65,14 @@ interface CliFlags {
 }
 
 function exitIfManagedResourcesAreNewer(currentAgentDir: string): void {
+  // Skip the check in non-production environments (hx-local, hx-dev).
+  // In these modes the managed resource version may be newer than the local
+  // binary's version (e.g. after running the global hx install), and that is
+  // expected — we should re-sync with the local build and continue normally.
+  if (process.env.HX_ENV === 'local' || process.env.HX_ENV === 'staging') {
+    return
+  }
+
   const currentVersion = process.env.HX_VERSION || '0.0.0'
   const managedVersion = getNewerManagedResourceVersion(currentAgentDir, currentVersion)
   if (!managedVersion) {
