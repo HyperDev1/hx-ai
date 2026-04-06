@@ -17,6 +17,7 @@ import { hxRoot } from "./paths.js";
 import { GitServiceImpl, runGit } from "./git-service.js";
 import { loadEffectiveHXPreferences } from "./preferences.js";
 import { nativeHasStagedChanges } from "./native-git-bridge.js";
+import { slugify, quickBranchName } from "./branch-patterns.js";
 
 interface QuickReturnState {
   basePath: string;
@@ -30,19 +31,6 @@ interface QuickReturnState {
 let pendingQuickReturn: QuickReturnState | null = null;
 
 // ─── Quick Task Helpers ───────────────────────────────────────────────────────
-
-/**
- * Generate a URL-friendly slug from a description.
- * Lowercase, hyphens, max 40 chars.
- */
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")
-    .slice(0, 40)
-    .replace(/-$/, "");
-}
 
 /**
  * Determine the next quick task number by scanning existing directories.
@@ -195,7 +183,7 @@ export async function handleQuick(
   // Create git branch for the quick task
   const gitPrefs = loadEffectiveHXPreferences()?.preferences?.git ?? {};
   const git = new GitServiceImpl(basePath, gitPrefs);
-  const branchName = `hx/quick/${taskNum}-${slug}`;
+  const branchName = quickBranchName(taskNum, slug);
   let originalBranch = git.getCurrentBranch();
 
   let branchCreated = false;

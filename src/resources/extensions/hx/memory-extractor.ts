@@ -64,6 +64,17 @@ function redactSecrets(text: string): string {
 
 // ─── Model Selection ────────────────────────────────────────────────────────
 
+// Deprecated model IDs that should be skipped during model selection.
+// These are known to trigger console.warn deprecation notices from the Anthropic SDK.
+const DEPRECATED_MODEL_IDS = new Set([
+  'claude-3-5-haiku-20241022',
+  'claude-3-5-haiku-latest',
+  'claude-3-haiku-20240307',
+  'claude-3-opus-20240229',
+  'claude-3-sonnet-20240229',
+  'claude-instant-1.2',
+]);
+
 /**
  * Build an LLM call function using the cheapest available model (preferring Haiku).
  * Returns null if no models available.
@@ -73,14 +84,18 @@ export function buildMemoryLLMCall(ctx: ExtensionContext): LLMCallFn | null {
     const available = ctx.modelRegistry.getAvailable();
     if (!available || available.length === 0) return null;
 
-    // Prefer Haiku by ID substring match
-    let model = available.find(m =>
+    // Filter out deprecated models to avoid SDK deprecation warnings
+    const nonDeprecated = available.filter(m => !DEPRECATED_MODEL_IDS.has(m.id));
+    const candidates = nonDeprecated.length > 0 ? nonDeprecated : available;
+
+    // Prefer Haiku by ID substring match (non-deprecated first)
+    let model = candidates.find(m =>
       m.id.toLowerCase().includes('haiku'),
     );
 
     // Fallback: cheapest by input cost
     if (!model) {
-      model = [...available].sort((a, b) => a.cost.input - b.cost.input)[0];
+      model = [...candidates].sort((a, b) => a.cost.input - b.cost.input)[0];
     }
 
     if (!model) return null;

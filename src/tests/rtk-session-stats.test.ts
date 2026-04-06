@@ -1,4 +1,4 @@
-import test from "node:test";
+import test, { beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
 import { chmodSync, copyFileSync, mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import { join } from "node:path";
@@ -11,6 +11,19 @@ import {
   getRtkSessionSavings,
 } from "../resources/extensions/shared/rtk-session-stats.ts";
 import { createFakeRtk } from "./rtk-test-utils.ts";
+
+// RTK tests require RTK to be enabled. HX_RTK_DISABLED may be set in CI or dev
+// environments where RTK is not installed — suppress it for the duration of this
+// test file so the implementation's isRtkEnabled() check doesn't short-circuit.
+let _savedRtkDisabled: string | undefined;
+beforeEach(() => {
+  _savedRtkDisabled = process.env.HX_RTK_DISABLED;
+  delete process.env.HX_RTK_DISABLED;
+});
+afterEach(() => {
+  if (_savedRtkDisabled === undefined) delete process.env.HX_RTK_DISABLED;
+  else process.env.HX_RTK_DISABLED = _savedRtkDisabled;
+});
 
 function summary(totalCommands: number, totalInput: number, totalOutput: number, totalSaved: number, totalTimeMs = 1000) {
   return JSON.stringify({
