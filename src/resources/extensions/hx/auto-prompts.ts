@@ -18,8 +18,8 @@ import {
 } from "./paths.js";
 import { resolveSkillDiscoveryMode, resolveInlineLevel, loadEffectiveHXPreferences, resolveAllSkillReferences } from "./preferences.js";
 import { parseRoadmap } from "./parsers-legacy.js";
-import type { GSDState, InlineLevel } from "./types.js";
-import type { GSDPreferences } from "./preferences.js";
+import type { HXState, InlineLevel } from "./types.js";
+import type { HXPreferences } from "./preferences.js";
 import { getLoadedSkills, type Skill } from "@hyperlab/hx-coding-agent";
 import { join, basename } from "node:path";
 import { existsSync } from "node:fs";
@@ -382,7 +382,7 @@ function skillMatchesContext(skill: Skill, contextTokens: Set<string>): boolean 
 
 function resolvePreferenceSkillNames(refs: string[], base: string): string[] {
   if (refs.length === 0) return [];
-  const prefs: GSDPreferences = { always_use_skills: refs };
+  const prefs: HXPreferences = { always_use_skills: refs };
   const report = resolveAllSkillReferences(prefs, base);
   return refs.map(ref => {
     const resolution = report.resolutions.get(ref);
@@ -398,7 +398,7 @@ function ruleMatchesContext(when: string, contextTokens: Set<string>): boolean {
 }
 
 function resolveSkillRuleMatches(
-  prefs: GSDPreferences | undefined,
+  prefs: HXPreferences | undefined,
   contextTokens: Set<string>,
   base: string,
 ): { include: string[]; avoid: string[] } {
@@ -415,7 +415,7 @@ function resolveSkillRuleMatches(
 }
 
 function resolvePreferredSkillNames(
-  prefs: GSDPreferences | undefined,
+  prefs: HXPreferences | undefined,
   visibleSkills: Skill[],
   contextTokens: Set<string>,
   base: string,
@@ -451,7 +451,7 @@ export function buildSkillActivationBlock(params: {
   taskTitle?: string;
   extraContext?: string[];
   taskPlanContent?: string | null;
-  preferences?: GSDPreferences;
+  preferences?: HXPreferences;
 }): string {
   const prefs = params.preferences ?? loadEffectiveHXPreferences()?.preferences;
   const contextTokens = tokenizeSkillContext(
@@ -715,7 +715,7 @@ export async function getDependencyTaskSummaryPaths(
  * - All slices are complete (milestone done — no point reassessing)
  */
 export async function checkNeedsReassessment(
-  base: string, mid: string, state: GSDState,
+  base: string, mid: string, state: HXState,
 ): Promise<{ sliceId: string } | null> {
   // DB primary path — fall through to file-based when DB has no data for this milestone
   try {
@@ -769,7 +769,7 @@ export async function checkNeedsReassessment(
  * - UAT result file already exists (idempotent — already ran)
  */
 export async function checkNeedsRunUat(
-  base: string, mid: string, state: GSDState, prefs: GSDPreferences | undefined,
+  base: string, mid: string, state: HXState, prefs: HXPreferences | undefined,
 ): Promise<{ sliceId: string; uatType: UatType } | null> {
   // DB primary path — fall through to file-based when DB has no data for this milestone
   try {

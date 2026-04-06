@@ -16,7 +16,7 @@ import { join } from "node:path";
 import { mkdirSync, existsSync } from "node:fs";
 import { logWarning } from "./workflow-logger.js";
 import { deriveState } from "./state.js";
-import type { GSDState } from "./types.js";
+import type { HXState } from "./types.js";
 
 // ─── PLAN.md Projection ──────────────────────────────────────────────────
 
@@ -227,11 +227,11 @@ export function renderSummaryProjection(basePath: string, milestoneId: string, s
 // ─── STATE.md Projection ────────────────────────────────────────────────
 
 /**
- * Render STATE.md content from GSDState.
+ * Render STATE.md content from HXState.
  * Matches the buildStateMarkdown output format from doctor.ts exactly.
  * Pure function — no side effects.
  */
-export function renderStateContent(state: GSDState): string {
+export function renderStateContent(state: HXState): string {
   const lines: string[] = [];
   lines.push("# HX State", "");
 

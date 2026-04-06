@@ -7,7 +7,7 @@
  */
 
 import type { ExtensionContext, ExtensionCommandContext, SessionMessageEntry } from "@hyperlab/hx-coding-agent";
-import type { GSDState } from "./types.js";
+import type { HXState } from "./types.js";
 import { getCurrentBranch } from "./worktree.js";
 import { getActiveHook } from "./post-unit-hooks.js";
 import { getLedger, getProjectTotals } from "./metrics.js";
@@ -114,7 +114,7 @@ export function unitPhaseLabel(unitType: string): string {
   }
 }
 
-function peekNext(unitType: string, state: GSDState): string {
+function peekNext(unitType: string, state: HXState): string {
   // Show active hook info in progress display
   const activeHookState = getActiveHook();
   if (activeHookState) {
@@ -143,7 +143,7 @@ function peekNext(unitType: string, state: GSDState): string {
 /**
  * Describe what the next unit will be, based on current state.
  */
-export function describeNextUnit(state: GSDState): { label: string; description: string } {
+export function describeNextUnit(state: HXState): { label: string; description: string } {
   const sid = state.activeSlice?.id;
   const sTitle = state.activeSlice?.title;
   const tid = state.activeTask?.id;
@@ -436,7 +436,7 @@ export function updateProgressWidget(
   ctx: ExtensionContext,
   unitType: string,
   unitId: string,
-  state: GSDState,
+  state: HXState,
   accessors: WidgetStateAccessors,
   tierBadge?: string,
 ): void {

@@ -9,8 +9,8 @@
  * without modifying orchestration code.
  */
 
-import type { GSDState } from "./types.js";
-import type { GSDPreferences } from "./preferences.js";
+import type { HXState } from "./types.js";
+import type { HXPreferences } from "./preferences.js";
 import type { UatType } from "./files.js";
 import { loadFile, extractUatType, loadActiveOverrides } from "./files.js";
 import { isDbAvailable, getMilestoneSlices, getPendingGates, markAllGatesOmitted, getMilestone } from "./hx-db.js";
@@ -69,8 +69,8 @@ export interface DispatchContext {
   basePath: string;
   mid: string;
   midTitle: string;
-  state: GSDState;
-  prefs: GSDPreferences | undefined;
+  state: HXState;
+  prefs: HXPreferences | undefined;
   session?: import("./auto/session.js").AutoSession;
 }
 

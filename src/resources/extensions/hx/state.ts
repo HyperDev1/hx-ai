@@ -3,7 +3,7 @@
 // Pure TypeScript, zero Pi dependencies.
 
 import type {
-  GSDState,
+  HXState,
   ActiveRef,
   Roadmap,
   RoadmapSliceEntry,
@@ -108,7 +108,7 @@ export function isValidationTerminal(validationContent: string): boolean {
 
 interface StateCache {
   basePath: string;
-  result: GSDState;
+  result: HXState;
   timestamp: number;
 }
 
@@ -192,7 +192,7 @@ export async function getActiveMilestoneId(basePath: string): Promise<string | n
  * Falls back to filesystem parsing for unmigrated projects or when DB
  * has zero milestones (e.g. first run before migration).
  */
-export async function deriveState(basePath: string): Promise<GSDState> {
+export async function deriveState(basePath: string): Promise<HXState> {
   // Return cached result if within the TTL window for the same basePath
   if (
     _stateCache &&
@@ -203,7 +203,7 @@ export async function deriveState(basePath: string): Promise<GSDState> {
   }
 
   const stopTimer = debugTime("derive-state-impl");
-  let result: GSDState;
+  let result: HXState;
 
   // Dual-path: try DB-backed derivation first when hierarchy tables are populated
   if (isDbAvailable()) {
@@ -274,9 +274,9 @@ function extractContextTitle(content: string | null, fallback: string): string {
  * are still checked on the filesystem since they aren't in DB tables.
  * Requirements also stay file-based via parseRequirementCounts().
  *
- * Must produce field-identical GSDState to _deriveStateImpl() for the same project.
+ * Must produce field-identical HXState to _deriveStateImpl() for the same project.
  */
-export async function deriveStateFromDb(basePath: string): Promise<GSDState> {
+export async function deriveStateFromDb(basePath: string): Promise<HXState> {
   const requirements = parseRequirementCounts(await loadFile(resolveHxRootFile(basePath, "REQUIREMENTS")));
 
   let allMilestones = getAllMilestones();
@@ -826,7 +826,7 @@ export async function deriveStateFromDb(basePath: string): Promise<GSDState> {
 // LEGACY: Filesystem-based state derivation for unmigrated projects.
 // DB-backed projects use deriveStateFromDb() above. Target: extract to
 // state-legacy.ts when all projects are DB-backed.
-export async function _deriveStateImpl(basePath: string): Promise<GSDState> {
+export async function _deriveStateImpl(basePath: string): Promise<HXState> {
   const milestoneIds = findMilestoneIds(basePath);
 
   // ── Parallel worker isolation ──────────────────────────────────────────

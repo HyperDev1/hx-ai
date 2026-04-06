@@ -14,7 +14,7 @@ import type {
   ReconcileResult,
   DisplayMetadata,
 } from "./engine-types.js";
-import type { GSDState } from "./types.js";
+import type { HXState } from "./types.js";
 import type { DispatchAction, DispatchContext } from "./auto-dispatch.js";
 
 import { deriveState } from "./state.js";
@@ -57,7 +57,7 @@ export class DevWorkflowEngine implements WorkflowEngine {
   readonly engineId = "dev" as const;
 
   async deriveState(basePath: string): Promise<EngineState> {
-    const hxState: GSDState = await deriveState(basePath);
+    const hxState: HXState = await deriveState(basePath);
     return {
       phase: hxState.phase,
       currentMilestoneId: hxState.activeMilestone?.id ?? null,
@@ -72,7 +72,7 @@ export class DevWorkflowEngine implements WorkflowEngine {
     state: EngineState,
     context: { basePath: string },
   ): Promise<EngineDispatchAction> {
-    const hxState = state.raw as GSDState;
+    const hxState = state.raw as HXState;
     const mid = hxState.activeMilestone?.id ?? "";
     const midTitle = hxState.activeMilestone?.title ?? "";
     const loaded = loadEffectiveHXPreferences();

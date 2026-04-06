@@ -219,7 +219,7 @@ export interface PostUnitContext {
   lockBase: () => string;
   stopAuto: (ctx?: ExtensionContext, pi?: ExtensionAPI, reason?: string) => Promise<void>;
   pauseAuto: (ctx?: ExtensionContext, pi?: ExtensionAPI) => Promise<void>;
-  updateProgressWidget: (ctx: ExtensionContext, unitType: string, unitId: string, state: import("./types.js").GSDState) => void;
+  updateProgressWidget: (ctx: ExtensionContext, unitType: string, unitId: string, state: import("./types.js").HXState) => void;
 }
 
 /**
