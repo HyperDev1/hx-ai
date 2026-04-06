@@ -10,7 +10,7 @@ Context: Currently all discovered models get api:"openai" in convertDiscoveredMo
   - Estimate: 1h
   - Files: packages/pi-ai/src/types.ts, packages/pi-ai/src/providers/ollama-chat.ts, packages/pi-ai/src/providers/register-builtins.ts, packages/pi-ai/src/index.ts, packages/pi-coding-agent/src/core/model-registry.ts, src/resources/extensions/hx/tests/ollama-chat.test.ts
   - Verify: npx tsc --noEmit && node scripts/compile-tests.mjs && node --test dist-test/src/resources/extensions/hx/tests/ollama-chat.test.js
-- [ ] **T02: Register Ollama provider, add flat-rate guard, ollama_manage tool, and fallback race fix** — Wire the ollama-chat provider registration in register-extension.ts; add the flat-rate routing guard to model-router.ts; create the ollama_manage tool (list/pull/remove/show subcommands via Ollama REST API); fix the model fallback race in auto-model-selection.ts; add tests for the flat-rate guard.
+- [x] **T02: Registered Ollama native provider, added flat-rate routing guard, ollama_manage REST tool, and fixed model fallback race** — Wire the ollama-chat provider registration in register-extension.ts; add the flat-rate routing guard to model-router.ts; create the ollama_manage tool (list/pull/remove/show subcommands via Ollama REST API); fix the model fallback race in auto-model-selection.ts; add tests for the flat-rate guard.
 
 Context (flat-rate guard): resolveModelForComplexity does cost-based routing that saves zero cost for GitHub Copilot (all-zero cost). The guard skips routing for providers prefixed "github-copilot/".
 

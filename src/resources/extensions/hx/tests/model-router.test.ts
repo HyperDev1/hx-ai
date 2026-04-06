@@ -5,6 +5,7 @@ import {
   resolveModelForComplexity,
   escalateTier,
   defaultRoutingConfig,
+  isFlatRateModel,
 } from "../model-router.js";
 import type { DynamicRoutingConfig, RoutingDecision } from "../model-router.js";
 import type { ClassificationResult } from "../complexity-classifier.js";
@@ -204,4 +205,53 @@ test("#2192: known model is still downgraded normally", () => {
   );
   assert.equal(result.wasDowngraded, true, "known heavy model should still be downgraded for light tasks");
   assert.notEqual(result.modelId, "claude-opus-4-6");
+});
+
+// ─── Flat-rate provider guard ─────────────────────────────────────────────────
+
+test("isFlatRateModel: github-copilot/ prefix is flat-rate", () => {
+  assert.equal(isFlatRateModel("github-copilot/gpt-4o"), true);
+  assert.equal(isFlatRateModel("github-copilot/claude-sonnet-4-5"), true);
+});
+
+test("isFlatRateModel: non-flat-rate providers return false", () => {
+  assert.equal(isFlatRateModel("claude-opus-4-6"), false);
+  assert.equal(isFlatRateModel("anthropic/claude-opus-4-6"), false);
+  assert.equal(isFlatRateModel("openai/gpt-4o"), false);
+  assert.equal(isFlatRateModel(""), false);
+});
+
+test("flat-rate model is not downgraded even with routing enabled", () => {
+  const config = { ...defaultRoutingConfig(), enabled: true };
+  const result = resolveModelForComplexity(
+    makeClassification("light"),
+    { primary: "github-copilot/gpt-4o", fallbacks: [] },
+    config,
+    ["github-copilot/gpt-4o", ...AVAILABLE_MODELS],
+  );
+  assert.equal(result.modelId, "github-copilot/gpt-4o", "flat-rate model should not be downgraded");
+  assert.equal(result.wasDowngraded, false, "wasDowngraded must be false for flat-rate");
+  assert.ok(result.reason.includes("flat-rate"), `reason should mention flat-rate, got: ${result.reason}`);
+});
+
+test("flat-rate guard returns configured fallbacks unchanged", () => {
+  const config = { ...defaultRoutingConfig(), enabled: true };
+  const result = resolveModelForComplexity(
+    makeClassification("light"),
+    { primary: "github-copilot/gpt-4o", fallbacks: ["github-copilot/gpt-4o-mini"] },
+    config,
+    ["github-copilot/gpt-4o", "github-copilot/gpt-4o-mini", ...AVAILABLE_MODELS],
+  );
+  assert.deepEqual(result.fallbacks, ["github-copilot/gpt-4o-mini"]);
+});
+
+test("non-flat-rate model is still downgraded normally (guard does not affect others)", () => {
+  const config = { ...defaultRoutingConfig(), enabled: true };
+  const result = resolveModelForComplexity(
+    makeClassification("light"),
+    { primary: "claude-opus-4-6", fallbacks: [] },
+    config,
+    AVAILABLE_MODELS,
+  );
+  assert.equal(result.wasDowngraded, true, "known heavy model must still be downgraded");
 });

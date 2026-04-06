@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-04-06T07:48:11.594Z",
+  "exported_at": "2026-04-06T08:00:38.867Z",
   "milestones": [
     {
       "id": "M001-df6x5t",
@@ -5390,19 +5390,31 @@
       "milestone_id": "M004-erchk5",
       "slice_id": "S02",
       "id": "T02",
-      "title": "Register Ollama provider, add flat-rate guard, ollama_manage tool, and fallback race fix",
-      "status": "pending",
-      "one_liner": "",
-      "narrative": "",
-      "verification_result": "",
+      "title": "Registered Ollama native provider, added flat-rate routing guard, ollama_manage REST tool, and fixed model fallback race",
+      "status": "complete",
+      "one_liner": "Registered Ollama native provider, added flat-rate routing guard, ollama_manage REST tool, and fixed model fallback race",
+      "narrative": "Wired pi.registerProvider(\"ollama\", {authMode:\"none\", api:\"ollama-chat\", baseUrl:\"http://localhost:11434\"}) in register-extension.ts so discovered Ollama models pass the isProviderRequestReady check without an API key. Created ollama-manage-tool.ts with list/pull/remove/show subcommands using fetch() against the Ollama REST API; gracefully returns {error:...} when Ollama is not running. Added FLAT_RATE_PREFIXES guard in model-router.ts (isFlatRateModel export + early return in resolveModelForComplexity) to skip cost-based routing for github-copilot/ models. Fixed the appliedModel race in auto-model-selection.ts: set appliedModel=startModel before the byId fallback attempt so currentUnitModel is never null when the session-start model was identified. Added 5 flat-rate guard tests to model-router.test.ts.",
+      "verification_result": "tsc --noEmit: clean. compile-tests.mjs: 1221 files. model-router.test.js: 20/20 pass (15 existing + 5 new). ollama-chat.test.js: 9/9 pass. npm run test:unit: 4314 pass, 3 fail (same 3 pre-existing as T01 baseline).",
       "duration": "",
-      "completed_at": null,
+      "completed_at": "2026-04-06T08:00:38.794Z",
       "blocker_discovered": false,
-      "deviations": "",
-      "known_issues": "",
-      "key_files": [],
-      "key_decisions": [],
-      "full_summary_md": "",
+      "deviations": "None.",
+      "known_issues": "None.",
+      "key_files": [
+        "src/resources/extensions/hx/bootstrap/register-extension.ts",
+        "src/resources/extensions/hx/bootstrap/ollama-manage-tool.ts",
+        "src/resources/extensions/hx/model-router.ts",
+        "src/resources/extensions/hx/auto-model-selection.ts",
+        "src/resources/extensions/hx/tests/model-router.test.ts"
+      ],
+      "key_decisions": [
+        "pi.registerProvider('ollama',{authMode:'none',...}) is required so isProviderRequestReady returns true for keyless Ollama",
+        "Flat-rate guard uses a FLAT_RATE_PREFIXES array (not hardcoded if/else) to ease future extension",
+        "ollama_manage pull uses stream:false to get a single JSON response rather than NDJSON",
+        "isFlatRateModel exported from model-router.ts for direct test coverage",
+        "Model fallback race fix: set appliedModel=startModel before byId attempt so it is never null when startModel is identified"
+      ],
+      "full_summary_md": "---\nid: T02\nparent: S02\nmilestone: M004-erchk5\nkey_files:\n  - src/resources/extensions/hx/bootstrap/register-extension.ts\n  - src/resources/extensions/hx/bootstrap/ollama-manage-tool.ts\n  - src/resources/extensions/hx/model-router.ts\n  - src/resources/extensions/hx/auto-model-selection.ts\n  - src/resources/extensions/hx/tests/model-router.test.ts\nkey_decisions:\n  - pi.registerProvider('ollama',{authMode:'none',...}) is required so isProviderRequestReady returns true for keyless Ollama\n  - Flat-rate guard uses a FLAT_RATE_PREFIXES array (not hardcoded if/else) to ease future extension\n  - ollama_manage pull uses stream:false to get a single JSON response rather than NDJSON\n  - isFlatRateModel exported from model-router.ts for direct test coverage\n  - Model fallback race fix: set appliedModel=startModel before byId attempt so it is never null when startModel is identified\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-04-06T08:00:38.796Z\nblocker_discovered: false\n---\n\n# T02: Registered Ollama native provider, added flat-rate routing guard, ollama_manage REST tool, and fixed model fallback race\n\n**Registered Ollama native provider, added flat-rate routing guard, ollama_manage REST tool, and fixed model fallback race**\n\n## What Happened\n\nWired pi.registerProvider(\"ollama\", {authMode:\"none\", api:\"ollama-chat\", baseUrl:\"http://localhost:11434\"}) in register-extension.ts so discovered Ollama models pass the isProviderRequestReady check without an API key. Created ollama-manage-tool.ts with list/pull/remove/show subcommands using fetch() against the Ollama REST API; gracefully returns {error:...} when Ollama is not running. Added FLAT_RATE_PREFIXES guard in model-router.ts (isFlatRateModel export + early return in resolveModelForComplexity) to skip cost-based routing for github-copilot/ models. Fixed the appliedModel race in auto-model-selection.ts: set appliedModel=startModel before the byId fallback attempt so currentUnitModel is never null when the session-start model was identified. Added 5 flat-rate guard tests to model-router.test.ts.\n\n## Verification\n\ntsc --noEmit: clean. compile-tests.mjs: 1221 files. model-router.test.js: 20/20 pass (15 existing + 5 new). ollama-chat.test.js: 9/9 pass. npm run test:unit: 4314 pass, 3 fail (same 3 pre-existing as T01 baseline).\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `npx tsc --noEmit` | 0 | ✅ pass | 7800ms |\n| 2 | `node scripts/compile-tests.mjs` | 0 | ✅ pass | 14700ms |\n| 3 | `node --test dist-test/src/resources/extensions/hx/tests/model-router.test.js` | 0 | ✅ pass (20/20) | 1800ms |\n| 4 | `node --test dist-test/src/resources/extensions/hx/tests/ollama-chat.test.js` | 0 | ✅ pass (9/9) | 1700ms |\n| 5 | `npm run test:unit 2>&1 | tail -5` | 1 | ✅ pass (4314/4317, 3 pre-existing) | 162800ms |\n\n\n## Deviations\n\nNone.\n\n## Known Issues\n\nNone.\n\n## Files Created/Modified\n\n- `src/resources/extensions/hx/bootstrap/register-extension.ts`\n- `src/resources/extensions/hx/bootstrap/ollama-manage-tool.ts`\n- `src/resources/extensions/hx/model-router.ts`\n- `src/resources/extensions/hx/auto-model-selection.ts`\n- `src/resources/extensions/hx/tests/model-router.test.ts`\n",
       "description": "Wire the ollama-chat provider registration in register-extension.ts; add the flat-rate routing guard to model-router.ts; create the ollama_manage tool (list/pull/remove/show subcommands via Ollama REST API); fix the model fallback race in auto-model-selection.ts; add tests for the flat-rate guard.\n\nContext (flat-rate guard): resolveModelForComplexity does cost-based routing that saves zero cost for GitHub Copilot (all-zero cost). The guard skips routing for providers prefixed \"github-copilot/\".\n\nContext (ollama_manage tool): Does not exist in hx-ai. Create as a new tool in dynamic-tools.ts or a new file. Use fetch() to Ollama REST API (not spawnSync/execSync) since Ollama has a full REST API: GET /api/tags (list), POST /api/pull (pull), DELETE /api/delete (remove), POST /api/show (show). Register via pi.registerTool() in register-extension.ts.\n\nContext (model fallback race): When autoModeStartModel is set and startModel is found but setModel fails, the byId fallback sets appliedModel=byId only if fallbackOk. If byId is not found at all, appliedModel stays null. Upstream fix ensures appliedModel is set to startModel even if setModel(startModel) returned false (so currentUnitModel isn't null when the session-start model was at least identified). Check if this fix is needed and apply it.\n\nConstraints:\n- Use fetch() for ollama_manage REST calls (no spawnSync/execSync, no new npm deps)\n- FLAT_RATE_PROVIDERS Set check: modelId.startsWith('github-copilot/') or indexOf('/')!==-1 && modelId.substring(0,slashIdx)==='github-copilot'\n- ollama_manage must handle cases where Ollama is not running gracefully (return error object, don't throw)\n- Default Ollama baseUrl: http://localhost:11434",
       "estimate": "1.5h",
       "files": [
@@ -8987,6 +8999,61 @@
       "verdict": "✅ pass (4309/4312, 3 pre-existing)",
       "duration_ms": 124900,
       "created_at": "2026-04-06T07:48:11.495Z"
+    },
+    {
+      "id": 301,
+      "task_id": "T02",
+      "slice_id": "S02",
+      "milestone_id": "M004-erchk5",
+      "command": "npx tsc --noEmit",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 7800,
+      "created_at": "2026-04-06T08:00:38.795Z"
+    },
+    {
+      "id": 302,
+      "task_id": "T02",
+      "slice_id": "S02",
+      "milestone_id": "M004-erchk5",
+      "command": "node scripts/compile-tests.mjs",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 14700,
+      "created_at": "2026-04-06T08:00:38.795Z"
+    },
+    {
+      "id": 303,
+      "task_id": "T02",
+      "slice_id": "S02",
+      "milestone_id": "M004-erchk5",
+      "command": "node --test dist-test/src/resources/extensions/hx/tests/model-router.test.js",
+      "exit_code": 0,
+      "verdict": "✅ pass (20/20)",
+      "duration_ms": 1800,
+      "created_at": "2026-04-06T08:00:38.795Z"
+    },
+    {
+      "id": 304,
+      "task_id": "T02",
+      "slice_id": "S02",
+      "milestone_id": "M004-erchk5",
+      "command": "node --test dist-test/src/resources/extensions/hx/tests/ollama-chat.test.js",
+      "exit_code": 0,
+      "verdict": "✅ pass (9/9)",
+      "duration_ms": 1700,
+      "created_at": "2026-04-06T08:00:38.795Z"
+    },
+    {
+      "id": 305,
+      "task_id": "T02",
+      "slice_id": "S02",
+      "milestone_id": "M004-erchk5",
+      "command": "npm run test:unit 2>&1 | tail -5",
+      "exit_code": 1,
+      "verdict": "✅ pass (4314/4317, 3 pre-existing)",
+      "duration_ms": 162800,
+      "created_at": "2026-04-06T08:00:38.795Z"
     }
   ]
 }

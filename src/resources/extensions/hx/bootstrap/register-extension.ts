@@ -7,6 +7,7 @@ import { registerDbTools } from "./db-tools.js";
 import { registerDynamicTools } from "./dynamic-tools.js";
 import { registerJournalTools } from "./journal-tools.js";
 import { registerHooks } from "./register-hooks.js";
+import { registerOllamaManageTool } from "./ollama-manage-tool.js";
 import { registerShortcuts } from "./register-shortcuts.js";
 
 export function handleRecoverableExtensionProcessError(err: Error): boolean {
@@ -46,6 +47,14 @@ export function registerHxExtension(pi: ExtensionAPI): void {
 
   installEpipeGuard();
 
+  // Register Ollama as a keyless local provider so discovered models route
+  // via the native ollama-chat API instead of the broken openai shim.
+  pi.registerProvider("ollama", {
+    authMode: "none",
+    api: "ollama-chat",
+    baseUrl: "http://localhost:11434",
+  });
+
   pi.registerCommand("kill", {
     description: "Exit HX immediately (no cleanup)",
     handler: async (_args: string, _ctx: ExtensionCommandContext) => {
@@ -58,4 +67,5 @@ export function registerHxExtension(pi: ExtensionAPI): void {
   registerJournalTools(pi);
   registerShortcuts(pi);
   registerHooks(pi);
+  registerOllamaManageTool(pi);
 }

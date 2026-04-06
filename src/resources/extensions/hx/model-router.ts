@@ -139,6 +139,28 @@ const BASE_REQUIREMENTS: Record<string, Partial<ModelCapabilities>> = {
   "run-uat":          {},
 };
 
+// ─── Flat-rate provider guard ─────────────────────────────────────────────────
+// Providers billed at a flat rate (e.g. GitHub Copilot subscriptions) have
+// zero per-token cost. Cost-based routing saves nothing for them and may
+// select the wrong model. Skip dynamic routing entirely for these providers.
+
+/** Known flat-rate provider prefixes. */
+const FLAT_RATE_PREFIXES = ["github-copilot"];
+
+/**
+ * Returns true if the given model ID belongs to a flat-rate provider.
+ * Matches both bare provider names and "provider/model" forms.
+ */
+export function isFlatRateModel(modelId: string): boolean {
+  const slashIdx = modelId.indexOf("/");
+  if (slashIdx === -1) {
+    // No slash — check if the bare id IS a known flat-rate prefix (unusual but guard anyway)
+    return FLAT_RATE_PREFIXES.includes(modelId);
+  }
+  const providerPart = modelId.substring(0, slashIdx);
+  return FLAT_RATE_PREFIXES.includes(providerPart);
+}
+
 // ─── Public API ──────────────────────────────────────────────────────────────
 
 /**
@@ -170,6 +192,19 @@ export function resolveModelForComplexity(
       tier: classification.tier,
       wasDowngraded: false,
       reason: "dynamic routing disabled or no phase config",
+      selectionMethod: "tier-only",
+    };
+  }
+
+  // Flat-rate guard: skip cost-based routing for providers like GitHub Copilot
+  // that are billed at a flat rate — saving zero cost makes routing pointless.
+  if (isFlatRateModel(phaseConfig.primary)) {
+    return {
+      modelId: phaseConfig.primary,
+      fallbacks: phaseConfig.fallbacks,
+      tier: classification.tier,
+      wasDowngraded: false,
+      reason: `flat-rate provider — cost-based routing skipped`,
       selectionMethod: "tier-only",
     };
   }

@@ -180,14 +180,18 @@ export async function selectAndApplyModel(
     );
     if (startModel) {
       const ok = await pi.setModel(startModel, { persist: false });
-      if (!ok) {
+      if (ok) {
+        appliedModel = startModel;
+      } else {
+        // setModel rejected startModel — try provider-agnostic fallback.
+        // Still record startModel as appliedModel so currentUnitModel is not null
+        // when the session-start model was at least identified (#fallback-race).
+        appliedModel = startModel;
         const byId = availableModels.find(m => m.id === autoModeStartModel.id);
         if (byId) {
           const fallbackOk = await pi.setModel(byId, { persist: false });
           if (fallbackOk) appliedModel = byId;
         }
-      } else {
-        appliedModel = startModel;
       }
     }
   }
