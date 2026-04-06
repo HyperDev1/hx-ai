@@ -66,7 +66,10 @@ export async function generateSmartSlug(description: string, ctx: ExtensionConte
 
   try {
     const available = ctx.modelRegistry?.getAvailable?.();
-    if (!available || available.length === 0) return fallback;
+    if (!available || available.length === 0) {
+      process.stderr.write(`[hx] Smart slug: no models available, using fallback\n`);
+      return fallback;
+    }
 
     const nonDeprecated = available.filter((m: Model<Api>) => !DEPRECATED_MODEL_IDS.has(m.id));
     const candidates = nonDeprecated.length > 0 ? nonDeprecated : available;
@@ -74,7 +77,19 @@ export async function generateSmartSlug(description: string, ctx: ExtensionConte
     if (!model) {
       model = [...candidates].sort((a: Model<Api>, b: Model<Api>) => a.cost.input - b.cost.input)[0];
     }
-    if (!model) return fallback;
+    if (!model) {
+      process.stderr.write(`[hx] Smart slug: no suitable model found, using fallback\n`);
+      return fallback;
+    }
+
+    process.stderr.write(`[hx] Smart slug: using model ${model.id} for "${description.slice(0, 50)}"\n`);
+
+    // Resolve API key through model registry — handles both OAuth tokens and env var API keys
+    const apiKey = await ctx.modelRegistry.getApiKey(model as Model<Api>);
+    if (!apiKey) {
+      process.stderr.write(`[hx] Smart slug: no auth for ${model.provider}, using fallback\n`);
+      return fallback;
+    }
 
     const { completeSimple } = await import("@hyperlab/hx-ai");
     const result: AssistantMessage = await completeSimple(model as Model<Api>, {
@@ -90,6 +105,7 @@ export async function generateSmartSlug(description: string, ctx: ExtensionConte
     }, {
       maxTokens: 30,
       temperature: 0,
+      apiKey,
     });
 
     const text = result.content
@@ -97,6 +113,8 @@ export async function generateSmartSlug(description: string, ctx: ExtensionConte
       .map((c) => c.text)
       .join("")
       .trim();
+
+    process.stderr.write(`[hx] Smart slug: LLM returned "${text}"\n`);
 
     // Validate: must be lowercase, hyphens, alphanumeric only
     const cleaned = text
@@ -107,7 +125,9 @@ export async function generateSmartSlug(description: string, ctx: ExtensionConte
       .replace(/-$/, "");
 
     return cleaned.length >= 3 ? cleaned : fallback;
-  } catch {
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    process.stderr.write(`[hx] Smart slug generation failed: ${msg}\n`);
     return fallback;
   }
 }
