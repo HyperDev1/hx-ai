@@ -1,4 +1,4 @@
-# M003-ttxmyu: Upstream v2.60.0–v2.63.0 Port + v2.59.0 Feature Backfill
+# M003-ttxmyu: Upstream v2.60.0-v2.63.0 Port + v2.59.0 Feature Backfill
 
 ## Vision
 Port all ~82 actionable upstream gsd-2 commits between v2.59.0 and v2.63.0 into hx-ai with GSD→HX naming adaptation, including the v2.59.0 feature commits deferred from M002-yle1ri. Covers capability-aware model routing, slice-level parallelism, context optimization, workflow-logger centralization, MCP server reader tools, and ~46 additional bugfixes across 6 slices.
@@ -6,7 +6,7 @@ Port all ~82 actionable upstream gsd-2 commits between v2.59.0 and v2.63.0 into 
 ## Slice Overview
 | ID | Slice | Risk | Depends | Done | After this |
 |----|-------|------|---------|------|------------|
-| RFIX | Build Error Remediation: triage-ui.ts + ask-user-questions.ts | low | S06 | ⬜ | npm run build exits 0; tsconfig.resources.json compilation clean; R011/R012/R013/R015/R016 moved to Validated in REQUIREMENTS.md |
+| RFIX | Build Error Remediation: triage-ui.ts + ask-user-questions.ts | low | S06 | ✅ | npm run build exits 0; tsconfig.resources.json compilation clean; R011/R012/R013/R015/R016 moved to Validated in REQUIREMENTS.md |
 | S01 | Capability-Aware Model Routing + DB Reconciliation | high | — | ✅ | After this: routing log shows selectionMethod: 'capability-score' or 'tier-only'; capability-router tests pass; tsc clean baseline for S02–S06 |
 | S02 | Slice-Level Parallelism | high | S01 | ✅ | After this: slice parallel orchestrator files exist with HX naming; 3 test files pass; state.ts handles HX_SLICE_LOCK in both paths |
 | S03 | Context Optimization (Masking + Phase Anchors) | medium | S01 | ✅ | After this: context-masker.ts and phase-anchor.ts exist; tests pass; phase-anchor.json written in auto-mode session |

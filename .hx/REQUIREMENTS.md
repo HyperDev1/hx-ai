@@ -127,18 +127,130 @@ Use it to track what is actively in scope, what has been validated by completed 
 - Validation: S05 created packages/mcp-server/src/readers/ with 7 files; 6 tools registered in server.ts (grep -c 'server.tool(' → 12 total); 31 reader tests pass; 0 GSD refs in source; tsc clean; 4215/0/5.
 - Notes: New mcp-server/src/readers/ subdirectory with paths, state, roadmap, metrics, captures, knowledge, doctor-lite modules
 
+## Active
+
+### R019 — Upstream v2.64.0 commits ported to hx-ai
+- Class: core-capability
+- Status: active
+- Description: All ~58 actionable commits from upstream gsd-2 v2.63.0→v2.64.0 (fix/feat/refactor/perf, excluding merge/docs/chore/release) applied to hx-ai with GSD→HX naming adaptation
+- Why it matters: hx-ai inherits the same bugs as upstream — safety harness, Ollama native provider, requirements seed, context injection, DB protection, loop stability fixes
+- Source: user
+- Primary owning slice: M004-erchk5/S01-S05
+- Supporting slices: none
+- Validation: unmapped
+- Notes: fea9d72de (slice-level parallelism) already ported in M003/S02 — explicitly skipped
+
+### R022 — LLM safety harness ported
+- Class: core-capability
+- Status: active
+- Description: 7-file safety/ subdirectory ported: evidence-collector.ts, destructive-guard.ts, file-change-validator.ts, evidence-cross-ref.ts, git-checkpoint.ts, content-validator.ts, safety-harness.ts; wired in auto-post-unit.ts, phases.ts, register-hooks.ts; safety_harness preference type added
+- Why it matters: Auto-mode can silently cause damage (rm -rf, force push, zero-bash completions) — the safety harness provides warn-and-continue monitoring and optional rollback
+- Source: user
+- Primary owning slice: M004-erchk5/S01
+- Supporting slices: none
+- Validation: unmapped
+- Notes: All components use warn-and-continue by default; auto_rollback off by default
+
+### R023 — Ollama native /api/chat provider
+- Class: core-capability
+- Status: active
+- Description: Replace OpenAI-compat Ollama shim with native /api/chat NDJSON streaming provider; exposes temperature, top_p, top_k, repeat_penalty, seed, num_gpu, keep_alive, num_predict; surfaces InferenceMetrics; adds remove/show to ollama_manage tool; adds "ollama-chat" to KnownApi
+- Why it matters: The shim caused streamSimple crashes; native provider avoids OOM on constrained hosts and surfaces real inference metrics
+- Source: user
+- Primary owning slice: M004-erchk5/S02
+- Supporting slices: none
+- Validation: unmapped
+- Notes: Also includes apiKey authMode fix to avoid crash and flat-rate routing guard for GitHub Copilot
+
+### R024 — Requirements DB auto-seed from REQUIREMENTS.md
+- Class: core-capability
+- Status: active
+- Description: updateRequirementInDb seeds all requirements from REQUIREMENTS.md into the DB on first not_found, then retries the update — eliminating burn-tokens-on-retries pattern at milestone completion
+- Why it matters: Standard workflow writes requirements to REQUIREMENTS.md during discussion; DB stays empty; hx_requirement_update fails "not_found" on every requirement at completion
+- Source: user
+- Primary owning slice: M004-erchk5/S03
+- Supporting slices: none
+- Validation: unmapped
+- Notes: Uses existing parseRequirementsSections() to parse REQUIREMENTS.md
+
+### R025 — Slice context injection to all prompt builders
+- Class: core-capability
+- Status: active
+- Description: S##-CONTEXT.md (produced by /hx discuss) injected into all 5 affected prompt builders: researcher, planner, completer, replanner, reassessor via resolveSliceFile + inlineFileOptional
+- Why it matters: Discussed requirements and design decisions are silently dropped — downstream agents never see them
+- Source: user
+- Primary owning slice: M004-erchk5/S03
+- Supporting slices: none
+- Validation: unmapped
+- Notes: 5 prompt builder files touched
+
+### R026 — DB bash access protection + hx_milestone_status tool
+- Class: core-capability
+- Status: active
+- Description: 4-layer WAL discipline: (1) global anti-pattern in system.md, (2) DB safety blocks in 5 high-risk prompts, (3) new hx_milestone_status read-only query tool, (4) 14 regression tests
+- Why it matters: LLM querying hx.db directly via bash breaks WAL single-writer discipline — causes corruption and races
+- Source: user
+- Primary owning slice: M004-erchk5/S03
+- Supporting slices: none
+- Validation: unmapped
+- Notes: New tool registered in bootstrap/query-tools.ts
+
+### R027 — Auto-mode loop stability (13 bugfix cluster)
+- Class: core-capability
+- Status: active
+- Description: artifact rendering corruption; cold resume DB reopen + U+2714 checkmark; deferred slice dispatch prevention; plan-milestone completed-slice status preservation; dashboard model label stale; tool validation failure loop cap; complete-slice context exhaustion handling; enrichment tool optional params; complete-slice filesystem safety guard; auto timeout guard in runFinalize; remote-questions manifest tracking; preferences silent parse warning; worktree teardown path validation; external-state worktree DB path resolution
+- Why it matters: These are real failures that corrupt state, block downstream slices, or cause infinite loops in production auto-mode runs
+- Source: user
+- Primary owning slice: M004-erchk5/S04
+- Supporting slices: none
+- Validation: unmapped
+- Notes: 13 distinct fixes across auto.ts, phases.ts, hx-db.ts, auto-worktree.ts, complete-slice.md, preferences.ts
+
+### R028 — MCP-client OAuth + resource sync + misc fixes
+- Class: core-capability
+- Status: active
+- Description: MCP HTTP transport OAuth/bearer auth; jiti module cache sharing (perf); bundled subdirectory extension pruning on upgrade; web subprocess-runner refactor; U+2705 checkmark emoji in roadmap parser; CmuxClient stdio isolation; doctor --fix flag parse; Gemini OAuth token detection; worktree health check monorepo walk; complete-milestone JSON coercion; skill path dynamic resolution; update-check npm cache bypass; headless query resource sync; Xcode bundle detection; welcome screen 200-col cap removal; promote milestone active on plan-milestone
+- Why it matters: Covers the long tail of real user-facing failures and performance improvements not grouped into other slices
+- Source: user
+- Primary owning slice: M004-erchk5/S05
+- Supporting slices: none
+- Validation: unmapped
+- Notes: ~20 commits; fea9d72de explicitly skipped (already in M003/S02)
+
+### R029 — GSD→HX naming adaptation (M004)
+- Class: quality-attribute
+- Status: active
+- Description: Every change ported in M004-erchk5 must use hx/HX naming — no GSD references introduced
+- Why it matters: Naming integrity is a first-class invariant established in M001
+- Source: inferred
+- Primary owning slice: M004-erchk5/S01-S05
+- Supporting slices: none
+- Validation: unmapped
+- Notes: Verified by grep after each slice
+
+### R030 — Typecheck + build + tests pass (M004)
+- Class: quality-attribute
+- Status: active
+- Description: After all changes applied, tsc --noEmit passes, npm run build passes, npm run test:unit passes with zero new failures (baseline: 4298/0/5)
+- Why it matters: Ported changes must not break existing functionality
+- Source: inferred
+- Primary owning slice: M004-erchk5/S01-S05
+- Supporting slices: none
+- Validation: unmapped
+- Notes: Baseline: 4298 pass / 0 fail / 5 skip from M003-ttxmyu
+
 ## Deferred
 
-### R019 — v2.63.0 sonrası upstream değişiklikler
+### R031 — v2.64.0 sonrası upstream değişiklikler
 - Class: core-capability
 - Status: deferred
-- Description: Any upstream commits after v2.63.0 tag
+- Description: Any upstream commits after v2.64.0 tag
 - Why it matters: Continuous upstream tracking is the long-term goal
 - Source: inferred
 - Primary owning slice: none
 - Supporting slices: none
 - Validation: unmapped
-- Notes: Deferred to a future milestone after M003-ttxmyu completes
+- Notes: Deferred to a future milestone after M004-erchk5 completes
 
 ## Out of Scope
 
@@ -179,14 +291,24 @@ Use it to track what is actively in scope, what has been validated by completed 
 | R016 | core-capability | validated | M003-ttxmyu/S05 | none | S05: 6 MCP reader tools in packages/mcp-server/src/readers/; 31 reader tests pass |
 | R017 | core-capability | validated | M003-ttxmyu/S06 | none | All S06 patches applied — security, dedup, DB, orchestration |
 | R018 | quality-attribute | validated | M003-ttxmyu/S01-S06 | none | tsc 0 errors, ≥4298 tests pass / 0 fail |
-| R019 | core-capability | deferred | none | none | unmapped |
+| R019 | core-capability | active | M004-erchk5/S01-S05 | none | unmapped |
+| R022 | core-capability | active | M004-erchk5/S01 | none | unmapped |
+| R023 | core-capability | active | M004-erchk5/S02 | none | unmapped |
+| R024 | core-capability | active | M004-erchk5/S03 | none | unmapped |
+| R025 | core-capability | active | M004-erchk5/S03 | none | unmapped |
+| R026 | core-capability | active | M004-erchk5/S03 | none | unmapped |
+| R027 | core-capability | active | M004-erchk5/S04 | none | unmapped |
+| R028 | core-capability | active | M004-erchk5/S05 | none | unmapped |
+| R029 | quality-attribute | active | M004-erchk5/S01-S05 | none | unmapped |
+| R030 | quality-attribute | active | M004-erchk5/S01-S05 | none | unmapped |
+| R031 | core-capability | deferred | none | none | unmapped |
 | R020 | constraint | out-of-scope | none | none | n/a |
 | R021 | constraint | out-of-scope | none | none | n/a |
 
 ## Coverage Summary
 
-- Active requirements: 0
+- Active requirements: 10 (R019, R022–R030)
 - Validated: 11 (R001–R003, R010–R013, R014–R018)
-- Deferred: 1 (R019)
+- Deferred: 1 (R031)
 - Out of scope: 2 (R020–R021)
-- Unmapped active requirements: 0
+- Unmapped active requirements: 10
