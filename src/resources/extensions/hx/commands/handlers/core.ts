@@ -1,5 +1,5 @@
 import type { ExtensionCommandContext, ExtensionContext } from "@hyperlab/hx-coding-agent";
-import type { GSDState } from "../../types.js";
+import type { HXState } from "../../types.js";
 
 import { computeProgressScore, formatProgressLine } from "../../progress-score.js";
 import { loadEffectiveHXPreferences, getGlobalHXPreferencesPath, getProjectHXPreferencesPath } from "../../preferences.js";
@@ -220,7 +220,7 @@ export async function handleCoreCommand(trimmed: string, ctx: ExtensionCommandCo
   return false;
 }
 
-export function formatTextStatus(state: GSDState): string {
+export function formatTextStatus(state: HXState): string {
   const lines: string[] = ["HX Status\n"];
   lines.push(formatProgressLine(computeProgressScore()));
   lines.push("");

@@ -12,7 +12,7 @@ import {
   resolveCmuxConfig,
   shouldPromptToEnableCmux,
 } from "../../cmux/index.ts";
-import type { GSDState } from "../types.ts";
+import type { HXState } from "../types.ts";
 
 test("detectCmuxEnvironment requires workspace, surface, and socket", () => {
   const detected = detectCmuxEnvironment(
@@ -80,7 +80,7 @@ test("shouldPromptToEnableCmux only prompts once per session", () => {
 });
 
 test("buildCmuxStatusLabel and progress prefer deepest active unit", () => {
-  const state: GSDState = {
+  const state: HXState = {
     activeMilestone: { id: "M001", title: "Milestone" },
     activeSlice: { id: "S02", title: "Slice" },
     activeTask: { id: "T03", title: "Task" },

@@ -25,7 +25,7 @@ import { autoWorktreeBranch, runWorktreePostCreateHook, syncGsdStateToWorktree }
 import { nativeBranchExists } from "./native-git-bridge.js";
 import { readIntegrationBranch } from "./git-service.js";
 import { resolveParallelConfig } from "./preferences.js";
-import type { GSDPreferences } from "./preferences.js";
+import type { HXPreferences } from "./preferences.js";
 import type { ParallelConfig } from "./types.js";
 import {
   writeSessionStatus,
@@ -327,7 +327,7 @@ export function getWorkerStatuses(basePath?: string): WorkerInfo[] {
  */
 export async function prepareParallelStart(
   basePath: string,
-  _prefs: GSDPreferences | undefined,
+  _prefs: HXPreferences | undefined,
 ): Promise<ParallelCandidates & { orphans?: Array<{ milestoneId: string; pid: number; alive: boolean }> }> {
   // Detect orphaned sessions before eligibility analysis
   const sessions = readAllSessionStatuses(basePath);
@@ -354,7 +354,7 @@ export async function prepareParallelStart(
 export async function startParallel(
   basePath: string,
   milestoneIds: string[],
-  prefs: GSDPreferences | undefined,
+  prefs: HXPreferences | undefined,
 ): Promise<{ started: string[]; errors: Array<{ mid: string; error: string }> }> {
   // Prevent workers from spawning nested parallel sessions
   if (process.env.HX_PARALLEL_WORKER) {

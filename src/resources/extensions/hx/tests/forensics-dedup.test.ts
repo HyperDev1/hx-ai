@@ -13,7 +13,7 @@ describe("forensics dedup (#2096)", () => {
     assert.ok(source.includes('"forensics_dedup"'),
       "KNOWN_PREFERENCE_KEYS must contain forensics_dedup");
     assert.ok(source.includes("forensics_dedup?: boolean"),
-      "GSDPreferences must declare forensics_dedup as optional boolean");
+      "HXPreferences must declare forensics_dedup as optional boolean");
   });
 
   it("forensics prompt contains {{dedupSection}} placeholder", () => {

@@ -21,7 +21,7 @@ import {
 } from '../guided-flow.ts';
 
 import { renderPreferencesForSystemPrompt } from '../preferences.ts';
-import type { GSDPreferences } from '../preferences.ts';
+import type { HXPreferences } from '../preferences.ts';
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -177,27 +177,27 @@ describe('unique-milestone-ids', async () => {
     console.log('  (h) Preferences round-trip');
 
     // validate { unique_milestone_ids: true } → field preserved (no validation error)
-    const prefsTrue: GSDPreferences = { unique_milestone_ids: true };
+    const prefsTrue: HXPreferences = { unique_milestone_ids: true };
     const renderedTrue = renderPreferencesForSystemPrompt(prefsTrue);
     assert.ok(!renderedTrue.includes('some preference values were ignored'), 'unique_milestone_ids: true validates without error');
 
     // validate { unique_milestone_ids: undefined } → field absent (no error)
-    const prefsUndefined: GSDPreferences = {};
+    const prefsUndefined: HXPreferences = {};
     const renderedUndefined = renderPreferencesForSystemPrompt(prefsUndefined);
     assert.ok(!renderedUndefined.includes('some preference values were ignored'), 'undefined unique_milestone_ids validates without error');
 
     // validate { unique_milestone_ids: false } → also valid
-    const prefsFalse: GSDPreferences = { unique_milestone_ids: false };
+    const prefsFalse: HXPreferences = { unique_milestone_ids: false };
     const renderedFalse = renderPreferencesForSystemPrompt(prefsFalse);
     assert.ok(!renderedFalse.includes('some preference values were ignored'), 'unique_milestone_ids: false validates without error');
 
     // validate coercion: truthy non-boolean → coerced to boolean (no crash)
-    const prefsCoerced: GSDPreferences = { unique_milestone_ids: 1 as unknown as boolean };
+    const prefsCoerced: HXPreferences = { unique_milestone_ids: 1 as unknown as boolean };
     const renderedCoerced = renderPreferencesForSystemPrompt(prefsCoerced);
     assert.ok(!renderedCoerced.includes('some preference values were ignored'), 'truthy non-boolean coerces without validation error');
 
-    // GSDPreferences interface accepts the field (compile-time check — if this compiles, it works)
-    const prefs: GSDPreferences = { unique_milestone_ids: true, version: 1 };
-    assert.ok(prefs.unique_milestone_ids === true, 'GSDPreferences interface accepts unique_milestone_ids');
+    // HXPreferences interface accepts the field (compile-time check — if this compiles, it works)
+    const prefs: HXPreferences = { unique_milestone_ids: true, version: 1 };
+    assert.ok(prefs.unique_milestone_ids === true, 'HXPreferences interface accepts unique_milestone_ids');
   }
 });

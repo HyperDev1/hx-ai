@@ -6,7 +6,7 @@
 
 import type { Api, Model } from "@hyperlab/hx-ai";
 import type { ExtensionAPI, ExtensionContext } from "@hyperlab/hx-coding-agent";
-import type { GSDPreferences } from "./preferences.js";
+import type { HXPreferences } from "./preferences.js";
 import { resolveModelWithFallbacksForUnit, resolveDynamicRoutingConfig } from "./preferences.js";
 import type { ComplexityTier } from "./complexity-classifier.js";
 import { classifyUnitComplexity, tierLabel } from "./complexity-classifier.js";
@@ -54,7 +54,7 @@ export async function selectAndApplyModel(
   unitType: string,
   unitId: string,
   basePath: string,
-  prefs: GSDPreferences | undefined,
+  prefs: HXPreferences | undefined,
   verbose: boolean,
   autoModeStartModel: { provider: string; id: string } | null,
   retryContext?: { isRetry: boolean; previousTier?: string },

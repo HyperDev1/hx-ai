@@ -12,16 +12,16 @@ import { defaultRoutingConfig } from "./model-router.js";
 import type { TokenProfile, InlineLevel } from "./types.js";
 
 import type {
-  GSDPreferences,
-  GSDModelConfigV2,
-  GSDPhaseModelConfig,
+  HXPreferences,
+  HXModelConfigV2,
+  HXPhaseModelConfig,
   ResolvedModelConfig,
   AutoSupervisorConfig,
 } from "./preferences-types.js";
 import { loadEffectiveHXPreferences, getGlobalHXPreferencesPath } from "./preferences.js";
 
 // Re-export types so existing consumers of ./preferences-models.js keep working
-export type { GSDPhaseModelConfig, GSDModelConfig, GSDModelConfigV2, ResolvedModelConfig } from "./preferences-types.js";
+export type { HXPhaseModelConfig, HXModelConfig, HXModelConfigV2, ResolvedModelConfig } from "./preferences-types.js";
 
 /**
  * Resolve which model ID to use for a given auto-mode unit type.
@@ -43,9 +43,9 @@ export function resolveModelForUnit(unitType: string): string | undefined {
 export function resolveModelWithFallbacksForUnit(unitType: string): ResolvedModelConfig | undefined {
   const prefs = loadEffectiveHXPreferences();
   if (!prefs?.preferences.models) return undefined;
-  const m = prefs.preferences.models as GSDModelConfigV2;
+  const m = prefs.preferences.models as HXModelConfigV2;
 
-  let phaseConfig: string | GSDPhaseModelConfig | undefined;
+  let phaseConfig: string | HXPhaseModelConfig | undefined;
   switch (unitType) {
     case "research-milestone":
     case "research-slice":
@@ -154,7 +154,7 @@ export function validateModelId(modelId: string): boolean {
  * Performs a safe read-modify-write: reads current content, updates the models
  * YAML block, and writes back. Creates the file if it doesn't exist.
  */
-export function updatePreferencesModels(models: GSDModelConfigV2): void {
+export function updatePreferencesModels(models: HXModelConfigV2): void {
   const prefsPath = getGlobalHXPreferencesPath();
 
   let content = "";
@@ -168,7 +168,7 @@ export function updatePreferencesModels(models: GSDModelConfigV2): void {
     if (typeof value === "string") {
       lines.push(`  ${phase}: ${value}`);
     } else if (value && typeof value === "object") {
-      const config = value as GSDPhaseModelConfig;
+      const config = value as HXPhaseModelConfig;
       lines.push(`  ${phase}:`);
       lines.push(`    model: ${config.model}`);
       if (config.provider) {
@@ -227,10 +227,10 @@ const VALID_TOKEN_PROFILES = new Set<TokenProfile>(["budget", "balanced", "quali
 
 /**
  * Resolve profile defaults for a given token profile tier.
- * Returns a partial GSDPreferences that is used as the base layer --
+ * Returns a partial HXPreferences that is used as the base layer --
  * explicit user preferences always override these defaults.
  */
-export function resolveProfileDefaults(profile: TokenProfile): Partial<GSDPreferences> {
+export function resolveProfileDefaults(profile: TokenProfile): Partial<HXPreferences> {
   switch (profile) {
     case "budget":
       return {
@@ -311,7 +311,7 @@ export function resolveContextSelection(): import("./types.js").ContextSelection
  * Resolve the search provider preference from PREFERENCES.md.
  * Returns undefined if not configured (caller falls back to existing behavior).
  */
-export function resolveSearchProviderFromPreferences(): GSDPreferences["search_provider"] | undefined {
+export function resolveSearchProviderFromPreferences(): HXPreferences["search_provider"] | undefined {
   const prefs = loadEffectiveHXPreferences();
   return prefs?.preferences.search_provider;
 }

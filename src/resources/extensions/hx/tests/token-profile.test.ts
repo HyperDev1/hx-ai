@@ -57,29 +57,29 @@ test("types: PhaseSkipPreferences interface exported", () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// GSDPreferences Interface
+// HXPreferences Interface
 // ═══════════════════════════════════════════════════════════════════════════
 
-test("preferences: GSDPreferences includes token_profile field", () => {
+test("preferences: HXPreferences includes token_profile field", () => {
   assert.ok(
     preferencesSrc.includes("token_profile?: TokenProfile"),
-    "GSDPreferences should have token_profile field",
+    "HXPreferences should have token_profile field",
   );
 });
 
-test("preferences: GSDPreferences includes phases field", () => {
+test("preferences: HXPreferences includes phases field", () => {
   assert.ok(
     preferencesSrc.includes("phases?: PhaseSkipPreferences"),
-    "GSDPreferences should have phases field",
+    "HXPreferences should have phases field",
   );
 });
 
-test("preferences: GSDModelConfig includes subagent field", () => {
+test("preferences: HXModelConfig includes subagent field", () => {
   // Check both v1 and v2 configs
-  const v1Match = preferencesSrc.match(/interface GSDModelConfig\s*\{[^}]*subagent/);
-  assert.ok(v1Match, "GSDModelConfig should have subagent field");
-  const v2Match = preferencesSrc.match(/interface GSDModelConfigV2\s*\{[^}]*subagent/);
-  assert.ok(v2Match, "GSDModelConfigV2 should have subagent field");
+  const v1Match = preferencesSrc.match(/interface HXModelConfig\s*\{[^}]*subagent/);
+  assert.ok(v1Match, "HXModelConfig should have subagent field");
+  const v2Match = preferencesSrc.match(/interface HXModelConfigV2\s*\{[^}]*subagent/);
+  assert.ok(v2Match, "HXModelConfigV2 should have subagent field");
 });
 
 test("preferences: KNOWN_PREFERENCE_KEYS includes token_profile and phases", () => {
