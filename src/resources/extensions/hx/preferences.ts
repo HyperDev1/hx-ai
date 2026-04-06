@@ -15,6 +15,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 
 import { hxRoot } from "./paths.js";
+import { logWarning } from "./workflow-logger.js";
 import { parse as parseYaml } from "yaml";
 import type { PostUnitHookConfig, PreDispatchHookConfig, TokenProfile } from "./types.js";
 import type { DynamicRoutingConfig } from "./model-router.js";
@@ -49,6 +50,7 @@ export type {
   AutoSupervisorConfig,
   RemoteQuestionsConfig,
   CmuxPreferences,
+  CodebaseMapPreferences,
   ExperimentalPreferences,
   ContextManagementConfig,
   HXPreferences,
@@ -238,6 +240,7 @@ export function parsePreferencesMarkdown(content: string): HXPreferences | null 
   if (!_warnedUnrecognizedFormat) {
     _warnedUnrecognizedFormat = true;
     console.warn("[parsePreferencesMarkdown] PREFERENCES.md exists but uses an unrecognized format — skipping.");
+    logWarning("engine", "PREFERENCES.md exists but uses an unrecognized format — skipping", {});
   }
   return null;
 }
@@ -390,6 +393,17 @@ function mergePreferences(base: HXPreferences, override: HXPreferences): HXPrefe
       : undefined,
     context_management: (base.context_management || override.context_management)
       ? { ...(base.context_management ?? {}), ...(override.context_management ?? {}) } as ContextManagementConfig
+      : undefined,
+    codebase: (base.codebase || override.codebase)
+      ? {
+          ...(base.codebase ?? {}),
+          ...(override.codebase ?? {}),
+          // Merge exclude_patterns arrays rather than overriding
+          exclude_patterns: [
+            ...((base.codebase?.exclude_patterns) ?? []),
+            ...((override.codebase?.exclude_patterns) ?? []),
+          ].filter(Boolean),
+        }
       : undefined,
   };
 }

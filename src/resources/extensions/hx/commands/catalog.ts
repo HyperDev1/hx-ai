@@ -68,6 +68,7 @@ export const TOP_LEVEL_SUBCOMMANDS: readonly HxCommandDefinition[] = [
   { cmd: "start", desc: "Start a workflow template (bugfix, spike, feature, etc.)" },
   { cmd: "templates", desc: "List available workflow templates" },
   { cmd: "extensions", desc: "Manage extensions (list, enable, disable, info)" },
+  { cmd: "codebase", desc: "Generate and manage codebase map (.hx/CODEBASE.md)" },
   { cmd: "fast", desc: "Toggle OpenAI service tier (on/off/flex/status)" },
   { cmd: "mcp", desc: "MCP server status and connectivity check (status, check <server>)" },
   { cmd: "rethink", desc: "Conversational project reorganization — reorder, park, discard, add milestones" },

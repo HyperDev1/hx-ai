@@ -240,10 +240,13 @@ export async function showProjectInit(
   untrackRuntimeFiles(basePath);
 
   try {
-    const codebaseMap = await generateCodebaseMap(basePath, {});
-    writeCodebaseMap(basePath, codebaseMap);
+    const entries = generateCodebaseMap(basePath);
+    if (entries.length > 0) {
+      writeCodebaseMap(basePath, entries);
+      ctx.ui.notify(`Codebase map generated: ${entries.length} entries`, "info");
+    }
   } catch {
-    // non-fatal — codebase generation failure should never block project init
+    // Non-fatal — codebase map generation failure should never block project init
   }
 
   ctx.ui.notify("HX initialized. Starting your first milestone...", "info");

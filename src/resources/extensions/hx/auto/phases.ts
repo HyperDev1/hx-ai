@@ -1282,7 +1282,7 @@ export async function runUnitPhase(
     const prefs = loadEffectiveHXPreferences();
     const safetyCfg = resolveSafetyHarnessConfig(prefs?.preferences.safety_harness);
 
-    if (safetyCfg.enabled && safetyCfg.autoRollback && unitResult.status === "failed") {
+    if (safetyCfg.enabled && safetyCfg.autoRollback && unitResult.status === "error") {
       const rollback = rollbackToCheckpoint(s.basePath, s.checkpointSha);
       if (rollback.success) {
         logWarning("safety", `Auto-rolled back to checkpoint ${s.checkpointSha} after failed unit`, {
@@ -1322,8 +1322,11 @@ export async function runFinalize(
 
   debugLog("autoLoop", { phase: "finalize", iteration: ic.iteration });
 
-  // Clear unit timeout (unit completed)
+  // Clear unit timeout (unit completed). Also cleared in finally to guard against
+  // any exception escaping from the verification/post-verification steps (#e772de0d2).
   deps.clearUnitTimeout();
+
+  try {
 
   // Post-unit context for pre/post verification
   const postUnitCtx: PostUnitContext = {
@@ -1420,4 +1423,7 @@ export async function runFinalize(
   }
 
   return { action: "next", data: undefined as void };
+  } finally {
+    deps.clearUnitTimeout();
+  }
 }
