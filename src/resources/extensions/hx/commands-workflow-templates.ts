@@ -22,21 +22,9 @@ import { hxRoot } from "./paths.js";
 import { createGitService, runGit } from "./git-service.js";
 import { isAutoActive, isAutoPaused } from "./auto.js";
 import { getErrorMessage } from "./error-utils.js";
+import { slugify, workflowBranchName } from "./branch-patterns.js";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-/**
- * Generate a URL-friendly slug from text.
- */
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")
-    .slice(0, 40)
-    .replace(/-$/, "");
-}
-
 /**
  * Get the next workflow task number by scanning existing directories.
  */
@@ -378,7 +366,7 @@ export async function handleStart(
     } else {
       lines.push("Artifact dir: (none — hotfix mode)");
     }
-    lines.push(`Branch:       hx/${templateId}/${slug}`);
+    lines.push(`Branch:       ${workflowBranchName(templateId, slug)}`);
     if (issueRef) lines.push(`Issue:        ${issueRef}`);
     lines.push("", "No changes made. Remove --dry-run to execute.");
     ctx.ui.notify(lines.join("\n"), "info");
@@ -428,7 +416,7 @@ export async function handleStart(
   const git = createGitService(basePath);
   const skipBranch = git.prefs.isolation === "none";
   const slug = slugify(description || templateId);
-  const branchName = `hx/${templateId}/${slug}`;
+  const branchName = workflowBranchName(templateId, slug);
   let branchCreated = false;
 
   if (!skipBranch) {
