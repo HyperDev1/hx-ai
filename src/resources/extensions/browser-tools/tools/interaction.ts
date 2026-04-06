@@ -34,13 +34,11 @@ export function registerInteractionTools(pi: ExtensionAPI, deps: ToolDeps): void
 			try {
 				const { page: p } = await deps.ensureBrowser();
 				const target = deps.getActiveTarget();
-				beforeState = await deps.captureCompactPageState(p, { selectors: params.selector ? [params.selector] : [], includeBodyText: true, target });
+				beforeState = await deps.captureCompactPageState(p, { selectors: params.selector ? [params.selector] : [], includeBodyText: true, target, clickTargetSelector: params.selector });
 				actionId = deps.beginTrackedAction("browser_click", params, beforeState.url).id;
 				const beforeUrl = p.url();
 				const beforeHash = deps.getUrlHash(beforeUrl);
-				const beforeTargetState = params.selector
-					? await deps.captureClickTargetState(target, params.selector)
-					: null;
+				const beforeTargetState = beforeState.clickTargetState ?? null;
 
 				if (params.selector) {
 					try {
@@ -84,12 +82,10 @@ export function registerInteractionTools(pi: ExtensionAPI, deps: ToolDeps): void
 
 				const settle = await deps.settleAfterActionAdaptive(p);
 
-				const afterState = await deps.captureCompactPageState(p, { selectors: params.selector ? [params.selector] : [], includeBodyText: true, target });
+				const afterState = await deps.captureCompactPageState(p, { selectors: params.selector ? [params.selector] : [], includeBodyText: true, target, clickTargetSelector: params.selector });
 				const url = afterState.url;
 				const hash = deps.getUrlHash(url);
-				const afterTargetState = params.selector
-					? await deps.captureClickTargetState(target, params.selector)
-					: null;
+				const afterTargetState = afterState.clickTargetState ?? null;
 				const targetStateChanged = !!beforeTargetState && !!afterTargetState && (
 					beforeTargetState.exists !== afterTargetState.exists ||
 					beforeTargetState.ariaExpanded !== afterTargetState.ariaExpanded ||

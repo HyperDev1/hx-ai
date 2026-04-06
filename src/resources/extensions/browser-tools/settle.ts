@@ -102,17 +102,17 @@ async function readSettleState(
 // ---------------------------------------------------------------------------
 
 /** Threshold (ms) after which zero mutations triggers a shortened quiet window. */
-const ZERO_MUTATION_THRESHOLD_MS = 60;
+const ZERO_MUTATION_THRESHOLD_MS = 30;
 /** Shortened quiet window when no mutations have been observed. */
-const ZERO_MUTATION_QUIET_MS = 30;
+const ZERO_MUTATION_QUIET_MS = 15;
 
 export async function settleAfterActionAdaptive(
 	p: Page,
 	opts: AdaptiveSettleOptions = {},
 ): Promise<AdaptiveSettleDetails> {
-	const timeoutMs = Math.max(150, opts.timeoutMs ?? 500);
-	const pollMs = Math.min(100, Math.max(20, opts.pollMs ?? 40));
-	const baseQuietWindowMs = Math.max(60, opts.quietWindowMs ?? 100);
+	const timeoutMs = Math.max(150, opts.timeoutMs ?? 400);
+	const pollMs = Math.min(100, Math.max(15, opts.pollMs ?? 30));
+	const baseQuietWindowMs = Math.max(40, opts.quietWindowMs ?? 80);
 	const checkFocus = opts.checkFocusStability ?? false;
 
 	const startedAt = Date.now();

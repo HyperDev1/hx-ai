@@ -113,6 +113,8 @@ export interface CompactPageState {
 		title: string;
 	};
 	selectorStates: Record<string, CompactSelectorState>;
+	/** Click target state — only present when clickTargetSelector was provided. */
+	clickTargetState?: ClickTargetStateSnapshot;
 }
 
 export interface TraceSessionState {
@@ -335,7 +337,7 @@ export interface ToolDeps {
 	// Capture & summary
 	captureCompactPageState: (
 		p: Page,
-		options?: { selectors?: string[]; includeBodyText?: boolean; target?: Page | Frame }
+		options?: { selectors?: string[]; includeBodyText?: boolean; target?: Page | Frame; clickTargetSelector?: string }
 	) => Promise<CompactPageState>;
 	postActionSummary: (p: Page, target?: Page | Frame) => Promise<string>;
 	formatCompactStateSummary: (state: CompactPageState) => string;
